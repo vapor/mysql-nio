@@ -1,10 +1,10 @@
 public final class MySQLPacketEncoder: MessageToByteEncoder {
     public typealias OutboundIn = MySQLPacket
     
-    public let state: MySQLConnectionState
+    public let sequence: MySQLPacketSequencer
     
-    public init(state: MySQLConnectionState) {
-        self.state = state
+    public init(sequence: MySQLPacketSequencer) {
+        self.sequence = sequence
     }
     
     public func encode(ctx: ChannelHandlerContext, data: MySQLPacket, out: inout ByteBuffer) throws {
@@ -13,7 +13,7 @@ public final class MySQLPacketEncoder: MessageToByteEncoder {
         out.writeInteger(UInt8(length & 0xFF))
         out.writeInteger(UInt8(length >> 8 & 0xFF))
         out.writeInteger(UInt8(length >> 16 & 0xFF))
-        out.writeInteger(UInt8(self.state.nextSequenceID()))
+        out.writeInteger(UInt8(self.sequence.next()))
         out.writeBuffer(&packet.payload)
     }
 }
