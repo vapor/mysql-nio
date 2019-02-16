@@ -1,0 +1,96 @@
+version: 2
+
+jobs:
+  linux:
+    docker:
+      - image: codevapor/swift:5.0
+    steps:
+      - checkout
+      - run: swift build
+  8_0-linux:
+    docker:
+      - image: codevapor/swift:5.0
+      - image: circleci/mysql:8.0
+        name: mysql
+        environment:
+          MYSQL_ALLOW_EMPTY_PASSWORD: "true"
+          MYSQL_DATABASE: vapor_database
+          MYSQL_USER: vapor_username
+          MYSQL_PASSWORD: vapor_password
+    steps:
+      - checkout
+      - run: swift build
+      - run: swift test
+  5_7-linux:
+    docker:
+      - image: codevapor/swift:5.0
+      - image: circleci/mysql:5.7
+        name: mysql
+        environment:
+          MYSQL_ALLOW_EMPTY_PASSWORD: "true"
+          MYSQL_DATABASE: vapor_database
+          MYSQL_USER: vapor_username
+          MYSQL_PASSWORD: vapor_password
+    steps:
+      - checkout
+      - run: swift build
+      - run: swift test
+  5_6-linux:
+    docker:
+      - image: codevapor/swift:5.0
+      - image: circleci/mysql:5.6
+        name: mysql
+        environment:
+          MYSQL_ALLOW_EMPTY_PASSWORD: "true"
+          MYSQL_DATABASE: vapor_database
+          MYSQL_USER: vapor_username
+          MYSQL_PASSWORD: vapor_password
+    steps:
+      - checkout
+      - run: swift build
+      - run: swift test
+  5_5-linux:
+    docker:
+      - image: codevapor/swift:5.0
+      - image: circleci/mysql:5.5
+        name: mysql
+        environment:
+          MYSQL_ALLOW_EMPTY_PASSWORD: "true"
+          MYSQL_DATABASE: vapor_database
+          MYSQL_USER: vapor_username
+          MYSQL_PASSWORD: vapor_password
+    steps:
+      - checkout
+      - run: swift build
+      - run: swift test
+  linux-release:
+    docker:
+      - image: codevapor/swift:5.0
+    steps:
+      - checkout
+      - run: swift build -c release
+workflows:
+  version: 2
+  tests:
+    jobs:
+      - linux
+      - 8_0-linux:
+          requires:
+            - linux
+      - 5_7-linux:
+          requires:
+            - linux
+      - 5_6-linux:
+          requires:
+            - linux
+      - 5_5-linux:
+          requires:
+            - linux
+      - linux-release:
+          requires:
+            - 8_0-linux
+            - 5_7-linux
+            - 5_6-linux
+            - 5_5-linux
+
+
