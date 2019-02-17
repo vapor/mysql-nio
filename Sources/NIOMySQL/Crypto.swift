@@ -20,6 +20,7 @@ func xor(_ a: ByteBuffer, _ b: ByteBuffer) -> ByteBuffer {
 
 private func digest(_ alg: OpaquePointer?, _ messages: [ByteBuffer]) -> ByteBuffer {
     let ctx = EVP_MD_CTX_new()
+    defer { EVP_MD_CTX_free(ctx) }
     assert(EVP_DigestInit_ex(ctx, alg, nil) == 1, "init digest failed")
     messages.combine().withUnsafeReadableBytes { buffer in
         assert(EVP_DigestUpdate(ctx, buffer.baseAddress, buffer.count) == 1, "update digest failed")

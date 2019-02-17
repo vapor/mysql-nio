@@ -10,7 +10,7 @@ public enum MySQLError: Error, CustomStringConvertible, LocalizedError {
     public var message: String {
         switch self {
         case .secureConnectionRequired:
-            return "A secure connection to the server is required to authenticate."
+            return "A secure connection to the server is required for authentication."
         case .unsupportedAuthPlugin(let name):
             return "Unsupported auth plugin name: \(name)"
         case .unsupportedServer(let message):
