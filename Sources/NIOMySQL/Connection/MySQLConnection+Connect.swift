@@ -1,17 +1,36 @@
 extension MySQLConnection {
-    public static func connect(to socketAddress: SocketAddress, on eventLoop: EventLoop) -> EventLoopFuture<MySQLConnection> {
+    public static func connect(
+        to socketAddress: SocketAddress,
+        username: String,
+        database: String,
+        password: String? = nil,
+        tlsConfig: TLSConfiguration? = nil,
+        on eventLoop: EventLoop
+    ) -> EventLoopFuture<MySQLConnection> {
         let bootstrap = ClientBootstrap(group: eventLoop)
             .channelOption(ChannelOptions.socket(SocketOptionLevel(SOL_SOCKET), SO_REUSEADDR), value: 1)
         
         return bootstrap.connect(to: socketAddress).flatMap { channel in
             let sequence = MySQLPacketSequence()
+            let done = channel.eventLoop.makePromise(of: Void.self)
+            done.futureResult.whenFailure { _ in
+                channel.close(mode: .all, promise: nil)
+            }
             return channel.pipeline.addHandlers([
                 ByteToMessageHandler(MySQLPacketDecoder(sequence: sequence)),
                 MySQLPacketEncoder(sequence: sequence),
-                MySQLConnectionHandler(),
+                MySQLConnectionHandler(state: .handshake(.init(
+                    username: username,
+                    database: database,
+                    password: password,
+                    tlsConfig: tlsConfig,
+                    done: done
+                ))),
                 ErrorHandler()
             ], first: false).map {
                 return MySQLConnection(channel: channel)
+            }.flatMap { conn in
+                return done.futureResult.map { conn }
             }
         }
     }
@@ -23,6 +42,6 @@ final class ErrorHandler: ChannelInboundHandler {
     init() { }
     
     func errorCaught(ctx: ChannelHandlerContext, error: Error) {
-        fatalError("uncaught error: \(error)")
+        assertionFailure("uncaught error: \(error)")
     }
 }

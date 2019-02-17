@@ -8,9 +8,9 @@ final class NIOMySQLTests: XCTestCase {
     }
     
     func testExample() throws {
-        let conn = try! MySQLConnection.test(on: self.eventLoop).wait()
+        let conn = try MySQLConnection.test(on: self.eventLoop).wait()
         defer { try? conn.close().wait() }
-        try conn.authenticate().wait()
+        print(conn)
     }
     
     func testSHA2() throws {

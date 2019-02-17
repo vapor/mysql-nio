@@ -10,8 +10,6 @@ public final class MySQLConnection {
     }
     
     public func close() -> EventLoopFuture<Void> {
-        return self.quit().flatMap {
-            return self.channel.close(mode: .all)
-        }
+        return self.channel.close(mode: .all)
     }
 }
