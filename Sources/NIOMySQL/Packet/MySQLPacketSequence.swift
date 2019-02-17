@@ -1,4 +1,4 @@
-public final class MySQLPacketSequencer {
+public final class MySQLPacketSequence {
     public var current: UInt8
     
     public init() {

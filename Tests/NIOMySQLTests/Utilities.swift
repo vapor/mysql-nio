@@ -4,6 +4,8 @@ extension MySQLConnection {
     static func test(on eventLoop: EventLoop) -> EventLoopFuture<MySQLConnection> {
         do {
             let address: SocketAddress
+            // socket:
+            // try .init(unixDomainSocketPath: "/tmp/mysqld.sock")
             #if os(Linux)
             address = try .makeAddressResolvingHost("mysql", port: 3306)
             #else

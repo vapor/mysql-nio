@@ -1,9 +1,9 @@
 public struct MySQLPacketDecoder: ByteToMessageDecoder {
     public typealias InboundOut = MySQLPacket
     
-    public let sequence: MySQLPacketSequencer
+    public let sequence: MySQLPacketSequence
     
-    public init(sequence: MySQLPacketSequencer) {
+    public init(sequence: MySQLPacketSequence) {
         self.sequence = sequence
     }
     
