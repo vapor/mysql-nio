@@ -10,6 +10,7 @@ final class NIOMySQLTests: XCTestCase {
     func testExample() throws {
         let conn = try MySQLConnection.test(on: self.eventLoop).wait()
         defer { try? conn.close().wait() }
+        sleep(2)
         print(conn)
     }
     

@@ -18,7 +18,7 @@ func xor(_ a: ByteBuffer, _ b: ByteBuffer) -> ByteBuffer {
     return output
 }
 
-private func digest(_ alg: OpaquePointer?, _ messages: [ByteBuffer]) -> ByteBuffer {
+private func digest(_ alg: UnsafePointer<EVP_MD>?, _ messages: [ByteBuffer]) -> ByteBuffer {
     let ctx = EVP_MD_CTX_new()
     defer { EVP_MD_CTX_free(ctx) }
     assert(EVP_DigestInit_ex(ctx, alg, nil) == 1, "init digest failed")

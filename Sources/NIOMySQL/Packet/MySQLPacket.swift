@@ -6,10 +6,14 @@ public struct MySQLPacket {
     }
     
     public var isError: Bool {
-        return self.payload.getInteger(
-            at: self.payload.readerIndex,
-            endianness: .little, 
-            as: UInt8.self
-        ) == 0xFF
+        return self.headerFlag == 0xFF
+    }
+    
+    public var isOK: Bool {
+        return self.headerFlag == 0xFE || self.headerFlag == 0x00
+    }
+    
+    var headerFlag: UInt8? {
+        return self.payload.getInteger(at: self.payload.readerIndex)
     }
 }
