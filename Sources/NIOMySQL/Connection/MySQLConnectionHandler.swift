@@ -6,7 +6,7 @@ final class MySQLConnectionHandler: ChannelDuplexHandler {
     enum State {
         case handshake(HandshakeState)
         case authenticating(AuthenticationState)
-        case commandPhase
+        case commandPhase(MySQLCapabilityFlags)
     }
     
     struct HandshakeState {
@@ -27,10 +27,12 @@ final class MySQLConnectionHandler: ChannelDuplexHandler {
     
     var state: State
     var queue: CircularBuffer<MySQLCommand>
+    let sequence: MySQLPacketSequence
     
-    init(state: State) {
+    init(state: State, sequence: MySQLPacketSequence) {
         self.state = state
         self.queue = .init()
+        self.sequence = sequence
     }
     
     func channelRead(ctx: ChannelHandlerContext, data: NIOAny) {
@@ -48,15 +50,17 @@ final class MySQLConnectionHandler: ChannelDuplexHandler {
             } catch {
                 state.done.fail(error)
             }
-        case .commandPhase:
+        case .commandPhase(let capabilities):
             if let current = self.queue.first {
-                try! current.handler.handle(packet: &packet, ctx: .init(ctx, self))
-            } else {
-                if packet.isError {
-                    let err = try! packet.err(capabilities: .clientDefault)
-                    print(err)
+                do {
+                    let commandState = try current.handler.handle(packet: &packet)
+                    self.handleCommandState(ctx: ctx, commandState)
+                } catch {
+                    self.queue.removeFirst()
+                    current.promise.fail(error)
                 }
-                fatalError("unhandled packet: \(packet)")
+            } else {
+                assertionFailure("unhandled packet: \(packet)")
             }
         }
     }
@@ -82,8 +86,8 @@ final class MySQLConnectionHandler: ChannelDuplexHandler {
                 return ctx.channel.pipeline.add(handler: handler, first: true).flatMapThrowing {
                     try self.writeHandshakeResponse(ctx: ctx, handshakeRequest: handshakeRequest, state: state)
                 }
-                }.whenFailure { error in
-                    state.done.fail(error)
+            }.whenFailure { error in
+                state.done.fail(error)
             }
         case .none:
             try self.writeHandshakeResponse(ctx: ctx, handshakeRequest: handshakeRequest, state: state)
@@ -149,6 +153,7 @@ final class MySQLConnectionHandler: ChannelDuplexHandler {
         switch state.authPluginName {
         case "caching_sha2_password":
             guard !packet.isOK else {
+                self.state = .commandPhase(state.capabilities)
                 state.done.succeed(())
                 return
             }
@@ -182,12 +187,12 @@ final class MySQLConnectionHandler: ChannelDuplexHandler {
         case "mysql_native_password":
             guard !packet.isError else {
                 let error = try packet.err(capabilities: state.capabilities)
-                print(error)
                 throw MySQLError.server(error)
             }
-            let ok = try packet.ok(capabilities: state.capabilities)
-            print(ok)
-            self.state = .commandPhase
+            guard packet.isOK else {
+                throw MySQLError.protocolError
+            }
+            self.state = .commandPhase(state.capabilities)
             state.done.succeed(())
         default:
             throw MySQLError.unsupportedAuthPlugin(name: state.authPluginName)
@@ -199,10 +204,32 @@ final class MySQLConnectionHandler: ChannelDuplexHandler {
         self.queue.append(request)
         
         // send initial
-        try! request.handler.activate(ctx: .init(ctx, self))
+        do {
+            self.sequence.current = nil
+            let commandState = try request.handler.activate()
+            self.handleCommandState(ctx: ctx, commandState)
+        } catch {
+            self.queue.removeFirst()
+            request.promise.fail(error)
+        }
         
         // write is complete
         promise?.succeed(())
+    }
+    
+    func handleCommandState(ctx: ChannelHandlerContext, _ commandState: MySQLCommandState) {
+        switch commandState {
+        case .done:
+            let current = self.queue.removeFirst()
+            current.promise.succeed(())
+        case .noResponse:
+            break
+        case .response(let packets):
+            for packet in packets {
+                ctx.write(self.wrapOutboundOut(packet), promise: nil)
+            }
+            ctx.flush()
+        }
     }
     
     func close(ctx: ChannelHandlerContext, mode: CloseMode, promise: EventLoopPromise<Void>?) {

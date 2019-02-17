@@ -25,7 +25,7 @@ extension MySQLConnection {
                     password: password,
                     tlsConfig: tlsConfig,
                     done: done
-                ))),
+                )), sequence: sequence),
                 ErrorHandler()
             ], first: false).map {
                 return MySQLConnection(channel: channel)

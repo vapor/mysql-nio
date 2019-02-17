@@ -1,5 +1,5 @@
 extension MySQLConnection {
-    public func send(_ command: MySQLCommandHandler) -> EventLoopFuture<Void> {
+    func send(_ command: MySQLCommandHandler) -> EventLoopFuture<Void> {
         let promise = self.eventLoop.makePromise(of: Void.self)
         let c = MySQLCommand(
             handler: command,
@@ -10,40 +10,18 @@ extension MySQLConnection {
     }
 }
 
-public protocol MySQLCommandHandler {
-    func handle(packet: inout MySQLPacket, ctx: MySQLRequestContext) throws
-    func activate(ctx: MySQLRequestContext) throws
+enum MySQLCommandState {
+    case response([MySQLPacket])
+    case noResponse
+    case done
 }
 
-extension MySQLCommandHandler {
-    public func activate(ctx: MySQLRequestContext) { }
+protocol MySQLCommandHandler {
+    func handle(packet: inout MySQLPacket) throws -> MySQLCommandState
+    func activate() throws -> MySQLCommandState
 }
 
 struct MySQLCommand {
     var handler: MySQLCommandHandler
     var promise: EventLoopPromise<Void>
-}
-
-public struct MySQLRequestContext {
-    let ctx: ChannelHandlerContext
-    let handler: MySQLConnectionHandler
-    
-    init(_ ctx: ChannelHandlerContext, _ handler: MySQLConnectionHandler) {
-        self.ctx = ctx
-        self.handler = handler
-    }
-    
-    public func succeed() {
-        let current = self.handler.queue.removeFirst()
-        current.promise.succeed(())
-    }
-    
-    public func flush() {
-        ctx.flush()
-    }
-    
-    public func write(_ packet: MySQLPacket) {
-        self.ctx.write(NIOAny(packet), promise: nil)
-        self.ctx.flush()
-    }
 }
