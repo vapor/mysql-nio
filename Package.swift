@@ -8,9 +8,18 @@ let package = Package(
     ],
     dependencies: [
         .package(url: "https://github.com/apple/swift-nio.git", .branch("master")),
+        .package(url: "https://github.com/tanner0101/swift-nio-ssl.git", .branch("master")),
     ],
     targets: [
-        .target(name: "NIOMySQL", dependencies: ["NIO"]),
+        .systemLibrary(
+            name: "CMySQLOpenSSL",
+            pkgConfig: "openssl",
+            providers: [
+                .apt(["openssl libssl-dev"]),
+                .brew(["openssl@1.1"])
+            ]
+        ),
+        .target(name: "NIOMySQL", dependencies: ["CMySQLOpenSSL", "NIO", "NIOOpenSSL"]),
         .testTarget(name: "NIOMySQLTests", dependencies: ["NIOMySQL"]),
     ]
 )

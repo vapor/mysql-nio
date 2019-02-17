@@ -72,11 +72,11 @@ extension MySQLPacket {
             buffer.writeBytes([
                 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
             ])
-            buffer.writeNullTerminatedString(username)
+            buffer.writeNullTerminatedString(self.username)
             assert(self.capabilities.contains(.CLIENT_PLUGIN_AUTH_LENENC_CLIENT_DATA) == false, "CLIENT_PLUGIN_AUTH_LENENC_CLIENT_DATA not supported")
             if self.capabilities.contains(.CLIENT_SECURE_CONNECTION) {
-                assert(authResponse.readableBytes <= UInt8.max, "auth response too large")
-                buffer.writeInteger(UInt8(authResponse.readableBytes), endianness: .little)
+                assert(self.authResponse.readableBytes <= UInt8.max, "auth response too large")
+                buffer.writeInteger(UInt8(self.authResponse.readableBytes), endianness: .little)
                 var authResponseCopy = self.authResponse
                 buffer.writeBuffer(&authResponseCopy)
             } else {

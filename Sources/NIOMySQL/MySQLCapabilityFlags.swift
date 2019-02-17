@@ -136,6 +136,7 @@ public struct MySQLCapabilityFlags: OptionSet, CustomStringConvertible {
     /// - CLIENT_SECURE_CONNECTION,
     /// - CLIENT_CONNECT_WITH_DB,
     /// - CLIENT_DEPRECATE_EOF
+    /// - CLIENT_SSL
     public static let clientDefault: MySQLCapabilityFlags = [
         .CLIENT_PROTOCOL_41,
         .CLIENT_PLUGIN_AUTH,
