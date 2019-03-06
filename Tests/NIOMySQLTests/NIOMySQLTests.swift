@@ -9,9 +9,17 @@ final class NIOMySQLTests: XCTestCase {
     
     func testExample() throws {
         let conn = try MySQLConnection.test(on: self.eventLoop).wait()
-        defer { try? conn.close().wait() }
-        try conn.simpleQuery("SELECT @@version").wait()
-        print(conn)
+        defer { try! conn.close().wait() }
+        let rows = try conn.simpleQuery("SELECT 'foo' as bar").wait()
+        XCTAssertEqual(rows.description, #"[["bar": "foo"]]"#)
+    }
+    
+    func testPerformance() throws {
+        let conn = try! MySQLConnection.test(on: self.eventLoop).wait()
+        defer { try! conn.close().wait() }
+        for _ in 0..<1_000 {
+            _ = try! conn.simpleQuery("SELECT 1").wait()
+        }
     }
     
     func testSHA2() throws {

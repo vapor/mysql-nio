@@ -1,5 +1,5 @@
 module CMySQLOpenSSL [system] {
-    header "shim.h"
-    link "ssl"
-    link "crypto"
+   header "shim.h"
+   link "crypto"
+   link "ssl"
 }

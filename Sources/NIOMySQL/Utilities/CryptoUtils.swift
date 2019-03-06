@@ -1,11 +1,13 @@
-import CMySQLOpenSSL
+// import CMySQLOpenSSL
+#warning("TODO: fix openssl linking")
+import CNIOBoringSSL
 
 func sha256(_ messages: ByteBuffer...) -> ByteBuffer {
-    return digest(EVP_sha256(), messages)
+    return digest(CNIOBoringSSL_EVP_sha256(), messages)
 }
 
 func sha1(_ messages: ByteBuffer...) -> ByteBuffer {
-    return digest(EVP_sha1(), messages)
+    return digest(CNIOBoringSSL_EVP_sha1(), messages)
 }
 
 func xor(_ a: ByteBuffer, _ b: ByteBuffer) -> ByteBuffer {
@@ -18,17 +20,17 @@ func xor(_ a: ByteBuffer, _ b: ByteBuffer) -> ByteBuffer {
     return output
 }
 
-private func digest(_ alg: UnsafePointer<EVP_MD>?, _ messages: [ByteBuffer]) -> ByteBuffer {
-    let ctx = EVP_MD_CTX_new()
-    defer { EVP_MD_CTX_free(ctx) }
-    assert(EVP_DigestInit_ex(ctx, alg, nil) == 1, "init digest failed")
+private func digest(_ alg: OpaquePointer, _ messages: [ByteBuffer]) -> ByteBuffer {
+    let context = CNIOBoringSSL_EVP_MD_CTX_new()
+    defer { CNIOBoringSSL_EVP_MD_CTX_free(context) }
+    assert(CNIOBoringSSL_EVP_DigestInit_ex(context, alg, nil) == 1, "init digest failed")
     messages.combine().withUnsafeReadableBytes { buffer in
-        assert(EVP_DigestUpdate(ctx, buffer.baseAddress, buffer.count) == 1, "update digest failed")
+        assert(CNIOBoringSSL_EVP_DigestUpdate(context, buffer.baseAddress, buffer.count) == 1, "update digest failed")
     }
     var digest = ByteBufferAllocator().buffer(capacity: numericCast(EVP_MAX_MD_SIZE))
     var count: UInt32 = 0
     digest.withUnsafeMutableWritableBytes { buffer in
-        assert(EVP_DigestFinal_ex(ctx, buffer.baseAddress?.assumingMemoryBound(to: UInt8.self), &count) == 1, "finalize digest failed")
+        assert(CNIOBoringSSL_EVP_DigestFinal_ex(context, buffer.baseAddress?.assumingMemoryBound(to: UInt8.self), &count) == 1, "finalize digest failed")
     }
     digest.moveWriterIndex(forwardBy: numericCast(count))
     return digest

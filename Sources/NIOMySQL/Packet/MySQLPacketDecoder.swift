@@ -7,7 +7,7 @@ public struct MySQLPacketDecoder: ByteToMessageDecoder {
         self.sequence = sequence
     }
     
-    public mutating func decode(ctx: ChannelHandlerContext, buffer: inout ByteBuffer) throws -> DecodingState {
+    public mutating func decode(context: ChannelHandlerContext, buffer: inout ByteBuffer) throws -> DecodingState {
         var copy = buffer
         guard let header = copy.readInteger(endianness: .little, as: UInt32.self) else {
             return .needMoreData
@@ -23,7 +23,11 @@ public struct MySQLPacketDecoder: ByteToMessageDecoder {
         buffer = copy
         let packet = MySQLPacket(payload: payload)
         self.sequence.current = UInt8(sequenceID & 0xFF)
-        ctx.fireChannelRead(self.wrapInboundOut(packet))
+        context.fireChannelRead(self.wrapInboundOut(packet))
         return .continue
+    }
+    
+    public mutating func decodeLast(context: ChannelHandlerContext, buffer: inout ByteBuffer, seenEOF: Bool) throws -> DecodingState {
+        return .needMoreData
     }
 }

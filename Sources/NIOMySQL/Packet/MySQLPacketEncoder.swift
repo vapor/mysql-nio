@@ -7,7 +7,7 @@ public final class MySQLPacketEncoder: MessageToByteEncoder {
         self.sequence = sequence
     }
     
-    public func encode(ctx: ChannelHandlerContext, data: MySQLPacket, out: inout ByteBuffer) throws {
+    public func encode(data: MySQLPacket, out: inout ByteBuffer) throws {
         var packet = data
         let length = packet.payload.readableBytes
         out.writeInteger(UInt8(length & 0xFF))

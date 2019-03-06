@@ -6,6 +6,7 @@ public enum MySQLError: Error, CustomStringConvertible, LocalizedError {
     case unsupportedServer(message: String)
     case protocolError
     case server(MySQLPacket.Err)
+    case closed
     
     public var message: String {
         switch self {
@@ -19,6 +20,8 @@ public enum MySQLError: Error, CustomStringConvertible, LocalizedError {
             return "Unknown protocol error"
         case .server(let error):
             return "Server error: \(error.errorMessage)"
+        case .closed:
+            return "Connection closed."
         }
     }
     

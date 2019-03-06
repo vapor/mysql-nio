@@ -16,6 +16,10 @@ extension ByteBuffer {
         self.writeInteger(0, as: UInt8.self)
     }
     
+    var readableString: String? {
+        return self.getString(at: self.readerIndex, length: self.readableBytes)
+    }
+    
     var isZeroes: Bool {
         for byte in self.readableBytesView {
             switch byte {
@@ -31,6 +35,13 @@ extension ByteBuffer {
             return nil
         }
         return self.readString(length: numericCast(length))
+    }
+    
+    mutating func readLengthEncodedSlice() -> ByteBuffer? {
+        guard let length = self.readLengthEncodedInteger() else {
+            return nil
+        }
+        return self.readSlice(length: numericCast(length))
     }
     
     mutating func readLengthEncodedInteger() -> UInt64? {

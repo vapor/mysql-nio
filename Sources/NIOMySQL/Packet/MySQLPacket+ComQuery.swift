@@ -1,5 +1,5 @@
 extension MySQLPacket {
-    public init(_ comQuery: ComQuery) {
+    public init(comQuery: ComQuery) {
         self.payload = ByteBufferAllocator().buffer(capacity: 0)
         comQuery.serialize(into: &self.payload)
     }

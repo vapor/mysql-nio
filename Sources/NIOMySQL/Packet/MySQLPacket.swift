@@ -5,6 +5,10 @@ public struct MySQLPacket {
         self.payload = payload
     }
     
+    public init() {
+        self.payload = ByteBufferAllocator().buffer(capacity: 0)
+    }
+    
     public var isError: Bool {
         return self.headerFlag == 0xFF
     }

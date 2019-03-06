@@ -18,7 +18,7 @@ extension MySQLConnection {
             }
             return channel.pipeline.addHandlers([
                 ByteToMessageHandler(MySQLPacketDecoder(sequence: sequence)),
-                MySQLPacketEncoder(sequence: sequence),
+                MessageToByteHandler(MySQLPacketEncoder(sequence: sequence)),
                 MySQLConnectionHandler(state: .handshake(.init(
                     username: username,
                     database: database,
@@ -27,7 +27,7 @@ extension MySQLConnection {
                     done: done
                 )), sequence: sequence),
                 ErrorHandler()
-            ], first: false).map {
+            ], position: .last).map {
                 return MySQLConnection(channel: channel)
             }.flatMap { conn in
                 return done.futureResult.map { conn }
@@ -41,7 +41,7 @@ final class ErrorHandler: ChannelInboundHandler {
     
     init() { }
     
-    func errorCaught(ctx: ChannelHandlerContext, error: Error) {
+    func errorCaught(context: ChannelHandlerContext, error: Error) {
         assertionFailure("uncaught error: \(error)")
     }
 }

@@ -10,20 +10,20 @@
 /// A character set is defined in the protocol as a integer.
 public struct MySQLCharacterSet: Equatable {
     /// charset_nr (2) -- number of the character set and collation
-    var raw: UInt16
+    var rawValue: UInt16
     
     /// Creates a new `MySQLCharacterSet` from UInt16
     ///
     /// - Parameter raw: UInt16 value of collation.
-    init(raw: UInt16) {
-        self.raw = raw
+    init(rawValue: UInt16) {
+        self.rawValue = rawValue
     }
     
     /// Creates a new `MySQLCharacterSet` with Byte value.
     ///
     /// - Parameter byte: Byte value of collation.
     init(byte: UInt8) {
-        self.raw = numericCast(byte)
+        self.rawValue = numericCast(byte)
     }
     
     /// Creates a new `MySQLCharacterSet` from a string. Can return nil if the string is a invalid or unsupported collation.
@@ -39,10 +39,10 @@ public struct MySQLCharacterSet: Equatable {
     /// Example: MySQLCharacterSet(string: "utf8mb4_unicode_ci")
     public init?(string: String) {
         switch string {
-        case "latin1_swedish_ci": self.raw = 0x0008
-        case "utf8_general_ci": self.raw = 0x0021
-        case "binary": self.raw = 0x003f
-        case "utf8mb4_unicode_ci": self.raw = 0x00e0
+        case "latin1_swedish_ci": self.rawValue = 0x0008
+        case "utf8_general_ci": self.rawValue = 0x0021
+        case "binary": self.rawValue = 0x003f
+        case "utf8mb4_unicode_ci": self.rawValue = 0x00e0
         default: return nil
         }
     }
@@ -78,7 +78,7 @@ public struct MySQLCharacterSet: Equatable {
     
     /// Serializes the `MySQLCharacterSet` into a buffer.
     func serialize(into buffer: inout ByteBuffer) {
-        buffer.writeInteger(UInt8(self.raw & 0xFF), endianness: .little)
+        buffer.writeInteger(UInt8(self.rawValue & 0xFF), endianness: .little)
     }
 }
 
@@ -91,7 +91,7 @@ extension MySQLCharacterSet: CustomStringConvertible {
         case .binary: return "binary"
         case .utf8mb4_unicode_ci: return "utf8mb4_unicode_ci"
         case .utf8mb4: return "utf8mb4"
-        default: return "unknown \(self.raw)"
+        default: return "unknown \(self.rawValue)"
         }
     }
 }
@@ -99,6 +99,6 @@ extension MySQLCharacterSet: CustomStringConvertible {
 extension MySQLCharacterSet: ExpressibleByIntegerLiteral {
     /// See `ExpressibleByIntegerLiteral.init(integerLiteral:)`
     public init(integerLiteral value: UInt16) {
-        self.raw = value
+        self.rawValue = value
     }
 }
