@@ -1,7 +1,3 @@
-//import struct NIOSSL.TLSConfiguration
-//import class NIOSSL.NIOSSLContext
-//import class NIOSSL.NIOSSLClientHandler
-
 final class MySQLConnectionHandler: ChannelDuplexHandler {
     typealias InboundIn = MySQLPacket
     typealias OutboundIn = MySQLCommand
