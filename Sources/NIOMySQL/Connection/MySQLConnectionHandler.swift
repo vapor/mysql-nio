@@ -1,3 +1,5 @@
+import NIOSSL
+
 final class MySQLConnectionHandler: ChannelDuplexHandler {
     typealias InboundIn = MySQLPacket
     typealias OutboundIn = MySQLCommand
