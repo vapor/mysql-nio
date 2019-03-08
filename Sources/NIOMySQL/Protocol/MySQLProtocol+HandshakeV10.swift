@@ -1,15 +1,11 @@
-extension MySQLPacket {
-    public mutating func handshake() throws -> Handshake {
-        return try .init(payload: &self.payload)
-    }
-    
+extension MySQLProtocol {
     /// Protocol::Handshake
     ///
     /// When the client connects to the server the server sends a handshake packet to the client.
     /// Depending on the server version and configuration options different variants of the initial packet are sent.
     ///
     /// https://dev.mysql.com/doc/internals/en/connection-phase-packets.html#packet-Protocol::Handshake
-    public struct Handshake {
+    public struct HandshakeV10: MySQLPacketDecodable {
         public enum Error: Swift.Error {
             case missingProtocolVersion
             case invalidProtocolVersion(UInt8)
@@ -40,83 +36,77 @@ extension MySQLPacket {
         public var authPluginData: ByteBuffer
         
         /// The server's capabilities.
-        public var capabilities: MySQLCapabilityFlags
+        public var capabilities: CapabilityFlags
         
         /// character_set (1) -- default server character-set, only the lower 8-bits Protocol::CharacterSet (optional)
-        public var characterSet: MySQLCharacterSet?
+        public var characterSet: CharacterSet?
         
         /// status_flags (2) -- Protocol::StatusFlags (optional)
-        public var statusFlags: MySQLStatusFlags?
+        public var statusFlags: StatusFlags?
         
         /// auth_plugin_name (string.NUL) -- name of the auth_method that the auth_plugin_data belongs to
         public var authPluginName: String?
         
-        /// Parses a `MySQLHandshakeV10` from the `ByteBuffer`.
-        init(payload: inout ByteBuffer) throws {
-            guard let protocolVersion = payload.readInteger(endianness: .little, as: UInt8.self) else {
+        /// `MySQLPacketDecodable` conformance.
+        public static func decode(from packet: inout MySQLPacket, capabilities _: MySQLProtocol.CapabilityFlags) throws -> HandshakeV10 {
+            guard let protocolVersion = packet.payload.readInteger(endianness: .little, as: UInt8.self) else {
                 throw Error.missingProtocolVersion
             }
-            self.protocolVersion = protocolVersion
             guard protocolVersion == 10 else {
                 throw Error.invalidProtocolVersion(protocolVersion)
             }
-            
-            guard let serverVersion = payload.readNullTerminatedString() else {
+            guard let serverVersion = packet.payload.readNullTerminatedString() else {
                 throw Error.missingServerVersion
             }
-            self.serverVersion = serverVersion
-            
-            guard let connectionID = payload.readInteger(endianness: .little, as: UInt32.self) else {
+            guard let connectionID = packet.payload.readInteger(endianness: .little, as: UInt32.self) else {
                 throw Error.missingConnectionID
             }
-            self.connectionID = connectionID
-            
-            guard let authPluginDataPart1 = payload.readSlice(length: 8) else {
+            guard let authPluginDataPart1 = packet.payload.readSlice(length: 8) else {
                 throw Error.missingAuthPluginData
             }
-            guard let filler1 = payload.readInteger(as: UInt8.self) else {
+            guard let filler1 = packet.payload.readInteger(as: UInt8.self) else {
                 throw Error.missingFiller
             }
             // filler_1 (1) -- 0x00
             assert(filler1 == 0x00)
-            
             // capability_flag_1 (2) -- lower 2 bytes of the Protocol::CapabilityFlags (optional)
-            guard let capabilityFlag1 = payload.readInteger(endianness: .little, as: UInt16.self) else {
+            guard let capabilitiesLower = packet.payload.readInteger(endianness: .little, as: UInt16.self) else {
                 throw Error.missingCapabilityFlag1
             }
             
-            if payload.readableBytes > 0 {
-                guard let characterSetByte = payload.readInteger(endianness: .little, as: UInt8.self) else {
+            let characterSet: CharacterSet?
+            let statusFlags: StatusFlags?
+            var capabilities: CapabilityFlags
+            var authPluginData: ByteBuffer
+            let authPluginName: String?
+            if packet.payload.readableBytes > 0 {
+                guard let set = packet.payload.readInteger(endianness: .little, as: CharacterSet.self) else {
                     throw Error.missingCharacterSet
                 }
-                self.characterSet = .init(byte: characterSetByte)
-                guard let statusFlags = payload.readInteger(endianness: .little, as: UInt16.self) else {
+                characterSet = set
+                guard let status = packet.payload.readInteger(endianness: .little, as: StatusFlags.self) else {
                     throw Error.missingStatusFlags
                 }
-                self.statusFlags = .init(rawValue: statusFlags)
-                
+                statusFlags = status
                 // capability_flags_2 (2) -- upper 2 bytes of the Protocol::CapabilityFlags
-                guard let upperCapabilities = payload.readInteger(endianness: .little, as: UInt16.self) else {
+                guard let capabilitiesUpper = packet.payload.readInteger(endianness: .little, as: UInt16.self) else {
                     throw Error.missingUpperCapabilities
                 }
-                self.capabilities = MySQLCapabilityFlags(upper: upperCapabilities, lower: capabilityFlag1)
-                
-                guard let authPluginDataLength = payload.readInteger(endianness: .little, as: UInt8.self) else {
+                capabilities = .init(upper: capabilitiesUpper, lower: capabilitiesLower)
+                guard let authPluginDataLength = packet.payload.readInteger(endianness: .little, as: UInt8.self) else {
                     throw Error.missingAuthPluginDataLength
                 }
-                if !self.capabilities.contains(.CLIENT_PLUGIN_AUTH) {
+                if !capabilities.contains(.CLIENT_PLUGIN_AUTH) {
                     assert(authPluginDataLength == 0x00, "invalid auth plugin data filler: \(authPluginDataLength)")
                 }
-                
                 /// string[6]     reserved (all [00])
-                guard let reserved1 = payload.readSlice(length: 6) else {
+                guard let reserved1 = packet.payload.readSlice(length: 6) else {
                     throw Error.missingReserved
                 }
                 assert(reserved1.isZeroes, "invalid reserve 1 \(reserved1)")
-                
                 if capabilities.contains(.CLIENT_LONG_PASSWORD) {
                     /// string[4]     reserved (all [00])
-                    guard let reserved2 = payload.readSlice(length: 4) else {
+                    guard let reserved2 = packet.payload.readSlice(length: 4) else {
                         throw Error.missingReserved
                     }
                     assert(reserved2.isZeroes, "invalid reserve 2: \(reserved2)")
@@ -124,10 +114,10 @@ extension MySQLPacket {
                     /// Capabilities 3rd part. MariaDB specific flags.
                     /// MariaDB Initial Handshake Packet specific flags
                     /// https://mariadb.com/kb/en/library/1-connecting-connecting/
-                    guard let mariaDBSpecific = payload.readInteger(endianness: .little, as: UInt32.self) else {
+                    guard let mariaDBSpecific = packet.payload.readInteger(endianness: .little, as: UInt32.self) else {
                         throw Error.missingMariaDBCapabilities
                     }
-                    self.capabilities.mariaDBSpecific = mariaDBSpecific
+                    capabilities.mariaDBSpecific = mariaDBSpecific
                 }
                 
                 if capabilities.contains(.CLIENT_SECURE_CONNECTION) {
@@ -137,32 +127,47 @@ extension MySQLPacket {
                     } else {
                         authPluginDataPart2Length = 12
                     }
-                    guard var authPluginDataPart2 = payload.readSlice(length: authPluginDataPart2Length) else {
+                    guard var authPluginDataPart2 = packet.payload.readSlice(length: authPluginDataPart2Length) else {
                         throw Error.missingAuthPluginData
                     }
-                    var authPluginData = authPluginDataPart1
+                    authPluginData = authPluginDataPart1
                     authPluginData.writeBuffer(&authPluginDataPart2)
-                    self.authPluginData = authPluginData
-                    if !self.capabilities.contains(.CLIENT_PLUGIN_AUTH) {
-                        guard let filler = payload.readInteger(endianness: .little, as: UInt8.self) else {
+                    if !capabilities.contains(.CLIENT_PLUGIN_AUTH) {
+                        guard let filler = packet.payload.readInteger(endianness: .little, as: UInt8.self) else {
                             throw Error.missingFiller
                         }
                         assert(filler == 0x00)
                     }
                 } else {
-                    self.authPluginData = authPluginDataPart1
+                    authPluginData = authPluginDataPart1
                 }
                 
                 if capabilities.contains(.CLIENT_PLUGIN_AUTH) {
-                    guard let authPluginName = payload.readNullTerminatedString() else {
+                    guard let name = packet.payload.readNullTerminatedString() else {
                         throw Error.missingAuthPluginName
                     }
-                    self.authPluginName = authPluginName
+                    authPluginName = name
+                } else {
+                    authPluginName = nil
                 }
             } else {
-                self.capabilities = .init(lower: capabilityFlag1)
-                self.authPluginData = authPluginDataPart1
+                characterSet = nil
+                statusFlags = nil
+                capabilities = .init(lower: capabilitiesLower)
+                authPluginData = authPluginDataPart1
+                authPluginName = nil
             }
+            
+            return .init(
+                protocolVersion: protocolVersion,
+                serverVersion: serverVersion,
+                connectionID: connectionID,
+                authPluginData: authPluginData,
+                capabilities: capabilities,
+                characterSet: characterSet,
+                statusFlags: statusFlags,
+                authPluginName: authPluginName
+            )
         }
     }
 }

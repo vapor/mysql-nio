@@ -5,7 +5,7 @@ public enum MySQLError: Error, CustomStringConvertible, LocalizedError {
     case unsupportedAuthPlugin(name: String)
     case unsupportedServer(message: String)
     case protocolError
-    case server(MySQLPacket.Err)
+    case server(MySQLProtocol.ERR_Packet)
     case closed
     
     public var message: String {
