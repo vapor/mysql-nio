@@ -11,6 +11,13 @@ extension ByteBuffer {
         return self.readString(length: (self.readableBytes - copy.readableBytes) - 1)
     }
     
+    mutating func readInteger<T>(endianness: Endianness = .big, as: T.Type = T.self) -> T?
+        where T: RawRepresentable, T.RawValue: FixedWidthInteger
+    {
+        return self.readInteger(endianness: endianness, as: T.RawValue.self)
+            .flatMap { T(rawValue: $0) }
+    }
+    
     mutating func writeNullTerminatedString(_ string: String) {
         self.writeString(string)
         self.writeInteger(0, as: UInt8.self)

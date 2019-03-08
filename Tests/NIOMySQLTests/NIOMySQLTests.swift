@@ -12,6 +12,7 @@ final class NIOMySQLTests: XCTestCase {
         defer { try! conn.close().wait() }
         let rows = try conn.simpleQuery("SELECT 'foo' as bar").wait()
         XCTAssertEqual(rows.description, #"[["bar": "foo"]]"#)
+        XCTAssertEqual(rows[0].column("bar")?.string, "foo")
     }
     
     func testPerformance() throws {

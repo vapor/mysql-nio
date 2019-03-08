@@ -17,8 +17,8 @@ enum MySQLCommandState {
 }
 
 protocol MySQLCommandHandler {
-    func handle(packet: inout MySQLPacket) throws -> MySQLCommandState
-    func activate() throws -> MySQLCommandState
+    func handle(packet: inout MySQLPacket, capabilities: MySQLProtocol.CapabilityFlags) throws -> MySQLCommandState
+    func activate(capabilities: MySQLProtocol.CapabilityFlags) throws -> MySQLCommandState
 }
 
 struct MySQLCommand {

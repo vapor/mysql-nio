@@ -1,3 +1,5 @@
+import NIOSSL
+
 extension MySQLConnection {
     public static func connect(
         to socketAddress: SocketAddress,

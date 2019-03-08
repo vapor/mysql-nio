@@ -12,26 +12,6 @@ extension MySQLConnection {
     }
 }
 
-public struct MySQLRow: CustomStringConvertible {
-    let columns: [MySQLPacket.ColumnDefinition]
-    let values: [MySQLPacket.ResultSetRow]
-    
-    public var description: String {
-        var desc = [String: String]()
-        for (column, value) in zip(columns, values) {
-            desc[column.name] = value.value?.readableString ?? "null"
-        }
-        return desc.description
-    }
-    
-    init(columns: [MySQLPacket.ColumnDefinition], values: [MySQLPacket.ResultSetRow]) {
-        self.columns = columns
-        self.values = values
-    }
-}
-
-
-
 private final class MySQLSimpleQueryCommand: MySQLCommandHandler {
     let sql: String
     
@@ -43,7 +23,7 @@ private final class MySQLSimpleQueryCommand: MySQLCommandHandler {
     }
     var state: State
     
-    var columns: [MySQLPacket.ColumnDefinition]
+    var columns: [MySQLProtocol.ColumnDefinition41]
     let onRow: (MySQLRow) -> ()
     
     init(sql: String, onRow: @escaping (MySQLRow) -> ()) {
@@ -53,19 +33,19 @@ private final class MySQLSimpleQueryCommand: MySQLCommandHandler {
         self.onRow = onRow
     }
     
-    func handle(packet: inout MySQLPacket) throws -> MySQLCommandState {
+    func handle(packet: inout MySQLPacket, capabilities: MySQLProtocol.CapabilityFlags) throws -> MySQLCommandState {
         switch self.state {
         case .ready:
             if packet.isOK {
                 self.state = .done
                 return .done
             } else {
-                let res = try packet.comQueryResponse()
+                let res = try packet.decode(MySQLProtocol.COM_QUERY_Response.self, capabilities: capabilities)
                 self.state = .columns(count: res.columnCount)
                 return .noResponse
             }
         case .columns(let total):
-            let column = try packet.columnDefinition()
+            let column = try packet.decode(MySQLProtocol.ColumnDefinition41.self, capabilities: capabilities)
             self.columns.append(column)
             if self.columns.count == numericCast(total) {
                 self.state = .rows
@@ -76,9 +56,9 @@ private final class MySQLSimpleQueryCommand: MySQLCommandHandler {
                 self.state = .done
                 return .done
             } else {
-                var values: [MySQLPacket.ResultSetRow] = []
+                var values: [MySQLProtocol.ResultSetRow] = []
                 for _ in 0..<self.columns.count {
-                    let value = try packet.resultSetRow()
+                    let value = try packet.decode(MySQLProtocol.ResultSetRow.self, capabilities: capabilities)
                     values.append(value)
                 }
                 let row = MySQLRow(columns: self.columns, values: values)
@@ -89,9 +69,9 @@ private final class MySQLSimpleQueryCommand: MySQLCommandHandler {
         }
     }
     
-    func activate() throws -> MySQLCommandState {
-        return .response([
-            .init(comQuery: .init(query: self.sql))
+    func activate(capabilities: MySQLProtocol.CapabilityFlags) throws -> MySQLCommandState {
+        return try .response([
+            .encode(MySQLProtocol.COM_QUERY(query: self.sql), capabilities: capabilities)
         ])
     }
 }

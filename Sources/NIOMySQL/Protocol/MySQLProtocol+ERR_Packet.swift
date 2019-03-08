@@ -1,14 +1,10 @@
-extension MySQLPacket {
-    public mutating func err(capabilities: MySQLCapabilityFlags) throws -> Err {
-        return try Err(payload: &self.payload, capabilities: capabilities)
-    }
-    
+extension MySQLProtocol {
     /// 14.1.3.2 ERR_Packet
     ///
     /// This packet signals that an error occurred. It contains a SQL state value if CLIENT_PROTOCOL_41 is enabled.
     ///
     /// https://dev.mysql.com/doc/internals/en/packet-ERR_Packet.html
-    public struct Err {
+    public struct ERR_Packet: MySQLPacketDecodable {
         public enum Error: Swift.Error {
             case missingFlag
             case invalidFlag(UInt8)
@@ -30,32 +26,37 @@ extension MySQLPacket {
         /// string<EOF>    error_message    human readable error message
         public var errorMessage: String
         
-        public init(payload: inout ByteBuffer, capabilities: MySQLCapabilityFlags) throws {
-            guard let flag = payload.readInteger(endianness: .little, as: UInt8.self) else {
+        /// `MySQLPacketDecodable` conformance.
+        public static func decode(from packet: inout MySQLPacket, capabilities: CapabilityFlags) throws -> ERR_Packet {
+            guard let flag = packet.payload.readInteger(endianness: .little, as: UInt8.self) else {
                 throw Error.missingFlag
             }
             guard flag == 0xFF else {
                 throw Error.invalidFlag(flag)
             }
-            guard let errorCode = payload.readInteger(endianness: .little, as: UInt16.self) else {
+            guard let errorCode = packet.payload.readInteger(endianness: .little, as: UInt16.self) else {
                 throw Error.missingErrorCode
             }
-            self.errorCode = errorCode
             
+            let sqlStateMarker: String?
+            let sqlState: String?
             if capabilities.contains(.CLIENT_PROTOCOL_41) {
-                guard let sqlStateMarker = payload.readString(length: 1) else {
+                guard let marker = packet.payload.readString(length: 1) else {
                     throw Error.missingSQLStateMarker
                 }
-                self.sqlStateMarker = sqlStateMarker
-                guard let sqlState = payload.readString(length: 5) else {
+                sqlStateMarker = marker
+                guard let state = packet.payload.readString(length: 5) else {
                     throw Error.missingSQLState
                 }
-                self.sqlState = sqlState
+                sqlState = state
+            } else {
+                sqlStateMarker = nil
+                sqlState = nil
             }
-            guard let errorMessage = payload.readString(length: payload.readableBytes) else {
+            guard let errorMessage = packet.payload.readString(length: packet.payload.readableBytes) else {
                 throw Error.missingErrorMessage
             }
-            self.errorMessage = errorMessage
+            return .init(errorCode: errorCode, sqlStateMarker: sqlStateMarker, sqlState: sqlState, errorMessage: errorMessage)
         }
     }
 }

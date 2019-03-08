@@ -1,3 +1,5 @@
+import NIOSSL
+
 final class MySQLConnectionHandler: ChannelDuplexHandler {
     typealias InboundIn = MySQLPacket
     typealias OutboundIn = MySQLCommand
@@ -6,7 +8,7 @@ final class MySQLConnectionHandler: ChannelDuplexHandler {
     enum State {
         case handshake(HandshakeState)
         case authenticating(AuthenticationState)
-        case commandPhase(MySQLCapabilityFlags)
+        case commandPhase
     }
     
     struct HandshakeState {
@@ -20,12 +22,12 @@ final class MySQLConnectionHandler: ChannelDuplexHandler {
     struct AuthenticationState {
         var authPluginName: String
         var password: String?
-        var capabilities: MySQLCapabilityFlags
         var isSecure: Bool
         var done: EventLoopPromise<Void>
     }
     
     var state: State
+    var serverCapabilities: MySQLProtocol.CapabilityFlags?
     var queue: CircularBuffer<MySQLCommand>
     let sequence: MySQLPacketSequence
     
@@ -50,10 +52,10 @@ final class MySQLConnectionHandler: ChannelDuplexHandler {
             } catch {
                 state.done.fail(error)
             }
-        case .commandPhase(let capabilities):
+        case .commandPhase:
             if let current = self.queue.first {
                 do {
-                    let commandState = try current.handler.handle(packet: &packet)
+                    let commandState = try current.handler.handle(packet: &packet, capabilities: self.serverCapabilities!)
                     self.handleCommandState(context: context, commandState)
                 } catch {
                     self.queue.removeFirst()
@@ -66,19 +68,20 @@ final class MySQLConnectionHandler: ChannelDuplexHandler {
     }
     
     func handleHandshake(context: ChannelHandlerContext, packet: inout MySQLPacket, state: HandshakeState) throws {
-        let handshakeRequest = try packet.handshake()
+        let handshakeRequest = try packet.decode(MySQLProtocol.HandshakeV10.self, capabilities: [])
         assert(handshakeRequest.capabilities.contains(.CLIENT_PROTOCOL_41), "Client protocol 4.1 required")
+        self.serverCapabilities = handshakeRequest.capabilities
         switch state.tlsConfig {
         case .some(let tlsConfig):
-            var capabilities = MySQLCapabilityFlags.clientDefault
+            var capabilities = MySQLProtocol.CapabilityFlags.clientDefault
             capabilities.insert(.CLIENT_SSL)
-            let sslRequest = MySQLPacket.SSLRequest(
+            let sslRequest = MySQLProtocol.SSLRequest(
                 capabilities: capabilities,
                 maxPacketSize: 0,
                 characterSet: .utf8mb4
             )
             let promise = context.channel.eventLoop.makePromise(of: Void.self)
-            context.write(self.wrapOutboundOut(.init(sslRequest)), promise: promise)
+            try context.write(self.wrapOutboundOut(.encode(sslRequest, capabilities: [])), promise: promise)
             context.flush()
             
             let sslContext = try NIOSSLContext(configuration: tlsConfig)
@@ -97,7 +100,7 @@ final class MySQLConnectionHandler: ChannelDuplexHandler {
     
     func writeHandshakeResponse(
         context: ChannelHandlerContext,
-        handshakeRequest: MySQLPacket.Handshake,
+        handshakeRequest: MySQLProtocol.HandshakeV10,
         state: HandshakeState
     ) throws {
         guard handshakeRequest.capabilities.contains(.CLIENT_SECURE_CONNECTION) else {
@@ -129,11 +132,10 @@ final class MySQLConnectionHandler: ChannelDuplexHandler {
         self.state = .authenticating(.init(
             authPluginName: authPluginName,
             password: state.password,
-            capabilities: handshakeRequest.capabilities,
             isSecure: state.tlsConfig != nil,
             done: state.done
         ))
-        let res = MySQLPacket.HandshakeResponse(
+        let res = MySQLPacket.HandshakeResponse41(
             capabilities: .clientDefault,
             maxPacketSize: 0,
             characterSet: .utf8mb4,
@@ -142,7 +144,7 @@ final class MySQLConnectionHandler: ChannelDuplexHandler {
             database: state.database,
             authPluginName: authPluginName
         )
-        context.write(self.wrapOutboundOut(.init(res)), promise: nil)
+        try context.write(self.wrapOutboundOut(.encode(res, capabilities: self.serverCapabilities!)), promise: nil)
         context.flush()
     }
     
@@ -154,12 +156,12 @@ final class MySQLConnectionHandler: ChannelDuplexHandler {
         switch state.authPluginName {
         case "caching_sha2_password":
             guard !packet.isOK else {
-                self.state = .commandPhase(state.capabilities)
+                self.state = .commandPhase
                 state.done.succeed(())
                 return
             }
             guard !packet.isError else {
-                let err = try packet.err(capabilities: state.capabilities)
+                let err = try packet.decode(MySQLProtocol.ERR_Packet.self, capabilities: self.serverCapabilities!)
                 throw MySQLError.server(err)
             }
             guard let status = packet.payload.readInteger(endianness: .little, as: UInt8.self) else {
@@ -187,13 +189,13 @@ final class MySQLConnectionHandler: ChannelDuplexHandler {
             }
         case "mysql_native_password":
             guard !packet.isError else {
-                let error = try packet.err(capabilities: state.capabilities)
+                let error = try packet.decode(MySQLProtocol.ERR_Packet.self, capabilities: self.serverCapabilities!)
                 throw MySQLError.server(error)
             }
             guard packet.isOK else {
                 throw MySQLError.protocolError
             }
-            self.state = .commandPhase(state.capabilities)
+            self.state = .commandPhase
             state.done.succeed(())
         default:
             throw MySQLError.unsupportedAuthPlugin(name: state.authPluginName)
@@ -207,7 +209,7 @@ final class MySQLConnectionHandler: ChannelDuplexHandler {
         // send initial
         do {
             self.sequence.current = nil
-            let commandState = try request.handler.activate()
+            let commandState = try request.handler.activate(capabilities: self.serverCapabilities!)
             self.handleCommandState(context: context, commandState)
         } catch {
             self.queue.removeFirst()
@@ -234,8 +236,15 @@ final class MySQLConnectionHandler: ChannelDuplexHandler {
     }
     
     func close(context: ChannelHandlerContext, mode: CloseMode, promise: EventLoopPromise<Void>?) {
-
-        context.write(self.wrapOutboundOut(.quit), promise: nil)
+        do {
+            try self._close(context: context, mode: mode, promise: promise)
+        } catch {
+            self.errorCaught(context: context, error: error)
+        }
+    }
+    
+    private func _close(context: ChannelHandlerContext, mode: CloseMode, promise: EventLoopPromise<Void>?) throws {
+        try context.write(self.wrapOutboundOut(.encode(MySQLProtocol.COM_QUIT(), capabilities: self.serverCapabilities!)), promise: nil)
         context.flush()
         context.close(mode: mode, promise: promise)
     }
