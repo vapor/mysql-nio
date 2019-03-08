@@ -15,6 +15,14 @@ final class NIOMySQLTests: XCTestCase {
         XCTAssertEqual(rows[0].column("bar")?.string, "foo")
     }
     
+    func testExample2() throws {
+        let conn = try MySQLConnection.test(on: self.eventLoop).wait()
+        defer { try! conn.close().wait() }
+        let rows = try conn.simpleQuery("SELECT 1 as one, 2 as two").wait()
+        XCTAssertEqual(rows[0].column("one")?.string, "1")
+        XCTAssertEqual(rows[0].column("two")?.string, "2")
+    }
+    
     func testPerformance() throws {
         let conn = try! MySQLConnection.test(on: self.eventLoop).wait()
         defer { try! conn.close().wait() }

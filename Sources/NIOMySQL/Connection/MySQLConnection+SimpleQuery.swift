@@ -61,7 +61,7 @@ private final class MySQLSimpleQueryCommand: MySQLCommandHandler {
                     let value = try packet.decode(MySQLProtocol.ResultSetRow.self, capabilities: capabilities)
                     values.append(value)
                 }
-                let row = MySQLRow(columns: self.columns, values: values)
+                let row = MySQLRow(format: .text, columns: self.columns, values: values)
                 self.onRow(row)
                 return .noResponse
             }
