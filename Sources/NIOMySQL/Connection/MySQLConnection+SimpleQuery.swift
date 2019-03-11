@@ -52,19 +52,19 @@ private final class MySQLSimpleQueryCommand: MySQLCommandHandler {
             }
             return .noResponse
         case .rows:
-            if packet.isOK {
+            guard !packet.isEOF else {
                 self.state = .done
                 return .done
-            } else {
-                var values: [MySQLProtocol.ResultSetRow] = []
-                for _ in 0..<self.columns.count {
-                    let value = try packet.decode(MySQLProtocol.ResultSetRow.self, capabilities: capabilities)
-                    values.append(value)
-                }
-                let row = MySQLRow(format: .text, columns: self.columns, values: values)
-                self.onRow(row)
-                return .noResponse
             }
+            
+            var values: [MySQLProtocol.ResultSetRow] = []
+            for _ in 0..<self.columns.count {
+                let value = try packet.decode(MySQLProtocol.ResultSetRow.self, capabilities: capabilities)
+                values.append(value)
+            }
+            let row = MySQLRow(format: .text, columns: self.columns, values: values)
+            self.onRow(row)
+            return .noResponse
         case .done: fatalError()
         }
     }
