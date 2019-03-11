@@ -11,6 +11,7 @@ extension MySQLConnection {
 }
 
 enum MySQLCommandState {
+    case reset([MySQLPacket])
     case response([MySQLPacket])
     case noResponse
     case done

@@ -25,7 +25,12 @@ public struct MySQLRow: CustomStringConvertible {
     public func column(_ name: String, table: String? = nil) -> MySQLData? {
         for (column, value) in zip(self.columns, self.values) {
             if column.name == name && (table == nil || column.table == table) {
-                return .init(type: column.columnType, format: self.format, buffer: value.value)
+                return .init(
+                    type: column.columnType,
+                    format: self.format,
+                    buffer: value.value,
+                    isUnsigned: column.flags.contains(.COLUMN_UNSIGNED)
+                )
             }
         }
         return nil

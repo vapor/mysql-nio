@@ -227,6 +227,12 @@ final class MySQLConnectionHandler: ChannelDuplexHandler {
             current.promise.succeed(())
         case .noResponse:
             break
+        case .reset(let packets):
+            self.sequence.reset()
+            for packet in packets {
+                context.write(self.wrapOutboundOut(packet), promise: nil)
+            }
+            context.flush()
         case .response(let packets):
             for packet in packets {
                 context.write(self.wrapOutboundOut(packet), promise: nil)
@@ -244,7 +250,9 @@ final class MySQLConnectionHandler: ChannelDuplexHandler {
     }
     
     private func _close(context: ChannelHandlerContext, mode: CloseMode, promise: EventLoopPromise<Void>?) throws {
-        try context.write(self.wrapOutboundOut(.encode(MySQLProtocol.COM_QUIT(), capabilities: self.serverCapabilities!)), promise: nil)
+        self.sequence.reset()
+        let quit = MySQLProtocol.COM_QUIT()
+        try context.write(self.wrapOutboundOut(.encode(quit, capabilities: self.serverCapabilities!)), promise: nil)
         context.flush()
         context.close(mode: mode, promise: promise)
     }
