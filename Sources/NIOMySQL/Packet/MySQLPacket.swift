@@ -14,7 +14,11 @@ public struct MySQLPacket {
     }
     
     public var isOK: Bool {
-        return self.headerFlag == 0xFE || self.headerFlag == 0x00
+        return self.headerFlag == 0x00
+    }
+    
+    public var isEOF: Bool {
+        return self.headerFlag == 0xFE
     }
     
     var headerFlag: UInt8? {

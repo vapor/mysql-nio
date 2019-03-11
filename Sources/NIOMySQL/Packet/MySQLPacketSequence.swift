@@ -5,6 +5,10 @@ public final class MySQLPacketSequence {
         self.current = nil
     }
     
+    public func reset() {
+        self.current = nil
+    }
+    
     public func next() -> UInt8 {
         if let existing = self.current {
             self.current = existing &+ 1

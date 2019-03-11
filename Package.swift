@@ -16,7 +16,7 @@ let package = Package(
             pkgConfig: "openssl",
             providers: [
                 .apt(["openssl libssl-dev"]),
-                .brew(["openssl@1.1"])
+                .brew(["openssl"])
             ]
         ),
         .target(name: "NIOMySQL", dependencies: ["CMySQLOpenSSL", "NIO", "NIOSSL"]),

@@ -1,11 +1,11 @@
 import CMySQLOpenSSL
 
 func sha256(_ messages: ByteBuffer...) -> ByteBuffer {
-    return digest(EVP_sha256(), messages)
+    return digest(EVP_sha256().convert(), messages)
 }
 
 func sha1(_ messages: ByteBuffer...) -> ByteBuffer {
-    return digest(EVP_sha1(), messages)
+    return digest(EVP_sha1().convert(), messages)
 }
 
 func xor(_ a: ByteBuffer, _ b: ByteBuffer) -> ByteBuffer {
@@ -21,7 +21,7 @@ func xor(_ a: ByteBuffer, _ b: ByteBuffer) -> ByteBuffer {
 private func digest(_ alg: OpaquePointer, _ messages: [ByteBuffer]) -> ByteBuffer {
     let context = EVP_MD_CTX_new()
     defer { EVP_MD_CTX_free(context) }
-    assert(EVP_DigestInit_ex(context, alg, nil) == 1, "init digest failed")
+    assert(EVP_DigestInit_ex(context, alg.convert(), nil) == 1, "init digest failed")
     messages.combine().withUnsafeReadableBytes { buffer in
         assert(EVP_DigestUpdate(context, buffer.baseAddress, buffer.count) == 1, "update digest failed")
     }
@@ -46,5 +46,31 @@ extension Array where Element == ByteBuffer {
             }
             return base
         }
+    }
+}
+
+private extension OpaquePointer {
+    func convert<T>() -> UnsafePointer<T> {
+        return .init(self)
+    }
+    
+    func convert<T>() -> UnsafeMutablePointer<T> {
+        return .init(self)
+    }
+    
+    func convert() -> OpaquePointer {
+        return self
+    }
+}
+
+private extension UnsafePointer {
+    func convert() -> OpaquePointer {
+        return .init(self)
+    }
+}
+
+private extension UnsafeMutablePointer {
+    func convert() -> OpaquePointer {
+        return .init(self)
     }
 }
