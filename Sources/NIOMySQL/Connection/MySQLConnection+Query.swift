@@ -42,8 +42,6 @@ private final class MySQLQueryCommand: MySQLCommandHandler {
     }
     
     func handle(packet: inout MySQLPacket, capabilities: MySQLProtocol.CapabilityFlags) throws -> MySQLCommandState {
-        print("")
-        print("\(self.state) \(packet.payload.debugDescription)")
         guard !packet.isError else {
             self.state = .done
             let error = try packet.decode(MySQLProtocol.ERR_Packet.self, capabilities: capabilities)

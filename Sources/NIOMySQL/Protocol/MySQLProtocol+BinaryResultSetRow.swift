@@ -17,7 +17,6 @@ extension MySQLProtocol {
                 fatalError()
             }
             
-            print("the data: \(packet.payload.debugDescription)")
             var values: [ByteBuffer?] = []
             values.reserveCapacity(columns.count)
             for (i, column) in columns.enumerated() {
@@ -63,7 +62,6 @@ extension MySQLProtocol {
                         fatalError("Unsupported type: \(column)")
                     }
                     
-                    print("column: \(column.name) length: \(length)")
                     if let length = length {
                         guard let data = packet.payload.readSlice(length: length) else {
                             fatalError()
