@@ -85,7 +85,7 @@ final class MySQLConnectionHandler: ChannelDuplexHandler {
             context.flush()
             
             let sslContext = try NIOSSLContext(configuration: tlsConfig)
-            let handler = try NIOSSLClientHandler(context: sslContext)
+            let handler = try NIOSSLClientHandler(context: sslContext, serverHostname: nil)
             promise.futureResult.flatMap {
                 return context.channel.pipeline.addHandler(handler, position: .first).flatMapThrowing {
                     try self.writeHandshakeResponse(context: context, handshakeRequest: handshakeRequest, state: state)

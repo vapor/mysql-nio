@@ -1,13 +1,17 @@
 public struct MySQLRow: CustomStringConvertible {
     private let columns: [MySQLProtocol.ColumnDefinition41]
-    private let values: [MySQLProtocol.ResultSetRow]
+    private let values: [ByteBuffer?]
     private let format: MySQLData.Format
     
     public var description: String {
-        var desc = [String: String]()
-        for (column, value) in zip(columns, values) {
-            print(column)
-            desc[column.name] = value.value?.readableString ?? "null"
+        var desc = [String: MySQLData]()
+        for (column, value) in zip(self.columns, self.values) {
+            desc[column.name] = .init(
+                type: column.columnType,
+                format: self.format,
+                buffer: value,
+                isUnsigned: column.flags.contains(.COLUMN_UNSIGNED)
+            )
         }
         return desc.description
     }
@@ -15,7 +19,7 @@ public struct MySQLRow: CustomStringConvertible {
     init(
         format: MySQLData.Format,
         columns: [MySQLProtocol.ColumnDefinition41],
-        values: [MySQLProtocol.ResultSetRow]
+        values: [ByteBuffer?]
     ) {
         self.format = format
         self.columns = columns
@@ -28,7 +32,7 @@ public struct MySQLRow: CustomStringConvertible {
                 return .init(
                     type: column.columnType,
                     format: self.format,
-                    buffer: value.value,
+                    buffer: value,
                     isUnsigned: column.flags.contains(.COLUMN_UNSIGNED)
                 )
             }

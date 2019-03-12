@@ -17,9 +17,10 @@ private final class MySQLQueryCommand: MySQLCommandHandler {
     
     enum State {
         case ready
-        case columns(count: UInt16)
-        case columnsDone
-        case beforeRows(remaining: Int)
+        case params(numParams: Int, numColumns: Int)
+        case columns(numColumns: Int)
+        case executeColumnCount
+        case executeColumns(remaining: Int)
         case rows
         case done
     }
@@ -27,87 +28,84 @@ private final class MySQLQueryCommand: MySQLCommandHandler {
     let binds: [MySQLData]
     let onRow: (MySQLRow) -> ()
     private var columns: [MySQLProtocol.ColumnDefinition41]
+    private var params: [MySQLProtocol.ColumnDefinition41]
     
     init(sql: String, binds: [MySQLData], onRow: @escaping (MySQLRow) -> ()) {
         self.state = .ready
         self.sql = sql
         self.binds = binds
         self.columns = []
+        self.params = []
         self.onRow = onRow
     }
     
     func handle(packet: inout MySQLPacket, capabilities: MySQLProtocol.CapabilityFlags) throws -> MySQLCommandState {
-        print(packet.payload.debugDescription)
+        print("")
+        print("\(self.state) \(packet.payload.debugDescription)")
+        guard !packet.isError else {
+            self.state = .done
+            let error = try packet.decode(MySQLProtocol.ERR_Packet.self, capabilities: capabilities)
+            throw MySQLError.server(error)
+        }
         switch self.state {
         case .ready:
-            guard !packet.isError else {
-                self.state = .done
-                let error = try packet.decode(MySQLProtocol.ERR_Packet.self, capabilities: capabilities)
-                throw MySQLError.server(error)
-            }
-
             let res = try packet.decode(MySQLProtocol.COM_STMT_PREPARE_OK.self, capabilities: capabilities)
-            print(res)
-            self.state = .columns(count: res.numColumns)
+            
+            if res.numParams != 0 {
+                self.state = .params(numParams: numericCast(res.numParams), numColumns: numericCast(res.numColumns))
+            } else if res.numColumns != 0 {
+                self.state = .columns(numColumns: numericCast(res.numColumns))
+            } else {
+                self.state = .executeColumnCount
+            }
+            
             let execute = MySQLProtocol.COM_STMT_EXECUTE(
                 statementID: res.statementID,
                 flags: [],
                 values: self.binds
             )
             return try .reset([.encode(execute, capabilities: capabilities)])
-        case .columns(let total):
-            let column = try packet.decode(MySQLProtocol.ColumnDefinition41.self, capabilities: capabilities)
-            print(column)
-            self.columns.append(column)
-            if self.columns.count == numericCast(total) {
-                self.state = .columnsDone
+        case .params(let numParams, let numColumns):
+            let param = try packet.decode(MySQLProtocol.ColumnDefinition41.self, capabilities: capabilities)
+            self.params.append(param)
+            if self.params.count == numParams {
+                if numColumns != 0 {
+                    self.state = .columns(numColumns: numColumns)
+                } else {
+                    self.state = .executeColumnCount
+                }
             }
             return .noResponse
-        case .columnsDone:
-            guard let columnCount = packet.payload.readLengthEncodedInteger() else {
+        case .columns(let numColumns):
+            let column = try packet.decode(MySQLProtocol.ColumnDefinition41.self, capabilities: capabilities)
+            self.columns.append(column)
+            if self.columns.count == numColumns {
+                self.state = .executeColumnCount
+            }
+            return .noResponse
+        case .executeColumnCount:
+            guard let count = packet.payload.readLengthEncodedInteger() else {
                 fatalError()
             }
-            print("column count: \(columnCount)")
-            assert(packet.payload.readableBytes == 0, "unread data")
-            assert(self.columns.count == numericCast(columnCount), "column count mis-match")
-            self.state = .beforeRows(remaining: numericCast(columnCount))
+            self.state = .executeColumns(remaining: numericCast(count))
             return .noResponse
-        case .beforeRows(var remaining):
+        case .executeColumns(var remaining):
             remaining -= 1
-            if remaining == 0 {
+            switch remaining {
+            case 0:
                 self.state = .rows
-            } else {
-                self.state = .beforeRows(remaining: remaining)
+            default:
+                self.state = .executeColumns(remaining: remaining)
             }
-            let column = try packet.decode(MySQLProtocol.ColumnDefinition41.self, capabilities: capabilities)
-            print("consuming column: \(column)")
             return .noResponse
         case .rows:
-            guard !packet.isError else {
-                self.state = .done
-                let error = try packet.decode(MySQLProtocol.ERR_Packet.self, capabilities: capabilities)
-                throw MySQLError.server(error)
-            }
             guard !packet.isEOF else {
                 self.state = .done
                 return .done
             }
-            guard let header = packet.payload.readInteger(endianness: .little, as: UInt8.self) else {
-                fatalError()
-            }
-            assert(header == 0x00)
-            guard let nullBitmap = MySQLProtocol.NullBitmap.readResultSetNullBitmap(
-                count: self.columns.count, from: &packet.payload
-            ) else {
-                fatalError()
-            }
-            print(nullBitmap)
-            var values: [MySQLProtocol.ResultSetRow] = []
-            for _ in 0..<self.columns.count {
-                let value = try packet.decode(MySQLProtocol.ResultSetRow.self, capabilities: capabilities)
-                values.append(value)
-            }
-            let row = MySQLRow(format: .binary, columns: self.columns, values: values)
+
+            let data = try MySQLProtocol.BinaryResultSetRow.decode(from: &packet, columns: columns)
+            let row = MySQLRow(format: .binary, columns: self.columns, values: data.values)
             self.onRow(row)
             return .noResponse
         case .done: fatalError()

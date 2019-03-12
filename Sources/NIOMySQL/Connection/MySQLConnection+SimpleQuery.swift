@@ -57,12 +57,8 @@ private final class MySQLSimpleQueryCommand: MySQLCommandHandler {
                 return .done
             }
             
-            var values: [MySQLProtocol.ResultSetRow] = []
-            for _ in 0..<self.columns.count {
-                let value = try packet.decode(MySQLProtocol.ResultSetRow.self, capabilities: capabilities)
-                values.append(value)
-            }
-            let row = MySQLRow(format: .text, columns: self.columns, values: values)
+            let data = try MySQLProtocol.TextResultSetRow.decode(from: &packet, columnCount: columns.count)
+            let row = MySQLRow(format: .text, columns: self.columns, values: data.values)
             self.onRow(row)
             return .noResponse
         case .done: fatalError()
