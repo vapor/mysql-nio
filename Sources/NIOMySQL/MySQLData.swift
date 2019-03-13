@@ -1,4 +1,4 @@
-public struct MySQLData: CustomStringConvertible, ExpressibleByStringLiteral, ExpressibleByIntegerLiteral {
+public struct MySQLData: CustomStringConvertible, ExpressibleByStringLiteral, ExpressibleByIntegerLiteral, ExpressibleByBooleanLiteral {
     public enum Format {
         case binary
         case text
@@ -10,6 +10,10 @@ public struct MySQLData: CustomStringConvertible, ExpressibleByStringLiteral, Ex
     
     /// If `true`, this value is unsigned.
     public var isUnsigned: Bool
+    
+    public init(booleanLiteral value: Bool) {
+        self.init(bool: value)
+    }
     
     public init(stringLiteral value: String) {
         self.init(string: value)
@@ -38,12 +42,27 @@ public struct MySQLData: CustomStringConvertible, ExpressibleByStringLiteral, Ex
         self.buffer = buffer
     }
     
+    public init(bool: Bool) {
+        self.format = .binary
+        self.type = .bit
+        var buffer = ByteBufferAllocator().buffer(capacity: 1)
+        buffer.writeInteger(bool ? 1 : 0, endianness: .little, as: UInt8.self)
+        self.isUnsigned = true
+        self.buffer = buffer
+    }
+    
     public var description: String {
         if self.buffer == nil {
             return "nil"
         } else {
-            #warning("TODO: better description based on type")
-            return self.string?.debugDescription ?? "<n/a>"
+            switch self.type {
+            case .longlong, .long, .int24, .short, .tiny:
+                return self.int!.description
+            case .bit:
+                return self.bool!.description
+            default:
+                return self.string?.debugDescription ?? "<n/a>"
+            }
         }
     }
     
@@ -66,6 +85,14 @@ public struct MySQLData: CustomStringConvertible, ExpressibleByStringLiteral, Ex
                 print(self.buffer?.debugDescription)
                 return nil
             }
+        }
+    }
+    
+    public var bool: Bool? {
+        switch self.string {
+        case "true", "1": return true
+        case "false", "0": return false
+        default: return nil
         }
     }
     

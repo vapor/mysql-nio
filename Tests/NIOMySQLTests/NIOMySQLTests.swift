@@ -158,7 +158,7 @@ final class NIOMySQLTests: XCTestCase {
             .init("xtext", "TEXT(62)", "hello3"),
             .init("xbinary", "BINARY(6)", "hello4"),
             .init("xvarbinary", "VARBINARY(66)", "hello5"),
-            .init("xbit", "BIT", 1),
+            .init("xbit", "BIT", true),
             .init("xtinyint", "TINYINT(1)", 5),
             .init("xsmallint", "SMALLINT(1)", 252),
             .init("xvarcharnull", "VARCHAR(10)", MySQLData(type: .varString, buffer: nil)),
