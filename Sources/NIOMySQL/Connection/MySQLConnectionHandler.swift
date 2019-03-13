@@ -249,7 +249,34 @@ final class MySQLConnectionHandler: ChannelDuplexHandler {
         let quit = MySQLProtocol.COM_QUIT()
         try context.write(self.wrapOutboundOut(.encode(quit, capabilities: self.serverCapabilities!)), promise: nil)
         context.flush()
-        context.close(mode: mode, promise: promise)
+        
+        if let promise = promise {
+            // we need to do some error mapping here, so create a new promise
+            let p = context.eventLoop.makePromise(of: Void.self)
+            
+            // forward the close request with our new promise
+            context.close(mode: mode, promise: p)
+            
+            // forward close future results based on whether
+            // the close was successful
+            p.futureResult.whenSuccess { promise.succeed(()) }
+            p.futureResult.whenFailure { error in
+                if
+                    let sslError = error as? NIOSSLError,
+                    case .uncleanShutdown = sslError,
+                    self.queue.isEmpty
+                {
+                    // we can ignore unclear shutdown errors
+                    // since no requests are pending
+                    promise.succeed(())
+                } else {
+                    promise.fail(error)
+                }
+            }
+        } else {
+            // no close promise anyway, just forward request
+            context.close(mode: mode, promise: nil)
+        }
     }
     
     func channelInactive(context: ChannelHandlerContext) {

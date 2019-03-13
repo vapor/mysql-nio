@@ -195,7 +195,7 @@ final class NIOMySQLTests: XCTestCase {
     }
     
     func testPerformance_simpleSelects() throws {
-        let conn = try! MySQLConnection.test(on: self.eventLoop).wait()
+        let conn = try MySQLConnection.test(on: self.eventLoop).wait()
         defer { try! conn.close().wait() }
         for _ in 0..<1_000 {
             _ = try! conn.simpleQuery("SELECT 1").wait()

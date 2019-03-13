@@ -1,4 +1,5 @@
 import NIOMySQL
+import NIOSSL
 
 extension MySQLConnection {
     static func test(on eventLoop: EventLoop) -> EventLoopFuture<MySQLConnection> {
@@ -11,12 +12,18 @@ extension MySQLConnection {
             #else
             address = try .init(ipAddress: "127.0.0.1", port: 3306)
             #endif
+            let tlsConfig: TLSConfiguration?
+            #if TEST_TLS
+            tlsConfig = .forClient(certificateVerification: .none)
+            #else
+            tlsConfig = nil
+            #endif
             return self.connect(
                 to: address,
                 username: "vapor_username",
                 database: "vapor_database",
                 password: "vapor_password",
-                // tlsConfig: .forClient(certificateVerification: .none),
+                tlsConfig: tlsConfig,
                 on: eventLoop
             )
         } catch {
@@ -24,12 +31,3 @@ extension MySQLConnection {
         }
     }
 }
-/*
- .flatMap {
- return conn.authenticate(
- username: "vapor_username",
- database: "vapor_database",
- password: "vapor_password"
- )
- }.map { conn }
- */
