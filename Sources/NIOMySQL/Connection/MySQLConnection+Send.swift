@@ -10,11 +10,28 @@ extension MySQLConnection {
     }
 }
 
-enum MySQLCommandState {
-    case reset([MySQLPacket])
-    case response([MySQLPacket])
-    case noResponse
-    case done
+struct MySQLCommandState {
+    static var noResponse: MySQLCommandState {
+        return .init()
+    }
+    
+    static var done: MySQLCommandState {
+        return .init(done: true)
+    }
+    
+    static func response(_ packets: [MySQLPacket]) -> MySQLCommandState {
+        return .init(response: packets)
+    }
+    
+    var response: [MySQLPacket]
+    var done: Bool
+    var resetSequence: Bool
+    
+    init(response: [MySQLPacket] = [], done: Bool = false, resetSequence: Bool = false) {
+        self.response = response
+        self.done = done
+        self.resetSequence = resetSequence
+    }
 }
 
 protocol MySQLCommandHandler {

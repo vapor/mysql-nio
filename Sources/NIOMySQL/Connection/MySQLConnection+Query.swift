@@ -42,6 +42,7 @@ private final class MySQLQueryCommand: MySQLCommandHandler {
     }
     
     func handle(packet: inout MySQLPacket, capabilities: MySQLProtocol.CapabilityFlags) throws -> MySQLCommandState {
+        // print("QUERY \(state): \(packet.payload.debugDescription)")
         guard !packet.isError else {
             self.state = .done
             let error = try packet.decode(MySQLProtocol.ERR_Packet.self, capabilities: capabilities)
@@ -63,7 +64,7 @@ private final class MySQLQueryCommand: MySQLCommandHandler {
                 flags: [],
                 values: self.binds
             )
-            return try .reset([.encode(execute, capabilities: capabilities)])
+            return try .init(response: [.encode(execute, capabilities: capabilities)], resetSequence: true)
         case .params:
             let param = try packet.decode(MySQLProtocol.ColumnDefinition41.self, capabilities: capabilities)
             self.params.append(param)
@@ -71,7 +72,7 @@ private final class MySQLQueryCommand: MySQLCommandHandler {
                 if self.ok!.numColumns != 0 {
                     self.state = .columns
                 } else {
-                    self.state = .executeColumnCount
+                    self.state = .rows
                 }
             }
             return .noResponse
@@ -98,17 +99,16 @@ private final class MySQLQueryCommand: MySQLCommandHandler {
             }
             return .noResponse
         case .rows:
-            guard !packet.isEOF else {
-                self.state = .done
-                return .done
+            if packet.isEOF || packet.isOK && columns.count == 0 {
+                var packet = MySQLPacket()
+                MySQLProtocol.COM_STMT_CLOSE(statementID: self.ok!.statementID).encode(into: &packet)
+                return .init(response: [packet], done: true, resetSequence: true)
             }
 
             let data = try MySQLProtocol.BinaryResultSetRow.decode(from: &packet, columns: columns)
             let row = MySQLRow(format: .binary, columns: self.columns, values: data.values)
             self.onRow(row)
-            var packet = MySQLPacket()
-            MySQLProtocol.COM_STMT_CLOSE(statementID: self.ok!.statementID).encode(into: &packet)
-            return .reset([packet])
+            return .noResponse
         case .done: fatalError()
         }
     }

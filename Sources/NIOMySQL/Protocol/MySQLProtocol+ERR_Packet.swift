@@ -5,7 +5,7 @@ extension MySQLProtocol {
     ///
     /// https://dev.mysql.com/doc/internals/en/packet-ERR_Packet.html
     public struct ERR_Packet: MySQLPacketDecodable {
-        public enum Error: Swift.Error {
+        public enum DecodeError: Swift.Error {
             case missingFlag
             case invalidFlag(UInt8)
             case missingErrorCode
@@ -15,7 +15,7 @@ extension MySQLProtocol {
         }
         
         /// error_code    error-code
-        public var errorCode: UInt16
+        public var errorCode: ErrorCode
         
         /// string[1] sql_state_marker    # marker of the SQL State
         public var sqlStateMarker: String?
@@ -29,24 +29,24 @@ extension MySQLProtocol {
         /// `MySQLPacketDecodable` conformance.
         public static func decode(from packet: inout MySQLPacket, capabilities: CapabilityFlags) throws -> ERR_Packet {
             guard let flag = packet.payload.readInteger(endianness: .little, as: UInt8.self) else {
-                throw Error.missingFlag
+                throw DecodeError.missingFlag
             }
             guard flag == 0xFF else {
-                throw Error.invalidFlag(flag)
+                throw DecodeError.invalidFlag(flag)
             }
-            guard let errorCode = packet.payload.readInteger(endianness: .little, as: UInt16.self) else {
-                throw Error.missingErrorCode
+            guard let errorCode = packet.payload.readInteger(endianness: .little, as: ErrorCode.self) else {
+                throw DecodeError.missingErrorCode
             }
             
             let sqlStateMarker: String?
             let sqlState: String?
             if capabilities.contains(.CLIENT_PROTOCOL_41) {
                 guard let marker = packet.payload.readString(length: 1) else {
-                    throw Error.missingSQLStateMarker
+                    throw DecodeError.missingSQLStateMarker
                 }
                 sqlStateMarker = marker
                 guard let state = packet.payload.readString(length: 5) else {
-                    throw Error.missingSQLState
+                    throw DecodeError.missingSQLState
                 }
                 sqlState = state
             } else {
@@ -54,7 +54,7 @@ extension MySQLProtocol {
                 sqlState = nil
             }
             guard let errorMessage = packet.payload.readString(length: packet.payload.readableBytes) else {
-                throw Error.missingErrorMessage
+                throw DecodeError.missingErrorMessage
             }
             return .init(errorCode: errorCode, sqlStateMarker: sqlStateMarker, sqlState: sqlState, errorMessage: errorMessage)
         }

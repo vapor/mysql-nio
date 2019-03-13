@@ -62,7 +62,7 @@ final class MySQLConnectionHandler: ChannelDuplexHandler {
                     current.promise.fail(error)
                 }
             } else {
-                assertionFailure("unhandled packet: \(packet)")
+                assertionFailure("unhandled packet: \(packet.payload.debugDescription)")
             }
         }
     }
@@ -221,20 +221,15 @@ final class MySQLConnectionHandler: ChannelDuplexHandler {
     }
     
     func handleCommandState(context: ChannelHandlerContext, _ commandState: MySQLCommandState) {
-        switch commandState {
-        case .done:
+        if commandState.done {
             let current = self.queue.removeFirst()
             current.promise.succeed(())
-        case .noResponse:
-            break
-        case .reset(let packets):
+        }
+        if commandState.resetSequence {
             self.sequence.reset()
-            for packet in packets {
-                context.write(self.wrapOutboundOut(packet), promise: nil)
-            }
-            context.flush()
-        case .response(let packets):
-            for packet in packets {
+        }
+        if !commandState.response.isEmpty {
+            for packet in commandState.response {
                 context.write(self.wrapOutboundOut(packet), promise: nil)
             }
             context.flush()

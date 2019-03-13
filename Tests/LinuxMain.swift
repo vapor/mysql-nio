@@ -3,5 +3,6 @@ import XCTest
 import NIOMySQLTests
 
 var tests = [XCTestCaseEntry]()
-tests += NIOMySQLTests.allTests()
+tests += NIOMySQLTests.__allTests()
+
 XCTMain(tests)

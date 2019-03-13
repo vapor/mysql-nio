@@ -2,97 +2,124 @@ extension MySQLProtocol {
     /// Table 14.4 Column Types
     public struct DataType: RawRepresentable, Equatable, CustomStringConvertible {
         /// Implemented by ProtocolBinary::MYSQL_TYPE_DECIMAL
-        public static let MYSQL_TYPE_DECIMAL = DataType(rawValue: 0x00)
+        public static let decimal = DataType(rawValue: 0x00)
         
         /// Implemented by ProtocolBinary::MYSQL_TYPE_TINY
-        public static let MYSQL_TYPE_TINY = DataType(rawValue: 0x01)
+        public static let tiny = DataType(rawValue: 0x01)
         
         /// Implemented by ProtocolBinary::MYSQL_TYPE_SHORT
-        public static let MYSQL_TYPE_SHORT = DataType(rawValue: 0x02)
+        public static let short = DataType(rawValue: 0x02)
         
         /// Implemented by ProtocolBinary::MYSQL_TYPE_LONG
-        public static let MYSQL_TYPE_LONG = DataType(rawValue: 0x03)
+        public static let long = DataType(rawValue: 0x03)
         
         /// Implemented by ProtocolBinary::MYSQL_TYPE_FLOAT
-        public static let MYSQL_TYPE_FLOAT = DataType(rawValue: 0x04)
+        public static let float = DataType(rawValue: 0x04)
         
         /// Implemented by ProtocolBinary::MYSQL_TYPE_DOUBLE
-        public static let MYSQL_TYPE_DOUBLE = DataType(rawValue: 0x05)
+        public static let double = DataType(rawValue: 0x05)
         
         /// Implemented by ProtocolBinary::MYSQL_TYPE_NULL
-        public static let MYSQL_TYPE_NULL = DataType(rawValue: 0x06)
+        public static let null = DataType(rawValue: 0x06)
         
         /// Implemented by ProtocolBinary::MYSQL_TYPE_TIMESTAMP
-        public static let MYSQL_TYPE_TIMESTAMP = DataType(rawValue: 0x07)
+        public static let timestamp = DataType(rawValue: 0x07)
         
         /// Implemented by ProtocolBinary::MYSQL_TYPE_LONGLONG
-        public static let MYSQL_TYPE_LONGLONG = DataType(rawValue: 0x08)
+        public static let longlong = DataType(rawValue: 0x08)
         
         /// Implemented by ProtocolBinary::MYSQL_TYPE_INT24
-        public static let MYSQL_TYPE_INT24 = DataType(rawValue: 0x09)
+        public static let int24 = DataType(rawValue: 0x09)
         
         /// Implemented by ProtocolBinary::MYSQL_TYPE_DATE
-        public static let MYSQL_TYPE_DATE = DataType(rawValue: 0x0a)
+        public static let date = DataType(rawValue: 0x0a)
         
         /// Implemented by ProtocolBinary::MYSQL_TYPE_TIME
-        public static let MYSQL_TYPE_TIME = DataType(rawValue: 0x0b)
+        public static let time = DataType(rawValue: 0x0b)
         
         /// Implemented by ProtocolBinary::MYSQL_TYPE_DATETIME
-        public static let MYSQL_TYPE_DATETIME = DataType(rawValue: 0x0c)
+        public static let datetime = DataType(rawValue: 0x0c)
         
         /// Implemented by ProtocolBinary::MYSQL_TYPE_YEAR
-        public static let MYSQL_TYPE_YEAR = DataType(rawValue: 0x0d)
+        public static let year = DataType(rawValue: 0x0d)
         
         /// see Protocol::MYSQL_TYPE_DATE
-        public static let MYSQL_TYPE_NEWDATE = DataType(rawValue: 0x0e)
+        public static let newdate = DataType(rawValue: 0x0e)
         
         /// Implemented by ProtocolBinary::MYSQL_TYPE_VARCHAR
-        public static let MYSQL_TYPE_VARCHAR = DataType(rawValue: 0x0f)
+        public static let varchar = DataType(rawValue: 0x0f)
         
         /// Implemented by ProtocolBinary::MYSQL_TYPE_BIT
-        public static let MYSQL_TYPE_BIT = DataType(rawValue: 0x10)
+        public static let bit = DataType(rawValue: 0x10)
         
-        /// see Protocol::MYSQL_TYPE_TIMESTAMP
-        public static let MYSQL_TYPE_TIMESTAMP2 = DataType(rawValue: 0x11)
+        /// see Protocol::MYSQL_TYPE_TIMESTAMP2
+        public static let timestamp2 = DataType(rawValue: 0x11)
         
-        /// see Protocol::MYSQL_TYPE_DATETIME
-        public static let MYSQL_TYPE_DATETIME2 = DataType(rawValue: 0x12)
+        /// see Protocol::MYSQL_TYPE_DATETIME2
+        public static let datetime2 = DataType(rawValue: 0x12)
         
-        /// see Protocol::MYSQL_TYPE_TIME
-        public static let MYSQL_TYPE_TIME2 = DataType(rawValue: 0x13)
+        /// see Protocol::MYSQL_TYPE_TIME2
+        public static let time2 = DataType(rawValue: 0x13)
         
         /// Implemented by ProtocolBinary::MYSQL_TYPE_JSON
-        public static let MYSQL_TYPE_JSON = DataType(rawValue: 0xf5)
+        public static let json = DataType(rawValue: 0xf5)
         
         /// Implemented by ProtocolBinary::MYSQL_TYPE_NEWDECIMAL
-        public static let MYSQL_TYPE_NEWDECIMAL = DataType(rawValue: 0xf6)
+        public static let newdecimal = DataType(rawValue: 0xf6)
         
         /// Implemented by ProtocolBinary::MYSQL_TYPE_ENUM
-        public static let MYSQL_TYPE_ENUM = DataType(rawValue: 0xf7)
+        public static let `enum` = DataType(rawValue: 0xf7)
         
         /// Implemented by ProtocolBinary::MYSQL_TYPE_SET
-        public static let MYSQL_TYPE_SET = DataType(rawValue: 0xf8)
+        public static let set = DataType(rawValue: 0xf8)
         
         /// Implemented by ProtocolBinary::MYSQL_TYPE_TINY_BLOB
-        public static let MYSQL_TYPE_TINY_BLOB = DataType(rawValue: 0xf9)
+        public static let tinyBlob = DataType(rawValue: 0xf9)
         
         /// Implemented by ProtocolBinary::MYSQL_TYPE_MEDIUM_BLOB
-        public static let MYSQL_TYPE_MEDIUM_BLOB = DataType(rawValue: 0xfa)
+        public static let mediumBlob = DataType(rawValue: 0xfa)
         
         /// Implemented by ProtocolBinary::MYSQL_TYPE_LONG_BLOB
-        public static let MYSQL_TYPE_LONG_BLOB = DataType(rawValue: 0xfb)
+        public static let longBlob = DataType(rawValue: 0xfb)
         
         /// Implemented by ProtocolBinary::MYSQL_TYPE_BLOB
-        public static let MYSQL_TYPE_BLOB = DataType(rawValue: 0xfc)
+        public static let blob = DataType(rawValue: 0xfc)
         
         /// Implemented by ProtocolBinary::MYSQL_TYPE_VAR_STRING
-        public static let MYSQL_TYPE_VAR_STRING = DataType(rawValue: 0xfd)
+        public static let varString = DataType(rawValue: 0xfd)
         
         /// Implemented by ProtocolBinary::MYSQL_TYPE_STRING
-        public static let MYSQL_TYPE_STRING = DataType(rawValue: 0xfe)
+        public static let string = DataType(rawValue: 0xfe)
         
         /// Implemented by ProtocolBinary::MYSQL_TYPE_GEOMETRY
-        public static let MYSQL_TYPE_GEOMETRY = DataType(rawValue: 0xff)
+        public static let geometry = DataType(rawValue: 0xff)
+        
+        /// Length that this type encodes to. If `nil`, the encoded
+        /// value is prefixed by a length-encoded integer.
+        internal var encodingLength: Int? {
+            let length: Int?
+            switch self {
+            case .string, .varchar, .varString, .enum, .set, .longBlob, .mediumBlob, .blob, .tinyBlob, .geometry, .bit, .decimal, .newdecimal, .json:
+                length = nil
+            case .longlong:
+                length = 8
+            case .long, .int24:
+                length = 4
+            case .short, .year:
+                length = 2
+            case .tiny:
+                length = 1
+            case .time, .date, .datetime, .timestamp:
+                length = nil
+            case .float:
+                length = 4
+            case .double:
+                length = 8
+            default:
+                fatalError("Unsupported type: \(self)")
+            }
+            return length
+        }
         
         /// The raw byte.
         public let rawValue: UInt8
@@ -108,37 +135,37 @@ extension MySQLProtocol {
         
         public var name: String {
             switch self {
-            case .MYSQL_TYPE_DECIMAL: return "MYSQL_TYPE_DECIMAL"
-            case .MYSQL_TYPE_TINY: return "MYSQL_TYPE_TINY"
-            case .MYSQL_TYPE_SHORT: return "MYSQL_TYPE_SHORT"
-            case .MYSQL_TYPE_LONG: return "MYSQL_TYPE_LONG"
-            case .MYSQL_TYPE_FLOAT: return "MYSQL_TYPE_FLOAT"
-            case .MYSQL_TYPE_DOUBLE: return "MYSQL_TYPE_DOUBLE"
-            case .MYSQL_TYPE_NULL: return "MYSQL_TYPE_NULL"
-            case .MYSQL_TYPE_TIMESTAMP: return "MYSQL_TYPE_TIMESTAMP"
-            case .MYSQL_TYPE_LONGLONG: return "MYSQL_TYPE_LONGLONG"
-            case .MYSQL_TYPE_INT24: return "MYSQL_TYPE_INT24"
-            case .MYSQL_TYPE_DATE: return "MYSQL_TYPE_DATE"
-            case .MYSQL_TYPE_TIME: return "MYSQL_TYPE_TIME"
-            case .MYSQL_TYPE_DATETIME: return "MYSQL_TYPE_DATETIME"
-            case .MYSQL_TYPE_YEAR: return "MYSQL_TYPE_YEAR"
-            case .MYSQL_TYPE_NEWDATE: return "MYSQL_TYPE_NEWDATE"
-            case .MYSQL_TYPE_VARCHAR: return "MYSQL_TYPE_VARCHAR"
-            case .MYSQL_TYPE_BIT: return "MYSQL_TYPE_BIT"
-            case .MYSQL_TYPE_TIMESTAMP2: return "MYSQL_TYPE_TIMESTAMP2"
-            case .MYSQL_TYPE_DATETIME2: return "MYSQL_TYPE_DATETIME2"
-            case .MYSQL_TYPE_TIME2: return "MYSQL_TYPE_TIME2"
-            case .MYSQL_TYPE_JSON: return "MYSQL_TYPE_JSON"
-            case .MYSQL_TYPE_NEWDECIMAL: return "MYSQL_TYPE_NEWDECIMAL"
-            case .MYSQL_TYPE_ENUM: return "MYSQL_TYPE_ENUM"
-            case .MYSQL_TYPE_SET: return "MYSQL_TYPE_SET"
-            case .MYSQL_TYPE_TINY_BLOB: return "MYSQL_TYPE_TINY_BLOB"
-            case .MYSQL_TYPE_MEDIUM_BLOB: return "MYSQL_TYPE_MEDIUM_BLOB"
-            case .MYSQL_TYPE_LONG_BLOB: return "MYSQL_TYPE_LONG_BLOB"
-            case .MYSQL_TYPE_BLOB: return "MYSQL_TYPE_BLOB"
-            case .MYSQL_TYPE_VAR_STRING: return "MYSQL_TYPE_VAR_STRING"
-            case .MYSQL_TYPE_STRING: return "MYSQL_TYPE_STRING"
-            case .MYSQL_TYPE_GEOMETRY: return "MYSQL_TYPE_GEOMETRY"
+            case .decimal: return "MYSQL_TYPE_DECIMAL"
+            case .tiny: return "MYSQL_TYPE_TINY"
+            case .short: return "MYSQL_TYPE_SHORT"
+            case .long: return "MYSQL_TYPE_LONG"
+            case .float: return "MYSQL_TYPE_FLOAT"
+            case .double: return "MYSQL_TYPE_DOUBLE"
+            case .null: return "MYSQL_TYPE_NULL"
+            case .timestamp: return "MYSQL_TYPE_TIMESTAMP"
+            case .longlong: return "MYSQL_TYPE_LONGLONG"
+            case .int24: return "MYSQL_TYPE_INT24"
+            case .date: return "MYSQL_TYPE_DATE"
+            case .time: return "MYSQL_TYPE_TIME"
+            case .datetime: return "MYSQL_TYPE_DATETIME"
+            case .year: return "MYSQL_TYPE_YEAR"
+            case .newdate: return "MYSQL_TYPE_NEWDATE"
+            case .varchar: return "MYSQL_TYPE_VARCHAR"
+            case .bit: return "MYSQL_TYPE_BIT"
+            case .timestamp2: return "MYSQL_TYPE_TIMESTAMP2"
+            case .datetime2: return "MYSQL_TYPE_DATETIME2"
+            case .time2: return "MYSQL_TYPE_TIME2"
+            case .json: return "MYSQL_TYPE_JSON"
+            case .newdecimal: return "MYSQL_TYPE_NEWDECIMAL"
+            case .enum: return "MYSQL_TYPE_ENUM"
+            case .set: return "MYSQL_TYPE_SET"
+            case .tinyBlob: return "MYSQL_TYPE_TINY_BLOB"
+            case .mediumBlob: return "MYSQL_TYPE_MEDIUM_BLOB"
+            case .longBlob: return "MYSQL_TYPE_LONG_BLOB"
+            case .blob: return "MYSQL_TYPE_BLOB"
+            case .varString: return "MYSQL_TYPE_VAR_STRING"
+            case .string: return "MYSQL_TYPE_STRING"
+            case .geometry: return "MYSQL_TYPE_GEOMETRY"
             default: return "MYSQL_TYPE_UNKNOWN (\(self.rawValue))"
             }
         }

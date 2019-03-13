@@ -74,7 +74,12 @@ extension MySQLProtocol {
                 for value in self.values {
                     switch value.buffer {
                     case .none: break
-                    case .some(var buffer): packet.payload.writeBuffer(&buffer)
+                    case .some(var buffer):
+                        if value.type.encodingLength == nil {
+                            #warning("TODO: make length encoded")
+                            packet.payload.writeInteger(numericCast(buffer.readableBytes), endianness: .little, as: UInt8.self)
+                        }
+                        packet.payload.writeBuffer(&buffer)
                     }
                 }
             }
