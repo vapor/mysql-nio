@@ -1,4 +1,4 @@
-extension MySQLConnection {
+extension MySQLDatabase {
     public func query(_ sql: String, _ binds: [MySQLData] = []) -> EventLoopFuture<[MySQLRow]> {
         var rows = [MySQLRow]()
         return self.query(sql, binds) { row in
@@ -12,7 +12,7 @@ extension MySQLConnection {
     }
 }
 
-private final class MySQLQueryCommand: MySQLCommandHandler {
+private final class MySQLQueryCommand: MySQLCommand {
     let sql: String
     
     enum State {

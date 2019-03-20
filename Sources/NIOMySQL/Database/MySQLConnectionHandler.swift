@@ -1,8 +1,13 @@
 import NIOSSL
 
+internal struct MySQLCommandContext {
+    var handler: MySQLCommand
+    var promise: EventLoopPromise<Void>
+}
+
 final class MySQLConnectionHandler: ChannelDuplexHandler {
     typealias InboundIn = MySQLPacket
-    typealias OutboundIn = MySQLCommand
+    typealias OutboundIn = MySQLCommandContext
     typealias OutboundOut = MySQLPacket
     
     enum State {
@@ -15,7 +20,7 @@ final class MySQLConnectionHandler: ChannelDuplexHandler {
         let username: String
         let database: String
         let password: String?
-        let tlsConfig: TLSConfiguration?
+        let tlsConfiguration: TLSConfiguration?
         let done: EventLoopPromise<Void>
     }
     
@@ -28,7 +33,7 @@ final class MySQLConnectionHandler: ChannelDuplexHandler {
     
     var state: State
     var serverCapabilities: MySQLProtocol.CapabilityFlags?
-    var queue: CircularBuffer<MySQLCommand>
+    var queue: CircularBuffer<MySQLCommandContext>
     let sequence: MySQLPacketSequence
     
     init(state: State, sequence: MySQLPacketSequence) {
@@ -71,7 +76,7 @@ final class MySQLConnectionHandler: ChannelDuplexHandler {
         let handshakeRequest = try packet.decode(MySQLProtocol.HandshakeV10.self, capabilities: [])
         assert(handshakeRequest.capabilities.contains(.CLIENT_PROTOCOL_41), "Client protocol 4.1 required")
         self.serverCapabilities = handshakeRequest.capabilities
-        switch state.tlsConfig {
+        switch state.tlsConfiguration {
         case .some(let tlsConfig):
             var capabilities = MySQLProtocol.CapabilityFlags.clientDefault
             capabilities.insert(.CLIENT_SSL)
@@ -132,7 +137,7 @@ final class MySQLConnectionHandler: ChannelDuplexHandler {
         self.state = .authenticating(.init(
             authPluginName: authPluginName,
             password: state.password,
-            isSecure: state.tlsConfig != nil,
+            isSecure: state.tlsConfiguration != nil,
             done: state.done
         ))
         let res = MySQLPacket.HandshakeResponse41(
