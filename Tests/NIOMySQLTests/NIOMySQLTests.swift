@@ -238,6 +238,18 @@ final class NIOMySQLTests: XCTestCase {
         }
     }
     
+    func testPerformance_parseDatetime() throws {
+        let conn = try MySQLConnection.test(on: self.eventLoop).wait()
+        defer { try! conn.close().wait() }
+        
+        measure {
+            for _ in 0..<100 {
+                let rows = try! conn.query("SELECT CAST('2016-01-18' AS DATETIME) as datetime").wait()
+                XCTAssertEqual(rows[0].column("datetime")?.date?.description, "2016-01-18 00:00:00 +0000")
+            }
+        }
+    }
+    
     func testSHA2() throws {
         var message = ByteBufferAllocator().buffer(capacity: 0)
         message.writeString("vapor")

@@ -19,19 +19,17 @@ func xor(_ a: ByteBuffer, _ b: ByteBuffer) -> ByteBuffer {
 }
 
 private func digest(_ alg: OpaquePointer, _ messages: [ByteBuffer]) -> ByteBuffer {
-    let context = EVP_MD_CTX_new()
-    defer { EVP_MD_CTX_free(context) }
-    assert(EVP_DigestInit_ex(context, alg.convert(), nil) == 1, "init digest failed")
-    messages.combine().withUnsafeReadableBytes { buffer in
-        assert(EVP_DigestUpdate(context, buffer.baseAddress, buffer.count) == 1, "update digest failed")
+    var md = ByteBufferAllocator().buffer(capacity: numericCast(EVP_MAX_MD_SIZE))
+    let data = messages.combine()
+    var size: UInt32 = 0
+    let res = data.withUnsafeReadableBytes { data in
+        return md.withUnsafeMutableWritableBytes { md in
+            return EVP_Digest(data.baseAddress, data.count, md.baseAddress?.assumingMemoryBound(to: UInt8.self), &size, alg.convert(), nil)
+        }
     }
-    var digest = ByteBufferAllocator().buffer(capacity: numericCast(EVP_MAX_MD_SIZE))
-    var count: UInt32 = 0
-    digest.withUnsafeMutableWritableBytes { buffer in
-        assert(EVP_DigestFinal_ex(context, buffer.baseAddress?.assumingMemoryBound(to: UInt8.self), &count) == 1, "finalize digest failed")
-    }
-    digest.moveWriterIndex(forwardBy: numericCast(count))
-    return digest
+    assert(res == 1, "EVP_Digest failed")
+    md.moveWriterIndex(forwardBy: numericCast(size))
+    return md
 }
 
 extension Array where Element == ByteBuffer {

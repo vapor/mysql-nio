@@ -216,7 +216,6 @@ public struct MySQLData: CustomStringConvertible, ExpressibleByStringLiteral, Ex
     }
     
     public var description: String {
-        print(self.type)
         if self.buffer == nil {
             return "nil"
         } else {
