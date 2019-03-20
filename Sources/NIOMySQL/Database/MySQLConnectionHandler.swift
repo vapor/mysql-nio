@@ -31,15 +31,22 @@ final class MySQLConnectionHandler: ChannelDuplexHandler {
         var done: EventLoopPromise<Void>
     }
     
+    enum CommandState {
+        case ready
+        case busy
+    }
+    
     var state: State
     var serverCapabilities: MySQLProtocol.CapabilityFlags?
     var queue: CircularBuffer<MySQLCommandContext>
     let sequence: MySQLPacketSequence
+    var commandState: CommandState
     
     init(state: State, sequence: MySQLPacketSequence) {
         self.state = state
         self.queue = .init()
         self.sequence = sequence
+        self.commandState = .ready
     }
     
     func channelRead(context: ChannelHandlerContext, data: NIOAny) {
@@ -64,7 +71,9 @@ final class MySQLConnectionHandler: ChannelDuplexHandler {
                     self.handleCommandState(context: context, commandState)
                 } catch {
                     self.queue.removeFirst()
+                    self.commandState = .ready
                     current.promise.fail(error)
+                    self.sendEnqueuedCommandIfReady(context: context)
                 }
             } else {
                 assertionFailure("unhandled packet: \(packet.payload.debugDescription)")
@@ -208,27 +217,40 @@ final class MySQLConnectionHandler: ChannelDuplexHandler {
     }
     
     func write(context: ChannelHandlerContext, data: NIOAny, promise: EventLoopPromise<Void>?) {
-        let request = self.unwrapOutboundIn(data)
-        self.queue.append(request)
+        let command = self.unwrapOutboundIn(data)
+        self.queue.append(command)
+        self.sendEnqueuedCommandIfReady(context: context)
+        promise?.succeed(())
+    }
+    
+    func sendEnqueuedCommandIfReady(context: ChannelHandlerContext) {
+        guard case .ready = self.commandState else {
+            return
+        }
+        guard let command = self.queue.first else {
+            return
+        }
+        self.commandState = .busy
         
         // send initial
         do {
             self.sequence.current = nil
-            let commandState = try request.handler.activate(capabilities: self.serverCapabilities!)
+            let commandState = try command.handler.activate(capabilities: self.serverCapabilities!)
             self.handleCommandState(context: context, commandState)
         } catch {
             self.queue.removeFirst()
-            request.promise.fail(error)
+            self.commandState = .ready
+            command.promise.fail(error)
+            self.sendEnqueuedCommandIfReady(context: context)
         }
-        
-        // write is complete
-        promise?.succeed(())
     }
     
     func handleCommandState(context: ChannelHandlerContext, _ commandState: MySQLCommandState) {
         if commandState.done {
             let current = self.queue.removeFirst()
+            self.commandState = .ready
             current.promise.succeed(())
+            self.sendEnqueuedCommandIfReady(context: context)
         }
         if commandState.resetSequence {
             self.sequence.reset()

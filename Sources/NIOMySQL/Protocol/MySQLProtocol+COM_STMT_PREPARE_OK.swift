@@ -29,6 +29,7 @@ extension MySQLProtocol {
             guard let status = packet.payload.readInteger(endianness: .little, as: UInt8.self) else {
                 throw Error.missingStatus
             }
+            
             assert(status == 0x00, "COM_STMT_PREPARE_OK has invalid status")
             guard let statementID = packet.payload.readInteger(endianness: .little, as: UInt32.self) else {
                 throw Error.missingStatementID
