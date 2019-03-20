@@ -1,13 +1,30 @@
+public struct MySQLQueryMetadata {
+    /// int<lenenc>    affected_rows    affected rows
+    public let affectedRows: UInt64
+    
+    /// int<lenenc>    last_insert_id    last insert-id
+    public let lastInsertID: UInt64?
+}
+
 extension MySQLDatabase {
-    public func query(_ sql: String, _ binds: [MySQLData] = []) -> EventLoopFuture<[MySQLRow]> {
+    public func query(
+        _ sql: String,
+        _ binds: [MySQLData] = [],
+        onMetadata: @escaping (MySQLQueryMetadata) -> () = { _ in }
+    ) -> EventLoopFuture<[MySQLRow]> {
         var rows = [MySQLRow]()
-        return self.query(sql, binds) { row in
+        return self.query(sql, binds, onRow: { row in
             rows.append(row)
-        }.map { rows }
+        }, onMetadata: onMetadata).map { rows }
     }
     
-    public func query(_ sql: String, _ binds: [MySQLData] = [], onRow: @escaping (MySQLRow) -> ()) -> EventLoopFuture<Void> {
-        let query = MySQLQueryCommand(sql: sql, binds: binds, onRow: onRow)
+    public func query(
+        _ sql: String,
+        _ binds: [MySQLData] = [],
+        onRow: @escaping (MySQLRow) -> (),
+        onMetadata: @escaping (MySQLQueryMetadata) -> () = { _ in }
+    ) -> EventLoopFuture<Void> {
+        let query = MySQLQueryCommand(sql: sql, binds: binds, onRow: onRow, onMetadata: onMetadata)
         return self.send(query)
     }
 }
@@ -28,17 +45,19 @@ private final class MySQLQueryCommand: MySQLCommand {
     var state: State
     let binds: [MySQLData]
     let onRow: (MySQLRow) -> ()
+    let onMetadata: (MySQLQueryMetadata) -> ()
     private var columns: [MySQLProtocol.ColumnDefinition41]
     private var params: [MySQLProtocol.ColumnDefinition41]
     private var ok: MySQLProtocol.COM_STMT_PREPARE_OK?
     
-    init(sql: String, binds: [MySQLData], onRow: @escaping (MySQLRow) -> ()) {
+    init(sql: String, binds: [MySQLData], onRow: @escaping (MySQLRow) -> (), onMetadata: @escaping (MySQLQueryMetadata) -> ()) {
         self.state = .ready
         self.sql = sql
         self.binds = binds
         self.columns = []
         self.params = []
         self.onRow = onRow
+        self.onMetadata = onMetadata
     }
     
     func handle(packet: inout MySQLPacket, capabilities: MySQLProtocol.CapabilityFlags) throws -> MySQLCommandState {
@@ -104,6 +123,10 @@ private final class MySQLQueryCommand: MySQLCommand {
             return .noResponse
         case .rows:
             if packet.isEOF || packet.isOK && columns.count == 0 {
+                if packet.isOK {
+                    let ok = try MySQLProtocol.OK_Packet.decode(from: &packet, capabilities: capabilities)
+                    self.onMetadata(.init(affectedRows: ok.affectedRows, lastInsertID: ok.lastInsertID))
+                }
                 var packet = MySQLPacket()
                 MySQLProtocol.COM_STMT_CLOSE(statementID: self.ok!.statementID).encode(into: &packet)
                 return .init(response: [packet], done: true, resetSequence: true)

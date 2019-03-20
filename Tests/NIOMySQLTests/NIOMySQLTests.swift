@@ -139,6 +139,20 @@ final class NIOMySQLTests: XCTestCase {
         XCTAssertEqual(rows.count, 0)
     }
     
+    func testQuery_metadata() throws {
+        let conn = try MySQLConnection.test(on: self.eventLoop).wait()
+        defer { try! conn.close().wait() }
+        let dropResults = try conn.simpleQuery("DROP TABLE IF EXISTS foos").wait()
+        XCTAssertEqual(dropResults.count, 0)
+        let createResults = try conn.simpleQuery("CREATE TABLE foos (id BIGINT PRIMARY KEY AUTO_INCREMENT, name VARCHAR(64))").wait()
+        XCTAssertEqual(createResults.count, 0)
+        let insertResults = try conn.query("INSERT INTO foos (name) VALUES (?)", ["vapor"]) { metadata in
+            XCTAssertEqual(metadata.affectedRows, 1)
+            XCTAssertEqual(metadata.lastInsertID, 1)
+        }.wait()
+        XCTAssertEqual(insertResults.count, 0)
+    }
+    
     func testTypes() throws {
         /// support
         struct TestColumn {
