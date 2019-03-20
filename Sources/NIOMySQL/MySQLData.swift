@@ -1,18 +1,13 @@
-public protocol MySQLDataConvertible {
-    init?(mysqlData: MySQLData)
-    var mysqlData: MySQLData? { get }
-}
+@_exported import struct Foundation.Date
 
-extension MySQLData {
-    public static var null: MySQLData {
-        return .init(type: .null, buffer: nil)
-    }
-}
-
-public struct MySQLData: CustomStringConvertible, ExpressibleByStringLiteral, ExpressibleByIntegerLiteral, ExpressibleByBooleanLiteral {
+public struct MySQLData: CustomStringConvertible, ExpressibleByStringLiteral, ExpressibleByIntegerLiteral, ExpressibleByBooleanLiteral, MySQLDataConvertible {
     public enum Format {
         case binary
         case text
+    }
+    
+    public static var null: MySQLData {
+        return .init(type: .null, buffer: nil)
     }
     
     public let type: MySQLProtocol.DataType
@@ -22,16 +17,18 @@ public struct MySQLData: CustomStringConvertible, ExpressibleByStringLiteral, Ex
     /// If `true`, this value is unsigned.
     public var isUnsigned: Bool
     
-    public init(booleanLiteral value: Bool) {
-        self.init(bool: value)
-    }
+    // MARK: Initializers
     
-    public init(stringLiteral value: String) {
-        self.init(string: value)
-    }
-    
-    public init(integerLiteral value: Int) {
-        self.init(int: value)
+    public init(
+        type: MySQLProtocol.DataType,
+        format: Format = .binary,
+        buffer: ByteBuffer?,
+        isUnsigned: Bool = false
+    ) {
+        self.type = type
+        self.format = format
+        self.buffer = buffer
+        self.isUnsigned = isUnsigned
     }
     
     public init(string: String) {
@@ -86,20 +83,35 @@ public struct MySQLData: CustomStringConvertible, ExpressibleByStringLiteral, Ex
         self.buffer = buffer
     }
     
-    public var description: String {
-        if self.buffer == nil {
-            return "nil"
-        } else {
-            switch self.type {
-            case .longlong, .long, .int24, .short, .tiny:
-                return self.int!.description
-            case .bit:
-                return self.bool!.description
-            default:
-                return self.string?.debugDescription ?? "<n/a>"
-            }
-        }
+    public init(date: Date) {
+        self.init(time: .init(date: date))
     }
+    
+    public init(time: MySQLTime) {
+        var buffer = ByteBufferAllocator().buffer(capacity: 11)
+        buffer.writeMySQLTime(time)
+        self.init(type: .datetime, format: .binary, buffer: buffer, isUnsigned: false)
+    }
+    
+    // MARK: Literal Initializers
+    
+    public init(booleanLiteral value: Bool) {
+        self.init(bool: value)
+    }
+    
+    public init(stringLiteral value: String) {
+        self.init(string: value)
+    }
+    
+    public init(integerLiteral value: Int) {
+        self.init(int: value)
+    }
+    
+    public init?(mysqlData: MySQLData) {
+        self = mysqlData
+    }
+    
+    // MARK: Converters
     
     public var string: String? {
         guard var buffer = self.buffer else {
@@ -181,145 +193,11 @@ public struct MySQLData: CustomStringConvertible, ExpressibleByStringLiteral, Ex
         }
     }
     
-    public init(
-        type: MySQLProtocol.DataType,
-        format: Format = .binary,
-        buffer: ByteBuffer?,
-        isUnsigned: Bool = false
-    ) {
-        self.type = type
-        self.format = format
-        self.buffer = buffer
-        self.isUnsigned = isUnsigned
-    }
-}
-
-import struct Foundation.Calendar
-import struct Foundation.Date
-import struct Foundation.DateComponents
-import struct Foundation.TimeZone
-
-/// MARK: Date
-
-/// MYSQL_TIME
-///
-/// This structure is used to send and receive DATE, TIME, DATETIME, and TIMESTAMP data directly to and from the server.
-/// Set the buffer member to point to a MYSQL_TIME structure, and set the buffer_type member of a MYSQL_BIND structure
-/// to one of the temporal types (MYSQL_TYPE_TIME, MYSQL_TYPE_DATE, MYSQL_TYPE_DATETIME, MYSQL_TYPE_TIMESTAMP).
-///
-/// https://dev.mysql.com/doc/refman/5.7/en/c-api-prepared-statement-data-structures.html
-public struct MySQLTime: Equatable {
-    /// The year
-    public var year: UInt16
-    
-    /// The month of the year
-    public var month: UInt8
-    
-    /// The day of the month
-    public var day: UInt8
-    
-    /// The hour of the day
-    public var hour: UInt8
-    
-    /// The minute of the hour
-    public var minute: UInt8
-    
-    /// The second of the minute
-    public var second: UInt8
-    
-    /// The fractional part of the second in microseconds
-    public var microsecond: UInt32
-}
-
-extension MySQLTime: CustomStringConvertible {
-    public var description: String {
-        return "\(self.year)-\(self.month)-\(self.day) \(self.hour):\(self.minute):\(self.second).\(self.microsecond)"
-    }
-}
-
-extension Calendar {
-    func ccomponent<I>(_ component: Calendar.Component, from date: Date) -> I where I: FixedWidthInteger {
-        return numericCast(self.component(component, from: date))
-    }
-}
-
-private final class _DateComponentsWrapper {
-    var value = DateComponents(
-        calendar:  Calendar(identifier: .gregorian),
-        timeZone: TimeZone(secondsFromGMT: 0)!
-    )
-}
-
-private var _comps = ThreadSpecificVariable<_DateComponentsWrapper>()
-
-
-extension Date {
-    public init(mysqlTime: MySQLTime) {
-        let comps: _DateComponentsWrapper
-        if let existing = _comps.currentValue {
-            comps = existing
-        } else {
-            let new = _DateComponentsWrapper()
-            _comps.currentValue = new
-            comps = new
+    public var date: Date? {
+        guard let time = self.time else {
+            return nil
         }
-        /// For some reason comps.nanosecond is `nil` on linux :(
-        let nanosecond: Int
-        #if os(macOS)
-        nanosecond = numericCast(mysqlTime.microsecond) * 1_000
-        #else
-        nanosecond = 0
-        #endif
-        
-        comps.value.year = numericCast(mysqlTime.year)
-        comps.value.month = numericCast(mysqlTime.month)
-        comps.value.day = numericCast(mysqlTime.day)
-        comps.value.hour = numericCast(mysqlTime.hour)
-        comps.value.minute = numericCast(mysqlTime.minute)
-        comps.value.second = numericCast(mysqlTime.second)
-        comps.value.nanosecond = numericCast(mysqlTime.microsecond) * 1_000
-        
-        guard let date = comps.value.date else {
-            fatalError("invalid date")
-        }
-        
-        /// For some reason comps.nanosecond is `nil` on linux :(
-        #if os(macOS)
-        self = date
-        #else
-        self = date.addingTimeInterval(TimeInterval(time.microsecond) / 1_000_000)
-        #endif
-    }
-    
-    public var mysqlTime: MySQLTime {
-        let comps = Calendar(identifier: .gregorian)
-            .dateComponents(in: TimeZone(secondsFromGMT: 0)!, from: self)
-        
-        let microsecond = UInt32(abs(timeIntervalSince1970.truncatingRemainder(dividingBy: 1) * 1_000_000))
-        
-        return MySQLTime(
-            year: numericCast(comps.year ?? 0),
-            month: numericCast(comps.month ?? 0),
-            day: numericCast(comps.day ?? 0),
-            hour: numericCast(comps.hour ?? 0),
-            minute: numericCast(comps.minute ?? 0),
-            second: numericCast(comps.second ?? 0),
-            microsecond: microsecond
-        )
-    }
-}
-
-extension MySQLData {
-    public init(time: MySQLTime) {
-        var buffer = ByteBufferAllocator().buffer(capacity: 0)
-        buffer.writeInteger(time.year, endianness: .little)
-        buffer.writeInteger(time.month, endianness: .little)
-        buffer.writeInteger(time.day, endianness: .little)
-        buffer.writeInteger(time.hour, endianness: .little)
-        buffer.writeInteger(time.minute, endianness: .little)
-        buffer.writeInteger(time.second, endianness: .little)
-        buffer.writeInteger(time.microsecond, endianness: .little)
-        self.init(type: .timestamp, format: .binary, buffer: buffer, isUnsigned: false)
+        return time.date
     }
     
     public var time: MySQLTime? {
@@ -327,75 +205,33 @@ extension MySQLData {
             return nil
         }
         switch self.type {
-        case .timestamp:
-            let time: MySQLTime
-            switch buffer.readableBytes {
-            case 0:
-                /// if year, month, day, hour, minutes, seconds and micro_seconds are all 0, length is 0 and no other field is sent
-                time = MySQLTime(year: 0, month: 0, day: 0, hour: 0, minute: 0, second: 0, microsecond: 0)
-            case 4:
-                /// if hour, minutes, seconds and micro_seconds are all 0, length is 4 and no other field is sent
-                time = MySQLTime(
-                    year: buffer.readInteger(endianness: .little)!,
-                    month: buffer.readInteger(endianness: .little)!,
-                    day: buffer.readInteger(endianness: .little)!,
-                    hour: 0,
-                    minute: 0,
-                    second: 0,
-                    microsecond: 0
-                )
-            case 7:
-                /// if micro_seconds is 0, length is 7 and micro_seconds is not sent
-                time = MySQLTime(
-                    year: buffer.readInteger(endianness: .little)!,
-                    month: buffer.readInteger(endianness: .little)!,
-                    day: buffer.readInteger(endianness: .little)!,
-                    hour: buffer.readInteger(endianness: .little)!,
-                    minute: buffer.readInteger(endianness: .little)!,
-                    second: buffer.readInteger(endianness: .little)!,
-                    microsecond: 0
-                )
-            case 11:
-                /// otherwise length is 11
-                time = MySQLTime(
-                    year: buffer.readInteger(endianness: .little)!,
-                    month: buffer.readInteger(endianness: .little)!,
-                    day: buffer.readInteger(endianness: .little)!,
-                    hour: buffer.readInteger(endianness: .little)!,
-                    minute: buffer.readInteger(endianness: .little)!,
-                    second: buffer.readInteger(endianness: .little)!,
-                    microsecond: buffer.readInteger(endianness: .little)!
-                )
-            default: fatalError("Invalid MYSQL_TIME length")
-            }
-            return time
+        case .timestamp, .datetime:
+            return buffer.readMySQLTime()
         default: return nil
         }
     }
-}
-
-extension MySQLData {
-    public init(date: Date) {
-        self.init(time: date.mysqlTime)
-    }
-    
-    public var date: Date? {
-        guard let time = self.time else {
-            return nil
-        }
-        return Date(mysqlTime: time)
-    }
-}
-
-extension Date: MySQLDataConvertible {
-    public init?(mysqlData: MySQLData) {
-        guard let date = mysqlData.date else {
-            return nil
-        }
-        self = date
-    }
     
     public var mysqlData: MySQLData? {
-        return .init(date: self)
+        return self
+    }
+    
+    public var description: String {
+        print(self.type)
+        if self.buffer == nil {
+            return "nil"
+        } else {
+            switch self.type {
+            case .longlong, .long, .int24, .short, .tiny:
+                return self.int!.description
+            case .bit:
+                return self.bool!.description
+            case .datetime, .timestamp:
+                return self.date!.description
+            case .varchar, .varString, .string, .blob:
+                return self.string!.debugDescription
+            default:
+                return "<\(self.type)>"
+            }
+        }
     }
 }

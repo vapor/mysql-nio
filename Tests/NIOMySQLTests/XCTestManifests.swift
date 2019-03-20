@@ -7,6 +7,7 @@ extension NIOMySQLTests {
     // to regenerate.
     static let __allTests__NIOMySQLTests = [
         ("testPerformance_simpleSelects", testPerformance_simpleSelects),
+        ("testQuery_datetime", testQuery_datetime),
         ("testQuery_insert", testQuery_insert),
         ("testQuery_metadata", testQuery_metadata),
         ("testQuery_noResponse", testQuery_noResponse),

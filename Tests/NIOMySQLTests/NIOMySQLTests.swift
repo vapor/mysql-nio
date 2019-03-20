@@ -153,6 +153,21 @@ final class NIOMySQLTests: XCTestCase {
         XCTAssertEqual(insertResults.count, 0)
     }
     
+    func testQuery_datetime() throws {
+        let conn = try MySQLConnection.test(on: self.eventLoop).wait()
+        defer { try! conn.close().wait() }
+        do {
+            let rows = try conn.query("SELECT CAST('2016-01-18' AS DATETIME) as datetime").wait()
+            XCTAssertEqual(rows[0].column("datetime")?.date?.description, "2016-01-18 00:00:00 +0000")
+        }
+        do {
+            let date = Date(timeIntervalSince1970: 1453075200)
+            let rows = try conn.query("SELECT CAST(? AS DATETIME) as datetime", [.init(date: date)]).wait()
+            print(rows)
+            XCTAssertEqual(rows[0].column("datetime")?.date?.description, "2016-01-18 00:00:00 +0000")
+        }
+    }
+    
     func testTypes() throws {
         /// support
         struct TestColumn {
