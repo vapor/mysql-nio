@@ -84,6 +84,10 @@ private final class MySQLQueryCommand: MySQLCommandHandler {
             }
             return .noResponse
         case .executeColumnCount:
+            guard !packet.isOK else {
+                self.state = .done
+                return .done
+            }
             guard let count = packet.payload.readLengthEncodedInteger() else {
                 fatalError()
             }

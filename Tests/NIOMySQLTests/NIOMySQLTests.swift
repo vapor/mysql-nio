@@ -132,6 +132,13 @@ final class NIOMySQLTests: XCTestCase {
         XCTAssertEqual(selectResults2.count, 1)
     }
     
+    func testQuery_noResponse() throws {
+        let conn = try MySQLConnection.test(on: self.eventLoop).wait()
+        defer { try! conn.close().wait() }
+        let rows = try conn.query("SET @foo = 'bar'").wait()
+        XCTAssertEqual(rows.count, 0)
+    }
+    
     func testTypes() throws {
         /// support
         struct TestColumn {

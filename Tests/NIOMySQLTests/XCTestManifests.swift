@@ -8,6 +8,7 @@ extension NIOMySQLTests {
     static let __allTests__NIOMySQLTests = [
         ("testPerformance_simpleSelects", testPerformance_simpleSelects),
         ("testQuery_insert", testQuery_insert),
+        ("testQuery_noResponse", testQuery_noResponse),
         ("testQuery_selectBoundParams", testQuery_selectBoundParams),
         ("testQuery_selectConcat", testQuery_selectConcat),
         ("testQuery_selectMixed", testQuery_selectMixed),
