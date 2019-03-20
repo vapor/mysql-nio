@@ -1,3 +1,14 @@
+public protocol MySQLDataConvertible {
+    init?(mysqlData: MySQLData)
+    var mysqlData: MySQLData? { get }
+}
+
+extension MySQLData {
+    public static var null: MySQLData {
+        return .init(type: .null, buffer: nil)
+    }
+}
+
 public struct MySQLData: CustomStringConvertible, ExpressibleByStringLiteral, ExpressibleByIntegerLiteral, ExpressibleByBooleanLiteral {
     public enum Format {
         case binary
