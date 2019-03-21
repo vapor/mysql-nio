@@ -48,14 +48,16 @@ public struct MySQLTime: Equatable, CustomStringConvertible, MySQLDataConvertibl
     
     /// Creates a new `MySQLTime` from a Swift Date using current calendar and GMT timezone.
     public init(date: Date) {
-        let comps = Calendar.current.dateComponents(in: .gmt, from: date)
+        // let comps = Calendar.current.dateComponents(in: .gmt, from: date)
+        var rawtime = Int(date.timeIntervalSince1970)
+        let tm = gmtime(&rawtime)!.pointee
         self.init(
-            year: numericCast(comps.year ?? 0),
-            month: numericCast(comps.month ?? 0),
-            day: numericCast(comps.day ?? 0),
-            hour: numericCast(comps.hour ?? 0),
-            minute: numericCast(comps.minute ?? 0),
-            second: numericCast(comps.second ?? 0),
+            year: numericCast(1900 + tm.tm_year),
+            month: numericCast(1 + tm.tm_mon),
+            day: numericCast(tm.tm_mday),
+            hour: numericCast(tm.tm_hour),
+            minute: numericCast(tm.tm_min),
+            second: numericCast(tm.tm_sec),
             microsecond: UInt32(date.timeIntervalSince1970.microseconds)
         )
     }
