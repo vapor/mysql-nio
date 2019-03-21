@@ -95,7 +95,7 @@ public struct MySQLTime: Equatable, CustomStringConvertible, MySQLDataConvertibl
         #if os(macOS)
         return date
         #else
-        return date.addingTimeInterval(TimeInterval(time.microsecond) / 1_000_000)
+        return date.addingTimeInterval(TimeInterval(self.microsecond) / 1_000_000)
         #endif
 
     }
