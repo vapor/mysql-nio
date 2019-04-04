@@ -168,6 +168,27 @@ final class NIOMySQLTests: XCTestCase {
         }
     }
     
+    func testDate_conversion() throws {
+        let date = Date(timeIntervalSinceReferenceDate: 0.001)
+        let mysqlDate = MySQLTime(date: date)
+        let time = mysqlDate.date
+        XCTAssertNotEqual(mysqlDate.microsecond, 0)
+        
+        XCTAssertEqual(
+            Double(date.timeIntervalSinceReferenceDate),
+            Double(time.timeIntervalSinceReferenceDate),
+            accuracy: 5
+        )
+    }
+ 
+    func testDate_before1970() throws {
+        let time = MySQLTime(date: MySQLTime(date: Date(timeIntervalSince1970: 1.1)).date)
+        let time2 = MySQLTime(date: MySQLTime(date: Date(timeIntervalSince1970: -1.1)).date)
+        
+        XCTAssert(time.microsecond == UInt32(100000))
+        XCTAssert(time2.microsecond == UInt32(100000))
+    }
+    
     func testTypes() throws {
         /// support
         struct TestColumn {
