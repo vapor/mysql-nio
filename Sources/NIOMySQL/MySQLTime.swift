@@ -51,6 +51,11 @@ public struct MySQLTime: Equatable, CustomStringConvertible, MySQLDataConvertibl
         // let comps = Calendar.current.dateComponents(in: .gmt, from: date)
         var rawtime = Int(date.timeIntervalSince1970)
         let tm = gmtime(&rawtime)!.pointee
+        var microseconds = date.timeIntervalSince1970.microseconds
+        if microseconds < 0.0 {
+            microseconds = 1_000_000 - microseconds
+        }
+        
         self.init(
             year: numericCast(1900 + tm.tm_year),
             month: numericCast(1 + tm.tm_mon),
@@ -58,7 +63,7 @@ public struct MySQLTime: Equatable, CustomStringConvertible, MySQLDataConvertibl
             hour: numericCast(tm.tm_hour),
             minute: numericCast(tm.tm_min),
             second: numericCast(tm.tm_sec),
-            microsecond: UInt32(date.timeIntervalSince1970.microseconds)
+            microsecond: UInt32(microseconds)
         )
     }
     
@@ -72,7 +77,6 @@ public struct MySQLTime: Equatable, CustomStringConvertible, MySQLDataConvertibl
     
     /// Converts this `MySQLTime` to a Swift `Date` using the current calendar and GMT timezone.
     public var date: Date {
-        var comps = DateComponents(calendar: .current, timeZone: .gmt)
         /// For some reason comps.nanosecond is `nil` on linux :(
         let nanosecond: Int
         #if os(macOS)
@@ -81,18 +85,17 @@ public struct MySQLTime: Equatable, CustomStringConvertible, MySQLDataConvertibl
         nanosecond = 0
         #endif
         
-        comps.year = numericCast(self.year)
-        comps.month = numericCast(self.month)
-        comps.day = numericCast(self.day)
-        comps.hour = numericCast(self.hour)
-        comps.minute = numericCast(self.minute)
-        comps.second = numericCast(self.second)
-        comps.nanosecond = numericCast(self.microsecond) * 1_000
+        var unixTime = tm()
+        unixTime.tm_year = numericCast(self.year) - 1900
+        unixTime.tm_mon = numericCast(self.month - 1)
+        unixTime.tm_mday = numericCast(self.day)
+        unixTime.tm_hour = numericCast(self.hour)
+        unixTime.tm_min = numericCast(self.minute)
+        unixTime.tm_sec = numericCast(self.second)
         
-        guard let date = comps.date else {
-            fatalError("invalid date")
-        }
-        
+        let timeStamp = timegm(&unixTime)
+        let date = Date(timeIntervalSince1970: TimeInterval(timeStamp) + (TimeInterval(nanosecond) / 1_000_000_000))
+
         /// For some reason comps.nanosecond is `nil` on linux :(
         #if os(macOS)
         return date
