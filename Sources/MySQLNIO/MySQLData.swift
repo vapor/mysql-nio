@@ -1,4 +1,5 @@
 @_exported import struct Foundation.Date
+@_exported import struct Foundation.UUID
 
 public struct MySQLData: CustomStringConvertible, ExpressibleByStringLiteral, ExpressibleByIntegerLiteral, ExpressibleByBooleanLiteral, MySQLDataConvertible {
     public enum Format {
@@ -82,6 +83,18 @@ public struct MySQLData: CustomStringConvertible, ExpressibleByStringLiteral, Ex
         self.isUnsigned = false
         self.buffer = buffer
     }
+
+    public init(uuid: UUID) {
+        self.format = .binary
+        self.type = .blob
+        var buffer = ByteBufferAllocator().buffer(capacity: 16)
+        var cuuid = uuid.uuid
+        _ = Swift.withUnsafeBytes(of: &cuuid) { ptr in
+            buffer.writeBytes(ptr)
+        }
+        self.isUnsigned = false
+        self.buffer = buffer
+    }
     
     public init(date: Date) {
         self.init(time: .init(date: date))
@@ -131,7 +144,75 @@ public struct MySQLData: CustomStringConvertible, ExpressibleByStringLiteral, Ex
             }
         }
     }
-    
+
+    public var double: Double? {
+        switch self.format {
+        case .binary:
+            guard self.type == .double else {
+                return nil
+            }
+            guard var buffer = self.buffer else {
+                return nil
+            }
+            guard let bytes = buffer.readBytes(length: MemoryLayout<Double>.size) else {
+                return nil
+            }
+            var double: Double?
+            Swift.withUnsafeMutableBytes(of: &double) { ptr in
+                ptr.copyBytes(from: bytes)
+            }
+            return double
+        case .text:
+            return self.string.flatMap(Double.init)
+        }
+    }
+
+
+    public var float: Float? {
+        switch self.format {
+        case .binary:
+            guard self.type == .float else {
+                return nil
+            }
+            guard var buffer = self.buffer else {
+                return nil
+            }
+            guard let bytes = buffer.readBytes(length: MemoryLayout<Float>.size) else {
+                return nil
+            }
+            var float: Float?
+            Swift.withUnsafeMutableBytes(of: &float) { ptr in
+                ptr.copyBytes(from: bytes)
+            }
+            return float
+        case .text:
+            return self.string.flatMap(Float.init)
+        }
+    }
+
+    public var uuid: UUID? {
+        switch self.format {
+        case .binary:
+            guard var buffer = self.buffer else {
+                return nil
+            }
+            guard buffer.readableBytes == 16 else {
+                return nil
+            }
+            guard let bytes = buffer.readBytes(length: 16) else {
+                return nil
+            }
+            return UUID(uuid: (
+                bytes[0], bytes[1], bytes[2], bytes[3],
+                bytes[4], bytes[5], bytes[6], bytes[7],
+                bytes[8], bytes[9], bytes[10], bytes[11],
+                bytes[12], bytes[13], bytes[14], bytes[15]
+            ))
+        case .text:
+            return self.string.flatMap(UUID.init)
+        }
+    }
+
     public var bool: Bool? {
         switch self.string {
         case "true", "1": return true
@@ -152,7 +233,6 @@ public struct MySQLData: CustomStringConvertible, ExpressibleByStringLiteral, Ex
             case .varchar, .varString:
                 return buffer.readString(length: buffer.readableBytes).flatMap(Int.init)
             case .longlong:
-                #warning("TODO: consider throwing on overflow")
                 if self.isUnsigned {
                     return buffer.readInteger(endianness: .little, as: UInt64.self)
                         .flatMap(Int.init)
@@ -161,7 +241,6 @@ public struct MySQLData: CustomStringConvertible, ExpressibleByStringLiteral, Ex
                         .flatMap(Int.init)
                 }
             case .long, .int24:
-                #warning("TODO: consider throwing on overflow")
                 if self.isUnsigned {
                     return buffer.readInteger(endianness: .little, as: UInt32.self)
                         .flatMap(Int.init)
@@ -170,7 +249,6 @@ public struct MySQLData: CustomStringConvertible, ExpressibleByStringLiteral, Ex
                         .flatMap(Int.init)
                 }
             case .short:
-                #warning("TODO: consider throwing on overflow")
                 if self.isUnsigned {
                     return buffer.readInteger(endianness: .little, as: UInt16.self)
                         .flatMap(Int.init)
@@ -179,7 +257,6 @@ public struct MySQLData: CustomStringConvertible, ExpressibleByStringLiteral, Ex
                         .flatMap(Int.init)
                 }
             case .tiny, .bit:
-                #warning("TODO: consider throwing on overflow")
                 if self.isUnsigned {
                     return buffer.readInteger(endianness: .little, as: UInt8.self)
                         .flatMap(Int.init)
