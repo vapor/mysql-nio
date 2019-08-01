@@ -6,6 +6,8 @@ extension NIOMySQLTests {
     //   `swift test --generate-linuxmain`
     // to regenerate.
     static let __allTests__NIOMySQLTests = [
+        ("testDate_before1970", testDate_before1970),
+        ("testDate_conversion", testDate_conversion),
         ("testPerformance_parseDatetime", testPerformance_parseDatetime),
         ("testPerformance_simpleSelects", testPerformance_simpleSelects),
         ("testQuery_datetime", testQuery_datetime),
