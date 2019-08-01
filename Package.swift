@@ -2,13 +2,13 @@
 import PackageDescription
 
 let package = Package(
-    name: "nio-mysql",
+    name: "mysql-nio",
     products: [
-        .library(name: "NIOMySQL", targets: ["NIOMySQL"]),
+        .library(name: "MySQLNIO", targets: ["MySQLNIO"]),
     ],
     dependencies: [
-        .package(url: "https://github.com/apple/swift-nio.git", from: "2.0.0-convergence"),
-        .package(url: "https://github.com/apple/swift-nio-ssl.git", from: "2.0.0-convergence"),
+        .package(url: "https://github.com/apple/swift-nio.git", from: "2.0.0"),
+        .package(url: "https://github.com/apple/swift-nio-ssl.git", from: "2.0.0"),
     ],
     targets: [
         .systemLibrary(
@@ -19,7 +19,7 @@ let package = Package(
                 .brew(["openssl"])
             ]
         ),
-        .target(name: "NIOMySQL", dependencies: ["CMySQLOpenSSL", "NIO", "NIOSSL"]),
-        .testTarget(name: "NIOMySQLTests", dependencies: ["NIOMySQL"]),
+        .target(name: "MySQLNIO", dependencies: ["CMySQLOpenSSL", "NIO", "NIOSSL"]),
+        .testTarget(name: "MySQLNIOTests", dependencies: ["MySQLNIO"]),
     ]
 )
