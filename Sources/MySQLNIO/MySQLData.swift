@@ -1,5 +1,8 @@
 @_exported import struct Foundation.Date
 @_exported import struct Foundation.UUID
+import class Foundation.JSONEncoder
+import class Foundation.JSONDecoder
+import struct Foundation.Data
 
 public struct MySQLData: CustomStringConvertible, ExpressibleByStringLiteral, ExpressibleByIntegerLiteral, ExpressibleByBooleanLiteral, MySQLDataConvertible {
     public enum Format {
@@ -105,6 +108,29 @@ public struct MySQLData: CustomStringConvertible, ExpressibleByStringLiteral, Ex
         buffer.writeMySQLTime(time)
         self.init(type: .datetime, format: .binary, buffer: buffer, isUnsigned: false)
     }
+
+    private struct Wrapper: Encodable {
+        let encodable: Encodable
+        init(_ encodable: Encodable) {
+            self.encodable = encodable
+        }
+        func encode(to encoder: Encoder) throws {
+            try self.encodable.encode(to: encoder)
+        }
+    }
+
+    public init(json value: Encodable) throws {
+        let json = JSONEncoder()
+        let data = try json.encode(Wrapper(value))
+        var buffer = ByteBufferAllocator().buffer(capacity: data.count)
+        buffer.writeBytes(data)
+        self.init(
+            type: .string,
+            format: .text,
+            buffer: buffer,
+            isUnsigned: true
+        )
+    }
     
     // MARK: Literal Initializers
     
@@ -125,6 +151,18 @@ public struct MySQLData: CustomStringConvertible, ExpressibleByStringLiteral, Ex
     }
     
     // MARK: Converters
+
+    public func json<Value>(as type: Value.Type) throws -> Value?
+        where Value: Decodable
+    {
+        guard var buffer = self.buffer else {
+            return nil
+        }
+        guard let data = buffer.readBytes(length: buffer.readableBytes) else {
+            return nil
+        }
+        return try JSONDecoder().decode(Value.self, from: Data(data))
+    }
     
     public var string: String? {
         guard var buffer = self.buffer else {
@@ -166,7 +204,6 @@ public struct MySQLData: CustomStringConvertible, ExpressibleByStringLiteral, Ex
             return self.string.flatMap(Double.init)
         }
     }
-
 
     public var float: Float? {
         switch self.format {
