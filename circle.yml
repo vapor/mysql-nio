@@ -13,6 +13,7 @@ jobs:
           MYSQL_PASSWORD: vapor_password
     steps:
       - checkout
+      - run: apt-get -y install openssl libssl-dev
       - run: swift build -Xswiftc -DTEST_TLS
       - run: swift test -Xswiftc -DTEST_TLS
   5_7-bionic:
@@ -27,6 +28,7 @@ jobs:
           MYSQL_PASSWORD: vapor_password
     steps:
       - checkout
+      - run: apt-get -y install openssl libssl-dev
       - run: swift build
       - run: swift test
   8_0-xenial:
@@ -41,6 +43,7 @@ jobs:
           MYSQL_PASSWORD: vapor_password
     steps:
       - checkout
+      - run: apt-get -y install openssl libssl-dev
       - run: swift build -Xswiftc -DTEST_TLS
       - run: swift test -Xswiftc -DTEST_TLS
   5_7-xenial:
@@ -55,6 +58,7 @@ jobs:
           MYSQL_PASSWORD: vapor_password
     steps:
       - checkout
+      - run: apt-get -y install openssl libssl-dev
       - run: swift build
       - run: swift test
 workflows:
