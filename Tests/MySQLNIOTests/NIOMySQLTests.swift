@@ -1,5 +1,5 @@
 import XCTest
-@testable import NIOMySQL
+@testable import MySQLNIO
 
 final class NIOMySQLTests: XCTestCase {
     private var group: EventLoopGroup!

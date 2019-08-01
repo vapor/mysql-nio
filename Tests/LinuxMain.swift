@@ -1,8 +1,8 @@
 import XCTest
 
-import NIOMySQLTests
+import MySQLNIOTests
 
 var tests = [XCTestCaseEntry]()
-tests += NIOMySQLTests.__allTests()
+tests += MySQLNIOTests.__allTests()
 
 XCTMain(tests)
