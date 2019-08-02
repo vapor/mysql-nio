@@ -68,7 +68,7 @@ extension MySQLProtocol {
                 fatalError()
             }
             assert(fixedLength == 0x0C, "invalid fixed length: \(fixedLength)")
-            #warning("TODO: check if character set > 255")
+            // TODO: check if character set > 255
             guard let characterSet = packet.payload.readInteger(endianness: .little, as: CharacterSet.self) else {
                 fatalError()
             }

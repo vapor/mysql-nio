@@ -76,7 +76,7 @@ extension MySQLProtocol {
                     case .none: break
                     case .some(var buffer):
                         if value.type.encodingLength == nil {
-                            #warning("TODO: make length encoded")
+                            // TODO: make length encoded
                             packet.payload.writeInteger(numericCast(buffer.readableBytes), endianness: .little, as: UInt8.self)
                         }
                         packet.payload.writeBuffer(&buffer)
