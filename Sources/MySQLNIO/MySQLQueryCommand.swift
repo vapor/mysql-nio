@@ -10,7 +10,7 @@ extension MySQLDatabase {
     public func query(
         _ sql: String,
         _ binds: [MySQLData] = [],
-        onMetadata: @escaping (MySQLQueryMetadata) -> () = { _ in }
+        onMetadata: @escaping (MySQLQueryMetadata) throws -> () = { _ in }
     ) -> EventLoopFuture<[MySQLRow]> {
         var rows = [MySQLRow]()
         return self.query(sql, binds, onRow: { row in
@@ -21,8 +21,8 @@ extension MySQLDatabase {
     public func query(
         _ sql: String,
         _ binds: [MySQLData] = [],
-        onRow: @escaping (MySQLRow) -> (),
-        onMetadata: @escaping (MySQLQueryMetadata) -> () = { _ in }
+        onRow: @escaping (MySQLRow) throws -> (),
+        onMetadata: @escaping (MySQLQueryMetadata) throws -> () = { _ in }
     ) -> EventLoopFuture<Void> {
         // print("[NIOMySQL] \(sql)")
         let query = MySQLQueryCommand(sql: sql, binds: binds, onRow: onRow, onMetadata: onMetadata)
@@ -45,13 +45,20 @@ private final class MySQLQueryCommand: MySQLCommand {
     
     var state: State
     let binds: [MySQLData]
-    let onRow: (MySQLRow) -> ()
-    let onMetadata: (MySQLQueryMetadata) -> ()
+    let onRow: (MySQLRow) throws -> ()
+    let onMetadata: (MySQLQueryMetadata) throws -> ()
     private var columns: [MySQLProtocol.ColumnDefinition41]
     private var params: [MySQLProtocol.ColumnDefinition41]
     private var ok: MySQLProtocol.COM_STMT_PREPARE_OK?
+
+    private var lastUserError: Error?
     
-    init(sql: String, binds: [MySQLData], onRow: @escaping (MySQLRow) -> (), onMetadata: @escaping (MySQLQueryMetadata) -> ()) {
+    init(
+        sql: String,
+        binds: [MySQLData],
+        onRow: @escaping (MySQLRow) throws -> (),
+        onMetadata: @escaping (MySQLQueryMetadata) throws -> ()
+    ) {
         self.state = .ready
         self.sql = sql
         self.binds = binds
@@ -126,16 +133,28 @@ private final class MySQLQueryCommand: MySQLCommand {
             if packet.isEOF || packet.isOK && columns.count == 0 {
                 if packet.isOK {
                     let ok = try MySQLProtocol.OK_Packet.decode(from: &packet, capabilities: capabilities)
-                    self.onMetadata(.init(affectedRows: ok.affectedRows, lastInsertID: ok.lastInsertID))
+                    do {
+                        try self.onMetadata(.init(affectedRows: ok.affectedRows, lastInsertID: ok.lastInsertID))
+                    } catch {
+                        self.lastUserError = error
+                    }
                 }
                 var packet = MySQLPacket()
                 MySQLProtocol.COM_STMT_CLOSE(statementID: self.ok!.statementID).encode(into: &packet)
-                return .init(response: [packet], done: true, resetSequence: true)
+                if let error = self.lastUserError {
+                    throw error
+                } else {
+                    return .init(response: [packet], done: true, resetSequence: true)
+                }
             }
 
             let data = try MySQLProtocol.BinaryResultSetRow.decode(from: &packet, columns: columns)
             let row = MySQLRow(format: .binary, columns: self.columns, values: data.values)
-            self.onRow(row)
+            do {
+                try self.onRow(row)
+            } catch {
+                self.lastUserError = error
+            }
             return .noResponse
         case .done: fatalError()
         }

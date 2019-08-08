@@ -186,20 +186,24 @@ public struct MySQLData: CustomStringConvertible, ExpressibleByStringLiteral, Ex
     public var double: Double? {
         switch self.format {
         case .binary:
-            guard self.type == .double else {
+            switch self.type {
+            case .double:
+                guard var buffer = self.buffer else {
+                    return nil
+                }
+                guard let bytes = buffer.readBytes(length: MemoryLayout<Double>.size) else {
+                    return nil
+                }
+                var double: Double = 0
+                Swift.withUnsafeMutableBytes(of: &double) { buffer in
+                    buffer.copyBytes(from: bytes)
+                }
+                return double
+            case .float:
+                return self.float.flatMap(Double.init)
+            default:
                 return nil
             }
-            guard var buffer = self.buffer else {
-                return nil
-            }
-            guard let bytes = buffer.readBytes(length: MemoryLayout<Double>.size) else {
-                return nil
-            }
-            var double: Double?
-            Swift.withUnsafeMutableBytes(of: &double) { ptr in
-                ptr.copyBytes(from: bytes)
-            }
-            return double
         case .text:
             return self.string.flatMap(Double.init)
         }
@@ -208,20 +212,24 @@ public struct MySQLData: CustomStringConvertible, ExpressibleByStringLiteral, Ex
     public var float: Float? {
         switch self.format {
         case .binary:
-            guard self.type == .float else {
+            switch self.type {
+            case .float:
+                guard var buffer = self.buffer else {
+                    return nil
+                }
+                guard let bytes = buffer.readBytes(length: MemoryLayout<Float>.size) else {
+                    return nil
+                }
+                var float: Float = 0
+                Swift.withUnsafeMutableBytes(of: &float) { buffer in
+                    buffer.copyBytes(from: bytes)
+                }
+                return float
+            case .double:
+                return self.double.flatMap(Float.init)
+            default:
                 return nil
             }
-            guard var buffer = self.buffer else {
-                return nil
-            }
-            guard let bytes = buffer.readBytes(length: MemoryLayout<Float>.size) else {
-                return nil
-            }
-            var float: Float?
-            Swift.withUnsafeMutableBytes(of: &float) { ptr in
-                ptr.copyBytes(from: bytes)
-            }
-            return float
         case .text:
             return self.string.flatMap(Float.init)
         }
@@ -342,6 +350,10 @@ public struct MySQLData: CustomStringConvertible, ExpressibleByStringLiteral, Ex
                 return self.date!.description
             case .varchar, .varString, .string, .blob:
                 return self.string!.debugDescription
+            case .double:
+                return self.double!.description
+            case .float:
+                return self.float!.description
             default:
                 return "<\(self.type)>"
             }
