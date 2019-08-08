@@ -67,7 +67,6 @@ final class NIOMySQLTests: XCTestCase {
         } catch let error as MySQLError {
             switch error {
             case .server(let packet):
-                print(packet)
                 XCTAssertEqual(packet.errorCode, .PARSE_ERROR)
             default:
                 XCTFail("unexpected error type")
@@ -163,7 +162,6 @@ final class NIOMySQLTests: XCTestCase {
         do {
             let date = Date(timeIntervalSince1970: 1453075200)
             let rows = try conn.query("SELECT CAST(? AS DATETIME) as datetime", [.init(date: date)]).wait()
-            print(rows)
             XCTAssertEqual(rows[0].column("datetime")?.date?.description, "2016-01-18 00:00:00 +0000")
         }
     }
@@ -244,7 +242,6 @@ final class NIOMySQLTests: XCTestCase {
         // select data
         let selectResults = try conn.query("SELECT * FROM kitchen_sink WHERE name = ?;", ["vapor"]).wait()
         XCTAssertEqual(selectResults.count, 1)
-        print(selectResults)
         
         for test in tests {
             try test.match(selectResults[0].column(test.name), #file, #line)
