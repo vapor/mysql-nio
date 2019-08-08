@@ -55,7 +55,12 @@ public struct MySQLData: CustomStringConvertible, ExpressibleByStringLiteral, Ex
     }
     
     public init(bool: Bool) {
-        self.init(int: bool ? 1 : 0)
+        self.format = .binary
+        self.type = .bit
+        var buffer = ByteBufferAllocator().buffer(capacity: 1)
+        buffer.writeInteger(bool ? 1 : 0, endianness: .little, as: UInt8.self)
+        self.isUnsigned = true
+        self.buffer = buffer
     }
     
     public init(double: Double) {
