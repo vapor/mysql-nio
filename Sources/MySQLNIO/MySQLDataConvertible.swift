@@ -105,3 +105,13 @@ extension Float: MySQLDataConvertible {
         return .init(float: self)
     }
 }
+
+extension Optional: MySQLDataConvertible where Wrapped: MySQLDataConvertible {
+    public init?(mysqlData: MySQLData) {
+        self = Wrapped(mysqlData: mysqlData)
+    }
+
+    public var mysqlData: MySQLData? {
+        self?.mysqlData
+    }
+}
