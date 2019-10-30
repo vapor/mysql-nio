@@ -112,6 +112,6 @@ extension Optional: MySQLDataConvertible where Wrapped: MySQLDataConvertible {
     }
 
     public var mysqlData: MySQLData? {
-        self?.mysqlData
+        return self?.mysqlData
     }
 }
