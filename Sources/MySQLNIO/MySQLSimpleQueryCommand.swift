@@ -7,8 +7,9 @@ extension MySQLDatabase {
     }
     
     public func simpleQuery(_ sql: String, onRow: @escaping (MySQLRow) -> ()) -> EventLoopFuture<Void> {
+        self.logger.debug("\(sql)")
         let query = MySQLSimpleQueryCommand(sql: sql, onRow: onRow)
-        return self.send(query)
+        return self.send(query, logger: self.logger)
     }
 }
 
