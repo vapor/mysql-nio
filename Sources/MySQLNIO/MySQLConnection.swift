@@ -74,6 +74,10 @@ public final class MySQLConnection: MySQLDatabase {
             .flatMap { promise.futureResult }
     }
     
+    public func withConnection<T>(_ closure: @escaping (MySQLConnection) -> EventLoopFuture<T>) -> EventLoopFuture<T> {
+        closure(self)
+    }
+    
     deinit {
         assert(!self.channel.isActive, "MySQLConnection not closed before deinit.")
     }

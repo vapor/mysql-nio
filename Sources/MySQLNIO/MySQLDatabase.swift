@@ -2,6 +2,7 @@ public protocol MySQLDatabase {
     var eventLoop: EventLoop { get }
     var logger: Logger { get }
     func send(_ command: MySQLCommand, logger: Logger) -> EventLoopFuture<Void>
+    func withConnection<T>(_ closure: @escaping (MySQLConnection) -> EventLoopFuture<T>) -> EventLoopFuture<T>
 }
 
 public struct MySQLCommandState {
@@ -52,5 +53,9 @@ extension _MySQLDatabaseWithLogger: MySQLDatabase {
     
     func send(_ command: MySQLCommand, logger: Logger) -> EventLoopFuture<Void> {
         self.database.send(command, logger: logger)
+    }
+    
+    func withConnection<T>(_ closure: @escaping (MySQLConnection) -> EventLoopFuture<T>) -> EventLoopFuture<T> {
+        self.database.withConnection(closure)
     }
 }
