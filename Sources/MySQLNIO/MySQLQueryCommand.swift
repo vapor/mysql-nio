@@ -24,9 +24,9 @@ extension MySQLDatabase {
         onRow: @escaping (MySQLRow) throws -> (),
         onMetadata: @escaping (MySQLQueryMetadata) throws -> () = { _ in }
     ) -> EventLoopFuture<Void> {
-        // print("[NIOMySQL] \(sql)")
+        self.logger.debug("\(sql) \(binds)")
         let query = MySQLQueryCommand(sql: sql, binds: binds, onRow: onRow, onMetadata: onMetadata)
-        return self.send(query)
+        return self.send(query, logger: self.logger)
     }
 }
 
