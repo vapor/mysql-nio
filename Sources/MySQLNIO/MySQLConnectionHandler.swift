@@ -27,7 +27,7 @@ final class MySQLConnectionHandler: ChannelDuplexHandler {
     struct AuthenticationState {
         var authPluginName: String
         var password: String?
-        var isSecure: Bool
+        var isTLS: Bool
         var done: EventLoopPromise<Void>
     }
     
@@ -85,37 +85,35 @@ final class MySQLConnectionHandler: ChannelDuplexHandler {
         let handshakeRequest = try packet.decode(MySQLProtocol.HandshakeV10.self, capabilities: [])
         assert(handshakeRequest.capabilities.contains(.CLIENT_PROTOCOL_41), "Client protocol 4.1 required")
         self.serverCapabilities = handshakeRequest.capabilities
-        switch state.tlsConfiguration {
-        case .some(let tlsConfig):
-            var capabilities = MySQLProtocol.CapabilityFlags.clientDefault
-            capabilities.insert(.CLIENT_SSL)
+        if let tlsConfiguration = state.tlsConfiguration, handshakeRequest.capabilities.contains(.CLIENT_SSL) {
             let sslRequest = MySQLProtocol.SSLRequest(
-                capabilities: capabilities,
+                capabilities: .clientDefault,
                 maxPacketSize: 0,
                 characterSet: .utf8mb4
             )
             let promise = context.channel.eventLoop.makePromise(of: Void.self)
             try context.write(self.wrapOutboundOut(.encode(sslRequest, capabilities: [])), promise: promise)
             context.flush()
-            
-            let sslContext = try NIOSSLContext(configuration: tlsConfig)
+
+            let sslContext = try NIOSSLContext(configuration: tlsConfiguration)
             let handler = try NIOSSLClientHandler(context: sslContext, serverHostname: nil)
             promise.futureResult.flatMap {
                 return context.channel.pipeline.addHandler(handler, position: .first).flatMapThrowing {
-                    try self.writeHandshakeResponse(context: context, handshakeRequest: handshakeRequest, state: state)
+                    try self.writeHandshakeResponse(context: context, handshakeRequest: handshakeRequest, state: state, isTLS: true)
                 }
             }.whenFailure { error in
                 state.done.fail(error)
             }
-        case .none:
-            try self.writeHandshakeResponse(context: context, handshakeRequest: handshakeRequest, state: state)
+        } else {
+            try self.writeHandshakeResponse(context: context, handshakeRequest: handshakeRequest, state: state, isTLS: false)
         }
     }
     
     func writeHandshakeResponse(
         context: ChannelHandlerContext,
         handshakeRequest: MySQLProtocol.HandshakeV10,
-        state: HandshakeState
+        state: HandshakeState,
+        isTLS: Bool
     ) throws {
         guard handshakeRequest.capabilities.contains(.CLIENT_SECURE_CONNECTION) else {
             throw MySQLError.unsupportedServer(message: "Pre-4.1 auth protocol is not supported or safe.")
@@ -146,7 +144,7 @@ final class MySQLConnectionHandler: ChannelDuplexHandler {
         self.state = .authenticating(.init(
             authPluginName: authPluginName,
             password: state.password,
-            isSecure: state.tlsConfiguration != nil,
+            isTLS: isTLS,
             done: state.done
         ))
         let res = MySQLPacket.HandshakeResponse41(
@@ -188,7 +186,7 @@ final class MySQLConnectionHandler: ChannelDuplexHandler {
                 }
                 switch name {
                 case 0x04:
-                    guard state.isSecure else {
+                    guard state.isTLS else {
                         throw MySQLError.secureConnectionRequired
                     }
                     var payload = ByteBufferAllocator().buffer(capacity: 0)
@@ -313,9 +311,16 @@ final class MySQLConnectionHandler: ChannelDuplexHandler {
     }
     
     func errorCaught(context: ChannelHandlerContext, error: Error) {
-        if let current = self.queue.first {
-            self.queue.removeFirst()
-            current.promise.fail(error)
+        switch self.state {
+        case .handshake(let state):
+            state.done.fail(error)
+        case .authenticating(let state):
+            state.done.fail(error)
+        case .commandPhase:
+            if let current = self.queue.first {
+                self.queue.removeFirst()
+                current.promise.fail(error)
+            }
         }
     }
 }

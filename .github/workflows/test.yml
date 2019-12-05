@@ -19,7 +19,6 @@ jobs:
     - run: swift test -Xswiftc -DTEST_TLS --enable-test-discovery --sanitize=thread
       env:
         MYSQL_HOSTNAME: mysql
-        MYSQL_TLS: true
   mysql-5_7:
     container: 
       image: vapor/swift:5.1

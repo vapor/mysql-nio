@@ -6,7 +6,7 @@ public final class MySQLConnection: MySQLDatabase {
         username: String,
         database: String,
         password: String? = nil,
-        tlsConfiguration: TLSConfiguration? = nil,
+        tlsConfiguration: TLSConfiguration? = .forClient(),
         logger: Logger = .init(label: "codes.vapor.mysql"),
         on eventLoop: EventLoop
     ) -> EventLoopFuture<MySQLConnection> {
