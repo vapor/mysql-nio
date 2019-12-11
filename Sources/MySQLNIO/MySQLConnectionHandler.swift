@@ -35,14 +35,16 @@ final class MySQLConnectionHandler: ChannelDuplexHandler {
         case ready
         case busy
     }
-    
+
+    let logger: Logger
     var state: State
     var serverCapabilities: MySQLProtocol.CapabilityFlags?
     var queue: CircularBuffer<MySQLCommandContext>
     let sequence: MySQLPacketSequence
     var commandState: CommandState
     
-    init(state: State, sequence: MySQLPacketSequence) {
+    init(logger: Logger, state: State, sequence: MySQLPacketSequence) {
+        self.logger = logger
         self.state = state
         self.queue = .init()
         self.sequence = sequence
@@ -83,11 +85,14 @@ final class MySQLConnectionHandler: ChannelDuplexHandler {
     
     func handleHandshake(context: ChannelHandlerContext, packet: inout MySQLPacket, state: HandshakeState) throws {
         let handshakeRequest = try packet.decode(MySQLProtocol.HandshakeV10.self, capabilities: [])
+        self.logger.trace("Handling MySQL handshake \(handshakeRequest)")
         assert(handshakeRequest.capabilities.contains(.CLIENT_PROTOCOL_41), "Client protocol 4.1 required")
         self.serverCapabilities = handshakeRequest.capabilities
         if let tlsConfiguration = state.tlsConfiguration, handshakeRequest.capabilities.contains(.CLIENT_SSL) {
+            var capabilities = MySQLProtocol.CapabilityFlags.clientDefault
+            capabilities.insert(.CLIENT_SSL)
             let sslRequest = MySQLProtocol.SSLRequest(
-                capabilities: .clientDefault,
+                capabilities: capabilities,
                 maxPacketSize: 0,
                 characterSet: .utf8mb4
             )
@@ -126,7 +131,9 @@ final class MySQLConnectionHandler: ChannelDuplexHandler {
         if let passwordString = state.password {
             password.writeString(passwordString)
         }
-        
+
+        self.logger.trace("Writing handshake response with auth plugin: \(authPluginName) tls: \(isTLS)")
+
         let hash: ByteBuffer
         switch authPluginName {
         case "caching_sha2_password":
