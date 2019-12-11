@@ -24,7 +24,7 @@ public final class MySQLConnection: MySQLDatabase {
             return channel.pipeline.addHandlers([
                 ByteToMessageHandler(MySQLPacketDecoder(sequence: sequence)),
                 MessageToByteHandler(MySQLPacketEncoder(sequence: sequence)),
-                MySQLConnectionHandler(state: .handshake(.init(
+                MySQLConnectionHandler(logger: logger, state: .handshake(.init(
                     username: username,
                     database: database,
                     password: password,
