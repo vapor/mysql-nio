@@ -1,3 +1,5 @@
+import struct Foundation.Decimal
+
 public protocol MySQLDataConvertible {
     init?(mysqlData: MySQLData)
     var mysqlData: MySQLData? { get }
@@ -103,5 +105,18 @@ extension Float: MySQLDataConvertible {
 
     public var mysqlData: MySQLData? {
         return .init(float: self)
+    }
+}
+
+extension Decimal: MySQLDataConvertible {
+    public init?(mysqlData: MySQLData) {
+        guard let string = mysqlData.string else {
+            return nil
+        }
+        self.init(string: string)
+    }
+
+    public var mysqlData: MySQLData? {
+        .init(string: self.description)
     }
 }

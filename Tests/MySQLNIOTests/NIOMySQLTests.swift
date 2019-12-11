@@ -277,6 +277,15 @@ final class NIOMySQLTests: XCTestCase {
             0xE9, 0x88, 0xE7, 0x02, 0x96, 0xD7, 0x09, 0x9B, 0xC5, 0x70, 0x8A, 0x87, 0x2F, 0x4C, 0xC1, 0x72
         ])
     }
+
+    func testQuery_decimal() throws {
+        let conn = try MySQLConnection.test(on: self.eventLoop).wait()
+        defer { try! conn.close().wait() }
+        do {
+            let rows = try conn.query("SELECT '3.1415926' as d").wait()
+            XCTAssertEqual(rows[0].column("d").flatMap { Decimal(mysqlData: $0) }?.description, "3.1415926")
+        }
+    }
     
     override func setUp() {
         self.group = MultiThreadedEventLoopGroup(numberOfThreads: 1)
