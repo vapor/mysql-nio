@@ -149,7 +149,11 @@ private final class MySQLQueryCommand: MySQLCommand {
             }
 
             let data = try MySQLProtocol.BinaryResultSetRow.decode(from: &packet, columns: columns)
-            let row = MySQLRow(format: .binary, columns: self.columns, values: data.values)
+            let row = MySQLRow(
+                format: .binary,
+                columnDefinitions: self.columns,
+                values: data.values
+            )
             do {
                 try self.onRow(row)
             } catch {

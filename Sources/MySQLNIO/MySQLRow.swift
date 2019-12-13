@@ -1,11 +1,11 @@
 public struct MySQLRow: CustomStringConvertible {
-    private let columns: [MySQLProtocol.ColumnDefinition41]
-    private let values: [ByteBuffer?]
-    private let format: MySQLData.Format
+    public let format: MySQLData.Format
+    public let columnDefinitions: [MySQLProtocol.ColumnDefinition41]
+    public let values: [ByteBuffer?]
     
     public var description: String {
         var desc = [String: MySQLData]()
-        for (column, value) in zip(self.columns, self.values) {
+        for (column, value) in zip(self.columnDefinitions, self.values) {
             desc[column.name] = .init(
                 type: column.columnType,
                 format: self.format,
@@ -16,18 +16,18 @@ public struct MySQLRow: CustomStringConvertible {
         return desc.description
     }
     
-    init(
+    public init(
         format: MySQLData.Format,
-        columns: [MySQLProtocol.ColumnDefinition41],
+        columnDefinitions: [MySQLProtocol.ColumnDefinition41],
         values: [ByteBuffer?]
     ) {
         self.format = format
-        self.columns = columns
+        self.columnDefinitions = columnDefinitions
         self.values = values
     }
     
     public func column(_ name: String, table: String? = nil) -> MySQLData? {
-        for (column, value) in zip(self.columns, self.values) {
+        for (column, value) in zip(self.columnDefinitions, self.values) {
             if column.name == name && (table == nil || column.table == table) {
                 return .init(
                     type: column.columnType,
