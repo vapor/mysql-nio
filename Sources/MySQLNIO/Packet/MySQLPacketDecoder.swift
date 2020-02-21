@@ -1,10 +1,15 @@
 public struct MySQLPacketDecoder: ByteToMessageDecoder {
     public typealias InboundOut = MySQLPacket
-    
+
     public let sequence: MySQLPacketSequence
+    let logger: Logger
     
-    public init(sequence: MySQLPacketSequence) {
+    public init(
+        sequence: MySQLPacketSequence,
+        logger: Logger
+    ) {
         self.sequence = sequence
+        self.logger = logger
     }
     
     public mutating func decode(context: ChannelHandlerContext, buffer: inout ByteBuffer) throws -> DecodingState {
@@ -22,6 +27,7 @@ public struct MySQLPacketDecoder: ByteToMessageDecoder {
         }
         buffer = copy
         let packet = MySQLPacket(payload: payload)
+        self.logger.trace("MySQLPacketDecoder.decode: \(packet)")
         self.sequence.current = UInt8(sequenceID & 0xFF)
         context.fireChannelRead(self.wrapInboundOut(packet))
         return .continue

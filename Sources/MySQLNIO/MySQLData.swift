@@ -348,12 +348,14 @@ public struct MySQLData: CustomStringConvertible, ExpressibleByStringLiteral, Ex
                 return self.bool!.description
             case .datetime, .timestamp:
                 return self.date!.description
-            case .varchar, .varString, .string, .blob:
+            case .varchar, .varString, .string:
                 return self.string!.debugDescription
             case .double:
                 return self.double!.description
             case .float:
                 return self.float!.description
+            case .blob:
+                return Data(self.buffer!.readableBytesView).description
             default:
                 return "<\(self.type)>"
             }
