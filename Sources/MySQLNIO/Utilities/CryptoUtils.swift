@@ -1,11 +1,17 @@
-import CMySQLOpenSSL
+import Crypto
 
 func sha256(_ messages: ByteBuffer...) -> ByteBuffer {
-    return digest(EVP_sha256().convert(), messages)
+    let digest = SHA256.hash(data: [UInt8](messages.combine().readableBytesView))
+    var buffer = ByteBufferAllocator().buffer(capacity: 0)
+    buffer.writeBytes(digest)
+    return buffer
 }
 
 func sha1(_ messages: ByteBuffer...) -> ByteBuffer {
-    return digest(EVP_sha1().convert(), messages)
+    let digest = Insecure.SHA1.hash(data: [UInt8](messages.combine().readableBytesView))
+    var buffer = ByteBufferAllocator().buffer(capacity: 0)
+    buffer.writeBytes(digest)
+    return buffer
 }
 
 func xor(_ a: ByteBuffer, _ b: ByteBuffer) -> ByteBuffer {
@@ -16,20 +22,6 @@ func xor(_ a: ByteBuffer, _ b: ByteBuffer) -> ByteBuffer {
         output.writeInteger(a ^ b)
     }
     return output
-}
-
-private func digest(_ alg: OpaquePointer, _ messages: [ByteBuffer]) -> ByteBuffer {
-    var md = ByteBufferAllocator().buffer(capacity: numericCast(EVP_MAX_MD_SIZE))
-    let data = messages.combine()
-    var size: UInt32 = 0
-    let res = data.withUnsafeReadableBytes { data in
-        return md.withUnsafeMutableWritableBytes { md in
-            return EVP_Digest(data.baseAddress, data.count, md.baseAddress?.assumingMemoryBound(to: UInt8.self), &size, alg.convert(), nil)
-        }
-    }
-    assert(res == 1, "EVP_Digest failed")
-    md.moveWriterIndex(forwardBy: numericCast(size))
-    return md
 }
 
 extension Array where Element == ByteBuffer {
