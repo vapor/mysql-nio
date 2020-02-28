@@ -1,5 +1,0 @@
-module CMySQLOpenSSL [system] {
-   header "c_mysql_openssl.h"
-   link "crypto"
-   link "ssl"
-}

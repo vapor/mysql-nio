@@ -1,29 +1,29 @@
-// swift-tools-version:5.1
+// swift-tools-version:5.2
 import PackageDescription
 
 let package = Package(
     name: "mysql-nio",
     platforms: [
-       .macOS(.v10_14)
+       .macOS(.v10_15)
     ],
     products: [
         .library(name: "MySQLNIO", targets: ["MySQLNIO"]),
     ],
     dependencies: [
+        .package(url: "https://github.com/apple/swift-crypto.git", from: "1.0.0"),
         .package(url: "https://github.com/apple/swift-log.git", from: "1.0.0"),
         .package(url: "https://github.com/apple/swift-nio.git", from: "2.0.0"),
         .package(url: "https://github.com/apple/swift-nio-ssl.git", from: "2.0.0"),
     ],
     targets: [
-        .systemLibrary(
-            name: "CMySQLOpenSSL",
-            pkgConfig: "openssl",
-            providers: [
-                .apt(["openssl libssl-dev"]),
-                .brew(["openssl@1.1"])
-            ]
-        ),
-        .target(name: "MySQLNIO", dependencies: ["CMySQLOpenSSL", "Logging", "NIO", "NIOSSL"]),
-        .testTarget(name: "MySQLNIOTests", dependencies: ["MySQLNIO"]),
+        .target(name: "MySQLNIO", dependencies: [
+            .product(name: "Crypto", package: "swift-crypto"),
+            .product(name: "Logging", package: "swift-log"),
+            .product(name: "NIO", package: "swift-nio"),
+            .product(name: "NIOSSL", package: "swift-nio-ssl"),
+        ]),
+        .testTarget(name: "MySQLNIOTests", dependencies: [
+            .target(name: "MySQLNIO"),
+        ]),
     ]
 )
