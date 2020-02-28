@@ -2,7 +2,7 @@ name: test
 on:
 - pull_request
 jobs:
-  mysql:
+  mysql-nio:
     container: 
       image: vapor/swift:5.2
     services:
@@ -19,7 +19,7 @@ jobs:
     - run: swift test --enable-test-discovery --sanitize=thread
       env:
         MYSQL_HOSTNAME: mysql
-  mysql-8_0:
+  mysql-nio-8_0:
     container: 
       image: vapor/swift:5.2
     services:
@@ -36,7 +36,7 @@ jobs:
     - run: swift test --enable-test-discovery --sanitize=thread
       env:
         MYSQL_HOSTNAME: mysql
-  mysql-5_7:
+  mysql-nio-5_7:
     container: 
       image: vapor/swift:5.2
     services:
