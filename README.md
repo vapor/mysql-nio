@@ -12,7 +12,7 @@
         <img src="http://img.shields.io/badge/license-MIT-brightgreen.svg" alt="MIT License">
     </a>
     <a href="https://github.com/vapor/mysql-nio/actions">
-        ![test](https://github.com/vapor/mysql-nio/workflows/test/badge.svg)
+        <img src="https://github.com/vapor/mysql-nio/workflows/test/badge.svg" alt="CI">
     </a>
     <a href="https://swift.org">
         <img src="http://img.shields.io/badge/swift-5.2-brightgreen.svg" alt="Swift 5.2">
