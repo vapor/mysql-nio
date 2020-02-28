@@ -66,7 +66,7 @@ jobs:
           MYSQL_PASSWORD: vapor_password
     runs-on: ubuntu-latest
     steps:
-    - run: git clone -b master https://github.com/vapor/mysql-kit.git
+    - run: git clone -b tn-rc-1 https://github.com/vapor/mysql-kit.git
       working-directory: ./
     - run: swift package edit mysql-nio --revision ${{ github.sha }}
       working-directory: ./mysql-kit
@@ -87,7 +87,7 @@ jobs:
           MYSQL_PASSWORD: vapor_password
     runs-on: ubuntu-latest
     steps:
-    - run: git clone -b master https://github.com/vapor/fluent-mysql-driver.git
+    - run: git clone -b tn-rc-1 https://github.com/vapor/fluent-mysql-driver.git
       working-directory: ./
     - run: swift package edit mysql-nio --revision ${{ github.sha }}
       working-directory: ./fluent-mysql-driver
