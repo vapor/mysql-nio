@@ -7,6 +7,28 @@ final class NIOMySQLTests: XCTestCase {
         return self.group.next()
     }
     
+    func testDecodingSumOfIntsWithNoRows() throws {
+        let conn = try MySQLConnection.test(on: self.eventLoop).wait()
+        defer { try! conn.close().wait() }
+        let dropResults = try conn.simpleQuery("DROP TABLE IF EXISTS foos").wait()
+        XCTAssertEqual(dropResults.count, 0)
+        let createResults = try conn.simpleQuery("CREATE TABLE foos (`item_count` int(11))").wait()
+        XCTAssertEqual(createResults.count, 0)
+        let rows = try conn.simpleQuery("SELECT sum(`item_count`) as sum from foos").wait()
+        guard rows.count == 1 else {
+            XCTFail("invalid row count")
+            return
+        }
+        if let sqlData = rows[0].column("sum") {
+            XCTAssertEqual(sqlData.string, "0")
+            XCTAssertEqual(sqlData.float, 0)
+            XCTAssertEqual(sqlData.double, 0)
+            XCTAssertEqual(sqlData.int, 0)
+        } else {
+            XCTAssert(false, "rows[0].column(\"sum\") was nil")
+        }
+    }
+
     func testSimpleQuery_selectVersion() throws {
         let conn = try MySQLConnection.test(on: self.eventLoop).wait()
         defer { try! conn.close().wait() }
