@@ -7,6 +7,65 @@ final class NIOMySQLTests: XCTestCase {
         return self.group.next()
     }
     
+    func testDecodingSumOfIntsWithNoRows() throws {
+        let conn = try MySQLConnection.test(on: self.eventLoop).wait()
+        defer { try! conn.close().wait() }
+        let dropResults = try conn.simpleQuery("DROP TABLE IF EXISTS foos").wait()
+        XCTAssertEqual(dropResults.count, 0)
+        let createResults = try conn.simpleQuery("CREATE TABLE foos (`item_count` int(11))").wait()
+        XCTAssertEqual(createResults.count, 0)
+        let rows = try conn.simpleQuery("SELECT sum(`item_count`) as sum from foos").wait()
+        guard rows.count == 1 else {
+            XCTFail("invalid row count")
+            return
+        }
+        if let sqlData = rows[0].column("sum") {
+            XCTAssertEqual(sqlData.string, nil)
+            XCTAssertEqual(sqlData.float, nil)
+            XCTAssertEqual(sqlData.double, nil)
+            XCTAssertEqual(sqlData.int, nil)
+        } else {
+            XCTAssert(false, "rows[0].column(\"sum\") was nil")
+        }
+    }
+
+    func testDecodingSumOfIntsWithRows() throws {
+        let conn = try MySQLConnection.test(on: self.eventLoop).wait()
+        defer { try! conn.close().wait() }
+        let dropResults = try conn.simpleQuery("DROP TABLE IF EXISTS foos").wait()
+        XCTAssertEqual(dropResults.count, 0)
+        let createResults = try conn.simpleQuery("CREATE TABLE foos (`item_count` int(11))").wait()
+        XCTAssertEqual(createResults.count, 0)
+        let _ = try conn.simpleQuery("insert into foos (`item_count`) values (0)").wait()
+        let rows = try conn.simpleQuery("SELECT sum(`item_count`) as sum from foos").wait()
+        guard rows.count == 1 else {
+            XCTFail("invalid row count")
+            return
+        }
+        if let sqlData = rows[0].column("sum") {
+            XCTAssertEqual(sqlData.string, "0")
+            XCTAssertEqual(sqlData.float, 0)
+            XCTAssertEqual(sqlData.double, 0)
+            XCTAssertEqual(sqlData.int, 0)
+        } else {
+            XCTAssert(false, "rows[0].column(\"sum\") was nil")
+        }
+        let _ = try conn.simpleQuery("insert into foos (`item_count`) values (199)").wait()
+        let rows2 = try conn.simpleQuery("SELECT sum(`item_count`) as sum from foos").wait()
+        guard rows2.count == 1 else {
+            XCTFail("invalid row count")
+            return
+        }
+        if let sqlData = rows2[0].column("sum") {
+            XCTAssertEqual(sqlData.string, "199")
+            XCTAssertEqual(sqlData.float, 199)
+            XCTAssertEqual(sqlData.double, 199)
+            XCTAssertEqual(sqlData.int, 199)
+        } else {
+            XCTAssert(false, "rows[0].column(\"sum\") was nil")
+        }
+    }
+
     func testSimpleQuery_selectVersion() throws {
         let conn = try MySQLConnection.test(on: self.eventLoop).wait()
         defer { try! conn.close().wait() }

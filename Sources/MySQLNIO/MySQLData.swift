@@ -201,6 +201,12 @@ public struct MySQLData: CustomStringConvertible, ExpressibleByStringLiteral, Ex
                 return double
             case .float:
                 return self.float.flatMap(Double.init)
+            case .newdecimal:
+                guard var buffer = self.buffer else {
+                    return nil
+                }
+                return buffer.readString(length: buffer.readableBytes)
+                    .flatMap(Double.init)
             default:
                 return nil
             }
@@ -227,6 +233,12 @@ public struct MySQLData: CustomStringConvertible, ExpressibleByStringLiteral, Ex
                 return float
             case .double:
                 return self.double.flatMap(Float.init)
+            case .newdecimal:
+                guard var buffer = self.buffer else {
+                    return nil
+                }
+                return buffer.readString(length: buffer.readableBytes)
+                    .flatMap(Float.init)
             default:
                 return nil
             }
@@ -309,6 +321,9 @@ public struct MySQLData: CustomStringConvertible, ExpressibleByStringLiteral, Ex
                     return buffer.readInteger(endianness: .little, as: Int8.self)
                         .flatMap(Int.init)
                 }
+            case .newdecimal:
+                return buffer.readString(length: buffer.readableBytes)
+                    .flatMap(Int.init)
             default:
                 return nil
             }
