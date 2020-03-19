@@ -1,15 +1,15 @@
 version: '3'
 
 services:
-  mysql-8_0:
-    image: mysql:8.0
-    environment:
-      MYSQL_ALLOW_EMPTY_PASSWORD: "true"
-      MYSQL_DATABASE: vapor_database
-      MYSQL_USER: vapor_username
-      MYSQL_PASSWORD: vapor_password
-    ports:
-      - 3306:3306
+#  mysql-8_0:
+#    image: mysql:8.0
+#    environment:
+#      MYSQL_ALLOW_EMPTY_PASSWORD: "true"
+#      MYSQL_DATABASE: vapor_database
+#      MYSQL_USER: vapor_username
+#      MYSQL_PASSWORD: vapor_password
+#    ports:
+#      - 3306:3306
   mysql-5_7:
     image: mysql:5.7
     environment:

@@ -166,12 +166,7 @@ public struct MySQLData: CustomStringConvertible, ExpressibleByStringLiteral, Ex
     
     public var string: String? {
         guard var buffer = self.buffer else {
-            switch self.type {
-            case .newdecimal:
-                return "0"
-            default:
-                return nil
-            }
+            return nil
         }
         switch format {
         case .text:
@@ -208,7 +203,7 @@ public struct MySQLData: CustomStringConvertible, ExpressibleByStringLiteral, Ex
                 return self.float.flatMap(Double.init)
             case .newdecimal:
                 guard var buffer = self.buffer else {
-                    return 0
+                    return nil
                 }
                 return buffer.readString(length: buffer.readableBytes)
                     .flatMap(Double.init)
@@ -240,7 +235,7 @@ public struct MySQLData: CustomStringConvertible, ExpressibleByStringLiteral, Ex
                 return self.double.flatMap(Float.init)
             case .newdecimal:
                 guard var buffer = self.buffer else {
-                    return 0
+                    return nil
                 }
                 return buffer.readString(length: buffer.readableBytes)
                     .flatMap(Float.init)
@@ -285,13 +280,7 @@ public struct MySQLData: CustomStringConvertible, ExpressibleByStringLiteral, Ex
     
     public var int: Int? {
         guard var buffer = self.buffer else {
-            switch self.type {
-            case .newdecimal:
-                //The buffer is nil, but the type is newdecimal. We need to parse it as 0
-                return 0
-            default:
-                return nil
-            }
+            return nil
         }
         switch format {
         case .text:
