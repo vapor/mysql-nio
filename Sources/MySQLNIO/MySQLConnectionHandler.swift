@@ -1,4 +1,5 @@
 import NIOSSL
+import Crypto
 
 internal struct MySQLCommandContext {
     var handler: MySQLCommand
@@ -28,6 +29,8 @@ final class MySQLConnectionHandler: ChannelDuplexHandler {
         var authPluginName: String
         var password: String?
         var isTLS: Bool
+        var savedSeedValue: [UInt8]
+        var awaitingCachingSha2PluginPublicKey: Bool
         var done: EventLoopPromise<Void>
     }
     
@@ -56,12 +59,14 @@ final class MySQLConnectionHandler: ChannelDuplexHandler {
         switch self.state {
         case .handshake(let state):
             do {
+                self.logger.trace("Handle handshake packet")
                 try self.handleHandshake(context: context, packet: &packet, state: state)
             } catch {
                 state.done.fail(error)
             }
         case .authenticating(let state):
             do {
+                self.logger.trace("Handle authentication packet")
                 try self.handleAuthentication(context: context, packet: &packet, state: state)
             } catch {
                 state.done.fail(error)
@@ -114,6 +119,50 @@ final class MySQLConnectionHandler: ChannelDuplexHandler {
         }
     }
     
+    func doInitialAuthPluginHandling(
+        authPluginName: String,
+        isTLS: Bool,
+        passwordInput: String?,
+        authPluginData: ByteBuffer,
+        done: EventLoopPromise<Void>
+    ) throws -> ByteBuffer {
+        var password = ByteBufferAllocator().buffer(capacity: 0)
+        if let passwordString = passwordInput {
+            password.writeString(passwordString)
+        }
+
+        self.logger.trace("Generating initial auth response with auth plugin: \(authPluginName) tls: \(isTLS)")
+        
+        var saveSeed: [UInt8] = []
+        let hash: ByteBuffer
+        switch authPluginName {
+        case "caching_sha2_password":
+            let seed = authPluginData
+            hash = xor(sha256(password), sha256(sha256(sha256(password)), seed))
+            saveSeed = seed.getBytes(at: 0, length: seed.readableBytes) ?? []
+            self.logger.trace("Generated scrambled hash for caching_sha2_password")
+        case "mysql_native_password":
+            var copy = authPluginData
+            guard let salt = copy.readSlice(length: 20) else {
+                throw MySQLError.authPluginDataError(name: authPluginName)
+            }
+            hash = xor(sha1(salt, sha1(sha1(password))), sha1(password))
+            saveSeed = salt.getBytes(at: 0, length: 20) ?? []
+            self.logger.trace("Generated salted hash for mysql_native_password")
+        default:
+            throw MySQLError.unsupportedAuthPlugin(name: authPluginName)
+        }
+        self.state = .authenticating(.init(
+            authPluginName: authPluginName,
+            password: passwordInput,
+            isTLS: isTLS,
+            savedSeedValue: saveSeed,
+            awaitingCachingSha2PluginPublicKey: false,
+            done: done
+        ))
+        return hash
+    }
+    
     func writeHandshakeResponse(
         context: ChannelHandlerContext,
         handshakeRequest: MySQLProtocol.HandshakeV10,
@@ -127,33 +176,8 @@ final class MySQLConnectionHandler: ChannelDuplexHandler {
             throw MySQLError.unsupportedAuthPlugin(name: "<none>")
         }
         
-        var password = ByteBufferAllocator().buffer(capacity: 0)
-        if let passwordString = state.password {
-            password.writeString(passwordString)
-        }
-
-        self.logger.trace("Writing handshake response with auth plugin: \(authPluginName) tls: \(isTLS)")
-
-        let hash: ByteBuffer
-        switch authPluginName {
-        case "caching_sha2_password":
-            let seed = handshakeRequest.authPluginData
-            hash = xor(sha256(password), sha256(sha256(sha256(password)), seed))
-        case "mysql_native_password":
-            var copy = handshakeRequest.authPluginData
-            guard let salt = copy.readSlice(length: 20) else {
-                throw MySQLError.protocolError
-            }
-            hash = xor(sha1(salt, sha1(sha1(password))), sha1(password))
-        default:
-            throw MySQLError.unsupportedAuthPlugin(name: authPluginName)
-        }
-        self.state = .authenticating(.init(
-            authPluginName: authPluginName,
-            password: state.password,
-            isTLS: isTLS,
-            done: state.done
-        ))
+        let hash = try doInitialAuthPluginHandling(authPluginName: authPluginName, isTLS: isTLS, passwordInput: state.password, authPluginData: handshakeRequest.authPluginData, done: state.done)
+        
         let res = MySQLPacket.HandshakeResponse41(
             capabilities: .clientDefault,
             maxPacketSize: 0,
@@ -167,6 +191,25 @@ final class MySQLConnectionHandler: ChannelDuplexHandler {
         context.flush()
     }
     
+    func handleSwitchPlugins(
+        context: ChannelHandlerContext,
+        packet: inout MySQLPacket,
+        state: AuthenticationState
+    ) throws {
+        self.logger.trace("Got request to switch auth methods (currently \(state.authPluginName)")
+        guard let newPluginName = packet.payload.readNullTerminatedString() else {
+            throw MySQLError.missingAuthPluginInlineData
+        }
+        self.logger.trace("New plugin is \(newPluginName)")
+        guard let newAuthData = packet.payload.readSlice(length: 20) else { // WARNING: This might be wrong for plugins we don't yet support...
+            throw MySQLError.missingAuthPluginInlineData
+        }
+        let newHash = try doInitialAuthPluginHandling(authPluginName: newPluginName, isTLS: state.isTLS, passwordInput: state.password, authPluginData: newAuthData, done: state.done)
+        // Send an AuthSwitchResponse (which is just the plugin auth data by itself)
+        context.write(self.wrapOutboundOut(MySQLPacket(payload: newHash)), promise: nil)
+        context.flush()
+    }
+
     func handleAuthentication(
         context: ChannelHandlerContext,
         packet: inout MySQLPacket,
@@ -175,47 +218,105 @@ final class MySQLConnectionHandler: ChannelDuplexHandler {
         switch state.authPluginName {
         case "caching_sha2_password":
             guard !packet.isOK else {
+                self.logger.trace("caching_sha2_password replied OK, going to command phase")
                 self.state = .commandPhase
                 state.done.succeed(())
                 return
             }
             guard !packet.isError else {
+                self.logger.trace("caching_sha2_password replied ERR, decoding")
                 let err = try packet.decode(MySQLProtocol.ERR_Packet.self, capabilities: self.serverCapabilities!)
                 throw MySQLError.server(err)
             }
             guard let status = packet.payload.readInteger(endianness: .little, as: UInt8.self) else {
-                throw MySQLError.protocolError
+                throw MySQLError.missingOrInvalidAuthMoreDataStatusTag
             }
+            self.logger.trace("caching_sha2_password sent packet tagged \(status)")
             switch status {
+            case 0xfe: // auth switch request
+                try self.handleSwitchPlugins(context: context, packet: &packet, state: state)
             case 0x01:
-                guard let name = packet.payload.readInteger(endianness: .little, as: UInt8.self) else {
-                    throw MySQLError.protocolError
-                }
-                switch name {
-                case 0x04:
-                    guard state.isTLS else {
-                        throw MySQLError.secureConnectionRequired
+                self.logger.trace("caching_sha2_password sent AuthMoreData, processing")
+                let name: UInt8?
+                if state.awaitingCachingSha2PluginPublicKey {
+                    self.logger.trace("Waiting for caching_sha2_password to send an RSA key")
+                    name = nil
+                } else {
+                    guard let pName = packet.payload.readInteger(endianness: .little, as: UInt8.self) else {
+                        throw MySQLError.missingOrInvalidAuthPluginInlineCommand(command: nil)
                     }
+                    name = pName
+                    self.logger.trace("caching_sha2_password sent command \(pName)")
+                }
+                self.state = .authenticating(AuthenticationState(authPluginName: state.authPluginName, password: state.password, isTLS: state.isTLS, savedSeedValue: state.savedSeedValue, awaitingCachingSha2PluginPublicKey: false, done: state.done)) // make sure to reset
+                
+                switch name {
+                case .none: // our internal sentinel for "here's the public key"
+                    // data will be the PEM form of the server's RSA public key
+                    guard let pemKeyRaw = packet.payload.readBytes(length: packet.payload.readableBytes) else {
+                        throw MySQLError.missingAuthPluginInlineData
+                    }
+                    let key = try MoreNIOSSLPublicKey(bytes: pemKeyRaw, format: .pem)
+                    
+                    self.logger.trace("caching_sha2_password sent an RSA public key, using it to encrypt")
+
+                    var passwordBuffer = ByteBufferAllocator().buffer(capacity: 0), seedBuffer = ByteBufferAllocator().buffer(capacity: 0)
+                    passwordBuffer.writeString(state.password ?? "")
+                    passwordBuffer.writeInteger(UInt8(0)) // add a trailing NUL
+                    seedBuffer.writeBytes(state.savedSeedValue)
+                    let scrambleBuffer = xor_pattern(passwordBuffer, seedBuffer)
+                    let scramble = scrambleBuffer.getBytes(at: 0, length: scrambleBuffer.readableBytes) ?? []
+                    let ciphertext = try key.encrypt(bytes: scramble)
+                    var ciphertextBuffer = ByteBufferAllocator().buffer(capacity: ciphertext.count)
+                    ciphertextBuffer.writeBytes(ciphertext)
+                    context.write(self.wrapOutboundOut(MySQLPacket(payload: ciphertextBuffer)), promise: nil)
+                    context.flush()
+                case 0x03: // fast_auth_success
+                    // Next packet will be OK, wait for more data
+                    self.logger.trace("caching_sha2_password sent fast_auth_success, just waiting for OK now")
+                    return
+                case 0x04: // perform_full_authentication
                     var payload = ByteBufferAllocator().buffer(capacity: 0)
-                    payload.writeNullTerminatedString(state.password ?? "")
+                    if state.isTLS {
+                        // TLS connection, send password in the "clear"
+                        self.logger.trace("caching_sha2_password sent perform_full_authentication on TLS, sending password in cleartext")
+                        payload.writeNullTerminatedString(state.password ?? "")
+                    } else {
+                        // send a public key request and wait
+                        self.logger.trace("caching_sha2_password sent perform_full_authentication on insecure, sending request_public_key")
+                        payload.writeBytes([0x02])
+                        self.state = .authenticating(AuthenticationState(authPluginName: state.authPluginName, password: state.password, isTLS: state.isTLS, savedSeedValue: state.savedSeedValue, awaitingCachingSha2PluginPublicKey: true, done: state.done))
+                    }
                     context.write(self.wrapOutboundOut(MySQLPacket(payload: payload)), promise: nil)
                     context.flush()
                 default:
-                    throw MySQLError.protocolError
+                    throw MySQLError.missingOrInvalidAuthPluginInlineCommand(command: name)
                 }
             default:
-                throw MySQLError.protocolError
+                throw MySQLError.missingOrInvalidAuthMoreDataStatusTag
             }
         case "mysql_native_password":
             guard !packet.isError else {
+                self.logger.trace("mysql_native_password sent ERR, decoding")
                 let error = try packet.decode(MySQLProtocol.ERR_Packet.self, capabilities: self.serverCapabilities!)
                 throw MySQLError.server(error)
             }
-            guard packet.isOK else {
-                throw MySQLError.protocolError
+            guard !packet.isOK else {
+                self.logger.trace("mysql_native_password sent OK, going to command phase")
+                self.state = .commandPhase
+                state.done.succeed(())
+                return
             }
-            self.state = .commandPhase
-            state.done.succeed(())
+            guard let tag = packet.payload.readInteger(endianness: .little, as: UInt8.self) else {
+                throw MySQLError.missingOrInvalidAuthMoreDataStatusTag
+            }
+            self.logger.trace("mysql_native_password sent packet tagged \(tag)")
+            switch tag {
+            case 0xfe: // auth switch request
+                try self.handleSwitchPlugins(context: context, packet: &packet, state: state)
+            default:
+                throw MySQLError.missingOrInvalidAuthPluginInlineCommand(command: tag)
+            }
         default:
             throw MySQLError.unsupportedAuthPlugin(name: state.authPluginName)
         }
