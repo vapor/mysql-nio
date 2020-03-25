@@ -15,11 +15,18 @@ func sha1(_ messages: ByteBuffer...) -> ByteBuffer {
 }
 
 func xor(_ a: ByteBuffer, _ b: ByteBuffer) -> ByteBuffer {
-    var a = a
-    var b = b
-    var output = ByteBufferAllocator().buffer(capacity: min(a.readableBytes, b.readableBytes))
-    while let a = a.readInteger(as: UInt8.self), let b = b.readInteger(as: UInt8.self) {
-        output.writeInteger(a ^ b)
+    assert(a.readableBytes == b.readableBytes)
+    var output = ByteBufferAllocator().buffer(capacity: a.readableBytes)
+    for i in 0..<a.readableBytes {
+        output.writeInteger(a.getInteger(at: i, as: UInt8.self)! ^ b.getInteger(at: i, as: UInt8.self)!)
+    }
+    return output
+}
+
+func xor_pattern(_ a: ByteBuffer, _ b: ByteBuffer) -> ByteBuffer {
+    var output = ByteBufferAllocator().buffer(capacity: a.readableBytes)
+    for i in 0..<a.readableBytes {
+        output.writeInteger(a.getInteger(at: i, as: UInt8.self)! ^ b.getInteger(at: i % b.readableBytes, as: UInt8.self)!)
     }
     return output
 }
