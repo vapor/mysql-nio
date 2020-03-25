@@ -1,4 +1,5 @@
 import XCTest
+import Logging
 @testable import MySQLNIO
 
 final class NIOMySQLTests: XCTestCase {
@@ -348,11 +349,21 @@ final class NIOMySQLTests: XCTestCase {
         }
     }
     
-    override func setUp() {
+    override func setUpWithError() throws {
+        XCTAssert(isLoggingConfigured)
         self.group = MultiThreadedEventLoopGroup(numberOfThreads: 1)
     }
     
-    override func tearDown() {
-        try! self.group.syncShutdownGracefully()
+    override func tearDownWithError() throws {
+        try self.group.syncShutdownGracefully()
     }
 }
+
+let isLoggingConfigured: Bool = {
+    LoggingSystem.bootstrap { label in
+        var handler = StreamLogHandler.standardOutput(label: label)
+        handler.logLevel = .debug
+        return handler
+    }
+    return true
+}()
