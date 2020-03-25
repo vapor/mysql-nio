@@ -14,7 +14,7 @@ extension MySQLConnection {
             username: "vapor_username",
             database: "vapor_database",
             password: "vapor_password",
-            tlsConfiguration: .forClient(certificateVerification: .none),
+            tlsConfiguration: nil,
             on: eventLoop
         )
     }
