@@ -41,7 +41,11 @@ public final class MySQLConnection: MySQLDatabase {
                 ], position: .last).map {
                     return MySQLConnection(channel: channel, logger: .init(label: "codes.vapor.mysql"))
                 }.flatMap { conn in
-                    return done.futureResult.map { conn }
+                    return done.futureResult
+                        .flatMapError { error in
+                            conn.close().recover { _ in }.flatMapThrowing { throw error }
+                        }
+                        .map { conn }
             }
         }
     }
