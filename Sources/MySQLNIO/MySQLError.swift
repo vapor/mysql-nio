@@ -3,6 +3,10 @@ import Foundation
 public enum MySQLError: Error, CustomStringConvertible, LocalizedError {
     case secureConnectionRequired
     case unsupportedAuthPlugin(name: String)
+    case authPluginDataError(name: String)
+    case missingOrInvalidAuthMoreDataStatusTag
+    case missingOrInvalidAuthPluginInlineCommand(command: UInt8?)
+    case missingAuthPluginInlineData
     case unsupportedServer(message: String)
     case protocolError
     case server(MySQLProtocol.ERR_Packet)
@@ -14,6 +18,14 @@ public enum MySQLError: Error, CustomStringConvertible, LocalizedError {
             return "A secure connection to the server is required for authentication."
         case .unsupportedAuthPlugin(let name):
             return "Unsupported auth plugin name: \(name)"
+        case .authPluginDataError(let name):
+            return "Auth plugin (name: \(name)) sent invalid authentication data."
+        case .missingOrInvalidAuthMoreDataStatusTag:
+            return "Auth plugin didn't send a correct status tag per protocol."
+        case .missingOrInvalidAuthPluginInlineCommand(let byte):
+            return "Auth plugin sent \(byte.map { "\($0)" } ?? "<nothing>"), which we can't interpret."
+        case .missingAuthPluginInlineData:
+            return "Auth plugin was supposed to send us some data."
         case .unsupportedServer(let message):
             return "Unsupported server: \(message)"
         case .protocolError:
