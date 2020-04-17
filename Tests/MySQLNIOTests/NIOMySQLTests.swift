@@ -245,6 +245,30 @@ final class NIOMySQLTests: XCTestCase {
         XCTAssert(time.microsecond == UInt32(100000))
         XCTAssert(time2.microsecond == UInt32(100000))
     }
+
+    func testString_lengthEncoded_uint8() throws {
+        let conn = try MySQLConnection.test(on: self.eventLoop).wait()
+        defer { try! conn.close().wait() }
+        let string = String(repeating: "a", count: 128)
+        let rows = try! conn.query("SELECT ? as s", [MySQLData(string: string)]).wait()
+        XCTAssertEqual(rows[0].column("s")?.string, string)
+    }
+
+    func testString_lengthEncoded_fc() throws {
+        let conn = try MySQLConnection.test(on: self.eventLoop).wait()
+        defer { try! conn.close().wait() }
+        let string = String(repeating: "a", count: 512)
+        let rows = try! conn.query("SELECT ? as s", [MySQLData(string: string)]).wait()
+        XCTAssertEqual(rows[0].column("s")?.string, string)
+    }
+
+    func testString_lengthEncoded_fd() throws {
+        let conn = try MySQLConnection.test(on: self.eventLoop).wait()
+        defer { try! conn.close().wait() }
+        let string = String(repeating: "a", count: 1<<17)
+        let rows = try! conn.query("SELECT ? as s", [MySQLData(string: string)]).wait()
+        XCTAssertEqual(rows[0].column("s")?.string, string)
+    }
     
     func testTypes() throws {
         /// support
