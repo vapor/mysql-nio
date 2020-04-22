@@ -292,13 +292,16 @@ final class NIOMySQLTests: XCTestCase {
         }
         var hello3 = ByteBufferAllocator().buffer(capacity: 0)
         hello3.writeString("hello3")
+
+        var bit = ByteBufferAllocator().buffer(capacity: 1)
+        bit.writeInteger(1, as: UInt8.self)
         let tests: [TestColumn] = [
             .init("xchar", "CHAR(60)", "hello1"),
             .init("xvarchar", "VARCHAR(61)", "hello2"),
             .init("xtext", "TEXT(62)", MySQLData(type: .blob, buffer: hello3)),
             .init("xbinary", "BINARY(6)", "hello4"),
             .init("xvarbinary", "VARBINARY(66)", "hello5"),
-            .init("xbit", "BIT", true),
+            .init("xbit", "BIT", MySQLData(type: .bit, buffer: bit)),
             .init("xtinyint", "TINYINT(1)", 5),
             .init("xsmallint", "SMALLINT(1)", 252),
             .init("xvarcharnull", "VARCHAR(10)", MySQLData(type: .varString, buffer: nil)),
