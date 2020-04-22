@@ -56,7 +56,7 @@ public struct MySQLData: CustomStringConvertible, ExpressibleByStringLiteral, Ex
     
     public init(bool: Bool) {
         self.format = .binary
-        self.type = .bit
+        self.type = .tiny
         var buffer = ByteBufferAllocator().buffer(capacity: 1)
         buffer.writeInteger(bool ? 1 : 0, endianness: .little, as: UInt8.self)
         self.isUnsigned = true
@@ -342,7 +342,7 @@ public struct MySQLData: CustomStringConvertible, ExpressibleByStringLiteral, Ex
             return nil
         }
         switch self.type {
-        case .timestamp, .datetime:
+        case .timestamp, .datetime, .date:
             return buffer.readMySQLTime()
         default: return nil
         }
