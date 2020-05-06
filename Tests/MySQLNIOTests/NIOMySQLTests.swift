@@ -143,12 +143,8 @@ final class NIOMySQLTests: XCTestCase {
         let insertResults = try conn.query("INSERT INTO foos VALUES (?, ?)", [1, "one"]).wait()
         XCTAssertEqual(insertResults.count, 0)
         XCTAssertThrowsError(try conn.query("INSERT INTO foos VALUES (?, ?)", [1, "two"]).wait()) { (inError) in
-            let e = inError as! MySQLError
-            switch e {
-                case .duplicateEntry(_):
-                    break
-                default:
-                    XCTFail("Wrong error thrown")
+            guard case .duplicateEntry = inError as? MySQLError else {
+                return XCTFail("Expected MySQLError.duplicateEntry, but found \(inError)")
             }
         }
     }
