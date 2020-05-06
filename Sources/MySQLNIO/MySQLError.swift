@@ -8,7 +8,7 @@ public enum MySQLError: Error, CustomStringConvertible, LocalizedError {
     case server(MySQLProtocol.ERR_Packet)
     case closed
     
-    /// A uniqueness constraint violated. Associated value is message from server with details.
+    /// A uniqueness constraint was violated. Associated value is message from server with details.
     case duplicateEntry(String)
     
     public var message: String {
