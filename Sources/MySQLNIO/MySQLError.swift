@@ -8,6 +8,9 @@ public enum MySQLError: Error, CustomStringConvertible, LocalizedError {
     case server(MySQLProtocol.ERR_Packet)
     case closed
     
+    /// A uniqueness constraint violated. Associated value is message from server with details.
+    case duplicateEntry(String)
+    
     public var message: String {
         switch self {
         case .secureConnectionRequired:
@@ -22,6 +25,8 @@ public enum MySQLError: Error, CustomStringConvertible, LocalizedError {
             return "Server error: \(error.errorMessage)"
         case .closed:
             return "Connection closed."
+        case .duplicateEntry(let message):
+            return "Duplicate entry: \(message)"
         }
     }
     
