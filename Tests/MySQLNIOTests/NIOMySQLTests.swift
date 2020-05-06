@@ -133,6 +133,26 @@ final class NIOMySQLTests: XCTestCase {
         }
     }
     
+    func testQuery_duplicateEntry() throws {
+        let conn = try MySQLConnection.test(on: self.eventLoop).wait()
+        defer { try! conn.close().wait() }
+        let dropResults = try conn.simpleQuery("DROP TABLE IF EXISTS foos").wait()
+        XCTAssertEqual(dropResults.count, 0)
+        let createResults = try conn.simpleQuery("CREATE TABLE foos (id BIGINT SIGNED unique, name VARCHAR(64))").wait()
+        XCTAssertEqual(createResults.count, 0)
+        let insertResults = try conn.query("INSERT INTO foos VALUES (?, ?)", [1, "one"]).wait()
+        XCTAssertEqual(insertResults.count, 0)
+        XCTAssertThrowsError(try conn.query("INSERT INTO foos VALUES (?, ?)", [1, "two"]).wait()) { (inError) in
+            let e = inError as! MySQLError
+            switch e {
+                case .duplicateEntry(_):
+                    break
+                default:
+                    XCTFail("Wrong error thrown")
+            }
+        }
+    }
+    
     func testQuery_selectMixed() throws {
         let conn = try MySQLConnection.test(on: self.eventLoop).wait()
         defer { try! conn.close().wait() }
