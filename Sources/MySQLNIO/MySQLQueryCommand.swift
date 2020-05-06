@@ -83,7 +83,13 @@ private final class MySQLQueryCommand: MySQLCommand {
         guard !packet.isError else {
             self.state = .done
             let error = try packet.decode(MySQLProtocol.ERR_Packet.self, capabilities: capabilities)
-            throw MySQLError.server(error)
+            switch error.errorCode {
+                case .DUP_ENTRY:
+                    let msg = error.errorMessage
+                    throw MySQLError.duplicateEntry(msg)
+                default:
+                    throw MySQLError.server(error)
+            }
         }
         switch self.state {
         case .ready:
