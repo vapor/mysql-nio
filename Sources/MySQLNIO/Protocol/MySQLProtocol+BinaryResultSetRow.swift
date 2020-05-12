@@ -24,17 +24,21 @@ extension MySQLProtocol {
                 if nullBitmap.isNull(at: i) {
                     storage = nil
                 } else {
+                    var slice: ByteBuffer
                     if let length = column.columnType.encodingLength {
                         guard let data = packet.payload.readSlice(length: length) else {
                             fatalError()
                         }
-                        storage = data
+                        slice = data
                     } else {
                         guard let data = packet.payload.readLengthEncodedSlice() else {
                             fatalError()
                         }
-                        storage = data
+                        slice = data
                     }
+                    var copy = ByteBufferAllocator().buffer(capacity: slice.readableBytes)
+                    copy.writeBuffer(&slice)
+                    storage = copy
                 }
                 values.append(storage)
             }
