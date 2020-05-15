@@ -29,7 +29,7 @@ public struct MySQLPacket {
 extension MySQLPacket: CustomStringConvertible {
     public var description: String {
         let bytes = [UInt8](self.payload.readableBytesView)
-        return "\(bytes) (err: \(self.isError), ok: \(self.isOK), eof: \(self.isEOF))"
+        return "\(bytes.prefix(16))... (err: \(self.isError), ok: \(self.isOK), eof: \(self.isEOF))"
     }
 }
 
