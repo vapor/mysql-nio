@@ -38,10 +38,8 @@ public final class MySQLConnection: MySQLDatabase {
                     done: done
                 )), sequence: sequence),
                 ErrorHandler()
-                ], position: .last).map {
-                    return MySQLConnection(channel: channel, logger: .init(label: "codes.vapor.mysql"))
-                }.flatMap { conn in
-                    return done.futureResult.map { conn }
+            ], position: .last).flatMap {
+                return done.futureResult.map { MySQLConnection(channel: channel, logger: logger) }
             }
         }
     }
