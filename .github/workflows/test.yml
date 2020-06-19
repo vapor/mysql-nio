@@ -78,7 +78,14 @@ jobs:
     container: 
       image: vapor/swift:5.2
     services:
-      mysql:
+      mysql-a:
+        image: mysql
+        env:
+          MYSQL_ALLOW_EMPTY_PASSWORD: true
+          MYSQL_DATABASE: vapor_database
+          MYSQL_USER: vapor_username
+          MYSQL_PASSWORD: vapor_password
+      mysql-b:
         image: mysql
         env:
           MYSQL_ALLOW_EMPTY_PASSWORD: true
@@ -94,4 +101,5 @@ jobs:
     - run: swift test --enable-test-discovery --sanitize=thread
       working-directory: ./fluent-mysql-driver
       env:
-        MYSQL_HOSTNAME: mysql
+        MYSQL_HOSTNAME_A: mysql-a
+        MYSQL_HOSTNAME_B: mysql-b
