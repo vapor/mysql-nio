@@ -1,7 +1,8 @@
 import XCTest
 @testable import MySQLNIO
+import Logging
 
-final class NIOMySQLTests: XCTestCase {
+final class MySQLNIOTests: XCTestCase {
     private var group: EventLoopGroup!
     private var eventLoop: EventLoop {
         return self.group.next()
@@ -390,12 +391,51 @@ final class NIOMySQLTests: XCTestCase {
             XCTAssertEqual(rows[0].column("d").flatMap { Decimal(mysqlData: $0) }?.description, "3.1415926")
         }
     }
+
+    // https://github.com/vapor/mysql-nio/issues/30
+    func testPreparedStatement_maxOpen() throws {
+        let conn = try MySQLConnection.test(on: self.eventLoop).wait()
+        defer { try! conn.close().wait() }
+
+        let result = try conn.simpleQuery("SHOW VARIABLES LIKE 'max_prepared_stmt_count';").wait()
+        let max = result[0].column("Value")!.int!
+        conn.logger.info("max_prepared_stmt_count=\(max)")
+
+        struct TestError: Error { }
+        for i in 0..<(max + 1) {
+            if i % (max / 10) == 0 {
+                conn.logger.info("max_prepared_stmt_count iteration \(i)/\(max + 1)")
+            }
+            do {
+                _ = try conn.query("SELECT @@version", onRow: { row in
+                    throw TestError()
+                }).wait()
+                XCTFail("Query should have errored")
+            } catch is TestError {
+                // expected
+            }
+        }
+    }
     
     override func setUp() {
         self.group = MultiThreadedEventLoopGroup(numberOfThreads: 1)
+        XCTAssert(isLoggingConfigured)
     }
     
     override func tearDown() {
         try! self.group.syncShutdownGracefully()
     }
+}
+
+let isLoggingConfigured: Bool = {
+    LoggingSystem.bootstrap { label in
+        var handler = StreamLogHandler.standardOutput(label: label)
+        handler.logLevel = env("LOG_LEVEL").flatMap { Logger.Level(rawValue: $0) } ?? .debug
+        return handler
+    }
+    return true
+}()
+
+func env(_ name: String) -> String? {
+    ProcessInfo.processInfo.environment[name]
 }

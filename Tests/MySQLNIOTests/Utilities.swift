@@ -17,7 +17,3 @@ extension MySQLConnection {
         }
     }
 }
-
-private func env(_ name: String) -> String? {
-    getenv(name).flatMap { String(cString: $0) }
-}
