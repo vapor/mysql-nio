@@ -176,12 +176,15 @@ private final class MySQLQueryCommand: MySQLCommand {
             }
         }
         var packet = MySQLPacket()
-        MySQLProtocol.COM_STMT_CLOSE(statementID: self.ok!.statementID).encode(into: &packet)
-        if let error = self.lastUserError {
-            throw error
-        } else {
-            return .init(response: [packet], done: true, resetSequence: true)
-        }
+        MySQLProtocol.COM_STMT_CLOSE(
+            statementID: self.ok!.statementID
+        ).encode(into: &packet)
+        return .init(
+            response: [packet],
+            done: true,
+            resetSequence: true,
+            error: self.lastUserError
+        )
     }
     
     func activate(capabilities: MySQLProtocol.CapabilityFlags) throws -> MySQLCommandState {

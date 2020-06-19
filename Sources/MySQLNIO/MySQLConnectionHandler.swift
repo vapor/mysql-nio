@@ -254,7 +254,11 @@ final class MySQLConnectionHandler: ChannelDuplexHandler {
         if commandState.done {
             let current = self.queue.removeFirst()
             self.commandState = .ready
-            current.promise.succeed(())
+            if let error = commandState.error {
+                current.promise.fail(error)
+            } else {
+                current.promise.succeed(())
+            }
             self.sendEnqueuedCommandIfReady(context: context)
         }
         if commandState.resetSequence {
