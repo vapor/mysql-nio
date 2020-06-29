@@ -251,6 +251,15 @@ final class MySQLConnectionHandler: ChannelDuplexHandler {
     }
     
     func handleCommandState(context: ChannelHandlerContext, _ commandState: MySQLCommandState) {
+        if commandState.resetSequence {
+            self.sequence.reset()
+        }
+        if !commandState.response.isEmpty {
+            for packet in commandState.response {
+                context.write(self.wrapOutboundOut(packet), promise: nil)
+            }
+            context.flush()
+        }
         if commandState.done {
             let current = self.queue.removeFirst()
             self.commandState = .ready
@@ -260,15 +269,6 @@ final class MySQLConnectionHandler: ChannelDuplexHandler {
                 current.promise.succeed(())
             }
             self.sendEnqueuedCommandIfReady(context: context)
-        }
-        if commandState.resetSequence {
-            self.sequence.reset()
-        }
-        if !commandState.response.isEmpty {
-            for packet in commandState.response {
-                context.write(self.wrapOutboundOut(packet), promise: nil)
-            }
-            context.flush()
         }
     }
     

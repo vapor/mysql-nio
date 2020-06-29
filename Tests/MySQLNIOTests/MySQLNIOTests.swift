@@ -416,6 +416,16 @@ final class MySQLNIOTests: XCTestCase {
             }
         }
     }
+    func testPreparedStatement_invalidParams() throws {
+        let conn = try MySQLConnection.test(on: self.eventLoop).wait()
+        defer { try! conn.close().wait() }
+
+        do {
+            _ = try conn.query("SELECT ?", []).wait()
+        } catch MySQLError.server {
+            // Pass
+        }
+    }
     
     override func setUp() {
         self.group = MultiThreadedEventLoopGroup(numberOfThreads: 1)
@@ -430,7 +440,7 @@ final class MySQLNIOTests: XCTestCase {
 let isLoggingConfigured: Bool = {
     LoggingSystem.bootstrap { label in
         var handler = StreamLogHandler.standardOutput(label: label)
-        handler.logLevel = env("LOG_LEVEL").flatMap { Logger.Level(rawValue: $0) } ?? .debug
+        handler.logLevel = env("LOG_LEVEL").flatMap { Logger.Level(rawValue: $0) } ?? .info
         return handler
     }
     return true
