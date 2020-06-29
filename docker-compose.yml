@@ -2,12 +2,13 @@ version: '3'
 
 services:
   test:
-    image: mysql
+    image: mysql:5.7
     environment:
       MYSQL_ALLOW_EMPTY_PASSWORD: "true"
       MYSQL_DATABASE: vapor_database
       MYSQL_USER: vapor_username
       MYSQL_PASSWORD: vapor_password
+      MYSQL_ROOT_PASSWORD: secret
     ports:
       - 3306:3306
   mysql-8_0:

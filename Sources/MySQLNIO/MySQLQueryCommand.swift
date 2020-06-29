@@ -60,6 +60,7 @@ private final class MySQLQueryCommand: MySQLCommand {
     private var ok: MySQLProtocol.COM_STMT_PREPARE_OK?
 
     private var lastUserError: Error?
+    var statementID: UInt32?
     
     init(
         sql: String,
@@ -82,14 +83,35 @@ private final class MySQLQueryCommand: MySQLCommand {
         self.logger.trace("MySQLQueryCommand.\(self.state)")
         guard !packet.isError else {
             self.state = .done
-            let error = try packet.decode(MySQLProtocol.ERR_Packet.self, capabilities: capabilities)
-            switch error.errorCode {
-                case .DUP_ENTRY:
-                    let msg = error.errorMessage
-                    throw MySQLError.duplicateEntry(msg)
-                default:
-                    throw MySQLError.server(error)
+
+            let errorPacket = try packet.decode(
+                MySQLProtocol.ERR_Packet.self,
+                capabilities: capabilities
+            )
+            let error: Error
+            switch errorPacket.errorCode {
+            case .DUP_ENTRY:
+                error = MySQLError.duplicateEntry(errorPacket.errorMessage)
+            default:
+                error = MySQLError.server(errorPacket)
             }
+
+            var response: [MySQLPacket] = []
+            if let statementID = self.statementID {
+                self.statementID = nil
+                var packet = MySQLPacket()
+                MySQLProtocol.COM_STMT_CLOSE(
+                    statementID: statementID
+                ).encode(into: &packet)
+                response = [packet]
+            }
+
+            return .init(
+                response: response,
+                done: true,
+                resetSequence: true,
+                error: error
+            )
         }
         switch self.state {
         case .ready:
@@ -102,6 +124,7 @@ private final class MySQLQueryCommand: MySQLCommand {
             } else {
                 self.state = .executeColumnCount
             }
+            self.statementID = res.statementID
             let execute = MySQLProtocol.COM_STMT_EXECUTE(
                 statementID: res.statementID,
                 flags: [],
@@ -179,8 +202,9 @@ private final class MySQLQueryCommand: MySQLCommand {
         MySQLProtocol.COM_STMT_CLOSE(
             statementID: self.ok!.statementID
         ).encode(into: &packet)
+        self.statementID = nil
         return .init(
-            response: [packet],
+            response: [],
             done: true,
             resetSequence: true,
             error: self.lastUserError
@@ -190,5 +214,9 @@ private final class MySQLQueryCommand: MySQLCommand {
     func activate(capabilities: MySQLProtocol.CapabilityFlags) throws -> MySQLCommandState {
         let prepare = MySQLProtocol.COM_STMT_PREPARE(query: self.sql)
         return try .response([.encode(prepare, capabilities: capabilities)])
+    }
+
+    deinit {
+        assert(self.statementID == nil, "Statement not closed: \(self.sql)")
     }
 }
