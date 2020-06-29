@@ -204,7 +204,7 @@ private final class MySQLQueryCommand: MySQLCommand {
         ).encode(into: &packet)
         self.statementID = nil
         return .init(
-            response: [],
+            response: [packet],
             done: true,
             resetSequence: true,
             error: self.lastUserError
@@ -218,5 +218,8 @@ private final class MySQLQueryCommand: MySQLCommand {
 
     deinit {
         assert(self.statementID == nil, "Statement not closed: \(self.sql)")
+        if self.statementID != nil {
+            self.logger.error("Statement not closed: \(self.sql)")
+        }
     }
 }
