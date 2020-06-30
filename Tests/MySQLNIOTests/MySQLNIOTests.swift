@@ -25,6 +25,7 @@ final class MySQLNIOTests: XCTestCase {
             XCTAssertEqual(sqlData.float, nil)
             XCTAssertEqual(sqlData.double, nil)
             XCTAssertEqual(sqlData.int, nil)
+            XCTAssertEqual(sqlData.decimal, nil)
         } else {
             XCTAssert(false, "rows[0].column(\"sum\") was nil")
         }
@@ -48,6 +49,7 @@ final class MySQLNIOTests: XCTestCase {
             XCTAssertEqual(sqlData.float, 0)
             XCTAssertEqual(sqlData.double, 0)
             XCTAssertEqual(sqlData.int, 0)
+            XCTAssertEqual(sqlData.decimal, 0)
         } else {
             XCTAssert(false, "rows[0].column(\"sum\") was nil")
         }
@@ -62,6 +64,7 @@ final class MySQLNIOTests: XCTestCase {
             XCTAssertEqual(sqlData.float, 199)
             XCTAssertEqual(sqlData.double, 199)
             XCTAssertEqual(sqlData.int, 199)
+            XCTAssertEqual(sqlData.decimal, Decimal(string: "199"))
         } else {
             XCTAssert(false, "rows[0].column(\"sum\") was nil")
         }
@@ -325,6 +328,7 @@ final class MySQLNIOTests: XCTestCase {
             .init("xmediumint", "MEDIUMINT(1)", 1024),
             .init("xinteger", "INTEGER(1)", 1024293),
             .init("xbigint", "BIGINT(1)", 234234234),
+            .init("xdecimal", "DECIMAL(12,5)", MySQLData(decimal: Decimal(string:"-12.34567")!)),
             .init("name", "VARCHAR(10) NOT NULL", "vapor"),
         ]
         
@@ -387,8 +391,8 @@ final class MySQLNIOTests: XCTestCase {
         let conn = try MySQLConnection.test(on: self.eventLoop).wait()
         defer { try! conn.close().wait() }
         do {
-            let rows = try conn.query("SELECT '3.1415926' as d").wait()
-            XCTAssertEqual(rows[0].column("d").flatMap { Decimal(mysqlData: $0) }?.description, "3.1415926")
+            let rows = try conn.query("SELECT CAST('3.1415926' as DECIMAL(12,3)) as d").wait()
+            XCTAssertEqual(rows[0].column("d").flatMap { Decimal(mysqlData: $0) }?.description, "3.142")
         }
     }
 

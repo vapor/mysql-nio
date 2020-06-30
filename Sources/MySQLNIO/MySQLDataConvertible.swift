@@ -110,13 +110,13 @@ extension Float: MySQLDataConvertible {
 
 extension Decimal: MySQLDataConvertible {
     public init?(mysqlData: MySQLData) {
-        guard let string = mysqlData.string else {
+        guard let decimal = mysqlData.decimal else {
             return nil
         }
-        self.init(string: string)
+        self = decimal
     }
 
     public var mysqlData: MySQLData? {
-        .init(string: self.description)
+        .init(decimal: self)
     }
 }

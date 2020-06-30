@@ -1,5 +1,7 @@
 @_exported import struct Foundation.Date
 @_exported import struct Foundation.UUID
+@_exported import struct Foundation.Decimal
+
 import class Foundation.JSONEncoder
 import class Foundation.JSONDecoder
 import struct Foundation.Data
@@ -73,6 +75,16 @@ public struct MySQLData: CustomStringConvertible, ExpressibleByStringLiteral, Ex
         }
         self.isUnsigned = false
         self.buffer = buffer
+    }
+
+    public init(decimal: Decimal) {
+        let string = decimal.description
+        self.format = .binary
+        self.type = .newdecimal
+        var buffer = ByteBufferAllocator().buffer(capacity: string.utf8.count)
+        buffer.writeString(string)
+        self.buffer = buffer
+        self.isUnsigned = false
     }
     
     public init(float: Float) {
@@ -212,6 +224,44 @@ public struct MySQLData: CustomStringConvertible, ExpressibleByStringLiteral, Ex
             }
         case .text:
             return self.string.flatMap(Double.init)
+        }
+    }
+
+    public var decimal: Decimal? {
+        switch self.format {
+        case .binary:
+            switch self.type {
+            case .double:
+                guard var buffer = self.buffer else {
+                    return nil
+                }
+                guard let bytes = buffer.readBytes(length: MemoryLayout<Double>.size) else {
+                    return nil
+                }
+                var double: Double = 0
+                Swift.withUnsafeMutableBytes(of: &double) { buffer in
+                    buffer.copyBytes(from: bytes)
+                }
+                return Decimal(floatLiteral: double)
+            case .float:
+                return self.float.flatMap { Decimal(Double($0)) }
+            case .newdecimal:
+                guard var buffer = self.buffer else {
+                    return nil
+                }
+                return buffer.readString(length: buffer.readableBytes)
+                    .flatMap{ Decimal(string: $0)  }
+            case .varchar, .varString, .string, .blob, .tinyBlob, .mediumBlob, .longBlob:
+                guard var buffer = self.buffer else {
+                    return nil
+                }
+                return buffer.readString(length: buffer.readableBytes)
+                        .flatMap{ Decimal(string: $0)  }
+            default:
+                return nil
+            }
+        case .text:
+            return self.string.flatMap{ Decimal(string: $0) }
         }
     }
 
