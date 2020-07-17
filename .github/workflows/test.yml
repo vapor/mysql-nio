@@ -53,6 +53,7 @@ jobs:
           MYSQL_HOSTNAME: mysql-a
           MYSQL_HOSTNAME_A: mysql-a
           MYSQL_HOSTNAME_B: mysql-b
+          LOG_LEVEL: error
   linux:
     strategy:
       fail-fast: false
@@ -97,6 +98,7 @@ jobs:
         run: swift test --enable-test-discovery --sanitize=thread
         env:
           MYSQL_HOSTNAME: mysql
+          LOG_LEVEL: error
   macOS:
     strategy:
       fail-fast: false
@@ -134,3 +136,4 @@ jobs:
         env: 
           MYSQL_HOSTNAME: '127.0.0.1'
           MYSQL_DATABASE: vapor_database
+          LOG_LEVEL: error
