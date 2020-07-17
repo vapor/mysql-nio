@@ -99,7 +99,7 @@ extension MySQLProtocol {
         internal var encodingLength: Int? {
             let length: Int?
             switch self {
-            case .string, .varchar, .varString, .enum, .set, .longBlob, .mediumBlob, .blob, .tinyBlob, .geometry, .bit, .decimal, .newdecimal, .json:
+            case .string, .varchar, .varString, .enum, .set, .longBlob, .mediumBlob, .blob, .tinyBlob, .geometry, .bit, .decimal, .newdecimal, .json, .null:
                 length = nil
             case .longlong:
                 length = 8

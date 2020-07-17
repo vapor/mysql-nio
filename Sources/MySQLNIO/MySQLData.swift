@@ -185,7 +185,7 @@ public struct MySQLData: CustomStringConvertible, ExpressibleByStringLiteral, Ex
             return buffer.readString(length: buffer.readableBytes)
         default:
             switch self.type {
-            case .varchar, .varString, .string, .blob, .tinyBlob, .mediumBlob, .longBlob:
+            case .varchar, .varString, .string, .blob, .tinyBlob, .mediumBlob, .longBlob, .null:
                 return buffer.readString(length: buffer.readableBytes)
             case .longlong, .long, .int24, .short, .tiny, .bit:
                 return self.int?.description
