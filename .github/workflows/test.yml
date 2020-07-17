@@ -1,105 +1,88 @@
 name: test
-on:
-- pull_request
+on: 
+  - pull_request
 jobs:
-  mysql-nio:
-    container: 
-      image: vapor/swift:5.2
+  linux:
+    strategy:
+      fail-fast: false
+      matrix:
+        dbimage:
+          - mysql:5.7
+          - mysql:8.0
+          - mariadb:latest
+        runner:
+          # 5.2 Stable
+          - swift:5.2-xenial
+          - swift:5.2-bionic
+          # 5.2 Unstable
+          - swiftlang/swift:nightly-5.2-xenial
+          - swiftlang/swift:nightly-5.2-bionic
+          # 5.3 Unstable
+          - swiftlang/swift:nightly-5.3-xenial
+          - swiftlang/swift:nightly-5.3-bionic
+          # Master Unsable
+          - swiftlang/swift:nightly-master-xenial
+          - swiftlang/swift:nightly-master-bionic
+          - swiftlang/swift:nightly-master-focal
+          - swiftlang/swift:nightly-master-centos8
+          - swiftlang/swift:nightly-master-amazonlinux2
+        include:
+          - runner: swiftlang/swift:nightly-master-centos8
+            installcmd: dnf install -y zlib-devel
+          - runner: swiftlang/swift:nightly-master-amazonlinux2
+            installcmd: yum install -y zlib-devel
+        exclude:
+          - runner: swiftlang/swift:nightly-master-amazonlinux2
+            dbimage: mysql:8.0
+    container: ${{ matrix.runner }}
+    runs-on: ubuntu-latest
     services:
       mysql:
-        image: mysql
-        env:
-          MYSQL_ALLOW_EMPTY_PASSWORD: true
-          MYSQL_DATABASE: vapor_database
+        image: ${{ matrix.dbimage }}
+        env: 
+          MYSQL_ALLOW_EMPTY_PASSWORD: "true"
           MYSQL_USER: vapor_username
           MYSQL_PASSWORD: vapor_password
-    runs-on: ubuntu-latest
+          MYSQL_DATABASE: vapor_database
     steps:
-    - uses: actions/checkout@v1
-    - run: swift test --enable-test-discovery --sanitize=thread
-      env:
-        MYSQL_HOSTNAME: mysql
-  mysql-nio-8_0:
-    container: 
-      image: vapor/swift:5.2
-    services:
-      mysql:
-        image: mysql:8.0
+      - name: Install dependencies
+        run: ${{ matrix.installcmd }}
+      - name: Check out code
+        uses: actions/checkout@v2
+      - name: Run tests with Thread Sanitizer
+        run: swift test --enable-test-discovery --sanitize=thread
         env:
-          MYSQL_ALLOW_EMPTY_PASSWORD: true
-          MYSQL_DATABASE: vapor_database
-          MYSQL_USER: vapor_username
-          MYSQL_PASSWORD: vapor_password
-    runs-on: ubuntu-latest
+          MYSQL_HOSTNAME: mysql
+  macOS:
+    strategy:
+      fail-fast: false
+      matrix:
+        formula: ['mysql@8.0', 'mysql@5.7', 'mariadb']
+        include:
+          - username: root
+          - { 'formula': 'mariadb', 'username': 'runner' }
+    runs-on: macos-latest
     steps:
-    - uses: actions/checkout@v1
-    - run: swift test --enable-test-discovery --sanitize=thread
-      env:
-        MYSQL_HOSTNAME: mysql
-  mysql-nio-5_7:
-    container: 
-      image: vapor/swift:5.2
-    services:
-      mysql:
-        image: mysql:5.7
-        env:
-          MYSQL_ALLOW_EMPTY_PASSWORD: true
+      - name: Select latest available Xcode
+        uses: maxim-lobanov/setup-xcode@1.0
+        with: { 'xcode-version': 'latest' }
+      - name: Install MySQL server from Homebrew
+        run: brew install ${{ matrix.formula }} && brew link --force ${{ matrix.formula }}
+      - name: Start MySQL server
+        run: brew services start ${{ matrix.formula }}
+      - name: Wait for MySQL server to be ready
+        run: until echo | mysql -u${{ matrix.username }}; do sleep 1; done
+        timeout-minutes: 5
+      - name: Set up MySQL databases and privileges
+        run: |
+          mysql -u${{ matrix.username }} --batch <<-'SQL'
+              CREATE USER vapor_username@localhost IDENTIFIED BY 'vapor_password';
+              CREATE DATABASE vapor_database; GRANT ALL PRIVILEGES ON vapor_database_a.* TO vapor_username@localhost;
+          SQL
+      - name: Check out code
+        uses: actions/checkout@v2
+      - name: Run tests with Thread Sanitizer
+        run: swift test --enable-test-discovery --sanitize=thread
+        env: 
+          MYSQL_HOSTNAME: '127.0.0.1'
           MYSQL_DATABASE: vapor_database
-          MYSQL_USER: vapor_username
-          MYSQL_PASSWORD: vapor_password
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v1
-    - run: swift test --enable-test-discovery --sanitize=thread
-      env:
-        MYSQL_HOSTNAME: mysql
-  mysql-kit:
-    container: 
-      image: vapor/swift:5.2
-    services:
-      mysql:
-        image: mysql
-        env:
-          MYSQL_ALLOW_EMPTY_PASSWORD: true
-          MYSQL_DATABASE: vapor_database
-          MYSQL_USER: vapor_username
-          MYSQL_PASSWORD: vapor_password
-    runs-on: ubuntu-latest
-    steps:
-    - run: git clone -b master https://github.com/vapor/mysql-kit.git
-      working-directory: ./
-    - run: swift package edit mysql-nio --revision ${{ github.sha }}
-      working-directory: ./mysql-kit
-    - run: swift test --enable-test-discovery --sanitize=thread
-      working-directory: ./mysql-kit
-      env:
-        MYSQL_HOSTNAME: mysql
-  fluent-mysql-driver:
-    container: 
-      image: vapor/swift:5.2
-    services:
-      mysql-a:
-        image: mysql
-        env:
-          MYSQL_ALLOW_EMPTY_PASSWORD: true
-          MYSQL_DATABASE: vapor_database
-          MYSQL_USER: vapor_username
-          MYSQL_PASSWORD: vapor_password
-      mysql-b:
-        image: mysql
-        env:
-          MYSQL_ALLOW_EMPTY_PASSWORD: true
-          MYSQL_DATABASE: vapor_database
-          MYSQL_USER: vapor_username
-          MYSQL_PASSWORD: vapor_password
-    runs-on: ubuntu-latest
-    steps:
-    - run: git clone -b master https://github.com/vapor/fluent-mysql-driver.git
-      working-directory: ./
-    - run: swift package edit mysql-nio --revision ${{ github.sha }}
-      working-directory: ./fluent-mysql-driver
-    - run: swift test --enable-test-discovery --sanitize=thread
-      working-directory: ./fluent-mysql-driver
-      env:
-        MYSQL_HOSTNAME_A: mysql-a
-        MYSQL_HOSTNAME_B: mysql-b
