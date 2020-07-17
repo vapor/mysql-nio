@@ -127,7 +127,8 @@ jobs:
         run: |
           mysql -u${{ matrix.username }} --batch <<-'SQL'
               CREATE USER vapor_username@localhost IDENTIFIED BY 'vapor_password';
-              CREATE DATABASE vapor_database; GRANT ALL PRIVILEGES ON vapor_database_a.* TO vapor_username@localhost;
+              CREATE DATABASE vapor_database; 
+              GRANT ALL PRIVILEGES ON vapor_database.* TO vapor_username@localhost;
           SQL
       - name: Check out code
         uses: actions/checkout@v2
