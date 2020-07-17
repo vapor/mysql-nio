@@ -96,6 +96,7 @@ extension MySQLProtocol {
         
         /// Length that this type encodes to. If `nil`, the encoded
         /// value is prefixed by a length-encoded integer.
+        /// https://dev.mysql.com/doc/refman/8.0/en/c-api-prepared-statement-type-codes.html
         internal var encodingLength: Int? {
             let length: Int?
             switch self {
