@@ -53,7 +53,7 @@ jobs:
           MYSQL_HOSTNAME: mysql-a
           MYSQL_HOSTNAME_A: mysql-a
           MYSQL_HOSTNAME_B: mysql-b
-          LOG_LEVEL: error
+          LOG_LEVEL: info
   linux:
     strategy:
       fail-fast: false
