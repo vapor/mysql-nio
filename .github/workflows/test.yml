@@ -1,6 +1,58 @@
 name: test
 on: 
   - pull_request
+defaults:
+  run:
+    shell: bash
+jobs:
+  dependents:
+    runs-on: ubuntu-latest
+    services:
+      mysql-a:
+        image: ${{ matrix.dbimage }}
+        env: 
+          MYSQL_ALLOW_EMPTY_PASSWORD: "true"
+          MYSQL_USER: vapor_username
+          MYSQL_PASSWORD: vapor_password
+          MYSQL_DATABASE: vapor_database
+      mysql-b:
+        image: ${{ matrix.dbimage }}
+        env: 
+          MYSQL_ALLOW_EMPTY_PASSWORD: "true"
+          MYSQL_USER: vapor_username
+          MYSQL_PASSWORD: vapor_password
+          MYSQL_DATABASE: vapor_database
+    container: swift:5.2-bionic
+    strategy:
+      fail-fast: false
+      matrix:
+        dbimage:
+          - mysql:5.7
+          - mysql:8.0
+          - mariadb:latest
+        dependent:
+          - mysql-kit
+          - fluent-mysql-driver
+    steps:
+      - name: Check out package
+        uses: actions/checkout@v2
+        with:
+          path: package
+      - name: Check out dependent
+        uses: actions/checkout@v2
+        with:
+          repository: vapor/${{ matrix.dependent }}
+          path: dependent
+      - name: Use local package
+        run: swift package edit mysql-nio --path ../package
+        working-directory: dependent
+      - name: Run tests with Thread Sanitizer
+        run: swift test --enable-test-discovery --sanitize=thread
+        working-directory: dependent
+        env:
+          MYSQL_HOSTNAME: mysql-a
+          MYSQL_HOSTNAME_A: mysql-a
+          MYSQL_HOSTNAME_B: mysql-b
 jobs:
   linux:
     strategy:
@@ -26,11 +78,6 @@ jobs:
           - swiftlang/swift:nightly-master-focal
           - swiftlang/swift:nightly-master-centos8
           - swiftlang/swift:nightly-master-amazonlinux2
-        include:
-          - runner: swiftlang/swift:nightly-master-centos8
-            installcmd: dnf install -y zlib-devel
-          - runner: swiftlang/swift:nightly-master-amazonlinux2
-            installcmd: yum install -y zlib-devel
         exclude:
           - runner: swiftlang/swift:nightly-master-amazonlinux2
             dbimage: mysql:8.0
@@ -45,8 +92,6 @@ jobs:
           MYSQL_PASSWORD: vapor_password
           MYSQL_DATABASE: vapor_database
     steps:
-      - name: Install dependencies
-        run: ${{ matrix.installcmd }}
       - name: Check out code
         uses: actions/checkout@v2
       - name: Run tests with Thread Sanitizer
