@@ -105,8 +105,8 @@ jobs:
       matrix:
         formula: 
           - mysql@8.0
-          # - mysql@5.7
-          # - mariadb
+          - mysql@5.7
+          - mariadb
         include:
           - username: root
           - formula: mariadb
@@ -115,7 +115,8 @@ jobs:
     steps:
       - name: Select latest available Xcode
         uses: maxim-lobanov/setup-xcode@1.0
-        with: { 'xcode-version': 'latest' }
+        with: 
+          xcode-version: latest
       - name: Install MySQL server from Homebrew
         run: brew install ${{ matrix.formula }} && brew link --force ${{ matrix.formula }}
       - name: Start MySQL server
