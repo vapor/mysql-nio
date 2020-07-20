@@ -303,33 +303,33 @@ final class MySQLNIOTests: XCTestCase {
                 self.data = value
                 self.match = { data, file, line in
                     if let data = data {
-                        XCTAssertEqual(data.description, value.description, name, file: file, line: line)
+                        if data.type == .bit {
+                            XCTAssertEqual(data.bool, value.bool, name, file: file, line: line)
+                        } else {
+                            XCTAssertEqual(data.description, value.description, name, file: file, line: line)
+                        }
                     } else {
                         XCTFail("Data null", file: file, line: line)
                     }
                 }
             }
         }
-        var hello3 = ByteBufferAllocator().buffer(capacity: 0)
-        hello3.writeString("hello3")
 
-        var bit = ByteBufferAllocator().buffer(capacity: 1)
-        bit.writeInteger(1, as: UInt8.self)
         let tests: [TestColumn] = [
             .init("xchar", "CHAR(60)", "hello1"),
             .init("xvarchar", "VARCHAR(61)", "hello2"),
-            .init("xtext", "TEXT(62)", MySQLData(type: .blob, buffer: hello3)),
+            .init("xtext", "TEXT(62)", MySQLData(type: .blob, buffer: .init(string: "hello3"))),
             .init("xbinary", "BINARY(6)", "hello4"),
             .init("xvarbinary", "VARBINARY(66)", "hello5"),
-            .init("xbit", "BIT", MySQLData(type: .bit, buffer: bit)),
-            .init("xtinyint", "TINYINT(1)", 5),
-            .init("xsmallint", "SMALLINT(1)", 252),
-            .init("xvarcharnull", "VARCHAR(10)", MySQLData(type: .varString, buffer: nil)),
-            .init("xmediumint", "MEDIUMINT(1)", 1024),
-            .init("xinteger", "INTEGER(1)", 1024293),
-            .init("xbigint", "BIGINT(1)", 234234234),
+            .init("xbit", "BIT", MySQLData(bool: true)),
+            .init("xtinyint", "TINYINT(1)", 127),
+            .init("xsmallint", "SMALLINT(1)", 32767),
+            .init("xvarcharnull", "VARCHAR(10)", MySQLData(type: .null, buffer: nil)),
+            .init("xmediumint", "MEDIUMINT(1)", 8388607),
+            .init("xinteger", "INTEGER(1)", 2147483647),
+            .init("xbigint", "BIGINT(1)", MySQLData(int: .max)),
             .init("xdecimal", "DECIMAL(12,5)", MySQLData(decimal: Decimal(string:"-12.34567")!)),
-            .init("name", "VARCHAR(10) NOT NULL", "vapor"),
+            .init("xname", "VARCHAR(10) NOT NULL", "vapor"),
         ]
         
         let conn = try MySQLConnection.test(on: self.eventLoop).wait()
@@ -349,7 +349,7 @@ final class MySQLNIOTests: XCTestCase {
         XCTAssertEqual(insertResults.count, 0)
         
         // select data
-        let selectResults = try conn.query("SELECT * FROM kitchen_sink WHERE name = ?;", ["vapor"]).wait()
+        let selectResults = try conn.query("SELECT * FROM kitchen_sink WHERE xname = ?;", ["vapor"]).wait()
         XCTAssertEqual(selectResults.count, 1)
         
         for test in tests {
