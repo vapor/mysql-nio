@@ -120,6 +120,47 @@ final class MySQLConnectionHandler: ChannelDuplexHandler {
         state: HandshakeState,
         isTLS: Bool
     ) throws {
+        struct SemanticVersion {
+            let major: Int
+            let minor: Int
+            let patch: Int
+
+            init?<S>(string: S)
+                where S: StringProtocol
+            {
+                let parts = string.split(separator: ".")
+                guard parts.count == 3 else {
+                    return nil
+                }
+                guard let major = Int(parts[0]), let minor = Int(parts[1]), let patch = Int(parts[2]) else {
+                    return nil
+                }
+                self.major = major
+                self.minor = minor
+                self.patch = patch
+            }
+        }
+
+        let versionString = handshakeRequest.serverVersion.split(separator: "-")[0]
+        if let version = SemanticVersion(string: versionString) {
+            if !handshakeRequest.serverVersion.contains("MariaDB") {
+
+                switch (version.major, version.minor) {
+                case (8..., _):
+                    // >= 8.0
+                    break
+                case (5..., 7...):
+                    // >= 5.7
+                    break
+                default:
+                    self.logger.error("Unsupported MySQL version: \(handshakeRequest.serverVersion)")
+                    self.logger.info("MySQL 5.7 or higher is required")
+                }
+            }
+        } else {
+            self.logger.error("Unrecognized MySQL version: \(handshakeRequest.serverVersion)")
+        }
+        
         guard handshakeRequest.capabilities.contains(.CLIENT_SECURE_CONNECTION) else {
             throw MySQLError.unsupportedServer(message: "Pre-4.1 auth protocol is not supported or safe.")
         }
