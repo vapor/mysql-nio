@@ -420,6 +420,7 @@ final class MySQLNIOTests: XCTestCase {
             }
         }
     }
+
     func testPreparedStatement_invalidParams() throws {
         let conn = try MySQLConnection.test(on: self.eventLoop).wait()
         defer { try! conn.close().wait() }
@@ -429,6 +430,23 @@ final class MySQLNIOTests: XCTestCase {
         } catch MySQLError.server {
             // Pass
         }
+    }
+
+    // https://github.com/vapor/mysql-kit/issues/210
+    func testValidQueryTimeout() throws {
+        let conn = try MySQLConnection.test(on: self.eventLoop).wait()
+        defer { try! conn.close().wait() }
+
+        _ = try conn.query("""
+        CREATE TABLE `Phrase` (id INT(11), views INT(11))
+        """).wait()
+        defer {
+            _ = try! conn.query("DROP TABLE IF EXISTS `Phrase`").wait()
+        }
+
+        _ = try conn.query("""
+        UPDATE `Phrase` SET `views` = CASE WHEN `id` = 1 THEN `views` + 6 WHEN `id` = 2 THEN `views` + 2 END WHERE `id` IN (1,2);
+        """).wait()
     }
     
     override func setUp() {
