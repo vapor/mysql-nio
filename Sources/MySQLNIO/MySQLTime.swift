@@ -72,7 +72,6 @@ public struct MySQLTime: Equatable, MySQLDataConvertible {
             second: numericCast(tm.tm_sec),
             microsecond: UInt32(microseconds)
         )
-        print(self)
     }
     
     /// `MySQLDataConvertible` conformance.
