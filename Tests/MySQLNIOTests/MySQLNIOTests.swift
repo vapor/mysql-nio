@@ -448,7 +448,15 @@ final class MySQLNIOTests: XCTestCase {
         """).wait()
     }
 
-    func test4ByteMySQLTime() throws {
+    func test4ByteMySQLTimeSerialize() throws {
+        let conn = try MySQLConnection.test(on: self.eventLoop).wait()
+        defer { try! conn.close().wait() }
+
+        let rows = try conn.query(#"SELECT DATE_FORMAT(?, "%M %D %Y %H:%i:%s.%f")as x"#, [.init(time: .init(year: 2020, month: 5, day: 23))]).wait()
+        XCTAssertEqual(rows[0].column("x")?.string, "May 23rd 2020 00:00:00.000000")
+    }
+
+    func test4ByteMySQLTimeParse() throws {
         let conn = try MySQLConnection.test(on: self.eventLoop).wait()
         defer { try! conn.close().wait() }
 
@@ -473,7 +481,17 @@ final class MySQLNIOTests: XCTestCase {
         XCTAssertEqual(time.date?.description, "2038-01-19 00:00:00 +0000")
     }
 
-    func test7ByteMySQLTime() throws {
+    func test7ByteMySQLTimeSerialize() throws {
+        let conn = try MySQLConnection.test(on: self.eventLoop).wait()
+        defer { try! conn.close().wait() }
+
+        let rows = try conn.query(#"SELECT DATE_FORMAT(?, "%M %D %Y %H:%i:%s.%f")as x"#, [
+            .init(time: .init(year: 2020, month: 5, day: 23, hour: 2, minute: 58, second: 42))
+        ]).wait()
+        XCTAssertEqual(rows[0].column("x")?.string, "May 23rd 2020 02:58:42.000000")
+    }
+
+    func test7ByteMySQLTimeParse() throws {
         let conn = try MySQLConnection.test(on: self.eventLoop).wait()
         defer { try! conn.close().wait() }
 
@@ -498,8 +516,18 @@ final class MySQLNIOTests: XCTestCase {
         XCTAssertEqual(time.date?.description, "2038-01-19 03:14:07 +0000")
     }
 
+    func test8ByteMySQLTimeSerialize() throws {
+        let conn = try MySQLConnection.test(on: self.eventLoop).wait()
+        defer { try! conn.close().wait() }
+
+        let rows = try conn.query(#"SELECT DATE_FORMAT(?, "%H:%i:%s.%f") as x"#, [
+            .init(time: .init(hour: 2, minute: 58, second: 42))
+        ]).wait()
+        XCTAssertEqual(rows[0].column("x")?.string, "02:58:42.000000")
+    }
+
     // https://github.com/vapor/mysql-nio/issues/49
-    func test8ByteMySQLTime() throws {
+    func test8ByteMySQLTimeParse() throws {
         let conn = try MySQLConnection.test(on: self.eventLoop).wait()
         defer { try! conn.close().wait() }
 
@@ -508,7 +536,7 @@ final class MySQLNIOTests: XCTestCase {
         defer {
             _ = try! conn.simpleQuery("DROP TABLE IF EXISTS foo").wait()
         }
-        _ = try conn.query("INSERT INTO foo (bar) VALUES ('12:34:56')").wait()
+        _ = try conn.query("INSERT INTO foo (bar) VALUES ('12:34:56.123')").wait()
         let rows = try conn.query("SELECT * FROM foo").wait()
         guard let time = rows[0].column("bar")?.time else {
             XCTFail("Could not convert to time: \(rows[0])")
@@ -524,7 +552,17 @@ final class MySQLNIOTests: XCTestCase {
         XCTAssertEqual(time.date, nil)
     }
 
-    func test11ByteMySQLTime() throws {
+    func test11ByteMySQLTimeSerialize() throws {
+        let conn = try MySQLConnection.test(on: self.eventLoop).wait()
+        defer { try! conn.close().wait() }
+
+        let rows = try conn.query(#"SELECT DATE_FORMAT(?, "%M %D %Y %H:%i:%s.%f") as x"#, [
+            .init(time: .init(year: 2038, month: 1, day: 19, hour: 3, minute: 14, second: 7, microsecond: 123456))
+        ]).wait()
+        XCTAssertEqual(rows[0].column("x")?.string, "January 19th 2038 03:14:07.123456")
+    }
+
+    func test11ByteMySQLTimeParse() throws {
         let conn = try MySQLConnection.test(on: self.eventLoop).wait()
         defer { try! conn.close().wait() }
 
@@ -547,6 +585,41 @@ final class MySQLNIOTests: XCTestCase {
         XCTAssertEqual(time.second, 7)
         XCTAssertEqual(time.microsecond, 123456)
         XCTAssertEqual(time.date?.description, "2038-01-19 03:14:07 +0000")
+    }
+
+    func test12ByteMySQLTimeSerialize() throws {
+        let conn = try MySQLConnection.test(on: self.eventLoop).wait()
+        defer { try! conn.close().wait() }
+
+        let rows = try conn.query(#"SELECT DATE_FORMAT(?, "%H:%i:%s.%f") as x"#, [
+            .init(time: .init(hour: 3, minute: 14, second: 7, microsecond: 123456))
+        ]).wait()
+        XCTAssertEqual(rows[0].column("x")?.string, "03:14:07.123456")
+    }
+
+    func test12ByteMySQLTimeParse() throws {
+        let conn = try MySQLConnection.test(on: self.eventLoop).wait()
+        defer { try! conn.close().wait() }
+
+        _ = try! conn.simpleQuery("DROP TABLE IF EXISTS foo").wait()
+        _ = try conn.simpleQuery("CREATE TABLE foo (bar TIME(6))").wait()
+        defer {
+            _ = try! conn.simpleQuery("DROP TABLE IF EXISTS foo").wait()
+        }
+        _ = try conn.query("INSERT INTO foo (bar) VALUES ('03:14:07.123456')").wait()
+        let rows = try conn.query("SELECT * FROM foo").wait()
+        guard let time = rows[0].column("bar")?.time else {
+            XCTFail("Could not convert to time: \(rows[0])")
+            return
+        }
+        XCTAssertEqual(time.year, nil)
+        XCTAssertEqual(time.month, nil)
+        XCTAssertEqual(time.day, nil)
+        XCTAssertEqual(time.hour, 3)
+        XCTAssertEqual(time.minute, 14)
+        XCTAssertEqual(time.second, 7)
+        XCTAssertEqual(time.microsecond, 123456)
+        XCTAssertEqual(time.date, nil)
     }
     
     override func setUp() {

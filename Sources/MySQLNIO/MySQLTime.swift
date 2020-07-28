@@ -164,7 +164,7 @@ extension ByteBuffer {
             .none
         ):
             // time
-            self.moveWriterIndex(forwardBy: 5)
+            self.writeBytes([0, 0, 0, 0])
             self.writeInteger(numericCast(hour), endianness: .little, as: UInt8.self)
             self.writeInteger(numericCast(minute), endianness: .little, as: UInt8.self)
             self.writeInteger(numericCast(second), endianness: .little, as: UInt8.self)
@@ -181,6 +181,17 @@ extension ByteBuffer {
             self.writeInteger(numericCast(minute), endianness: .little, as: UInt8.self)
             self.writeInteger(numericCast(second), endianness: .little, as: UInt8.self)
             self.writeInteger(microsecond, endianness: .little, as: UInt32.self)
+        case (
+            .none, .none, .none,
+            .some(let hour), .some(let minute), .some(let second),
+            .some(let microsecond)
+        ):
+            // time + fractional seconds
+            self.writeBytes([0, 0, 0, 0])
+            self.writeInteger(numericCast(hour), endianness: .little, as: UInt8.self)
+            self.writeInteger(numericCast(minute), endianness: .little, as: UInt8.self)
+            self.writeInteger(numericCast(second), endianness: .little, as: UInt8.self)
+            self.writeInteger(microsecond, endianness: .little, as: UInt32.self)
         default:
             Logger(label: "codes.vapor.mysql")
                 .warning("Cannot convert MySQLTime to ByteBuffer: \(time)")
@@ -189,7 +200,6 @@ extension ByteBuffer {
     
     mutating func readMySQLTime() -> MySQLTime? {
         let time: MySQLTime
-        print(self.debugDescription)
         switch self.readableBytes {
         case 0:
             // null
@@ -237,6 +247,18 @@ extension ByteBuffer {
                     .flatMap(numericCast),
                 day: self.readInteger(endianness: .little, as: UInt8.self)
                     .flatMap(numericCast),
+                hour: self.readInteger(endianness: .little, as: UInt8.self)
+                    .flatMap(numericCast),
+                minute: self.readInteger(endianness: .little, as: UInt8.self)
+                    .flatMap(numericCast),
+                second: self.readInteger(endianness: .little, as: UInt8.self)
+                    .flatMap(numericCast),
+                microsecond: self.readInteger(endianness: .little)
+            )
+        case 12:
+            // time + fractional seconds
+            self.moveReaderIndex(forwardBy: 5)
+            time = MySQLTime(
                 hour: self.readInteger(endianness: .little, as: UInt8.self)
                     .flatMap(numericCast),
                 minute: self.readInteger(endianness: .little, as: UInt8.self)
