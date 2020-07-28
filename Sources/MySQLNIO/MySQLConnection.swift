@@ -7,6 +7,7 @@ public final class MySQLConnection: MySQLDatabase {
         database: String,
         password: String? = nil,
         tlsConfiguration: TLSConfiguration? = .forClient(),
+        serverHostname: String? = nil,
         logger: Logger = .init(label: "codes.vapor.mysql"),
         on eventLoop: EventLoop
     ) -> EventLoopFuture<MySQLConnection> {
@@ -35,6 +36,7 @@ public final class MySQLConnection: MySQLDatabase {
                     database: database,
                     password: password,
                     tlsConfiguration: tlsConfiguration,
+                    serverHostname: serverHostname,
                     done: done
                 )), sequence: sequence),
                 ErrorHandler()
