@@ -248,7 +248,7 @@ final class MySQLNIOTests: XCTestCase {
     func testDate_conversion() throws {
         let date = Date(timeIntervalSinceReferenceDate: 0.001)
         let mysqlDate = MySQLTime(date: date)
-        let time = mysqlDate.date
+        let time = mysqlDate.date!
         XCTAssertNotEqual(mysqlDate.microsecond, 0)
         
         XCTAssertEqual(
@@ -259,9 +259,8 @@ final class MySQLNIOTests: XCTestCase {
     }
  
     func testDate_before1970() throws {
-        let time = MySQLTime(date: MySQLTime(date: Date(timeIntervalSince1970: 1.1)).date)
-        let time2 = MySQLTime(date: MySQLTime(date: Date(timeIntervalSince1970: -1.1)).date)
-        
+        let time = MySQLTime(date: MySQLTime(date: Date(timeIntervalSince1970: 1.1)).date!)
+        let time2 = MySQLTime(date: MySQLTime(date: Date(timeIntervalSince1970: -1.1)).date!)
         XCTAssert(time.microsecond == UInt32(100000))
         XCTAssert(time2.microsecond == UInt32(100000))
     }
@@ -432,7 +431,7 @@ final class MySQLNIOTests: XCTestCase {
         }
     }
 
-    // https://github.com/vapor/mysql-kit/issues/210
+    // https://github.com/vapor/mysql-nio/issues/47
     func testValidQueryTimeout() throws {
         let conn = try MySQLConnection.test(on: self.eventLoop).wait()
         defer { try! conn.close().wait() }
@@ -447,6 +446,107 @@ final class MySQLNIOTests: XCTestCase {
         _ = try conn.query("""
         UPDATE `Phrase` SET `views` = CASE WHEN `id` = 1 THEN `views` + 6 WHEN `id` = 2 THEN `views` + 2 END WHERE `id` IN (1,2);
         """).wait()
+    }
+
+    func test4ByteMySQLTime() throws {
+        let conn = try MySQLConnection.test(on: self.eventLoop).wait()
+        defer { try! conn.close().wait() }
+
+        _ = try! conn.simpleQuery("DROP TABLE IF EXISTS foo").wait()
+        _ = try conn.simpleQuery("CREATE TABLE foo (bar DATE)").wait()
+        defer {
+            _ = try! conn.simpleQuery("DROP TABLE IF EXISTS foo").wait()
+        }
+        _ = try conn.query("INSERT INTO foo (bar) VALUES ('2038-01-19')").wait()
+        let rows = try conn.query("SELECT * FROM foo").wait()
+        guard let time = rows[0].column("bar")?.time else {
+            XCTFail("Could not convert to time: \(rows[0])")
+            return
+        }
+        XCTAssertEqual(time.year, 2038)
+        XCTAssertEqual(time.month, 1)
+        XCTAssertEqual(time.day, 19)
+        XCTAssertEqual(time.hour, nil)
+        XCTAssertEqual(time.minute, nil)
+        XCTAssertEqual(time.second, nil)
+        XCTAssertEqual(time.microsecond, nil)
+        XCTAssertEqual(time.date?.description, "2038-01-19 00:00:00 +0000")
+    }
+
+    func test7ByteMySQLTime() throws {
+        let conn = try MySQLConnection.test(on: self.eventLoop).wait()
+        defer { try! conn.close().wait() }
+
+        _ = try! conn.simpleQuery("DROP TABLE IF EXISTS foo").wait()
+        _ = try conn.simpleQuery("CREATE TABLE foo (bar DATETIME)").wait()
+        defer {
+            _ = try! conn.simpleQuery("DROP TABLE IF EXISTS foo").wait()
+        }
+        _ = try conn.query("INSERT INTO foo (bar) VALUES ('2038-01-19 03:14:07')").wait()
+        let rows = try conn.query("SELECT * FROM foo").wait()
+        guard let time = rows[0].column("bar")?.time else {
+            XCTFail("Could not convert to time: \(rows[0])")
+            return
+        }
+        XCTAssertEqual(time.year, 2038)
+        XCTAssertEqual(time.month, 1)
+        XCTAssertEqual(time.day, 19)
+        XCTAssertEqual(time.hour, 3)
+        XCTAssertEqual(time.minute, 14)
+        XCTAssertEqual(time.second, 7)
+        XCTAssertEqual(time.microsecond, nil)
+        XCTAssertEqual(time.date?.description, "2038-01-19 03:14:07 +0000")
+    }
+
+    // https://github.com/vapor/mysql-nio/issues/49
+    func test8ByteMySQLTime() throws {
+        let conn = try MySQLConnection.test(on: self.eventLoop).wait()
+        defer { try! conn.close().wait() }
+
+        _ = try! conn.simpleQuery("DROP TABLE IF EXISTS foo").wait()
+        _ = try conn.simpleQuery("CREATE TABLE foo (bar TIME)").wait()
+        defer {
+            _ = try! conn.simpleQuery("DROP TABLE IF EXISTS foo").wait()
+        }
+        _ = try conn.query("INSERT INTO foo (bar) VALUES ('12:34:56')").wait()
+        let rows = try conn.query("SELECT * FROM foo").wait()
+        guard let time = rows[0].column("bar")?.time else {
+            XCTFail("Could not convert to time: \(rows[0])")
+            return
+        }
+        XCTAssertEqual(time.year, nil)
+        XCTAssertEqual(time.month, nil)
+        XCTAssertEqual(time.day, nil)
+        XCTAssertEqual(time.hour, 12)
+        XCTAssertEqual(time.minute, 34)
+        XCTAssertEqual(time.second, 56)
+        XCTAssertEqual(time.microsecond, nil)
+        XCTAssertEqual(time.date, nil)
+    }
+
+    func test11ByteMySQLTime() throws {
+        let conn = try MySQLConnection.test(on: self.eventLoop).wait()
+        defer { try! conn.close().wait() }
+
+        _ = try! conn.simpleQuery("DROP TABLE IF EXISTS foo").wait()
+        _ = try conn.simpleQuery("CREATE TABLE foo (bar DATETIME(6))").wait()
+        defer {
+            _ = try! conn.simpleQuery("DROP TABLE IF EXISTS foo").wait()
+        }
+        _ = try conn.query("INSERT INTO foo (bar) VALUES ('2038-01-19 03:14:07.123456')").wait()
+        let rows = try conn.query("SELECT * FROM foo").wait()
+        guard let time = rows[0].column("bar")?.time else {
+            XCTFail("Could not convert to time: \(rows[0])")
+            return
+        }
+        XCTAssertEqual(time.year, 2038)
+        XCTAssertEqual(time.month, 1)
+        XCTAssertEqual(time.day, 19)
+        XCTAssertEqual(time.hour, 3)
+        XCTAssertEqual(time.minute, 14)
+        XCTAssertEqual(time.second, 7)
+        XCTAssertEqual(time.microsecond, 123456)
+        XCTAssertEqual(time.date?.description, "2038-01-19 03:14:07 +0000")
     }
     
     override func setUp() {
