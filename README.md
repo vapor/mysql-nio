@@ -95,7 +95,7 @@ import MySQLNIO
 
 let eventLoop: EventLoop = ...
 let conn = try MySQLConnection(
-    to: .makeAddressResolvingHost("my.psql.server", port: 5432),
+    to: .makeAddressResolvingHost("my.mysql.server", port: 5432),
     username: "vapor_username",
     database: "vapor_database",
     password: "vapor_password",
