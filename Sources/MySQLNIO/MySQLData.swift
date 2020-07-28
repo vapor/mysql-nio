@@ -329,51 +329,93 @@ public struct MySQLData: CustomStringConvertible, ExpressibleByStringLiteral, Ex
     }
     
     public var int: Int? {
+        self.fwi()
+    }
+
+    public var int8: Int8? {
+        self.fwi()
+    }
+
+    public var int16: Int16? {
+        self.fwi()
+    }
+
+    public var int32: Int32? {
+        self.fwi()
+    }
+
+    public var int64: Int64? {
+        self.fwi()
+    }
+
+    public var uint: UInt? {
+        self.fwi()
+    }
+
+    public var uint8: UInt8? {
+        self.fwi()
+    }
+
+    public var uint16: UInt16? {
+        self.fwi()
+    }
+
+    public var uint32: UInt32? {
+        self.fwi()
+    }
+
+    public var uint64: UInt64? {
+        self.fwi()
+    }
+
+    private func fwi<I>(_ type: I.Type = I.self) -> I?
+        where I: FixedWidthInteger
+    {
         guard var buffer = self.buffer else {
             return nil
         }
         switch format {
         case .text:
-            return buffer.readString(length: buffer.readableBytes).flatMap(Int.init)
+            return buffer.readString(length: buffer.readableBytes).flatMap(I.init)
         default:
             switch self.type {
             case .varchar, .varString:
-                return buffer.readString(length: buffer.readableBytes).flatMap(Int.init)
+                return buffer.readString(length: buffer.readableBytes).flatMap(I.init)
             case .longlong:
                 if self.isUnsigned {
                     return buffer.readInteger(endianness: .little, as: UInt64.self)
-                        .flatMap(Int.init)
+                        .flatMap(I.init)
                 } else {
                     return buffer.readInteger(endianness: .little, as: Int64.self)
-                        .flatMap(Int.init)
+                        .flatMap(I.init)
                 }
             case .long, .int24:
                 if self.isUnsigned {
                     return buffer.readInteger(endianness: .little, as: UInt32.self)
-                        .flatMap(Int.init)
+                        .flatMap(I.init)
                 } else {
                     return buffer.readInteger(endianness: .little, as: Int32.self)
-                        .flatMap(Int.init)
+                        .flatMap(I.init)
                 }
             case .short:
                 if self.isUnsigned {
                     return buffer.readInteger(endianness: .little, as: UInt16.self)
-                        .flatMap(Int.init)
+                        .flatMap(I.init)
                 } else {
                     return buffer.readInteger(endianness: .little, as: Int16.self)
-                        .flatMap(Int.init)
+                        .flatMap(I.init)
                 }
             case .tiny, .bit:
                 if self.isUnsigned {
                     return buffer.readInteger(endianness: .little, as: UInt8.self)
-                        .flatMap(Int.init)
+                        .flatMap(I.init)
                 } else {
                     return buffer.readInteger(endianness: .little, as: Int8.self)
-                        .flatMap(Int.init)
+                        .flatMap(I.init)
                 }
             case .newdecimal:
                 return buffer.readString(length: buffer.readableBytes)
-                    .flatMap(Int.init)
+                    .flatMap(I.init)
             default:
                 return nil
             }
