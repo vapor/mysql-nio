@@ -13,30 +13,38 @@ import struct Foundation.TimeZone
 /// to one of the temporal types (MYSQL_TYPE_TIME, MYSQL_TYPE_DATE, MYSQL_TYPE_DATETIME, MYSQL_TYPE_TIMESTAMP).
 ///
 /// https://dev.mysql.com/doc/refman/5.7/en/c-api-prepared-statement-data-structures.html
-public struct MySQLTime: Equatable, CustomStringConvertible, MySQLDataConvertible {
+public struct MySQLTime: Equatable, MySQLDataConvertible {
     /// The year
-    public var year: UInt16
+    public var year: UInt16?
     
     /// The month of the year
-    public var month: UInt8
+    public var month: UInt16?
     
     /// The day of the month
-    public var day: UInt8
+    public var day: UInt16?
     
     /// The hour of the day
-    public var hour: UInt8
+    public var hour: UInt16?
     
     /// The minute of the hour
-    public var minute: UInt8
-    
+    public var minute: UInt16?
+
     /// The second of the minute
-    public var second: UInt8
+    public var second: UInt16?
     
     /// The fractional part of the second in microseconds
-    public var microsecond: UInt32
+    public var microsecond: UInt32?
     
     /// Creates a new `MySQLTime`.
-    public init(year: UInt16, month: UInt8, day: UInt8, hour: UInt8, minute: UInt8, second: UInt8, microsecond: UInt32) {
+    public init(
+        year: UInt16? = nil,
+        month: UInt16? = nil,
+        day: UInt16? = nil,
+        hour: UInt16? = nil,
+        minute: UInt16? = nil,
+        second: UInt16? = nil,
+        microsecond: UInt32? = nil
+    ) {
         self.year = year
         self.month = month
         self.day = day
@@ -55,7 +63,6 @@ public struct MySQLTime: Equatable, CustomStringConvertible, MySQLDataConvertibl
         if microseconds < 0.0 {
             microseconds = 1_000_000 - microseconds
         }
-        
         self.init(
             year: numericCast(1900 + tm.tm_year),
             month: numericCast(1 + tm.tm_mon),
@@ -76,43 +83,40 @@ public struct MySQLTime: Equatable, CustomStringConvertible, MySQLDataConvertibl
     }
     
     /// Converts this `MySQLTime` to a Swift `Date` using the current calendar and GMT timezone.
-    public var date: Date {
-        /// For some reason comps.nanosecond is `nil` on linux :(
-        let nanosecond: Int
-        #if os(macOS)
-        nanosecond = numericCast(self.microsecond) * 1_000
-        #else
-        nanosecond = 0
-        #endif
-        
-        var unixTime = tm()
-        unixTime.tm_year = numericCast(self.year) - 1900
-        unixTime.tm_mon = numericCast(self.month - 1)
-        unixTime.tm_mday = numericCast(self.day)
-        unixTime.tm_hour = numericCast(self.hour)
-        unixTime.tm_min = numericCast(self.minute)
-        unixTime.tm_sec = numericCast(self.second)
-        
-        let timeStamp = timegm(&unixTime)
-        let date = Date(timeIntervalSince1970: TimeInterval(timeStamp) + (TimeInterval(nanosecond) / 1_000_000_000))
-
-        /// For some reason comps.nanosecond is `nil` on linux :(
-        #if os(macOS)
+    public var date: Date? {
+        var ctime = tm()
+        guard
+            let year = self.year,
+            let month = self.month,
+            let day = self.day
+        else {
+            return nil
+        }
+        ctime.tm_year = numericCast(year) - 1900
+        ctime.tm_mon = numericCast(month - 1)
+        ctime.tm_mday = numericCast(day)
+        if
+            let hour = self.hour,
+            let minute = self.minute,
+            let second = self.second
+        {
+            ctime.tm_hour = numericCast(hour)
+            ctime.tm_min = numericCast(minute)
+            ctime.tm_sec = numericCast(second)
+        }
+        var date = Date(
+            timeIntervalSince1970: .init(timegm(&ctime))
+        )
+        if let microsecond = self.microsecond {
+            let nanoseconds = numericCast(microsecond) * 1_000
+            date.addTimeInterval(.init(nanoseconds) / 1_000_000_000)
+        }
         return date
-        #else
-        return date.addingTimeInterval(TimeInterval(self.microsecond) / 1_000_000)
-        #endif
-
     }
     
     /// `MySQLDataConvertible` conformance.
     public var mysqlData: MySQLData? {
-        return .init(time: self)
-    }
-    
-    /// `CustomStringConvertible` conformance.
-    public var description: String {
-        return self.date.description
+        .init(time: self)
     }
 }
 
@@ -120,54 +124,147 @@ public struct MySQLTime: Equatable, CustomStringConvertible, MySQLDataConvertibl
 
 extension ByteBuffer {
     mutating func writeMySQLTime(_ time: MySQLTime) {
-        // always write all the time bytes even though we don't need to
-        self.writeInteger(time.year, endianness: .little)
-        self.writeInteger(time.month, endianness: .little)
-        self.writeInteger(time.day, endianness: .little)
-        self.writeInteger(time.hour, endianness: .little)
-        self.writeInteger(time.minute, endianness: .little)
-        self.writeInteger(time.second, endianness: .little)
-        self.writeInteger(time.microsecond, endianness: .little)
+        switch (
+            time.year, time.month, time.day,
+            time.hour, time.minute, time.second,
+            time.microsecond
+        ) {
+        case (
+            .none, .none, .none,
+            .none, .none, .none,
+            .none
+        ):
+            // null
+            break
+        case (
+            .some(let year), .some(let month), .some(let day),
+            .none, .none, .none,
+            .none
+        ):
+            // date
+            self.writeInteger(year, endianness: .little, as: UInt16.self)
+            self.writeInteger(numericCast(month), endianness: .little, as: UInt8.self)
+            self.writeInteger(numericCast(day), endianness: .little, as: UInt8.self)
+        case (
+            .some(let year), .some(let month), .some(let day),
+            .some(let hour), .some(let minute), .some(let second),
+            .none
+        ):
+            // date + time
+            self.writeInteger(year, endianness: .little, as: UInt16.self)
+            self.writeInteger(numericCast(month), endianness: .little, as: UInt8.self)
+            self.writeInteger(numericCast(day), endianness: .little, as: UInt8.self)
+            self.writeInteger(numericCast(hour), endianness: .little, as: UInt8.self)
+            self.writeInteger(numericCast(minute), endianness: .little, as: UInt8.self)
+            self.writeInteger(numericCast(second), endianness: .little, as: UInt8.self)
+        case (
+            .none, .none, .none,
+            .some(let hour), .some(let minute), .some(let second),
+            .none
+        ):
+            // time
+            self.writeBytes([0, 0, 0, 0])
+            self.writeInteger(numericCast(hour), endianness: .little, as: UInt8.self)
+            self.writeInteger(numericCast(minute), endianness: .little, as: UInt8.self)
+            self.writeInteger(numericCast(second), endianness: .little, as: UInt8.self)
+        case (
+            .some(let year), .some(let month), .some(let day),
+            .some(let hour), .some(let minute), .some(let second),
+            .some(let microsecond)
+        ):
+            // date + time + fractional seconds
+            self.writeInteger(year, endianness: .little, as: UInt16.self)
+            self.writeInteger(numericCast(month), endianness: .little, as: UInt8.self)
+            self.writeInteger(numericCast(day), endianness: .little, as: UInt8.self)
+            self.writeInteger(numericCast(hour), endianness: .little, as: UInt8.self)
+            self.writeInteger(numericCast(minute), endianness: .little, as: UInt8.self)
+            self.writeInteger(numericCast(second), endianness: .little, as: UInt8.self)
+            self.writeInteger(microsecond, endianness: .little, as: UInt32.self)
+        case (
+            .none, .none, .none,
+            .some(let hour), .some(let minute), .some(let second),
+            .some(let microsecond)
+        ):
+            // time + fractional seconds
+            self.writeBytes([0, 0, 0, 0])
+            self.writeInteger(numericCast(hour), endianness: .little, as: UInt8.self)
+            self.writeInteger(numericCast(minute), endianness: .little, as: UInt8.self)
+            self.writeInteger(numericCast(second), endianness: .little, as: UInt8.self)
+            self.writeInteger(microsecond, endianness: .little, as: UInt32.self)
+        default:
+            Logger(label: "codes.vapor.mysql")
+                .warning("Cannot convert MySQLTime to ByteBuffer: \(time)")
+        }
     }
     
     mutating func readMySQLTime() -> MySQLTime? {
         let time: MySQLTime
         switch self.readableBytes {
         case 0:
-            // if year, month, day, hour, minutes, seconds and micro_seconds are all 0, length is 0 and no other field is sent
-            time = MySQLTime(year: 0, month: 0, day: 0, hour: 0, minute: 0, second: 0, microsecond: 0)
+            // null
+            time = MySQLTime()
         case 4:
-            // if hour, minutes, seconds and micro_seconds are all 0, length is 4 and no other field is sent
+            // date
             time = MySQLTime(
-                year: self.readInteger(endianness: .little)!,
-                month: self.readInteger(endianness: .little)!,
-                day: self.readInteger(endianness: .little)!,
-                hour: 0,
-                minute: 0,
-                second: 0,
-                microsecond: 0
+                year: self.readInteger(endianness: .little),
+                month: self.readInteger(endianness: .little, as: UInt8.self)
+                    .flatMap(numericCast),
+                day: self.readInteger(endianness: .little, as: UInt8.self)
+                    .flatMap(numericCast)
             )
         case 7:
-            // if micro_seconds is 0, length is 7 and micro_seconds is not sent
+            // date + time
             time = MySQLTime(
-                year: self.readInteger(endianness: .little)!,
-                month: self.readInteger(endianness: .little)!,
-                day: self.readInteger(endianness: .little)!,
-                hour: self.readInteger(endianness: .little)!,
-                minute: self.readInteger(endianness: .little)!,
-                second: self.readInteger(endianness: .little)!,
-                microsecond: 0
+                year: self.readInteger(endianness: .little),
+                month: self.readInteger(endianness: .little, as: UInt8.self)
+                    .flatMap(numericCast),
+                day: self.readInteger(endianness: .little, as: UInt8.self)
+                    .flatMap(numericCast),
+                hour: self.readInteger(endianness: .little, as: UInt8.self)
+                    .flatMap(numericCast),
+                minute: self.readInteger(endianness: .little, as: UInt8.self)
+                    .flatMap(numericCast),
+                second: self.readInteger(endianness: .little, as: UInt8.self)
+                    .flatMap(numericCast)
+            )
+        case 8:
+            // time
+            self.moveReaderIndex(forwardBy: 5)
+            time = MySQLTime(
+                hour: self.readInteger(endianness: .little, as: UInt8.self)
+                    .flatMap(numericCast),
+                minute: self.readInteger(endianness: .little, as: UInt8.self)
+                    .flatMap(numericCast),
+                second: self.readInteger(endianness: .little, as: UInt8.self)
+                    .flatMap(numericCast)
             )
         case 11:
-            // otherwise length is 11
+            // date + time + fractional seconds
             time = MySQLTime(
-                year: self.readInteger(endianness: .little)!,
-                month: self.readInteger(endianness: .little)!,
-                day: self.readInteger(endianness: .little)!,
-                hour: self.readInteger(endianness: .little)!,
-                minute: self.readInteger(endianness: .little)!,
-                second: self.readInteger(endianness: .little)!,
-                microsecond: self.readInteger(endianness: .little)!
+                year: self.readInteger(endianness: .little),
+                month: self.readInteger(endianness: .little, as: UInt8.self)
+                    .flatMap(numericCast),
+                day: self.readInteger(endianness: .little, as: UInt8.self)
+                    .flatMap(numericCast),
+                hour: self.readInteger(endianness: .little, as: UInt8.self)
+                    .flatMap(numericCast),
+                minute: self.readInteger(endianness: .little, as: UInt8.self)
+                    .flatMap(numericCast),
+                second: self.readInteger(endianness: .little, as: UInt8.self)
+                    .flatMap(numericCast),
+                microsecond: self.readInteger(endianness: .little)
+            )
+        case 12:
+            // time + fractional seconds
+            self.moveReaderIndex(forwardBy: 5)
+            time = MySQLTime(
+                hour: self.readInteger(endianness: .little, as: UInt8.self)
+                    .flatMap(numericCast),
+                minute: self.readInteger(endianness: .little, as: UInt8.self)
+                    .flatMap(numericCast),
+                second: self.readInteger(endianness: .little, as: UInt8.self)
+                    .flatMap(numericCast),
+                microsecond: self.readInteger(endianness: .little)
             )
         default: return nil
         }

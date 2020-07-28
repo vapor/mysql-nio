@@ -392,7 +392,7 @@ public struct MySQLData: CustomStringConvertible, ExpressibleByStringLiteral, Ex
             return nil
         }
         switch self.type {
-        case .timestamp, .datetime, .date:
+        case .timestamp, .datetime, .date, .time:
             return buffer.readMySQLTime()
         default: return nil
         }
