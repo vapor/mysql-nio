@@ -80,7 +80,7 @@ This package has no additional system dependencies.
 
 ## API Docs
 
-Check out the [MySQLNIO API docs](https://api.vapor.codes/mysql-nio/master/MySQLNIO/index.html) for a detailed look at all of the classes, structs, protocols, and more.
+Check out the [MySQLNIO API docs](https://api.vapor.codes/mysql-nio/master/MySQLNIO/) for a detailed look at all of the classes, structs, protocols, and more.
 
 ## Getting Started
 
