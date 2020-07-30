@@ -116,9 +116,10 @@ public struct MySQLData: CustomStringConvertible, ExpressibleByStringLiteral, Ex
     }
     
     public init(time: MySQLTime) {
-        var buffer = ByteBufferAllocator().buffer(capacity: 11)
-        buffer.writeMySQLTime(time)
-        self.init(type: .datetime, format: .binary, buffer: buffer, isUnsigned: false)
+        var buffer = ByteBufferAllocator().buffer(capacity: 12)
+        var type: MySQLProtocol.DataType = .datetime
+        buffer.writeMySQLTime(time, as: &type)
+        self.init(type: type, format: .binary, buffer: buffer, isUnsigned: false)
     }
 
     private struct Wrapper: Encodable {
