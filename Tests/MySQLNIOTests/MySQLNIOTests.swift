@@ -357,6 +357,7 @@ final class MySQLNIOTests: XCTestCase {
     }
     
     func testPerformance_simpleSelects() throws {
+        try XCTSkipIf(env("PERFORMANCE_TESTS") == nil)
         let conn = try MySQLConnection.test(on: self.eventLoop).wait()
         defer { try! conn.close().wait() }
         for _ in 0..<1_000 {
@@ -365,6 +366,7 @@ final class MySQLNIOTests: XCTestCase {
     }
     
     func testPerformance_parseDatetime() throws {
+        try XCTSkipIf(env("PERFORMANCE_TESTS") == nil)
         let conn = try MySQLConnection.test(on: self.eventLoop).wait()
         defer { try! conn.close().wait() }
         
@@ -397,6 +399,7 @@ final class MySQLNIOTests: XCTestCase {
 
     // https://github.com/vapor/mysql-nio/issues/30
     func testPreparedStatement_maxOpen() throws {
+        try XCTSkipIf(env("PERFORMANCE_TESTS") == nil)
         let conn = try MySQLConnection.test(on: self.eventLoop).wait()
         defer { try! conn.close().wait() }
 

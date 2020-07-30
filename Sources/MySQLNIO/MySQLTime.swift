@@ -123,7 +123,7 @@ public struct MySQLTime: Equatable, MySQLDataConvertible {
 // MARK: Internal
 
 extension ByteBuffer {
-    mutating func writeMySQLTime(_ time: MySQLTime) {
+    mutating func writeMySQLTime(_ time: MySQLTime, as type: inout MySQLProtocol.DataType) {
         switch (
             time.year, time.month, time.day,
             time.hour, time.minute, time.second,
@@ -142,6 +142,7 @@ extension ByteBuffer {
             .none
         ):
             // date
+            type = .date
             self.writeInteger(year, endianness: .little, as: UInt16.self)
             self.writeInteger(numericCast(month), endianness: .little, as: UInt8.self)
             self.writeInteger(numericCast(day), endianness: .little, as: UInt8.self)
@@ -151,6 +152,7 @@ extension ByteBuffer {
             .none
         ):
             // date + time
+            type = .datetime
             self.writeInteger(year, endianness: .little, as: UInt16.self)
             self.writeInteger(numericCast(month), endianness: .little, as: UInt8.self)
             self.writeInteger(numericCast(day), endianness: .little, as: UInt8.self)
@@ -163,7 +165,8 @@ extension ByteBuffer {
             .none
         ):
             // time
-            self.writeBytes([0, 0, 0, 0])
+            type = .time
+            self.writeBytes([0, 0, 0, 0, 0])
             self.writeInteger(numericCast(hour), endianness: .little, as: UInt8.self)
             self.writeInteger(numericCast(minute), endianness: .little, as: UInt8.self)
             self.writeInteger(numericCast(second), endianness: .little, as: UInt8.self)
@@ -173,6 +176,7 @@ extension ByteBuffer {
             .some(let microsecond)
         ):
             // date + time + fractional seconds
+            type = .datetime
             self.writeInteger(year, endianness: .little, as: UInt16.self)
             self.writeInteger(numericCast(month), endianness: .little, as: UInt8.self)
             self.writeInteger(numericCast(day), endianness: .little, as: UInt8.self)
@@ -186,7 +190,8 @@ extension ByteBuffer {
             .some(let microsecond)
         ):
             // time + fractional seconds
-            self.writeBytes([0, 0, 0, 0])
+            type = .time
+            self.writeBytes([0, 0, 0, 0, 0])
             self.writeInteger(numericCast(hour), endianness: .little, as: UInt8.self)
             self.writeInteger(numericCast(minute), endianness: .little, as: UInt8.self)
             self.writeInteger(numericCast(second), endianness: .little, as: UInt8.self)
