@@ -93,7 +93,7 @@ public struct MySQLTime: Equatable, MySQLDataConvertible {
             return nil
         }
         ctime.tm_year = numericCast(year) - 1900
-        ctime.tm_mon = numericCast(month - 1)
+        ctime.tm_mon = numericCast(month) - 1
         ctime.tm_mday = numericCast(day)
         if
             let hour = self.hour,
