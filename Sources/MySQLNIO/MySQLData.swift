@@ -116,7 +116,7 @@ public struct MySQLData: CustomStringConvertible, ExpressibleByStringLiteral, Ex
     }
     
     public init(time: MySQLTime) {
-        var buffer = ByteBufferAllocator().buffer(capacity: 11)
+        var buffer = ByteBufferAllocator().buffer(capacity: 12)
         var type: MySQLProtocol.DataType = .datetime
         buffer.writeMySQLTime(time, as: &type)
         self.init(type: type, format: .binary, buffer: buffer, isUnsigned: false)
