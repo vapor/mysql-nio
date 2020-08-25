@@ -1,12 +1,7 @@
 extension ByteBuffer {
     mutating func readNullTerminatedString() -> String? {
         var copy = self
-        scan: while let byte = copy.readInteger(as: UInt8.self) {
-            switch byte {
-            case 0x00: break scan
-            default: break
-            }
-        }
+        while let byte = copy.readInteger(as: UInt8.self), byte != 0x00 { continue }
         defer { self.moveReaderIndex(forwardBy: 1) }
         return self.readString(length: (self.readableBytes - copy.readableBytes) - 1)
     }
