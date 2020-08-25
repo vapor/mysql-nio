@@ -64,12 +64,12 @@ extension MySQLPacket {
             packet.payload.writeInteger(maxPacketSize, endianness: .little)
             packet.payload.writeInteger(self.characterSet.rawValue, endianness: .little)
             /// string[23]     reserved (all [0])
-            packet.payload.writeBytes([
-                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
-            ])
+            packet.payload.writeBytes([UInt8](repeating: 0, count: 23))
             packet.payload.writeNullTerminatedString(self.username)
-            assert(self.capabilities.contains(.CLIENT_PLUGIN_AUTH_LENENC_CLIENT_DATA) == false, "CLIENT_PLUGIN_AUTH_LENENC_CLIENT_DATA not supported")
-            if self.capabilities.contains(.CLIENT_SECURE_CONNECTION) {
+            if self.capabilities.contains(.CLIENT_PLUGIN_AUTH_LENENC_CLIENT_DATA) {
+                var responseCopy = authResponse
+                packet.payload.writeLengthEncodedSlice(&responseCopy)
+            } else if self.capabilities.contains(.CLIENT_SECURE_CONNECTION) {
                 assert(self.authResponse.readableBytes <= UInt8.max, "auth response too large")
                 packet.payload.writeInteger(UInt8(self.authResponse.readableBytes), endianness: .little)
                 var authResponseCopy = self.authResponse
