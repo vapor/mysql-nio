@@ -142,13 +142,19 @@ final class MySQLConnectionHandler: ChannelDuplexHandler {
             saveSeed = seed.getBytes(at: 0, length: seed.readableBytes) ?? []
             self.logger.trace("Generated scrambled hash for caching_sha2_password")
         case "mysql_native_password":
-            var copy = authPluginData
-            guard let salt = copy.readSlice(length: 20) else {
-                throw MySQLError.authPluginDataError(name: authPluginName)
+            if let passwordValue = passwordInput, !passwordValue.isEmpty {
+                var copy = authPluginData
+                guard let salt = copy.readSlice(length: 20) else {
+                    throw MySQLError.authPluginDataError(name: authPluginName)
+                }
+                hash = xor(sha1(salt, sha1(sha1(password))), sha1(password))
+                saveSeed = salt.getBytes(at: 0, length: 20) ?? []
+                self.logger.trace("Generated salted hash for mysql_native_password")
+            } else {
+                hash = .init()
+                // No need to save any seed; we don't reuse it for this plugin anyway.
+                self.logger.trace("Generated empty reponse for mysql_native_password with empty password input")
             }
-            hash = xor(sha1(salt, sha1(sha1(password))), sha1(password))
-            saveSeed = salt.getBytes(at: 0, length: 20) ?? []
-            self.logger.trace("Generated salted hash for mysql_native_password")
         default:
             throw MySQLError.unsupportedAuthPlugin(name: authPluginName)
         }
