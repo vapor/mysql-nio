@@ -180,14 +180,9 @@ final class MySQLConnectionHandler: ChannelDuplexHandler {
             let minor: Int
             let patch: Int
 
-            init?<S>(string: S)
-                where S: StringProtocol
-            {
-                let parts = string.split(separator: ".")
-                guard parts.count == 3 else {
-                    return nil
-                }
-                guard let major = Int(parts[0]), let minor = Int(parts[1]), let patch = Int(parts[2]) else {
+            init?<S>(string: S) where S: StringProtocol {
+                let parts = string.split(separator: ".", maxSplits: 2, omittingEmptySubsequences: false)
+                guard parts.count == 3, let major = Int(parts[0]), let minor = Int(parts[1]), let patch = Int(parts[2]) else {
                     return nil
                 }
                 self.major = major
@@ -196,16 +191,13 @@ final class MySQLConnectionHandler: ChannelDuplexHandler {
             }
         }
 
-        let versionString = handshakeRequest.serverVersion.split(separator: "-")[0]
+        guard let versionString = handshakeRequest.serverVersion.split(separator: "-").first else {
+            throw MySQLError.protocolError
+        }
         if let version = SemanticVersion(string: versionString) {
             if !handshakeRequest.serverVersion.contains("MariaDB") {
-
                 switch (version.major, version.minor) {
-                case (8..., _):
-                    // >= 8.0
-                    break
-                case (5..., 7...):
-                    // >= 5.7
+                case (5..., 7...), (8..., _): // >= 5.7, or >= 8.0
                     break
                 default:
                     self.logger.error("Unsupported MySQL version: \(handshakeRequest.serverVersion)")
