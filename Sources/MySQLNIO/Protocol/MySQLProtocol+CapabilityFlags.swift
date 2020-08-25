@@ -143,7 +143,10 @@ extension MySQLProtocol {
             .CLIENT_PLUGIN_AUTH,
             .CLIENT_SECURE_CONNECTION,
             .CLIENT_CONNECT_WITH_DB,
-            .CLIENT_DEPRECATE_EOF
+            .CLIENT_DEPRECATE_EOF,
+            .CLIENT_PLUGIN_AUTH_LENENC_CLIENT_DATA,
+            .CLIENT_LONG_PASSWORD,
+            .CLIENT_TRANSACTIONS,
         ]
         
         /// All capabilities.
