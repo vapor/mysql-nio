@@ -1,12 +1,7 @@
 extension ByteBuffer {
     mutating func readNullTerminatedString() -> String? {
         var copy = self
-        scan: while let byte = copy.readInteger(as: UInt8.self) {
-            switch byte {
-            case 0x00: break scan
-            default: break
-            }
-        }
+        while let byte = copy.readInteger(as: UInt8.self), byte != 0x00 { continue }
         defer { self.moveReaderIndex(forwardBy: 1) }
         return self.readString(length: (self.readableBytes - copy.readableBytes) - 1)
     }
@@ -21,6 +16,29 @@ extension ByteBuffer {
     mutating func writeNullTerminatedString(_ string: String) {
         self.writeString(string)
         self.writeInteger(0, as: UInt8.self)
+    }
+    
+    mutating func writeLengthEncodedInteger(_ integer: UInt64) {
+        switch integer {
+        case 0..<251:
+            self.writeInteger(numericCast(integer), as: UInt8.self)
+        case 251..<1<<16:
+            self.writeInteger(0xFC, as: UInt8.self)
+            self.writeInteger(numericCast(integer), endianness: .little, as: UInt16.self)
+        case 1<<16..<1<<24:
+            self.writeInteger(0xFD, as: UInt8.self)
+            self.writeInteger(numericCast(integer & 0xFF), as: UInt8.self)
+            self.writeInteger(numericCast(integer >> 8 & 0xFF), as: UInt8.self)
+            self.writeInteger(numericCast(integer >> 16 & 0xFF), as: UInt8.self)
+        default:
+            self.writeInteger(0xFE, as: UInt8.self)
+            self.writeInteger(numericCast(integer), endianness: .little, as: UInt64.self)
+        }
+    }
+
+    mutating func writeLengthEncodedSlice(_ buffer: inout ByteBuffer) {
+        self.writeLengthEncodedInteger(numericCast(buffer.readableBytes))
+        self.writeBuffer(&buffer)
     }
     
     var readableString: String? {

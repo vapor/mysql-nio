@@ -22,7 +22,7 @@ jobs:
           MYSQL_USER: vapor_username
           MYSQL_PASSWORD: vapor_password
           MYSQL_DATABASE: vapor_database
-    container: swift:5.2-bionic
+    container: swift:5.2-focal
     strategy:
       fail-fast: false
       matrix:
@@ -66,19 +66,32 @@ jobs:
           # 5.2 Stable
           - swift:5.2-xenial
           - swift:5.2-bionic
+          - swift:5.2-focal
+          - swift:5.2-centos7
+          - swift:5.2-centos8
+          - swift:5.2-amazonlinux2
           # 5.2 Unstable
           - swiftlang/swift:nightly-5.2-xenial
           - swiftlang/swift:nightly-5.2-bionic
           # 5.3 Unstable
           - swiftlang/swift:nightly-5.3-xenial
           - swiftlang/swift:nightly-5.3-bionic
-          # Master Unsable
+          - swiftlang/swift:nightly-5.3-focal
+          - swiftlang/swift:nightly-5.3-centos7
+          - swiftlang/swift:nightly-5.3-centos8
+          - swiftlang/swift:nightly-5.3-amazonlinux2
+          # Main Unsable
           - swiftlang/swift:nightly-master-xenial
           - swiftlang/swift:nightly-master-bionic
           - swiftlang/swift:nightly-master-focal
+          - swiftlang/swift:nightly-master-centos7
           - swiftlang/swift:nightly-master-centos8
           - swiftlang/swift:nightly-master-amazonlinux2
         exclude:
+          - runner: swift:5.2-amazonlinux2
+            dbimage: mysql:8.0
+          - runner: swiftlang/swift:nightly-5.3-amazonlinux2
+            dbimage: mysql:8.0
           - runner: swiftlang/swift:nightly-master-amazonlinux2
             dbimage: mysql:8.0
     container: ${{ matrix.runner }}
@@ -92,6 +105,12 @@ jobs:
           MYSQL_PASSWORD: vapor_password
           MYSQL_DATABASE: vapor_database
     steps:
+      - name: Workaround SPM incompatibility with old Git on CentOS 7
+        if: ${{ contains(matrix.runner, 'centos7') }}
+        run: |
+          yum install -y make libcurl-devel
+          git clone https://github.com/git/git -bv2.28.0 --depth 1 && cd git
+          make prefix=/usr -j all install NO_OPENSSL=1 NO_EXPAT=1 NO_TCLTK=1 NO_GETTEXT=1 NO_PERL=1
       - name: Check out code
         uses: actions/checkout@v2
       - name: Run tests with Thread Sanitizer

@@ -142,13 +142,19 @@ final class MySQLConnectionHandler: ChannelDuplexHandler {
             saveSeed = seed.getBytes(at: 0, length: seed.readableBytes) ?? []
             self.logger.trace("Generated scrambled hash for caching_sha2_password")
         case "mysql_native_password":
-            var copy = authPluginData
-            guard let salt = copy.readSlice(length: 20) else {
-                throw MySQLError.authPluginDataError(name: authPluginName)
+            if let passwordValue = passwordInput, !passwordValue.isEmpty {
+                var copy = authPluginData
+                guard let salt = copy.readSlice(length: 20) else {
+                    throw MySQLError.authPluginDataError(name: authPluginName)
+                }
+                hash = xor(sha1(salt, sha1(sha1(password))), sha1(password))
+                saveSeed = salt.getBytes(at: 0, length: 20) ?? []
+                self.logger.trace("Generated salted hash for mysql_native_password")
+            } else {
+                hash = .init()
+                // No need to save any seed; we don't reuse it for this plugin anyway.
+                self.logger.trace("Generated empty reponse for mysql_native_password with empty password input")
             }
-            hash = xor(sha1(salt, sha1(sha1(password))), sha1(password))
-            saveSeed = salt.getBytes(at: 0, length: 20) ?? []
-            self.logger.trace("Generated salted hash for mysql_native_password")
         default:
             throw MySQLError.unsupportedAuthPlugin(name: authPluginName)
         }
@@ -174,14 +180,9 @@ final class MySQLConnectionHandler: ChannelDuplexHandler {
             let minor: Int
             let patch: Int
 
-            init?<S>(string: S)
-                where S: StringProtocol
-            {
-                let parts = string.split(separator: ".")
-                guard parts.count == 3 else {
-                    return nil
-                }
-                guard let major = Int(parts[0]), let minor = Int(parts[1]), let patch = Int(parts[2]) else {
+            init?<S>(string: S) where S: StringProtocol {
+                let parts = string.split(separator: ".", maxSplits: 2, omittingEmptySubsequences: false)
+                guard parts.count == 3, let major = Int(parts[0]), let minor = Int(parts[1]), let patch = Int(parts[2]) else {
                     return nil
                 }
                 self.major = major
@@ -190,16 +191,13 @@ final class MySQLConnectionHandler: ChannelDuplexHandler {
             }
         }
 
-        let versionString = handshakeRequest.serverVersion.split(separator: "-")[0]
+        guard let versionString = handshakeRequest.serverVersion.split(separator: "-").first else {
+            throw MySQLError.protocolError
+        }
         if let version = SemanticVersion(string: versionString) {
             if !handshakeRequest.serverVersion.contains("MariaDB") {
-
                 switch (version.major, version.minor) {
-                case (8..., _):
-                    // >= 8.0
-                    break
-                case (5..., 7...):
-                    // >= 5.7
+                case (5..., 7...), (8..., _): // >= 5.7, or >= 8.0
                     break
                 default:
                     self.logger.error("Unsupported MySQL version: \(handshakeRequest.serverVersion)")
