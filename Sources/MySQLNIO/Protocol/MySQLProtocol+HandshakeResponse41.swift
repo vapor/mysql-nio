@@ -10,7 +10,7 @@ extension MySQLPacket {
     /// the Protocol::HandshakeResponse320 packet must be used.
     ///
     /// https://dev.mysql.com/doc/internals/en/connection-phase-packets.html#packet-Protocol::HandshakeResponse
-    public struct HandshakeResponse41: MySQLPacketEncodable {
+    public struct HandshakeResponse41: MySQLPacketDecodable, MySQLPacketEncodable {
         /// capability_flags (4)
         /// capability flags of the client as defined in Protocol::CapabilityFlags
         public var capabilities: MySQLProtocol.CapabilityFlags
@@ -92,5 +92,101 @@ extension MySQLPacket {
             }
             assert(self.capabilities.contains(.CLIENT_CONNECT_ATTRS) == false, "CLIENT_CONNECT_ATTRS not supported")
         }
+
+        /// `MySQLPacketDecodable` conformance.
+        public static func decode(from packet: inout MySQLPacket, capabilities _: MySQLProtocol.CapabilityFlags) throws -> HandshakeResponse41 {
+            guard let rawClientCapabilities = packet.payload.readInteger(endianness: .little, as: UInt32.self) else {
+                throw Error.missingCapabilities
+            }
+            let clientCapabilities = MySQLProtocol.CapabilityFlags(rawValue: UInt64(rawClientCapabilities))
+            guard let maxPacketSize = packet.payload.readInteger(endianness: .little, as: UInt32.self) else {
+                throw Error.missingPacketSize
+            }
+            guard let rawCharacterSet = packet.payload.readInteger(endianness: .little, as: UInt8.self) else {
+                throw Error.missingCharacterSet
+            }
+            let characterSet = MySQLProtocol.CharacterSet(rawValue: rawCharacterSet)
+            guard let reservedData = packet.payload.readBytes(length: 23) else {
+                throw Error.missingReservedData
+            }
+            guard !reservedData.contains(where: { $0 != 0 }) else {
+                throw Error.invalidReservedData(reservedData)
+            }
+            guard let username = packet.payload.readNullTerminatedString() else {
+                throw Error.missingUsername
+            }
+            let authResponse: ByteBuffer
+            if clientCapabilities.contains(.CLIENT_PLUGIN_AUTH_LENENC_CLIENT_DATA) {
+                guard let lenencAuthResponse = packet.payload.readLengthEncodedSlice() else {
+                    throw Error.missingAuthResponse
+                }
+                authResponse = lenencAuthResponse
+            } else if clientCapabilities.contains(.CLIENT_SECURE_CONNECTION) {
+                guard let authResponseLength = packet.payload.readInteger(endianness: .little, as: UInt8.self) else {
+                    throw Error.missingAuthResponse
+                }
+                guard let secAuthResponse = packet.payload.readBytes(length: numericCast(authResponseLength)) else {
+                    throw Error.missingAuthResponse
+                }
+                authResponse = .init(bytes: secAuthResponse)
+            } else {
+                guard let insecAuthResponse = packet.payload.readNullTerminatedBytes() else {
+                    throw Error.missingAuthResponse
+                }
+                authResponse = .init(bytes: insecAuthResponse)
+            }
+            let database: String?
+            if clientCapabilities.contains(.CLIENT_CONNECT_WITH_DB) {
+                guard let databaseName = packet.payload.readNullTerminatedString() else {
+                    throw Error.missingDatabaseName
+                }
+                database = databaseName
+            } else {
+                database = nil
+            }
+            let authPlugin: String?
+            if clientCapabilities.contains(.CLIENT_PLUGIN_AUTH) {
+                guard let authPluginName = packet.payload.readNullTerminatedString() else {
+                    throw Error.missingAuthPluginName
+                }
+                authPlugin = authPluginName
+            } else {
+                authPlugin = nil
+            }
+            
+            return .init(
+                capabilities: clientCapabilities,
+                maxPacketSize: maxPacketSize,
+                characterSet: characterSet,
+                username: username,
+                authResponse: authResponse,
+                database: database ?? "",
+                authPluginName: authPlugin ?? ""
+            )
+        }
+
+        public enum Error: Swift.Error {
+            case missingCapabilities
+            case missingPacketSize
+            case missingCharacterSet
+            case missingReservedData
+            case invalidReservedData([UInt8])
+            case missingUsername
+            case missingAuthResponse
+            case missingDatabaseName
+            case missingAuthPluginName
+        }
     }
 }
+
+extension ByteBuffer {
+    public mutating func readNullTerminatedBytes() -> [UInt8]? {
+        var copy = self
+        while let byte = copy.readInteger(as: UInt8.self), byte != 0x00 {
+            continue
+        }
+        defer { self.moveReaderIndex(forwardBy: 1) }
+        return self.readBytes(length: (self.readableBytes - copy.readableBytes) - 1)
+    }
+}
+
