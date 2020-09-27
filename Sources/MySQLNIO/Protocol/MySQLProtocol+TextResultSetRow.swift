@@ -25,6 +25,7 @@ extension MySQLProtocol {
                 switch header {
                 case 0xFB:
                     value = nil
+                    packet.payload.moveReaderIndex(forwardBy: 1)    // Consume the 0xFB byte
                 default:
                     guard let v = packet.payload.readLengthEncodedSlice() else {
                         fatalError()
