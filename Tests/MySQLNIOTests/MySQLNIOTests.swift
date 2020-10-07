@@ -625,6 +625,24 @@ final class MySQLNIOTests: XCTestCase {
         XCTAssertEqual(time.date, nil)
     }
     
+    func testNull() throws {
+        let conn = try MySQLConnection.test(on: self.eventLoop).wait()
+        defer { try! conn.close().wait() }
+        
+        
+        _ = try conn.simpleQuery("DROP TABLE IF EXISTS foo").wait()
+        _ = try conn.simpleQuery("CREATE TABLE foo (bar INT, baz INT, qux INT)").wait()
+        defer {
+            _ = try! conn.simpleQuery("DROP TABLE IF EXISTS foo").wait()
+        }
+        
+        _ = try conn.simpleQuery("INSERT INTO foo (bar, baz, qux) VALUES (1, NULL, 3)").wait()
+        let rows = try conn.simpleQuery("SELECT * FROM foo").wait()
+        XCTAssertEqual(rows[0].column("bar")?.int, 1)
+        XCTAssertNil(rows[0].column("baz")?.int)
+        XCTAssertEqual(rows[0].column("qux")?.int, 3)
+    }
+    
     override func setUpWithError() throws {
         self.group = MultiThreadedEventLoopGroup(numberOfThreads: 1)
         XCTAssert(isLoggingConfigured)
