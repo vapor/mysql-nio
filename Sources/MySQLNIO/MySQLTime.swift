@@ -58,7 +58,8 @@ public struct MySQLTime: Equatable, MySQLDataConvertible {
     public init(date: Date) {
         // let comps = Calendar.current.dateComponents(in: .gmt, from: date)
         var rawtime = Int(date.timeIntervalSince1970)
-        let tm = gmtime(&rawtime)!.pointee
+        var tm = tm()
+        gmtime_r(&rawtime, &tm)
         var microseconds = date.timeIntervalSince1970.microseconds
         if microseconds < 0.0 {
             microseconds = 1_000_000 - microseconds
