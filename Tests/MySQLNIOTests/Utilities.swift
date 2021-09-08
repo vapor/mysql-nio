@@ -12,12 +12,14 @@ extension MySQLConnection {
         } catch {
             return eventLoop.makeFailedFuture(error)
         }
+        var tls = TLSConfiguration.makeClientConfiguration()
+        tls.certificateVerification = .none
         return self.connect(
             to: addr,
             username: env("MYSQL_USERNAME") ?? "vapor_username",
             database: env("MYSQL_DATABASE") ?? "vapor_database",
             password: env("MYSQL_PASSWORD") ?? "vapor_password",
-            tlsConfiguration: .forClient(certificateVerification: .none),
+            tlsConfiguration: tls,
             on: eventLoop
         )
     }
