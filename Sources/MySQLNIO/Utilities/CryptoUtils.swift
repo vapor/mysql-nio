@@ -2,14 +2,14 @@ import Crypto
 
 func sha256(_ messages: ByteBuffer...) -> ByteBuffer {
     let digest = SHA256.hash(data: [UInt8](messages.combine().readableBytesView))
-    var buffer = ByteBufferAllocator().buffer(capacity: 0)
+    var buffer = ByteBufferAllocator().buffer(capacity: SHA256.Digest.byteCount)
     buffer.writeBytes(digest)
     return buffer
 }
 
 func sha1(_ messages: ByteBuffer...) -> ByteBuffer {
     let digest = Insecure.SHA1.hash(data: [UInt8](messages.combine().readableBytesView))
-    var buffer = ByteBufferAllocator().buffer(capacity: 0)
+    var buffer = ByteBufferAllocator().buffer(capacity: Insecure.SHA1.Digest.byteCount)
     buffer.writeBytes(digest)
     return buffer
 }
