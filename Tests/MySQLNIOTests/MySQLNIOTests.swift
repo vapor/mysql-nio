@@ -264,6 +264,13 @@ final class MySQLNIOTests: XCTestCase {
         XCTAssert(time.microsecond == UInt32(100000))
         XCTAssert(time2.microsecond == UInt32(100000))
     }
+    
+    func testDate_zeroIsInvalidButMySQLReturnsIt() throws {
+        let zeroTime = MySQLTime()
+        let data = MySQLData(time: zeroTime)
+
+        XCTAssertEqual(data.description, "1970-01-01 00:00:00 +0000")
+    }
 
     func testString_lengthEncoded_uint8() throws {
         let conn = try MySQLConnection.test(on: self.eventLoop).wait()
