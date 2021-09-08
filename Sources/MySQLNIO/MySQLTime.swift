@@ -58,19 +58,19 @@ public struct MySQLTime: Equatable, MySQLDataConvertible {
     public init(date: Date) {
         // let comps = Calendar.current.dateComponents(in: .gmt, from: date)
         var rawtime = Int(date.timeIntervalSince1970)
-        var tm = tm()
-        gmtime_r(&rawtime, &tm)
+        var tms = tm()
+        gmtime_r(&rawtime, &tms)
         var microseconds = date.timeIntervalSince1970.microseconds
         if microseconds < 0.0 {
             microseconds = 1_000_000 - microseconds
         }
         self.init(
-            year: numericCast(1900 + tm.tm_year),
-            month: numericCast(1 + tm.tm_mon),
-            day: numericCast(tm.tm_mday),
-            hour: numericCast(tm.tm_hour),
-            minute: numericCast(tm.tm_min),
-            second: numericCast(tm.tm_sec),
+            year: numericCast(1900 + tms.tm_year),
+            month: numericCast(1 + tms.tm_mon),
+            day: numericCast(tms.tm_mday),
+            hour: numericCast(tms.tm_hour),
+            minute: numericCast(tms.tm_min),
+            second: numericCast(tms.tm_sec),
             microsecond: UInt32(microseconds)
         )
     }
