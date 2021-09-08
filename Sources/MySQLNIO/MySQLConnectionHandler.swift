@@ -74,7 +74,10 @@ final class MySQLConnectionHandler: ChannelDuplexHandler {
         case .commandPhase:
             if let current = self.queue.first {
                 do {
-                    let commandState = try current.handler.handle(packet: &packet, capabilities: self.serverCapabilities!)
+                    guard let capabilities = self.serverCapabilities else {
+                        throw MySQLError.protocolError
+                    }
+                    let commandState = try current.handler.handle(packet: &packet, capabilities: capabilities)
                     self.handleCommandState(context: context, commandState)
                 } catch {
                     self.queue.removeFirst()
@@ -226,7 +229,10 @@ final class MySQLConnectionHandler: ChannelDuplexHandler {
             database: state.database,
             authPluginName: authPluginName
         )
-        try context.write(self.wrapOutboundOut(.encode(res, capabilities: self.serverCapabilities!)), promise: nil)
+        guard let capabilities = self.serverCapabilities else {
+            throw MySQLError.protocolError
+        }
+        try context.write(self.wrapOutboundOut(.encode(res, capabilities: capabilities)), promise: nil)
         context.flush()
     }
     
@@ -264,7 +270,10 @@ final class MySQLConnectionHandler: ChannelDuplexHandler {
             }
             guard !packet.isError else {
                 self.logger.trace("caching_sha2_password replied ERR, decoding")
-                let err = try packet.decode(MySQLProtocol.ERR_Packet.self, capabilities: self.serverCapabilities!)
+                guard let capabilities = self.serverCapabilities else {
+                    throw MySQLError.protocolError
+                }
+                let err = try packet.decode(MySQLProtocol.ERR_Packet.self, capabilities: capabilities)
                 throw MySQLError.server(err)
             }
             guard let status = packet.payload.readInteger(endianness: .little, as: UInt8.self) else {
@@ -327,7 +336,10 @@ final class MySQLConnectionHandler: ChannelDuplexHandler {
         case "mysql_native_password":
             guard !packet.isError else {
                 self.logger.trace("mysql_native_password sent ERR, decoding")
-                let error = try packet.decode(MySQLProtocol.ERR_Packet.self, capabilities: self.serverCapabilities!)
+                guard let capabilities = self.serverCapabilities else {
+                    throw MySQLError.protocolError
+                }
+                let error = try packet.decode(MySQLProtocol.ERR_Packet.self, capabilities: capabilities)
                 throw MySQLError.server(error)
             }
             guard !packet.isOK else {
@@ -365,12 +377,16 @@ final class MySQLConnectionHandler: ChannelDuplexHandler {
         guard let command = self.queue.first else {
             return
         }
+        guard let capabilities = self.serverCapabilities else {
+            command.promise.fail(MySQLError.protocolError)
+            return
+        }
         self.commandState = .busy
         
         // send initial
         do {
             self.sequence.current = nil
-            let commandState = try command.handler.activate(capabilities: self.serverCapabilities!)
+            let commandState = try command.handler.activate(capabilities: capabilities)
             self.handleCommandState(context: context, commandState)
         } catch {
             self.queue.removeFirst()
@@ -413,7 +429,10 @@ final class MySQLConnectionHandler: ChannelDuplexHandler {
     private func _close(context: ChannelHandlerContext, mode: CloseMode, promise: EventLoopPromise<Void>?) throws {
         self.sequence.reset()
         let quit = MySQLProtocol.COM_QUIT()
-        try context.write(self.wrapOutboundOut(.encode(quit, capabilities: self.serverCapabilities!)), promise: nil)
+        // N.B.: It is possible to get here without having processed a handshake packet yet, in which case there will
+        // not be any serverCapabilities. Since COM_QUIT doesn't care about any of those anyway, don't crash if they're
+        // not there!
+        try context.write(self.wrapOutboundOut(.encode(quit, capabilities: self.serverCapabilities ?? .init())), promise: nil)
         context.flush()
         
         if let promise = promise {
