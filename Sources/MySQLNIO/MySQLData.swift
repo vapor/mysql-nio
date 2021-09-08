@@ -455,7 +455,7 @@ public struct MySQLData: CustomStringConvertible, ExpressibleByStringLiteral, Ex
             case .bit:
                 return self.bool!.description
             case .datetime, .timestamp:
-                return self.date!.description
+                return (self.time!.date ?? Date(timeIntervalSince1970: 0)).description
             case .varchar, .varString, .string:
                 return self.string!.debugDescription
             case .double:
