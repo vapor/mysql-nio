@@ -103,13 +103,13 @@ extension MySQLProtocol {
                 guard let reserved1 = packet.payload.readSlice(length: 6) else {
                     throw Error.missingReserved
                 }
-                assert(reserved1.isZeroes, "invalid reserve 1 \(reserved1)")
+                assert(reserved1.readableBytesView.allSatisfy { $0 == 0 }, "invalid reserve 1 \(reserved1)")
                 if capabilities.contains(.CLIENT_LONG_PASSWORD) {
                     /// string[4]     reserved (all [00])
                     guard let reserved2 = packet.payload.readSlice(length: 4) else {
                         throw Error.missingReserved
                     }
-                    assert(reserved2.isZeroes, "invalid reserve 2: \(reserved2)")
+                    assert(reserved2.readableBytesView.allSatisfy { $0 == 0 }, "invalid reserve 2: \(reserved2)")
                 } else {
                     /// Capabilities 3rd part. MariaDB specific flags.
                     /// MariaDB Initial Handshake Packet specific flags
