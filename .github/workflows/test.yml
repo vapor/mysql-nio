@@ -105,7 +105,7 @@ jobs:
           xcode-version: ${{ matrix.xcode }}
       - name: Install MySQL, setup DB and auth, and wait for server start
         run: |
-          brew install ${{ matrix.dbimage }} && brew link --force ${{ matrix.formula }}
+          brew install ${{ matrix.dbimage }} && brew link --force ${{ matrix.dbimage }}
           until echo | mysql -u${{ matrix.username }}; do sleep 1; done
           mysql -u${{ matrix.username }} --batch <<-SQL
               CREATE USER $MYSQL_USERNAME@localhost IDENTIFIED BY '$MYSQL_PASSWORD';
