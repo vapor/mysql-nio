@@ -16,9 +16,9 @@ extension MySQLConnection {
         tls.certificateVerification = .none
         return self.connect(
             to: addr,
-            username: env("MYSQL_USERNAME") ?? "vapor_username",
-            database: env("MYSQL_DATABASE") ?? "vapor_database",
-            password: env("MYSQL_PASSWORD") ?? "vapor_password",
+            username: env("MYSQL_USERNAME") ?? "test_username",
+            database: env("MYSQL_DATABASE") ?? "test_database",
+            password: env("MYSQL_PASSWORD") ?? "test_password",
             tlsConfiguration: tls,
             on: eventLoop
         )

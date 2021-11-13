@@ -15,6 +15,9 @@
 <a href="https://swift.org">
     <img src="http://img.shields.io/badge/swift-5.2-brightgreen.svg" alt="Swift 5.2">
 </a>
+<a href="https://swift.org">
+    <img src="http://img.shields.io/badge/swift-5.5-brightgreen.svg" alt="Swift 5.5">
+</a>
 <br>
 <br>
 
@@ -96,9 +99,9 @@ import MySQLNIO
 let eventLoop: EventLoop = ...
 let conn = try MySQLConnection(
     to: .makeAddressResolvingHost("my.mysql.server", port: 5432),
-    username: "vapor_username",
-    database: "vapor_database",
-    password: "vapor_password",
+    username: "test_username",
+    database: "test_database",
+    password: "test_password",
     on: eventLoop
 ).wait()
 ```
