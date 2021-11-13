@@ -195,18 +195,18 @@ final class MySQLNIOTests: XCTestCase {
         XCTAssertEqual(dropResults.count, 0)
         let createResults = try conn.simpleQuery("CREATE TABLE foos (id BIGINT SIGNED, name VARCHAR(64))").wait()
         XCTAssertEqual(createResults.count, 0)
-        let insertResults = try conn.query("INSERT INTO foos VALUES (?, ?)", [-1, "vapor"]).wait()
+        let insertResults = try conn.query("INSERT INTO foos VALUES (?, ?)", [-1, "test"]).wait()
         XCTAssertEqual(insertResults.count, 0)
-        let selectResults = try conn.query("SELECT * FROM foos WHERE name = ?", ["vapor"]).wait()
+        let selectResults = try conn.query("SELECT * FROM foos WHERE name = ?", ["test"]).wait()
         guard selectResults.count == 1 else {
             XCTFail("invalid row count")
             return
         }
         XCTAssertEqual(selectResults[0].column("id")?.int, -1)
-        XCTAssertEqual(selectResults[0].column("name")?.string, "vapor")
+        XCTAssertEqual(selectResults[0].column("name")?.string, "test")
         
         // test double parameterized query
-        let selectResults2 = try conn.query("SELECT * FROM foos WHERE name = ?", ["vapor"]).wait()
+        let selectResults2 = try conn.query("SELECT * FROM foos WHERE name = ?", ["test"]).wait()
         XCTAssertEqual(selectResults2.count, 1)
     }
     
@@ -224,7 +224,7 @@ final class MySQLNIOTests: XCTestCase {
         XCTAssertEqual(dropResults.count, 0)
         let createResults = try conn.simpleQuery("CREATE TABLE foos (id BIGINT PRIMARY KEY AUTO_INCREMENT, name VARCHAR(64))").wait()
         XCTAssertEqual(createResults.count, 0)
-        let insertResults = try conn.query("INSERT INTO foos (name) VALUES (?)", ["vapor"]) { metadata in
+        let insertResults = try conn.query("INSERT INTO foos (name) VALUES (?)", ["test"]) { metadata in
             XCTAssertEqual(metadata.affectedRows, 1)
             XCTAssertEqual(metadata.lastInsertID, 1)
         }.wait()
@@ -335,7 +335,7 @@ final class MySQLNIOTests: XCTestCase {
             .init("xinteger", "INTEGER(1)", 2147483647),
             .init("xbigint", "BIGINT(1)", MySQLData(int: .max)),
             .init("xdecimal", "DECIMAL(12,5)", MySQLData(decimal: Decimal(string:"-12.34567")!)),
-            .init("xname", "VARCHAR(10) NOT NULL", "vapor"),
+            .init("xname", "VARCHAR(10) NOT NULL", "test"),
         ]
         
         let conn = try MySQLConnection.test(on: self.eventLoop).wait()
@@ -355,7 +355,7 @@ final class MySQLNIOTests: XCTestCase {
         XCTAssertEqual(insertResults.count, 0)
         
         // select data
-        let selectResults = try conn.query("SELECT * FROM kitchen_sink WHERE xname = ?;", ["vapor"]).wait()
+        let selectResults = try conn.query("SELECT * FROM kitchen_sink WHERE xname = ?;", ["test"]).wait()
         XCTAssertEqual(selectResults.count, 1)
         
         for test in tests {
@@ -387,7 +387,7 @@ final class MySQLNIOTests: XCTestCase {
     
     func testSHA2() throws {
         var message = ByteBufferAllocator().buffer(capacity: 0)
-        message.writeString("vapor")
+        message.writeString("test")
         var digest = sha256(message)
         XCTAssertEqual(digest.readBytes(length: 32), [
             0xFB, 0x7A, 0xE6, 0x94, 0xBA, 0x3F, 0xD9, 0x0A, 0xE3, 0x90, 0x9C, 0xCC, 0xCD, 0x0B, 0xE0, 0xDA,
