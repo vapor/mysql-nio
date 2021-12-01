@@ -92,6 +92,8 @@ private final class MySQLQueryCommand: MySQLCommand {
             switch errorPacket.errorCode {
             case .DUP_ENTRY:
                 error = MySQLError.duplicateEntry(errorPacket.errorMessage)
+            case .PARSE_ERROR:
+                error = MySQLError.invalidSyntax(errorPacket.errorMessage)
             default:
                 error = MySQLError.server(errorPacket)
             }

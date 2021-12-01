@@ -38,8 +38,17 @@ private final class MySQLSimpleQueryCommand: MySQLCommand {
         // print("QUERY \(state): \(packet.payload.debugDescription)")
         guard !packet.isError else {
             self.state = .done
-            let error = try packet.decode(MySQLProtocol.ERR_Packet.self, capabilities: capabilities)
-            throw MySQLError.server(error)
+            let errorPacket = try packet.decode(MySQLProtocol.ERR_Packet.self, capabilities: capabilities)
+            let error: Error
+            switch errorPacket.errorCode {
+            case .DUP_ENTRY:
+                error = MySQLError.duplicateEntry(errorPacket.errorMessage)
+            case .PARSE_ERROR:
+                error = MySQLError.invalidSyntax(errorPacket.errorMessage)
+            default:
+                error = MySQLError.server(errorPacket)
+            }
+            throw error
         }
         switch self.state {
         case .ready:
