@@ -71,7 +71,12 @@ public final class MySQLConnection: MySQLDatabase {
     }
     
     public func send(_ command: MySQLCommand, logger: Logger) -> EventLoopFuture<Void> {
+        guard self.channel.isActive else {
+            return self.channel.eventLoop.makeFailedFuture(MySQLError.closed)
+        }
+
         let promise = self.eventLoop.makePromise(of: Void.self)
+        
         let c = MySQLCommandContext(
             handler: command,
             promise: promise

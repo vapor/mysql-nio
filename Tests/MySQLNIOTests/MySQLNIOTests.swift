@@ -108,15 +108,9 @@ final class MySQLNIOTests: XCTestCase {
     func testSimpleQuery_syntaxError() throws {
         let conn = try MySQLConnection.test(on: self.eventLoop).wait()
         defer { try! conn.close().wait() }
-        do {
-            _ = try conn.simpleQuery("SELECT &").wait()
-            XCTFail("should have thrown")
-        } catch let error as MySQLError {
-            switch error {
-            case .server(let packet):
-                XCTAssertEqual(packet.errorCode, .PARSE_ERROR)
-            default:
-                XCTFail("unexpected error type")
+        XCTAssertThrowsError(try conn.simpleQuery("SELECT &").wait()) { error in
+            guard case .invalidSyntax = error as? MySQLError else {
+                return XCTFail("Exected MySQLError.invalidSyntax, but found \(error)")
             }
         }
     }
@@ -124,19 +118,29 @@ final class MySQLNIOTests: XCTestCase {
     func testQuery_syntaxError() throws {
         let conn = try MySQLConnection.test(on: self.eventLoop).wait()
         defer { try! conn.close().wait() }
-        do {
-            _ = try conn.query("SELECT &").wait()
-            XCTFail("should have thrown")
-        } catch let error as MySQLError {
-            switch error {
-            case .server(let packet):
-                XCTAssertEqual(packet.errorCode, .PARSE_ERROR)
-            default:
-                XCTFail("unexpected error type")
+        XCTAssertThrowsError(try conn.query("SELECT &").wait()) { error in
+            guard case .invalidSyntax = error as? MySQLError else {
+                return XCTFail("Exected MySQLError.invalidSyntax, but found \(error)")
             }
         }
     }
     
+    func testSimpleQuery_duplicateEntry() throws {
+        let conn = try MySQLConnection.test(on: self.eventLoop).wait()
+        defer { try! conn.close().wait() }
+        let dropResults = try conn.simpleQuery("DROP TABLE IF EXISTS foos").wait()
+        XCTAssertEqual(dropResults.count, 0)
+        let createResults = try conn.simpleQuery("CREATE TABLE foos (id BIGINT SIGNED unique, name VARCHAR(64))").wait()
+        XCTAssertEqual(createResults.count, 0)
+        let insertResults = try conn.simpleQuery("INSERT INTO foos VALUES (1, 'one')").wait()
+        XCTAssertEqual(insertResults.count, 0)
+        XCTAssertThrowsError(try conn.query("INSERT INTO foos VALUES (1, 'two')").wait()) { error in
+            guard case .duplicateEntry = error as? MySQLError else {
+                return XCTFail("Expected MySQLError.duplicateEntry, but found \(error)")
+            }
+        }
+    }
+
     func testQuery_duplicateEntry() throws {
         let conn = try MySQLConnection.test(on: self.eventLoop).wait()
         defer { try! conn.close().wait() }

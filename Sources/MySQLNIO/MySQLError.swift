@@ -15,6 +15,9 @@ public enum MySQLError: Error, CustomStringConvertible, LocalizedError {
     /// A uniqueness constraint was violated. Associated value is message from server with details.
     case duplicateEntry(String)
     
+    /// A syntax error occurred in a query. Associated value is message from server with details.
+    case invalidSyntax(String)
+    
     public var message: String {
         switch self {
         case .secureConnectionRequired:
@@ -39,6 +42,8 @@ public enum MySQLError: Error, CustomStringConvertible, LocalizedError {
             return "Connection closed."
         case .duplicateEntry(let message):
             return "Duplicate entry: \(message)"
+        case .invalidSyntax(let message):
+            return "Invalid syntax: \(message)"
         }
     }
     
