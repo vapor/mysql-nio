@@ -434,10 +434,31 @@ public struct MySQLData: CustomStringConvertible, ExpressibleByStringLiteral, Ex
         guard var buffer = self.buffer else {
             return nil
         }
-        switch self.type {
-        case .timestamp, .datetime, .date, .time:
-            return buffer.readMySQLTime()
-        default: return nil
+        switch self.format {
+        case .binary:
+            switch self.type {
+            case .timestamp, .datetime, .date, .time:
+                return buffer.readMySQLTime()
+            default: return nil
+            }
+        case .text:
+            if let s = buffer.readString(length: buffer.readableBytes) {
+                var ctime = tm()
+                let format = "%Y-%m-%d %H:%M:%S"
+                _ = format.withCString { cf in
+                    s.withCString { cs in
+                        strptime(cs, cf, &ctime)
+                    }
+                }
+                return MySQLTime(year: UInt16(ctime.tm_year + 1900),
+                                 month: UInt16(ctime.tm_mon + 1),
+                                 day: UInt16(ctime.tm_mday),
+                                 hour: UInt16(ctime.tm_hour),
+                                 minute: UInt16(ctime.tm_min),
+                                 second: UInt16(ctime.tm_sec),
+                                 microsecond: nil)
+            }
+            return nil
         }
     }
     
