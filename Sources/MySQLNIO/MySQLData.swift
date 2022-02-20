@@ -445,18 +445,20 @@ public struct MySQLData: CustomStringConvertible, ExpressibleByStringLiteral, Ex
             if let s = buffer.readString(length: buffer.readableBytes) {
                 var ctime = tm()
                 let format = "%Y-%m-%d %H:%M:%S"
-                _ = format.withCString { cf in
-                    s.withCString { cs in
-                        strptime(cs, cf, &ctime)
+                let success = format.withCString { cf in
+                    return s.withCString { cs in
+                        return strptime(cs, cf, &ctime) != nil
                     }
                 }
-                return MySQLTime(year: UInt16(ctime.tm_year + 1900),
-                                 month: UInt16(ctime.tm_mon + 1),
-                                 day: UInt16(ctime.tm_mday),
-                                 hour: UInt16(ctime.tm_hour),
-                                 minute: UInt16(ctime.tm_min),
-                                 second: UInt16(ctime.tm_sec),
-                                 microsecond: nil)
+                if success {
+                    return MySQLTime(year: UInt16(ctime.tm_year + 1900),
+                                     month: UInt16(ctime.tm_mon + 1),
+                                     day: UInt16(ctime.tm_mday),
+                                     hour: UInt16(ctime.tm_hour),
+                                     minute: UInt16(ctime.tm_min),
+                                     second: UInt16(ctime.tm_sec),
+                                     microsecond: nil)
+                }
             }
             return nil
         }
