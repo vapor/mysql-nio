@@ -75,6 +75,24 @@ public struct MySQLTime: Equatable, MySQLDataConvertible {
         )
     }
     
+    /// Parse a new `MySQLTime` from a String in "yyyy-MM-dd hh:mm:ss" format.
+    public init?(_ string: String) {
+        let parts = string.split { c in
+            ":- ".contains(c)
+        }
+        guard parts.count >= 6,
+              let year = UInt16(parts[0]),
+              let month = UInt16(parts[1]),
+              let day = UInt16(parts[2]),
+              let hour = UInt16(parts[3]),
+              let minute = UInt16(parts[4]),
+              let second = UInt16(parts[5])
+        else {
+            return nil
+        }
+        self.init(year: year, month: month, day: day, hour: hour, minute: minute, second: second)
+    }
+    
     /// `MySQLDataConvertible` conformance.
     public init?(mysqlData: MySQLData) {
         guard let time = mysqlData.time else {
