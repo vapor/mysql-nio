@@ -61,7 +61,6 @@ final class MySQLConnectionHandler: ChannelDuplexHandler {
         switch self.state {
         case .handshake(let state):
             do {
-                self.logger.trace("Handle handshake packet")
                 try self.handleHandshake(context: context, packet: &packet, state: state)
             } catch {
                 state.done.fail(error)
@@ -94,10 +93,19 @@ final class MySQLConnectionHandler: ChannelDuplexHandler {
     }
     
     func handleHandshake(context: ChannelHandlerContext, packet: inout MySQLPacket, state: HandshakeState) throws {
+        guard !packet.isError else {
+            let errPacket = try packet.decode(MySQLProtocol.ERR_Packet.self, capabilities: [])
+            self.logger.trace("MySQL server opened with error \(errPacket.errorMessage)")
+            throw MySQLError.server(errPacket)
+        }
+
         let handshakeRequest = try packet.decode(MySQLProtocol.HandshakeV10.self, capabilities: [])
         self.logger.trace("Handling MySQL handshake \(handshakeRequest)")
-        assert(handshakeRequest.capabilities.contains(.CLIENT_PROTOCOL_41), "Client protocol 4.1 required")
+        guard handshakeRequest.capabilities.contains(.CLIENT_PROTOCOL_41) else {
+            throw MySQLError.protocolError
+        }
         self.serverCapabilities = handshakeRequest.capabilities
+
         if let tlsConfiguration = state.tlsConfiguration, handshakeRequest.capabilities.contains(.CLIENT_SSL) {
             var capabilities = MySQLProtocol.CapabilityFlags.clientDefault
             capabilities.insert(.CLIENT_SSL)
