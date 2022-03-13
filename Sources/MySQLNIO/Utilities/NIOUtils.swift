@@ -23,6 +23,12 @@ extension ByteBuffer {
     }
 
     @discardableResult
+    mutating func writeImmutableLengthEncodedSlice(_ buffer: ByteBuffer) -> Int {
+        var copy = buffer
+        return self.writeLengthEncodedSlice(&copy)
+    }
+    
+    @discardableResult
     mutating func writeLengthEncodedSlice(_ buffer: inout ByteBuffer) -> Int {
         return self.writeLengthEncodedInteger(numericCast(buffer.readableBytes))
              + self.writeBuffer(&buffer)
