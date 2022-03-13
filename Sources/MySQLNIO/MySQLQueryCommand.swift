@@ -91,6 +91,7 @@ private final class MySQLQueryCommand: MySQLCommand {
                 MySQLProtocol.ERR_Packet.self,
                 capabilities: capabilities
             )
+            self.logger.trace("Handling ERR_Packet: \(errorPacket)")
             let error: Error
             switch errorPacket.errorCode {
             case .DUP_ENTRY:
@@ -143,7 +144,7 @@ private final class MySQLQueryCommand: MySQLCommand {
                 if self.ok!.numColumns != 0 {
                     self.state = .columns
                 } else {
-                    self.state = .rows
+                    self.state = .executeColumnCount
                 }
             }
             return .noResponse
@@ -164,6 +165,10 @@ private final class MySQLQueryCommand: MySQLCommand {
             self.state = .executeColumns(remaining: numericCast(count))
             return .noResponse
         case .executeColumns(var remaining):
+            if self.ok!.numColumns == 0 && remaining > 0 {
+                let column = try packet.decode(MySQLProtocol.ColumnDefinition41.self, capabilities: capabilities)
+                self.columns.append(column)
+            }
             remaining -= 1
             switch remaining {
             case 0:
@@ -173,7 +178,7 @@ private final class MySQLQueryCommand: MySQLCommand {
             }
             return .noResponse
         case .rows:
-            if packet.isEOF || packet.isOK && columns.count == 0 {
+            if packet.isEOF || (packet.isOK && columns.count == 0) {
                 return try self.done(packet: &packet, capabilities: capabilities)
             }
 
@@ -195,7 +200,7 @@ private final class MySQLQueryCommand: MySQLCommand {
 
     func done(packet: inout MySQLPacket, capabilities: MySQLProtocol.CapabilityFlags) throws -> MySQLCommandState {
         self.state = .done
-        if packet.isOK {
+        if packet.isOK || packet.isEOF {
             let ok = try MySQLProtocol.OK_Packet.decode(from: &packet, capabilities: capabilities)
             do {
                 try self.onMetadata(.init(affectedRows: ok.affectedRows, lastInsertID: ok.lastInsertID))
