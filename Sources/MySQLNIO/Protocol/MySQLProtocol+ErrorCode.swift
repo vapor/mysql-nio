@@ -1774,6 +1774,176 @@ extension MySQLProtocol {
         public static let GTID_UNSAFE_BINLOG_SPLITTABLE_STATEMENT_AND_GTID_GROUP: ErrorCode = 1884
         /// `ER_SLAVE_HAS_MORE_GTIDS_THAN_MASTER`
         public static let SLAVE_HAS_MORE_GTIDS_THAN_MASTER: ErrorCode = 1885
+        /// `ER_MISSING_KEY`
+        public static let MISSING_KEY: ErrorCode = 1886
+        /// `WARN_NAMED_PIPE_ACCESS_EVERYONE`
+        public static let WARN_NAMED_PIPE_ACCESS_EVERYONE: ErrorCode = 1887
+        /// `ER_UNUSED_18`
+        public static let MARIADB_UNUSED_18: ErrorCode = 1900
+        /// `ER_GENERATED_COLUMN_FUNCTION_IS_NOT_ALLOWED`
+        public static let MARIADB_GENERATED_COLUMN_FUNCTION_IS_NOT_ALLOWED: ErrorCode = 1901
+        /// `ER_UNUSED_19`
+        public static let MARIADB_UNUSED_19: ErrorCode = 1902
+        /// `ER_PRIMARY_KEY_BASED_ON_GENERATED_COLUMN`
+        public static let MARIADB_PRIMARY_KEY_BASED_ON_GENERATED_COLUMN: ErrorCode = 1903
+        /// `ER_KEY_BASED_ON_GENERATED_VIRTUAL_COLUMN`
+        public static let MARIADB_KEY_BASED_ON_GENERATED_VIRTUAL_COLUMN: ErrorCode = 1904
+        /// `ER_WRONG_FK_OPTION_FOR_GENERATED_COLUMN`
+        public static let MARIADB_WRONG_FK_OPTION_FOR_GENERATED_COLUMN: ErrorCode = 1905
+        /// `ER_WARNING_NON_DEFAULT_VALUE_FOR_GENERATED_COLUMN`
+        public static let MARIADB_WARNING_NON_DEFAULT_VALUE_FOR_GENERATED_COLUMN: ErrorCode = 1906
+        /// `ER_UNSUPPORTED_ACTION_ON_GENERATED_COLUMN`
+        public static let MARIADB_UNSUPPORTED_ACTION_ON_GENERATED_COLUMN: ErrorCode = 1907
+        /// `ER_UNUSED_20`
+        public static let MARIADB_UNUSED_20: ErrorCode = 1908
+        /// `ER_UNUSED_21`
+        public static let MARIADB_UNUSED_21: ErrorCode = 1909
+        /// `ER_UNSUPPORTED_ENGINE_FOR_GENERATED_COLUMNS`
+        public static let MARIADB_UNSUPPORTED_ENGINE_FOR_GENERATED_COLUMNS: ErrorCode = 1910
+        /// `ER_UNKNOWN_OPTION`
+        public static let MARIADB_UNKNOWN_OPTION: ErrorCode = 1911
+        /// `ER_BAD_OPTION_VALUE`
+        public static let MARIADB_BAD_OPTION_VALUE: ErrorCode = 1912
+        /// `ER_UNUSED_6`
+        public static let MARIADB_UNUSED_6: ErrorCode = 1913
+        /// `ER_UNUSED_7`
+        public static let MARIADB_UNUSED_7: ErrorCode = 1914
+        /// `ER_UNUSED_8`
+        public static let MARIADB_UNUSED_8: ErrorCode = 1915
+        /// `ER_DATA_OVERFLOW`
+        public static let MARIADB_DATA_OVERFLOW: ErrorCode = 1916
+        /// `ER_DATA_TRUNCATED`
+        public static let MARIADB_DATA_TRUNCATED: ErrorCode = 1917
+        /// `ER_BAD_DATA`
+        public static let MARIADB_BAD_DATA: ErrorCode = 1918
+        /// `ER_DYN_COL_WRONG_FORMAT`
+        public static let MARIADB_DYN_COL_WRONG_FORMAT: ErrorCode = 1919
+        /// `ER_DYN_COL_IMPLEMENTATION_LIMIT`
+        public static let MARIADB_DYN_COL_IMPLEMENTATION_LIMIT: ErrorCode = 1920
+        /// `ER_DYN_COL_DATA`
+        public static let MARIADB_DYN_COL_DATA: ErrorCode = 1921
+        /// `ER_DYN_COL_WRONG_CHARSET`
+        public static let MARIADB_DYN_COL_WRONG_CHARSET: ErrorCode = 1922
+        /// `ER_ILLEGAL_SUBQUERY_OPTIMIZER_SWITCHES`
+        public static let MARIADB_ILLEGAL_SUBQUERY_OPTIMIZER_SWITCHES: ErrorCode = 1923
+        /// `ER_QUERY_CACHE_IS_DISABLED`
+        public static let MARIADB_QUERY_CACHE_IS_DISABLED: ErrorCode = 1924
+        /// `ER_QUERY_CACHE_IS_GLOBALY_DISABLED`
+        public static let MARIADB_QUERY_CACHE_IS_GLOBALY_DISABLED: ErrorCode = 1925
+        /// `ER_VIEW_ORDERBY_IGNORED`
+        public static let MARIADB_VIEW_ORDERBY_IGNORED: ErrorCode = 1926
+        /// `ER_CONNECTION_KILLED`
+        public static let MARIADB_CONNECTION_KILLED: ErrorCode = 1927
+        /// `ER_UNUSED_11`
+        public static let MARIADB_UNUSED_11: ErrorCode = 1928
+        /// `ER_INSIDE_TRANSACTION_PREVENTS_SWITCH_SKIP_REPLICATION`
+        public static let MARIADB_INSIDE_TRANSACTION_PREVENTS_SWITCH_SKIP_REPLICATION: ErrorCode = 1929
+        /// `ER_STORED_FUNCTION_PREVENTS_SWITCH_SKIP_REPLICATION`
+        public static let MARIADB_STORED_FUNCTION_PREVENTS_SWITCH_SKIP_REPLICATION: ErrorCode = 1930
+        /// `ER_QUERY_EXCEEDED_ROWS_EXAMINED_LIMIT`
+        public static let MARIADB_QUERY_EXCEEDED_ROWS_EXAMINED_LIMIT: ErrorCode = 1931
+        /// `ER_NO_SUCH_TABLE_IN_ENGINE`
+        public static let MARIADB_NO_SUCH_TABLE_IN_ENGINE: ErrorCode = 1932
+        /// `ER_TARGET_NOT_EXPLAINABLE`
+        public static let MARIADB_TARGET_NOT_EXPLAINABLE: ErrorCode = 1933
+        /// `ER_CONNECTION_ALREADY_EXISTS`
+        public static let MARIADB_CONNECTION_ALREADY_EXISTS: ErrorCode = 1934
+        /// `ER_MASTER_LOG_PREFIX`
+        public static let MARIADB_MASTER_LOG_PREFIX: ErrorCode = 1935
+        /// `ER_CANT_START_STOP_SLAVE`
+        public static let MARIADB_CANT_START_STOP_SLAVE: ErrorCode = 1936
+        /// `ER_SLAVE_STARTED`
+        public static let MARIADB_SLAVE_STARTED: ErrorCode = 1937
+        /// `ER_SLAVE_STOPPED`
+        public static let MARIADB_SLAVE_STOPPED: ErrorCode = 1938
+        /// `ER_SQL_DISCOVER_ERROR`
+        public static let MARIADB_SQL_DISCOVER_ERROR: ErrorCode = 1939
+        /// `ER_FAILED_GTID_STATE_INIT`
+        public static let MARIADB_FAILED_GTID_STATE_INIT: ErrorCode = 1940
+        /// `ER_INCORRECT_GTID_STATE`
+        public static let MARIADB_INCORRECT_GTID_STATE: ErrorCode = 1941
+        /// `ER_CANNOT_UPDATE_GTID_STATE`
+        public static let MARIADB_CANNOT_UPDATE_GTID_STATE: ErrorCode = 1942
+        /// `ER_DUPLICATE_GTID_DOMAIN`
+        public static let MARIADB_DUPLICATE_GTID_DOMAIN: ErrorCode = 1943
+        /// `ER_GTID_OPEN_TABLE_FAILED`
+        public static let MARIADB_GTID_OPEN_TABLE_FAILED: ErrorCode = 1944
+        /// `ER_GTID_POSITION_NOT_FOUND_IN_BINLOG`
+        public static let MARIADB_GTID_POSITION_NOT_FOUND_IN_BINLOG: ErrorCode = 1945
+        /// `ER_CANNOT_LOAD_SLAVE_GTID_STATE`
+        public static let MARIADB_CANNOT_LOAD_SLAVE_GTID_STATE: ErrorCode = 1946
+        /// `ER_MASTER_GTID_POS_CONFLICTS_WITH_BINLOG`
+        public static let MARIADB_MASTER_GTID_POS_CONFLICTS_WITH_BINLOG: ErrorCode = 1947
+        /// `ER_MASTER_GTID_POS_MISSING_DOMAIN`
+        public static let MARIADB_MASTER_GTID_POS_MISSING_DOMAIN: ErrorCode = 1948
+        /// `ER_UNTIL_REQUIRES_USING_GTID`
+        public static let MARIADB_UNTIL_REQUIRES_USING_GTID: ErrorCode = 1949
+        /// `ER_GTID_STRICT_OUT_OF_ORDER`
+        public static let MARIADB_GTID_STRICT_OUT_OF_ORDER: ErrorCode = 1950
+        /// `ER_GTID_START_FROM_BINLOG_HOLE`
+        public static let MARIADB_GTID_START_FROM_BINLOG_HOLE: ErrorCode = 1951
+        /// `ER_SLAVE_UNEXPECTED_MASTER_SWITCH`
+        public static let MARIADB_SLAVE_UNEXPECTED_MASTER_SWITCH: ErrorCode = 1952
+        /// `ER_INSIDE_TRANSACTION_PREVENTS_SWITCH_GTID_DOMAIN_ID_SEQ_NO`
+        public static let MARIADB_INSIDE_TRANSACTION_PREVENTS_SWITCH_GTID_DOMAIN_ID_SEQ_NO: ErrorCode = 1953
+        /// `ER_STORED_FUNCTION_PREVENTS_SWITCH_GTID_DOMAIN_ID_SEQ_NO`
+        public static let MARIADB_STORED_FUNCTION_PREVENTS_SWITCH_GTID_DOMAIN_ID_SEQ_NO: ErrorCode = 1954
+        /// `ER_GTID_POSITION_NOT_FOUND_IN_BINLOG2`
+        public static let MARIADB_GTID_POSITION_NOT_FOUND_IN_BINLOG2: ErrorCode = 1955
+        /// `ER_BINLOG_MUST_BE_EMPTY`
+        public static let MARIADB_BINLOG_MUST_BE_EMPTY: ErrorCode = 1956
+        /// `ER_NO_SUCH_QUERY`
+        public static let MARIADB_NO_SUCH_QUERY: ErrorCode = 1957
+        /// `ER_BAD_BASE64_DATA`
+        public static let MARIADB_BAD_BASE64_DATA: ErrorCode = 1958
+        /// `ER_INVALID_ROLE`
+        public static let MARIADB_INVALID_ROLE: ErrorCode = 1959
+        /// `ER_INVALID_CURRENT_USER`
+        public static let MARIADB_INVALID_CURRENT_USER: ErrorCode = 1960
+        /// `ER_CANNOT_GRANT_ROLE`
+        public static let MARIADB_CANNOT_GRANT_ROLE: ErrorCode = 1961
+        /// `ER_CANNOT_REVOKE_ROLE`
+        public static let MARIADB_CANNOT_REVOKE_ROLE: ErrorCode = 1962
+        /// `ER_CHANGE_SLAVE_PARALLEL_THREADS_ACTIVE`
+        public static let MARIADB_CHANGE_SLAVE_PARALLEL_THREADS_ACTIVE: ErrorCode = 1963
+        /// `ER_PRIOR_COMMIT_FAILED`
+        public static let MARIADB_PRIOR_COMMIT_FAILED: ErrorCode = 1964
+        /// `ER_IT_IS_A_VIEW`
+        public static let MARIADB_IT_IS_A_VIEW: ErrorCode = 1965
+        /// `ER_SLAVE_SKIP_NOT_IN_GTID`
+        public static let MARIADB_SLAVE_SKIP_NOT_IN_GTID: ErrorCode = 1966
+        /// `ER_TABLE_DEFINITION_TOO_BIG`
+        public static let MARIADB_TABLE_DEFINITION_TOO_BIG: ErrorCode = 1967
+        /// `ER_PLUGIN_INSTALLED`
+        public static let MARIADB_PLUGIN_INSTALLED: ErrorCode = 1968
+        /// `ER_STATEMENT_TIMEOUT`
+        public static let MARIADB_STATEMENT_TIMEOUT: ErrorCode = 1969
+        /// `ER_SUBQUERIES_NOT_SUPPORTED`
+        public static let MARIADB_SUBQUERIES_NOT_SUPPORTED: ErrorCode = 1970
+        /// `ER_SET_STATEMENT_NOT_SUPPORTED`
+        public static let MARIADB_SET_STATEMENT_NOT_SUPPORTED: ErrorCode = 1971
+        /// `ER_UNUSED_9`
+        public static let MARIADB_UNUSED_9: ErrorCode = 1972
+        /// `ER_USER_CREATE_EXISTS`
+        public static let MARIADB_USER_CREATE_EXISTS: ErrorCode = 1973
+        /// `ER_USER_DROP_EXISTS`
+        public static let MARIADB_USER_DROP_EXISTS: ErrorCode = 1974
+        /// `ER_ROLE_CREATE_EXISTS`
+        public static let MARIADB_ROLE_CREATE_EXISTS: ErrorCode = 1975
+        /// `ER_ROLE_DROP_EXISTS`
+        public static let MARIADB_ROLE_DROP_EXISTS: ErrorCode = 1976
+        /// `ER_CANNOT_CONVERT_CHARACTER`
+        public static let MARIADB_CANNOT_CONVERT_CHARACTER: ErrorCode = 1977
+        /// `ER_INVALID_DEFAULT_VALUE_FOR_FIELD`
+        public static let MARIADB_INVALID_DEFAULT_VALUE_FOR_FIELD: ErrorCode = 1978
+        /// `ER_KILL_QUERY_DENIED_ERROR`
+        public static let MARIADB_KILL_QUERY_DENIED_ERROR: ErrorCode = 1979
+        /// `ER_NO_EIS_FOR_FIELD`
+        public static let MARIADB_NO_EIS_FOR_FIELD: ErrorCode = 1980
+        /// `ER_WARN_AGGFUNC_DEPENDENCE`
+        public static let MARIADB_WARN_AGGFUNC_DEPENDENCE: ErrorCode = 1981
+        /// `WARN_INNODB_PARTITION_OPTION_IGNORED`
+        public static let MARIADB_INNODB_PARTITION_OPTION_IGNORED: ErrorCode = 1982
         /// `CR_UNKNOWN_ERROR`
         public static let UNKNOWN_ERROR_CLIENT: ErrorCode = 2000
         /// `CR_SOCKET_CREATE_ERROR`
@@ -1900,6 +2070,30 @@ extension MySQLProtocol {
         public static let AUTH_PLUGIN_ERR: ErrorCode = 2061
         /// `CR_INSECURE_API_ERR`
         public static let INSECURE_API_ERR: ErrorCode = 2062
+        /// `CR_FILE_NAME_TOO_LONG`
+        public static let FILE_NAME_TOO_LONG: ErrorCode = 2063
+        /// `CR_SSL_FIPS_MODE_ERR`
+        public static let SSL_FIPS_MODE_ERR: ErrorCode = 2064
+        /// `CR_COMPRESSION_NOT_SUPPORTED`
+        public static let COMPRESSION_NOT_SUPPORTED: ErrorCode = 2065
+        /// `CR_DEPRECATED_COMPRESSION_NOT_SUPPORTED`
+        public static let DEPRECATED_COMPRESSION_NOT_SUPPORTED: ErrorCode = 2065
+        /// `CR_COMPRESSION_WRONGLY_CONFIGURED`
+        public static let COMPRESSION_WRONGLY_CONFIGURED: ErrorCode = 2066
+        /// `CR_KERBEROS_USER_NOT_FOUND`
+        public static let KERBEROS_USER_NOT_FOUND: ErrorCode = 2067
+        /// `CR_LOAD_DATA_LOCAL_INFILE_REJECTED`
+        public static let LOAD_DATA_LOCAL_INFILE_REJECTED: ErrorCode = 2068
+        /// `CR_LOAD_DATA_LOCAL_INFILE_REALPATH_FAIL`
+        public static let LOAD_DATA_LOCAL_INFILE_REALPATH_FAIL: ErrorCode = 2069
+        /// `CR_DNS_SRV_LOOKUP_FAILED`
+        public static let DNS_SRV_LOOKUP_FAILED: ErrorCode = 2070
+        /// `CR_MANDATORY_TRACKER_NOT_FOUND`
+        public static let MANDATORY_TRACKER_NOT_FOUND: ErrorCode = 2071
+        /// `CR_INVALID_FACTOR_NO`
+        public static let INVALID_FACTOR_NO: ErrorCode = 2072
+        /// `CR_CANT_GET_SESSION_DATA`
+        public static let CANT_GET_SESSION_DATA: ErrorCode = 2073
         /// `ER_FILE_CORRUPT`
         public static let FILE_CORRUPT: ErrorCode = 3000
         /// `ER_ERROR_ON_MASTER`
@@ -2288,6 +2482,1247 @@ extension MySQLProtocol {
         public static let CANNOT_ADD_FOREIGN_BASE_COL_STORED: ErrorCode = 3192
         /// `ER_TABLE_REFERENCED`
         public static let TABLE_REFERENCED: ErrorCode = 3193
+        /// `ER_XA_RETRY`
+        public static let XA_RETRY: ErrorCode = 3197
+        /// `ER_KEYRING_AWS_UDF_AWS_KMS_ERROR`
+        public static let KEYRING_AWS_UDF_AWS_KMS_ERROR: ErrorCode = 3198
+        /// `ER_BINLOG_UNSAFE_XA`
+        public static let BINLOG_UNSAFE_XA: ErrorCode = 3199
+        /// `ER_UDF_ERROR`
+        public static let UDF_ERROR: ErrorCode = 3200
+        /// `ER_KEYRING_MIGRATION_FAILURE`
+        public static let KEYRING_MIGRATION_FAILURE: ErrorCode = 3201
+        /// `ER_KEYRING_ACCESS_DENIED_ERROR`
+        public static let KEYRING_ACCESS_DENIED_ERROR: ErrorCode = 3202
+        /// `ER_KEYRING_MIGRATION_STATUS`
+        public static let KEYRING_MIGRATION_STATUS: ErrorCode = 3203
+        /// `ER_AUDIT_LOG_UDF_READ_INVALID_MAX_ARRAY_LENGTH_ARG_VALUE`
+        public static let AUDIT_LOG_UDF_READ_INVALID_MAX_ARRAY_LENGTH_ARG_VALUE: ErrorCode = 3218
+        /// `ER_WRITE_SET_EXCEEDS_LIMIT`
+        public static let WRITE_SET_EXCEEDS_LIMIT: ErrorCode = 3231
+        /// `ER_UNSUPPORT_COMPRESSED_TEMPORARY_TABLE`
+        public static let UNSUPPORT_COMPRESSED_TEMPORARY_TABLE: ErrorCode = 3500
+        /// `ER_ACL_OPERATION_FAILED`
+        public static let ACL_OPERATION_FAILED: ErrorCode = 3501
+        /// `ER_UNSUPPORTED_INDEX_ALGORITHM`
+        public static let UNSUPPORTED_INDEX_ALGORITHM: ErrorCode = 3502
+        /// `ER_NO_SUCH_DB`
+        public static let NO_SUCH_DB: ErrorCode = 3503
+        /// `ER_TOO_BIG_ENUM`
+        public static let TOO_BIG_ENUM: ErrorCode = 3504
+        /// `ER_TOO_LONG_SET_ENUM_VALUE`
+        public static let TOO_LONG_SET_ENUM_VALUE: ErrorCode = 3505
+        /// `ER_INVALID_DD_OBJECT`
+        public static let INVALID_DD_OBJECT: ErrorCode = 3506
+        /// `ER_UPDATING_DD_TABLE`
+        public static let UPDATING_DD_TABLE: ErrorCode = 3507
+        /// `ER_INVALID_DD_OBJECT_ID`
+        public static let INVALID_DD_OBJECT_ID: ErrorCode = 3508
+        /// `ER_INVALID_DD_OBJECT_NAME`
+        public static let INVALID_DD_OBJECT_NAME: ErrorCode = 3509
+        /// `ER_TABLESPACE_MISSING_WITH_NAME`
+        public static let TABLESPACE_MISSING_WITH_NAME: ErrorCode = 3510
+        /// `ER_TOO_LONG_ROUTINE_COMMENT`
+        public static let TOO_LONG_ROUTINE_COMMENT: ErrorCode = 3511
+        /// `ER_SP_LOAD_FAILED`
+        public static let SP_LOAD_FAILED: ErrorCode = 3512
+        /// `ER_INVALID_BITWISE_OPERANDS_SIZE`
+        public static let INVALID_BITWISE_OPERANDS_SIZE: ErrorCode = 3513
+        /// `ER_INVALID_BITWISE_AGGREGATE_OPERANDS_SIZE`
+        public static let INVALID_BITWISE_AGGREGATE_OPERANDS_SIZE: ErrorCode = 3514
+        /// `ER_WARN_UNSUPPORTED_HINT`
+        public static let WARN_UNSUPPORTED_HINT: ErrorCode = 3515
+        /// `ER_UNEXPECTED_GEOMETRY_TYPE`
+        public static let UNEXPECTED_GEOMETRY_TYPE: ErrorCode = 3516
+        /// `ER_SRS_PARSE_ERROR`
+        public static let SRS_PARSE_ERROR: ErrorCode = 3517
+        /// `ER_SRS_PROJ_PARAMETER_MISSING`
+        public static let SRS_PROJ_PARAMETER_MISSING: ErrorCode = 3518
+        /// `ER_WARN_SRS_NOT_FOUND`
+        public static let WARN_SRS_NOT_FOUND: ErrorCode = 3519
+        /// `ER_SRS_NOT_CARTESIAN`
+        public static let SRS_NOT_CARTESIAN: ErrorCode = 3520
+        /// `ER_SRS_NOT_CARTESIAN_UNDEFINED`
+        public static let SRS_NOT_CARTESIAN_UNDEFINED: ErrorCode = 3521
+        /// `ER_PK_INDEX_CANT_BE_INVISIBLE`
+        public static let PK_INDEX_CANT_BE_INVISIBLE: ErrorCode = 3522
+        /// `ER_UNKNOWN_AUTHID`
+        public static let UNKNOWN_AUTHID: ErrorCode = 3523
+        /// `ER_FAILED_ROLE_GRANT`
+        public static let FAILED_ROLE_GRANT: ErrorCode = 3524
+        /// `ER_OPEN_ROLE_TABLES`
+        public static let OPEN_ROLE_TABLES: ErrorCode = 3525
+        /// `ER_FAILED_DEFAULT_ROLES`
+        public static let FAILED_DEFAULT_ROLES: ErrorCode = 3526
+        /// `ER_COMPONENTS_NO_SCHEME`
+        public static let COMPONENTS_NO_SCHEME: ErrorCode = 3527
+        /// `ER_COMPONENTS_NO_SCHEME_SERVICE`
+        public static let COMPONENTS_NO_SCHEME_SERVICE: ErrorCode = 3528
+        /// `ER_COMPONENTS_CANT_LOAD`
+        public static let COMPONENTS_CANT_LOAD: ErrorCode = 3529
+        /// `ER_ROLE_NOT_GRANTED`
+        public static let ROLE_NOT_GRANTED: ErrorCode = 3530
+        /// `ER_FAILED_REVOKE_ROLE`
+        public static let FAILED_REVOKE_ROLE: ErrorCode = 3531
+        /// `ER_RENAME_ROLE`
+        public static let RENAME_ROLE: ErrorCode = 3532
+        /// `ER_COMPONENTS_CANT_ACQUIRE_SERVICE_IMPLEMENTATION`
+        public static let COMPONENTS_CANT_ACQUIRE_SERVICE_IMPLEMENTATION: ErrorCode = 3533
+        /// `ER_COMPONENTS_CANT_SATISFY_DEPENDENCY`
+        public static let COMPONENTS_CANT_SATISFY_DEPENDENCY: ErrorCode = 3534
+        /// `ER_COMPONENTS_LOAD_CANT_REGISTER_SERVICE_IMPLEMENTATION`
+        public static let COMPONENTS_LOAD_CANT_REGISTER_SERVICE_IMPLEMENTATION: ErrorCode = 3535
+        /// `ER_COMPONENTS_LOAD_CANT_INITIALIZE`
+        public static let COMPONENTS_LOAD_CANT_INITIALIZE: ErrorCode = 3536
+        /// `ER_COMPONENTS_UNLOAD_NOT_LOADED`
+        public static let COMPONENTS_UNLOAD_NOT_LOADED: ErrorCode = 3537
+        /// `ER_COMPONENTS_UNLOAD_CANT_DEINITIALIZE`
+        public static let COMPONENTS_UNLOAD_CANT_DEINITIALIZE: ErrorCode = 3538
+        /// `ER_COMPONENTS_CANT_RELEASE_SERVICE`
+        public static let COMPONENTS_CANT_RELEASE_SERVICE: ErrorCode = 3539
+        /// `ER_COMPONENTS_UNLOAD_CANT_UNREGISTER_SERVICE`
+        public static let COMPONENTS_UNLOAD_CANT_UNREGISTER_SERVICE: ErrorCode = 3540
+        /// `ER_COMPONENTS_CANT_UNLOAD`
+        public static let COMPONENTS_CANT_UNLOAD: ErrorCode = 3541
+        /// `ER_WARN_UNLOAD_THE_NOT_PERSISTED`
+        public static let WARN_UNLOAD_THE_NOT_PERSISTED: ErrorCode = 3542
+        /// `ER_COMPONENT_TABLE_INCORRECT`
+        public static let COMPONENT_TABLE_INCORRECT: ErrorCode = 3543
+        /// `ER_COMPONENT_MANIPULATE_ROW_FAILED`
+        public static let COMPONENT_MANIPULATE_ROW_FAILED: ErrorCode = 3544
+        /// `ER_COMPONENTS_UNLOAD_DUPLICATE_IN_GROUP`
+        public static let COMPONENTS_UNLOAD_DUPLICATE_IN_GROUP: ErrorCode = 3545
+        /// `ER_CANT_SET_GTID_PURGED_DUE_SETS_CONSTRAINTS`
+        public static let CANT_SET_GTID_PURGED_DUE_SETS_CONSTRAINTS: ErrorCode = 3546
+        /// `ER_CANNOT_LOCK_USER_MANAGEMENT_CACHES`
+        public static let CANNOT_LOCK_USER_MANAGEMENT_CACHES: ErrorCode = 3547
+        /// `ER_SRS_NOT_FOUND`
+        public static let SRS_NOT_FOUND: ErrorCode = 3548
+        /// `ER_VARIABLE_NOT_PERSISTED`
+        public static let VARIABLE_NOT_PERSISTED: ErrorCode = 3549
+        /// `ER_IS_QUERY_INVALID_CLAUSE`
+        public static let IS_QUERY_INVALID_CLAUSE: ErrorCode = 3550
+        /// `ER_UNABLE_TO_STORE_STATISTICS`
+        public static let UNABLE_TO_STORE_STATISTICS: ErrorCode = 3551
+        /// `ER_NO_SYSTEM_SCHEMA_ACCESS`
+        public static let NO_SYSTEM_SCHEMA_ACCESS: ErrorCode = 3552
+        /// `ER_NO_SYSTEM_TABLESPACE_ACCESS`
+        public static let NO_SYSTEM_TABLESPACE_ACCESS: ErrorCode = 3553
+        /// `ER_NO_SYSTEM_TABLE_ACCESS`
+        public static let NO_SYSTEM_TABLE_ACCESS: ErrorCode = 3554
+        /// `ER_NO_SYSTEM_TABLE_ACCESS_FOR_DICTIONARY_TABLE`
+        public static let NO_SYSTEM_TABLE_ACCESS_FOR_DICTIONARY_TABLE: ErrorCode = 3555
+        /// `ER_NO_SYSTEM_TABLE_ACCESS_FOR_SYSTEM_TABLE`
+        public static let NO_SYSTEM_TABLE_ACCESS_FOR_SYSTEM_TABLE: ErrorCode = 3556
+        /// `ER_NO_SYSTEM_TABLE_ACCESS_FOR_TABLE`
+        public static let NO_SYSTEM_TABLE_ACCESS_FOR_TABLE: ErrorCode = 3557
+        /// `ER_INVALID_OPTION_KEY`
+        public static let INVALID_OPTION_KEY: ErrorCode = 3558
+        /// `ER_INVALID_OPTION_VALUE`
+        public static let INVALID_OPTION_VALUE: ErrorCode = 3559
+        /// `ER_INVALID_OPTION_KEY_VALUE_PAIR`
+        public static let INVALID_OPTION_KEY_VALUE_PAIR: ErrorCode = 3560
+        /// `ER_INVALID_OPTION_START_CHARACTER`
+        public static let INVALID_OPTION_START_CHARACTER: ErrorCode = 3561
+        /// `ER_INVALID_OPTION_END_CHARACTER`
+        public static let INVALID_OPTION_END_CHARACTER: ErrorCode = 3562
+        /// `ER_INVALID_OPTION_CHARACTERS`
+        public static let INVALID_OPTION_CHARACTERS: ErrorCode = 3563
+        /// `ER_DUPLICATE_OPTION_KEY`
+        public static let DUPLICATE_OPTION_KEY: ErrorCode = 3564
+        /// `ER_WARN_SRS_NOT_FOUND_AXIS_ORDER`
+        public static let WARN_SRS_NOT_FOUND_AXIS_ORDER: ErrorCode = 3565
+        /// `ER_NO_ACCESS_TO_NATIVE_FCT`
+        public static let NO_ACCESS_TO_NATIVE_FCT: ErrorCode = 3566
+        /// `ER_RESET_MASTER_TO_VALUE_OUT_OF_RANGE`
+        public static let RESET_MASTER_TO_VALUE_OUT_OF_RANGE: ErrorCode = 3567
+        /// `ER_UNRESOLVED_TABLE_LOCK`
+        public static let UNRESOLVED_TABLE_LOCK: ErrorCode = 3568
+        /// `ER_DUPLICATE_TABLE_LOCK`
+        public static let DUPLICATE_TABLE_LOCK: ErrorCode = 3569
+        /// `ER_BINLOG_UNSAFE_SKIP_LOCKED`
+        public static let BINLOG_UNSAFE_SKIP_LOCKED: ErrorCode = 3570
+        /// `ER_BINLOG_UNSAFE_NOWAIT`
+        public static let BINLOG_UNSAFE_NOWAIT: ErrorCode = 3571
+        /// `ER_LOCK_NOWAIT`
+        public static let LOCK_NOWAIT: ErrorCode = 3572
+        /// `ER_CTE_RECURSIVE_REQUIRES_UNION`
+        public static let CTE_RECURSIVE_REQUIRES_UNION: ErrorCode = 3573
+        /// `ER_CTE_RECURSIVE_REQUIRES_NONRECURSIVE_FIRST`
+        public static let CTE_RECURSIVE_REQUIRES_NONRECURSIVE_FIRST: ErrorCode = 3574
+        /// `ER_CTE_RECURSIVE_FORBIDS_AGGREGATION`
+        public static let CTE_RECURSIVE_FORBIDS_AGGREGATION: ErrorCode = 3575
+        /// `ER_CTE_RECURSIVE_FORBIDDEN_JOIN_ORDER`
+        public static let CTE_RECURSIVE_FORBIDDEN_JOIN_ORDER: ErrorCode = 3576
+        /// `ER_CTE_RECURSIVE_REQUIRES_SINGLE_REFERENCE`
+        public static let CTE_RECURSIVE_REQUIRES_SINGLE_REFERENCE: ErrorCode = 3577
+        /// `ER_SWITCH_TMP_ENGINE`
+        public static let SWITCH_TMP_ENGINE: ErrorCode = 3578
+        /// `ER_WINDOW_NO_SUCH_WINDOW`
+        public static let WINDOW_NO_SUCH_WINDOW: ErrorCode = 3579
+        /// `ER_WINDOW_CIRCULARITY_IN_WINDOW_GRAPH`
+        public static let WINDOW_CIRCULARITY_IN_WINDOW_GRAPH: ErrorCode = 3580
+        /// `ER_WINDOW_NO_CHILD_PARTITIONING`
+        public static let WINDOW_NO_CHILD_PARTITIONING: ErrorCode = 3581
+        /// `ER_WINDOW_NO_INHERIT_FRAME`
+        public static let WINDOW_NO_INHERIT_FRAME: ErrorCode = 3582
+        /// `ER_WINDOW_NO_REDEFINE_ORDER_BY`
+        public static let WINDOW_NO_REDEFINE_ORDER_BY: ErrorCode = 3583
+        /// `ER_WINDOW_FRAME_START_ILLEGAL`
+        public static let WINDOW_FRAME_START_ILLEGAL: ErrorCode = 3584
+        /// `ER_WINDOW_FRAME_END_ILLEGAL`
+        public static let WINDOW_FRAME_END_ILLEGAL: ErrorCode = 3585
+        /// `ER_WINDOW_FRAME_ILLEGAL`
+        public static let WINDOW_FRAME_ILLEGAL: ErrorCode = 3586
+        /// `ER_WINDOW_RANGE_FRAME_ORDER_TYPE`
+        public static let WINDOW_RANGE_FRAME_ORDER_TYPE: ErrorCode = 3587
+        /// `ER_WINDOW_RANGE_FRAME_TEMPORAL_TYPE`
+        public static let WINDOW_RANGE_FRAME_TEMPORAL_TYPE: ErrorCode = 3588
+        /// `ER_WINDOW_RANGE_FRAME_NUMERIC_TYPE`
+        public static let WINDOW_RANGE_FRAME_NUMERIC_TYPE: ErrorCode = 3589
+        /// `ER_WINDOW_RANGE_BOUND_NOT_CONSTANT`
+        public static let WINDOW_RANGE_BOUND_NOT_CONSTANT: ErrorCode = 3590
+        /// `ER_WINDOW_DUPLICATE_NAME`
+        public static let WINDOW_DUPLICATE_NAME: ErrorCode = 3591
+        /// `ER_WINDOW_ILLEGAL_ORDER_BY`
+        public static let WINDOW_ILLEGAL_ORDER_BY: ErrorCode = 3592
+        /// `ER_WINDOW_INVALID_WINDOW_FUNC_USE`
+        public static let WINDOW_INVALID_WINDOW_FUNC_USE: ErrorCode = 3593
+        /// `ER_WINDOW_INVALID_WINDOW_FUNC_ALIAS_USE`
+        public static let WINDOW_INVALID_WINDOW_FUNC_ALIAS_USE: ErrorCode = 3594
+        /// `ER_WINDOW_NESTED_WINDOW_FUNC_USE_IN_WINDOW_SPEC`
+        public static let WINDOW_NESTED_WINDOW_FUNC_USE_IN_WINDOW_SPEC: ErrorCode = 3595
+        /// `ER_WINDOW_ROWS_INTERVAL_USE`
+        public static let WINDOW_ROWS_INTERVAL_USE: ErrorCode = 3596
+        /// `ER_WINDOW_NO_GROUP_ORDER`
+        public static let WINDOW_NO_GROUP_ORDER: ErrorCode = 3597
+        /// `ER_WINDOW_NO_GROUP_ORDER_UNUSED`
+        public static let WINDOW_NO_GROUP_ORDER_UNUSED: ErrorCode = 3597
+        /// `ER_WINDOW_EXPLAIN_JSON`
+        public static let WINDOW_EXPLAIN_JSON: ErrorCode = 3598
+        /// `ER_WINDOW_FUNCTION_IGNORES_FRAME`
+        public static let WINDOW_FUNCTION_IGNORES_FRAME: ErrorCode = 3599
+        /// `ER_WINDOW_SE_NOT_ACCEPTABLE`
+        public static let WINDOW_SE_NOT_ACCEPTABLE: ErrorCode = 3600
+        /// `ER_WL9236_NOW_UNUSED`
+        public static let WL9236_NOW_UNUSED: ErrorCode = 3600
+        /// `ER_INVALID_NO_OF_ARGS`
+        public static let INVALID_NO_OF_ARGS: ErrorCode = 3601
+        /// `ER_FIELD_IN_GROUPING_NOT_GROUP_BY`
+        public static let FIELD_IN_GROUPING_NOT_GROUP_BY: ErrorCode = 3602
+        /// `ER_TOO_LONG_TABLESPACE_COMMENT`
+        public static let TOO_LONG_TABLESPACE_COMMENT: ErrorCode = 3603
+        /// `ER_ENGINE_CANT_DROP_TABLE`
+        public static let ENGINE_CANT_DROP_TABLE: ErrorCode = 3604
+        /// `ER_ENGINE_CANT_DROP_MISSING_TABLE`
+        public static let ENGINE_CANT_DROP_MISSING_TABLE: ErrorCode = 3605
+        /// `ER_TABLESPACE_DUP_FILENAME`
+        public static let TABLESPACE_DUP_FILENAME: ErrorCode = 3606
+        /// `ER_DB_DROP_RMDIR2`
+        public static let DB_DROP_RMDIR2: ErrorCode = 3607
+        /// `ER_IMP_NO_FILES_MATCHED`
+        public static let IMP_NO_FILES_MATCHED: ErrorCode = 3608
+        /// `ER_IMP_SCHEMA_DOES_NOT_EXIST`
+        public static let IMP_SCHEMA_DOES_NOT_EXIST: ErrorCode = 3609
+        /// `ER_IMP_TABLE_ALREADY_EXISTS`
+        public static let IMP_TABLE_ALREADY_EXISTS: ErrorCode = 3610
+        /// `ER_IMP_INCOMPATIBLE_MYSQLD_VERSION`
+        public static let IMP_INCOMPATIBLE_MYSQLD_VERSION: ErrorCode = 3611
+        /// `ER_IMP_INCOMPATIBLE_DD_VERSION`
+        public static let IMP_INCOMPATIBLE_DD_VERSION: ErrorCode = 3612
+        /// `ER_IMP_INCOMPATIBLE_SDI_VERSION`
+        public static let IMP_INCOMPATIBLE_SDI_VERSION: ErrorCode = 3613
+        /// `ER_WARN_INVALID_HINT`
+        public static let WARN_INVALID_HINT: ErrorCode = 3614
+        /// `ER_VAR_DOES_NOT_EXIST`
+        public static let VAR_DOES_NOT_EXIST: ErrorCode = 3615
+        /// `ER_LONGITUDE_OUT_OF_RANGE`
+        public static let LONGITUDE_OUT_OF_RANGE: ErrorCode = 3616
+        /// `ER_LATITUDE_OUT_OF_RANGE`
+        public static let LATITUDE_OUT_OF_RANGE: ErrorCode = 3617
+        /// `ER_NOT_IMPLEMENTED_FOR_GEOGRAPHIC_SRS`
+        public static let NOT_IMPLEMENTED_FOR_GEOGRAPHIC_SRS: ErrorCode = 3618
+        /// `ER_ILLEGAL_PRIVILEGE_LEVEL`
+        public static let ILLEGAL_PRIVILEGE_LEVEL: ErrorCode = 3619
+        /// `ER_NO_SYSTEM_VIEW_ACCESS`
+        public static let NO_SYSTEM_VIEW_ACCESS: ErrorCode = 3620
+        /// `ER_COMPONENT_FILTER_FLABBERGASTED`
+        public static let COMPONENT_FILTER_FLABBERGASTED: ErrorCode = 3621
+        /// `ER_PART_EXPR_TOO_LONG`
+        public static let PART_EXPR_TOO_LONG: ErrorCode = 3622
+        /// `ER_UDF_DROP_DYNAMICALLY_REGISTERED`
+        public static let UDF_DROP_DYNAMICALLY_REGISTERED: ErrorCode = 3623
+        /// `ER_UNABLE_TO_STORE_COLUMN_STATISTICS`
+        public static let UNABLE_TO_STORE_COLUMN_STATISTICS: ErrorCode = 3624
+        /// `ER_UNABLE_TO_UPDATE_COLUMN_STATISTICS`
+        public static let UNABLE_TO_UPDATE_COLUMN_STATISTICS: ErrorCode = 3625
+        /// `ER_UNABLE_TO_DROP_COLUMN_STATISTICS`
+        public static let UNABLE_TO_DROP_COLUMN_STATISTICS: ErrorCode = 3626
+        /// `ER_UNABLE_TO_BUILD_HISTOGRAM`
+        public static let UNABLE_TO_BUILD_HISTOGRAM: ErrorCode = 3627
+        /// `ER_MANDATORY_ROLE`
+        public static let MANDATORY_ROLE: ErrorCode = 3628
+        /// `ER_MISSING_TABLESPACE_FILE`
+        public static let MISSING_TABLESPACE_FILE: ErrorCode = 3629
+        /// `ER_PERSIST_ONLY_ACCESS_DENIED_ERROR`
+        public static let PERSIST_ONLY_ACCESS_DENIED_ERROR: ErrorCode = 3630
+        /// `ER_CMD_NEED_SUPER`
+        public static let CMD_NEED_SUPER: ErrorCode = 3631
+        /// `ER_PATH_IN_DATADIR`
+        public static let PATH_IN_DATADIR: ErrorCode = 3632
+        /// `ER_DDL_IN_PROGRESS`
+        public static let DDL_IN_PROGRESS: ErrorCode = 3633
+        /// `ER_CLONE_DDL_IN_PROGRESS`
+        public static let CLONE_DDL_IN_PROGRESS: ErrorCode = 3633
+        /// `ER_TOO_MANY_CONCURRENT_CLONES`
+        public static let TOO_MANY_CONCURRENT_CLONES: ErrorCode = 3634
+        /// `ER_CLONE_TOO_MANY_CONCURRENT_CLONES`
+        public static let CLONE_TOO_MANY_CONCURRENT_CLONES: ErrorCode = 3634
+        /// `ER_APPLIER_LOG_EVENT_VALIDATION_ERROR`
+        public static let APPLIER_LOG_EVENT_VALIDATION_ERROR: ErrorCode = 3635
+        /// `ER_CTE_MAX_RECURSION_DEPTH`
+        public static let CTE_MAX_RECURSION_DEPTH: ErrorCode = 3636
+        /// `ER_NOT_HINT_UPDATABLE_VARIABLE`
+        public static let NOT_HINT_UPDATABLE_VARIABLE: ErrorCode = 3637
+        /// `ER_CREDENTIALS_CONTRADICT_TO_HISTORY`
+        public static let CREDENTIALS_CONTRADICT_TO_HISTORY: ErrorCode = 3638
+        /// `ER_WARNING_PASSWORD_HISTORY_CLAUSES_VOID`
+        public static let WARNING_PASSWORD_HISTORY_CLAUSES_VOID: ErrorCode = 3639
+        /// `ER_CLIENT_DOES_NOT_SUPPORT`
+        public static let CLIENT_DOES_NOT_SUPPORT: ErrorCode = 3640
+        /// `ER_I_S_SKIPPED_TABLESPACE`
+        public static let I_S_SKIPPED_TABLESPACE: ErrorCode = 3641
+        /// `ER_TABLESPACE_ENGINE_MISMATCH`
+        public static let TABLESPACE_ENGINE_MISMATCH: ErrorCode = 3642
+        /// `ER_WRONG_SRID_FOR_COLUMN`
+        public static let WRONG_SRID_FOR_COLUMN: ErrorCode = 3643
+        /// `ER_CANNOT_ALTER_SRID_DUE_TO_INDEX`
+        public static let CANNOT_ALTER_SRID_DUE_TO_INDEX: ErrorCode = 3644
+        /// `ER_WARN_BINLOG_PARTIAL_UPDATES_DISABLED`
+        public static let WARN_BINLOG_PARTIAL_UPDATES_DISABLED: ErrorCode = 3645
+        /// `ER_WARN_BINLOG_V1_ROW_EVENTS_DISABLED`
+        public static let WARN_BINLOG_V1_ROW_EVENTS_DISABLED: ErrorCode = 3646
+        /// `ER_WARN_BINLOG_PARTIAL_UPDATES_SUGGESTS_PARTIAL_IMAGES`
+        public static let WARN_BINLOG_PARTIAL_UPDATES_SUGGESTS_PARTIAL_IMAGES: ErrorCode = 3647
+        /// `ER_COULD_NOT_APPLY_JSON_DIFF`
+        public static let COULD_NOT_APPLY_JSON_DIFF: ErrorCode = 3648
+        /// `ER_CORRUPTED_JSON_DIFF`
+        public static let CORRUPTED_JSON_DIFF: ErrorCode = 3649
+        /// `ER_RESOURCE_GROUP_EXISTS`
+        public static let RESOURCE_GROUP_EXISTS: ErrorCode = 3650
+        /// `ER_RESOURCE_GROUP_NOT_EXISTS`
+        public static let RESOURCE_GROUP_NOT_EXISTS: ErrorCode = 3651
+        /// `ER_INVALID_VCPU_ID`
+        public static let INVALID_VCPU_ID: ErrorCode = 3652
+        /// `ER_INVALID_VCPU_RANGE`
+        public static let INVALID_VCPU_RANGE: ErrorCode = 3653
+        /// `ER_INVALID_THREAD_PRIORITY`
+        public static let INVALID_THREAD_PRIORITY: ErrorCode = 3654
+        /// `ER_DISALLOWED_OPERATION`
+        public static let DISALLOWED_OPERATION: ErrorCode = 3655
+        /// `ER_RESOURCE_GROUP_BUSY`
+        public static let RESOURCE_GROUP_BUSY: ErrorCode = 3656
+        /// `ER_RESOURCE_GROUP_DISABLED`
+        public static let RESOURCE_GROUP_DISABLED: ErrorCode = 3657
+        /// `ER_FEATURE_UNSUPPORTED`
+        public static let FEATURE_UNSUPPORTED: ErrorCode = 3658
+        /// `ER_ATTRIBUTE_IGNORED`
+        public static let ATTRIBUTE_IGNORED: ErrorCode = 3659
+        /// `ER_INVALID_THREAD_ID`
+        public static let INVALID_THREAD_ID: ErrorCode = 3660
+        /// `ER_RESOURCE_GROUP_BIND_FAILED`
+        public static let RESOURCE_GROUP_BIND_FAILED: ErrorCode = 3661
+        /// `ER_INVALID_USE_OF_FORCE_OPTION`
+        public static let INVALID_USE_OF_FORCE_OPTION: ErrorCode = 3662
+        /// `ER_GROUP_REPLICATION_COMMAND_FAILURE`
+        public static let GROUP_REPLICATION_COMMAND_FAILURE: ErrorCode = 3663
+        /// `ER_SDI_OPERATION_FAILED`
+        public static let SDI_OPERATION_FAILED: ErrorCode = 3664
+        /// `ER_MISSING_JSON_TABLE_VALUE`
+        public static let MISSING_JSON_TABLE_VALUE: ErrorCode = 3665
+        /// `ER_WRONG_JSON_TABLE_VALUE`
+        public static let WRONG_JSON_TABLE_VALUE: ErrorCode = 3666
+        /// `ER_TF_MUST_HAVE_ALIAS`
+        public static let TF_MUST_HAVE_ALIAS: ErrorCode = 3667
+        /// `ER_TF_FORBIDDEN_JOIN_TYPE`
+        public static let TF_FORBIDDEN_JOIN_TYPE: ErrorCode = 3668
+        /// `ER_JT_VALUE_OUT_OF_RANGE`
+        public static let JT_VALUE_OUT_OF_RANGE: ErrorCode = 3669
+        /// `ER_JT_MAX_NESTED_PATH`
+        public static let JT_MAX_NESTED_PATH: ErrorCode = 3670
+        /// `ER_PASSWORD_EXPIRATION_NOT_SUPPORTED_BY_AUTH_METHOD`
+        public static let PASSWORD_EXPIRATION_NOT_SUPPORTED_BY_AUTH_METHOD: ErrorCode = 3671
+        /// `ER_INVALID_GEOJSON_CRS_NOT_TOP_LEVEL`
+        public static let INVALID_GEOJSON_CRS_NOT_TOP_LEVEL: ErrorCode = 3672
+        /// `ER_BAD_NULL_ERROR_NOT_IGNORED`
+        public static let BAD_NULL_ERROR_NOT_IGNORED: ErrorCode = 3673
+        /// `WARN_USELESS_SPATIAL_INDEX`
+        public static let USELESS_SPATIAL_INDEX: ErrorCode = 3674
+        /// `ER_DISK_FULL_NOWAIT`
+        public static let DISK_FULL_NOWAIT: ErrorCode = 3675
+        /// `ER_PARSE_ERROR_IN_DIGEST_FN`
+        public static let PARSE_ERROR_IN_DIGEST_FN: ErrorCode = 3676
+        /// `ER_UNDISCLOSED_PARSE_ERROR_IN_DIGEST_FN`
+        public static let UNDISCLOSED_PARSE_ERROR_IN_DIGEST_FN: ErrorCode = 3677
+        /// `ER_SCHEMA_DIR_EXISTS`
+        public static let SCHEMA_DIR_EXISTS: ErrorCode = 3678
+        /// `ER_SCHEMA_DIR_MISSING`
+        public static let SCHEMA_DIR_MISSING: ErrorCode = 3679
+        /// `ER_SCHEMA_DIR_CREATE_FAILED`
+        public static let SCHEMA_DIR_CREATE_FAILED: ErrorCode = 3680
+        /// `ER_SCHEMA_DIR_UNKNOWN`
+        public static let SCHEMA_DIR_UNKNOWN: ErrorCode = 3681
+        /// `ER_ONLY_IMPLEMENTED_FOR_SRID_0_AND_4326`
+        public static let ONLY_IMPLEMENTED_FOR_SRID_0_AND_4326: ErrorCode = 3682
+        /// `ER_BINLOG_EXPIRE_LOG_DAYS_AND_SECS_USED_TOGETHER`
+        public static let BINLOG_EXPIRE_LOG_DAYS_AND_SECS_USED_TOGETHER: ErrorCode = 3683
+        /// `ER_REGEXP_STRING_NOT_TERMINATED`
+        public static let REGEXP_STRING_NOT_TERMINATED: ErrorCode = 3684
+        /// `ER_REGEXP_BUFFER_OVERFLOW`
+        public static let REGEXP_BUFFER_OVERFLOW: ErrorCode = 3684
+        /// `ER_REGEXP_ILLEGAL_ARGUMENT`
+        public static let REGEXP_ILLEGAL_ARGUMENT: ErrorCode = 3685
+        /// `ER_REGEXP_INDEX_OUTOFBOUNDS_ERROR`
+        public static let REGEXP_INDEX_OUTOFBOUNDS_ERROR: ErrorCode = 3686
+        /// `ER_REGEXP_INTERNAL_ERROR`
+        public static let REGEXP_INTERNAL_ERROR: ErrorCode = 3687
+        /// `ER_REGEXP_RULE_SYNTAX`
+        public static let REGEXP_RULE_SYNTAX: ErrorCode = 3688
+        /// `ER_REGEXP_BAD_ESCAPE_SEQUENCE`
+        public static let REGEXP_BAD_ESCAPE_SEQUENCE: ErrorCode = 3689
+        /// `ER_REGEXP_UNIMPLEMENTED`
+        public static let REGEXP_UNIMPLEMENTED: ErrorCode = 3690
+        /// `ER_REGEXP_MISMATCHED_PAREN`
+        public static let REGEXP_MISMATCHED_PAREN: ErrorCode = 3691
+        /// `ER_REGEXP_BAD_INTERVAL`
+        public static let REGEXP_BAD_INTERVAL: ErrorCode = 3692
+        /// `ER_REGEXP_MAX_LT_MIN`
+        public static let REGEXP_MAX_LT_MIN: ErrorCode = 3693
+        /// `ER_REGEXP_INVALID_BACK_REF`
+        public static let REGEXP_INVALID_BACK_REF: ErrorCode = 3694
+        /// `ER_REGEXP_LOOK_BEHIND_LIMIT`
+        public static let REGEXP_LOOK_BEHIND_LIMIT: ErrorCode = 3695
+        /// `ER_REGEXP_MISSING_CLOSE_BRACKET`
+        public static let REGEXP_MISSING_CLOSE_BRACKET: ErrorCode = 3696
+        /// `ER_REGEXP_INVALID_RANGE`
+        public static let REGEXP_INVALID_RANGE: ErrorCode = 3697
+        /// `ER_REGEXP_STACK_OVERFLOW`
+        public static let REGEXP_STACK_OVERFLOW: ErrorCode = 3698
+        /// `ER_REGEXP_TIME_OUT`
+        public static let REGEXP_TIME_OUT: ErrorCode = 3699
+        /// `ER_REGEXP_PATTERN_TOO_BIG`
+        public static let REGEXP_PATTERN_TOO_BIG: ErrorCode = 3700
+        /// `ER_CANT_SET_ERROR_LOG_SERVICE`
+        public static let CANT_SET_ERROR_LOG_SERVICE: ErrorCode = 3701
+        /// `ER_EMPTY_PIPELINE_FOR_ERROR_LOG_SERVICE`
+        public static let EMPTY_PIPELINE_FOR_ERROR_LOG_SERVICE: ErrorCode = 3702
+        /// `ER_COMPONENT_FILTER_DIAGNOSTICS`
+        public static let COMPONENT_FILTER_DIAGNOSTICS: ErrorCode = 3703
+        /// `ER_INNODB_CANNOT_BE_IGNORED`
+        public static let INNODB_CANNOT_BE_IGNORED: ErrorCode = 3704
+        /// `ER_NOT_IMPLEMENTED_FOR_CARTESIAN_SRS`
+        public static let NOT_IMPLEMENTED_FOR_CARTESIAN_SRS: ErrorCode = 3704
+        /// `ER_NOT_IMPLEMENTED_FOR_PROJECTED_SRS`
+        public static let NOT_IMPLEMENTED_FOR_PROJECTED_SRS: ErrorCode = 3705
+        /// `ER_NONPOSITIVE_RADIUS`
+        public static let NONPOSITIVE_RADIUS: ErrorCode = 3706
+        /// `ER_RESTART_SERVER_FAILED`
+        public static let RESTART_SERVER_FAILED: ErrorCode = 3707
+        /// `ER_SRS_MISSING_MANDATORY_ATTRIBUTE`
+        public static let SRS_MISSING_MANDATORY_ATTRIBUTE: ErrorCode = 3708
+        /// `ER_SRS_MULTIPLE_ATTRIBUTE_DEFINITIONS`
+        public static let SRS_MULTIPLE_ATTRIBUTE_DEFINITIONS: ErrorCode = 3709
+        /// `ER_SRS_NAME_CANT_BE_EMPTY_OR_WHITESPACE`
+        public static let SRS_NAME_CANT_BE_EMPTY_OR_WHITESPACE: ErrorCode = 3710
+        /// `ER_SRS_ORGANIZATION_CANT_BE_EMPTY_OR_WHITESPACE`
+        public static let SRS_ORGANIZATION_CANT_BE_EMPTY_OR_WHITESPACE: ErrorCode = 3711
+        /// `ER_SRS_ID_ALREADY_EXISTS`
+        public static let SRS_ID_ALREADY_EXISTS: ErrorCode = 3712
+        /// `ER_WARN_SRS_ID_ALREADY_EXISTS`
+        public static let WARN_SRS_ID_ALREADY_EXISTS: ErrorCode = 3713
+        /// `ER_CANT_MODIFY_SRID_0`
+        public static let CANT_MODIFY_SRID_0: ErrorCode = 3714
+        /// `ER_WARN_RESERVED_SRID_RANGE`
+        public static let WARN_RESERVED_SRID_RANGE: ErrorCode = 3715
+        /// `ER_CANT_MODIFY_SRS_USED_BY_COLUMN`
+        public static let CANT_MODIFY_SRS_USED_BY_COLUMN: ErrorCode = 3716
+        /// `ER_SRS_INVALID_CHARACTER_IN_ATTRIBUTE`
+        public static let SRS_INVALID_CHARACTER_IN_ATTRIBUTE: ErrorCode = 3717
+        /// `ER_SRS_ATTRIBUTE_STRING_TOO_LONG`
+        public static let SRS_ATTRIBUTE_STRING_TOO_LONG: ErrorCode = 3718
+        /// `ER_DEPRECATED_UTF8_ALIAS`
+        public static let DEPRECATED_UTF8_ALIAS: ErrorCode = 3719
+        /// `ER_DEPRECATED_NATIONAL`
+        public static let DEPRECATED_NATIONAL: ErrorCode = 3720
+        /// `ER_INVALID_DEFAULT_UTF8MB4_COLLATION`
+        public static let INVALID_DEFAULT_UTF8MB4_COLLATION: ErrorCode = 3721
+        /// `ER_UNABLE_TO_COLLECT_LOG_STATUS`
+        public static let UNABLE_TO_COLLECT_LOG_STATUS: ErrorCode = 3722
+        /// `ER_RESERVED_TABLESPACE_NAME`
+        public static let RESERVED_TABLESPACE_NAME: ErrorCode = 3723
+        /// `ER_UNABLE_TO_SET_OPTION`
+        public static let UNABLE_TO_SET_OPTION: ErrorCode = 3724
+        /// `ER_SLAVE_POSSIBLY_DIVERGED_AFTER_DDL`
+        public static let SLAVE_POSSIBLY_DIVERGED_AFTER_DDL: ErrorCode = 3725
+        /// `ER_SRS_NOT_GEOGRAPHIC`
+        public static let SRS_NOT_GEOGRAPHIC: ErrorCode = 3726
+        /// `ER_POLYGON_TOO_LARGE`
+        public static let POLYGON_TOO_LARGE: ErrorCode = 3727
+        /// `ER_SPATIAL_UNIQUE_INDEX`
+        public static let SPATIAL_UNIQUE_INDEX: ErrorCode = 3728
+        /// `ER_INDEX_TYPE_NOT_SUPPORTED_FOR_SPATIAL_INDEX`
+        public static let INDEX_TYPE_NOT_SUPPORTED_FOR_SPATIAL_INDEX: ErrorCode = 3729
+        /// `ER_FK_CANNOT_DROP_PARENT`
+        public static let FK_CANNOT_DROP_PARENT: ErrorCode = 3730
+        /// `ER_GEOMETRY_PARAM_LONGITUDE_OUT_OF_RANGE`
+        public static let GEOMETRY_PARAM_LONGITUDE_OUT_OF_RANGE: ErrorCode = 3731
+        /// `ER_GEOMETRY_PARAM_LATITUDE_OUT_OF_RANGE`
+        public static let GEOMETRY_PARAM_LATITUDE_OUT_OF_RANGE: ErrorCode = 3732
+        /// `ER_FK_CANNOT_USE_VIRTUAL_COLUMN`
+        public static let FK_CANNOT_USE_VIRTUAL_COLUMN: ErrorCode = 3733
+        /// `ER_FK_NO_COLUMN_PARENT`
+        public static let FK_NO_COLUMN_PARENT: ErrorCode = 3734
+        /// `ER_CANT_SET_ERROR_SUPPRESSION_LIST`
+        public static let CANT_SET_ERROR_SUPPRESSION_LIST: ErrorCode = 3735
+        /// `ER_SRS_GEOGCS_INVALID_AXES`
+        public static let SRS_GEOGCS_INVALID_AXES: ErrorCode = 3736
+        /// `ER_SRS_INVALID_SEMI_MAJOR_AXIS`
+        public static let SRS_INVALID_SEMI_MAJOR_AXIS: ErrorCode = 3737
+        /// `ER_SRS_INVALID_INVERSE_FLATTENING`
+        public static let SRS_INVALID_INVERSE_FLATTENING: ErrorCode = 3738
+        /// `ER_SRS_INVALID_ANGULAR_UNIT`
+        public static let SRS_INVALID_ANGULAR_UNIT: ErrorCode = 3739
+        /// `ER_SRS_INVALID_PRIME_MERIDIAN`
+        public static let SRS_INVALID_PRIME_MERIDIAN: ErrorCode = 3740
+        /// `ER_TRANSFORM_SOURCE_SRS_NOT_SUPPORTED`
+        public static let TRANSFORM_SOURCE_SRS_NOT_SUPPORTED: ErrorCode = 3741
+        /// `ER_TRANSFORM_TARGET_SRS_NOT_SUPPORTED`
+        public static let TRANSFORM_TARGET_SRS_NOT_SUPPORTED: ErrorCode = 3742
+        /// `ER_TRANSFORM_SOURCE_SRS_MISSING_TOWGS84`
+        public static let TRANSFORM_SOURCE_SRS_MISSING_TOWGS84: ErrorCode = 3743
+        /// `ER_TRANSFORM_TARGET_SRS_MISSING_TOWGS84`
+        public static let TRANSFORM_TARGET_SRS_MISSING_TOWGS84: ErrorCode = 3744
+        /// `ER_TEMP_TABLE_PREVENTS_SWITCH_SESSION_BINLOG_FORMAT`
+        public static let TEMP_TABLE_PREVENTS_SWITCH_SESSION_BINLOG_FORMAT: ErrorCode = 3745
+        /// `ER_TEMP_TABLE_PREVENTS_SWITCH_GLOBAL_BINLOG_FORMAT`
+        public static let TEMP_TABLE_PREVENTS_SWITCH_GLOBAL_BINLOG_FORMAT: ErrorCode = 3746
+        /// `ER_RUNNING_APPLIER_PREVENTS_SWITCH_GLOBAL_BINLOG_FORMAT`
+        public static let RUNNING_APPLIER_PREVENTS_SWITCH_GLOBAL_BINLOG_FORMAT: ErrorCode = 3747
+        /// `ER_CLIENT_GTID_UNSAFE_CREATE_DROP_TEMP_TABLE_IN_TRX_IN_SBR`
+        public static let CLIENT_GTID_UNSAFE_CREATE_DROP_TEMP_TABLE_IN_TRX_IN_SBR: ErrorCode = 3748
+        /// `ER_TABLE_WITHOUT_PK`
+        public static let TABLE_WITHOUT_PK: ErrorCode = 3750
+        /// `WARN_DATA_TRUNCATED_FUNCTIONAL_INDEX`
+        public static let DATA_TRUNCATED_FUNCTIONAL_INDEX: ErrorCode = 3751
+        /// `ER_WARN_DATA_TRUNCATED_FUNCTIONAL_INDEX`
+        public static let WARN_DATA_TRUNCATED_FUNCTIONAL_INDEX: ErrorCode = 3751
+        /// `ER_WARN_DATA_OUT_OF_RANGE_FUNCTIONAL_INDEX`
+        public static let WARN_DATA_OUT_OF_RANGE_FUNCTIONAL_INDEX: ErrorCode = 3752
+        /// `ER_FUNCTIONAL_INDEX_ON_JSON_OR_GEOMETRY_FUNCTION`
+        public static let FUNCTIONAL_INDEX_ON_JSON_OR_GEOMETRY_FUNCTION: ErrorCode = 3753
+        /// `ER_FUNCTIONAL_INDEX_REF_AUTO_INCREMENT`
+        public static let FUNCTIONAL_INDEX_REF_AUTO_INCREMENT: ErrorCode = 3754
+        /// `ER_CANNOT_DROP_COLUMN_FUNCTIONAL_INDEX`
+        public static let CANNOT_DROP_COLUMN_FUNCTIONAL_INDEX: ErrorCode = 3755
+        /// `ER_FUNCTIONAL_INDEX_PRIMARY_KEY`
+        public static let FUNCTIONAL_INDEX_PRIMARY_KEY: ErrorCode = 3756
+        /// `ER_FUNCTIONAL_INDEX_ON_LOB`
+        public static let FUNCTIONAL_INDEX_ON_LOB: ErrorCode = 3757
+        /// `ER_FUNCTIONAL_INDEX_FUNCTION_IS_NOT_ALLOWED`
+        public static let FUNCTIONAL_INDEX_FUNCTION_IS_NOT_ALLOWED: ErrorCode = 3758
+        /// `ER_FULLTEXT_FUNCTIONAL_INDEX`
+        public static let FULLTEXT_FUNCTIONAL_INDEX: ErrorCode = 3759
+        /// `ER_SPATIAL_FUNCTIONAL_INDEX`
+        public static let SPATIAL_FUNCTIONAL_INDEX: ErrorCode = 3760
+        /// `ER_WRONG_KEY_COLUMN_FUNCTIONAL_INDEX`
+        public static let WRONG_KEY_COLUMN_FUNCTIONAL_INDEX: ErrorCode = 3761
+        /// `ER_FUNCTIONAL_INDEX_ON_FIELD`
+        public static let FUNCTIONAL_INDEX_ON_FIELD: ErrorCode = 3762
+        /// `ER_GENERATED_COLUMN_NAMED_FUNCTION_IS_NOT_ALLOWED`
+        public static let GENERATED_COLUMN_NAMED_FUNCTION_IS_NOT_ALLOWED: ErrorCode = 3763
+        /// `ER_GENERATED_COLUMN_ROW_VALUE`
+        public static let GENERATED_COLUMN_ROW_VALUE: ErrorCode = 3764
+        /// `ER_GENERATED_COLUMN_VARIABLES`
+        public static let GENERATED_COLUMN_VARIABLES: ErrorCode = 3765
+        /// `ER_DEPENDENT_BY_DEFAULT_GENERATED_VALUE`
+        public static let DEPENDENT_BY_DEFAULT_GENERATED_VALUE: ErrorCode = 3766
+        /// `ER_DEFAULT_VAL_GENERATED_NON_PRIOR`
+        public static let DEFAULT_VAL_GENERATED_NON_PRIOR: ErrorCode = 3767
+        /// `ER_DEFAULT_VAL_GENERATED_REF_AUTO_INC`
+        public static let DEFAULT_VAL_GENERATED_REF_AUTO_INC: ErrorCode = 3768
+        /// `ER_DEFAULT_VAL_GENERATED_FUNCTION_IS_NOT_ALLOWED`
+        public static let DEFAULT_VAL_GENERATED_FUNCTION_IS_NOT_ALLOWED: ErrorCode = 3769
+        /// `ER_DEFAULT_VAL_GENERATED_NAMED_FUNCTION_IS_NOT_ALLOWED`
+        public static let DEFAULT_VAL_GENERATED_NAMED_FUNCTION_IS_NOT_ALLOWED: ErrorCode = 3770
+        /// `ER_DEFAULT_VAL_GENERATED_ROW_VALUE`
+        public static let DEFAULT_VAL_GENERATED_ROW_VALUE: ErrorCode = 3771
+        /// `ER_DEFAULT_VAL_GENERATED_VARIABLES`
+        public static let DEFAULT_VAL_GENERATED_VARIABLES: ErrorCode = 3772
+        /// `ER_DEFAULT_AS_VAL_GENERATED`
+        public static let DEFAULT_AS_VAL_GENERATED: ErrorCode = 3773
+        /// `ER_UNSUPPORTED_ACTION_ON_DEFAULT_VAL_GENERATED`
+        public static let UNSUPPORTED_ACTION_ON_DEFAULT_VAL_GENERATED: ErrorCode = 3774
+        /// `ER_GTID_UNSAFE_ALTER_ADD_COL_WITH_DEFAULT_EXPRESSION`
+        public static let GTID_UNSAFE_ALTER_ADD_COL_WITH_DEFAULT_EXPRESSION: ErrorCode = 3775
+        /// `ER_FK_CANNOT_CHANGE_ENGINE`
+        public static let FK_CANNOT_CHANGE_ENGINE: ErrorCode = 3776
+        /// `ER_WARN_DEPRECATED_USER_SET_EXPR`
+        public static let WARN_DEPRECATED_USER_SET_EXPR: ErrorCode = 3777
+        /// `ER_WARN_DEPRECATED_UTF8MB3_COLLATION`
+        public static let WARN_DEPRECATED_UTF8MB3_COLLATION: ErrorCode = 3778
+        /// `ER_WARN_DEPRECATED_NESTED_COMMENT_SYNTAX`
+        public static let WARN_DEPRECATED_NESTED_COMMENT_SYNTAX: ErrorCode = 3779
+        /// `ER_FK_INCOMPATIBLE_COLUMNS`
+        public static let FK_INCOMPATIBLE_COLUMNS: ErrorCode = 3780
+        /// `ER_GR_HOLD_WAIT_TIMEOUT`
+        public static let GR_HOLD_WAIT_TIMEOUT: ErrorCode = 3781
+        /// `ER_GR_HOLD_KILLED`
+        public static let GR_HOLD_KILLED: ErrorCode = 3782
+        /// `ER_GR_HOLD_MEMBER_STATUS_ERROR`
+        public static let GR_HOLD_MEMBER_STATUS_ERROR: ErrorCode = 3783
+        /// `ER_RPL_ENCRYPTION_FAILED_TO_FETCH_KEY`
+        public static let RPL_ENCRYPTION_FAILED_TO_FETCH_KEY: ErrorCode = 3784
+        /// `ER_RPL_ENCRYPTION_KEY_NOT_FOUND`
+        public static let RPL_ENCRYPTION_KEY_NOT_FOUND: ErrorCode = 3785
+        /// `ER_RPL_ENCRYPTION_KEYRING_INVALID_KEY`
+        public static let RPL_ENCRYPTION_KEYRING_INVALID_KEY: ErrorCode = 3786
+        /// `ER_RPL_ENCRYPTION_HEADER_ERROR`
+        public static let RPL_ENCRYPTION_HEADER_ERROR: ErrorCode = 3787
+        /// `ER_RPL_ENCRYPTION_FAILED_TO_ROTATE_LOGS`
+        public static let RPL_ENCRYPTION_FAILED_TO_ROTATE_LOGS: ErrorCode = 3788
+        /// `ER_RPL_ENCRYPTION_KEY_EXISTS_UNEXPECTED`
+        public static let RPL_ENCRYPTION_KEY_EXISTS_UNEXPECTED: ErrorCode = 3789
+        /// `ER_RPL_ENCRYPTION_FAILED_TO_GENERATE_KEY`
+        public static let RPL_ENCRYPTION_FAILED_TO_GENERATE_KEY: ErrorCode = 3790
+        /// `ER_RPL_ENCRYPTION_FAILED_TO_STORE_KEY`
+        public static let RPL_ENCRYPTION_FAILED_TO_STORE_KEY: ErrorCode = 3791
+        /// `ER_RPL_ENCRYPTION_FAILED_TO_REMOVE_KEY`
+        public static let RPL_ENCRYPTION_FAILED_TO_REMOVE_KEY: ErrorCode = 3792
+        /// `ER_RPL_ENCRYPTION_UNABLE_TO_CHANGE_OPTION`
+        public static let RPL_ENCRYPTION_UNABLE_TO_CHANGE_OPTION: ErrorCode = 3793
+        /// `ER_RPL_ENCRYPTION_MASTER_KEY_RECOVERY_FAILED`
+        public static let RPL_ENCRYPTION_MASTER_KEY_RECOVERY_FAILED: ErrorCode = 3794
+        /// `ER_SLOW_LOG_MODE_IGNORED_WHEN_NOT_LOGGING_TO_FILE`
+        public static let SLOW_LOG_MODE_IGNORED_WHEN_NOT_LOGGING_TO_FILE: ErrorCode = 3795
+        /// `ER_GRP_TRX_CONSISTENCY_NOT_ALLOWED`
+        public static let GRP_TRX_CONSISTENCY_NOT_ALLOWED: ErrorCode = 3796
+        /// `ER_GRP_TRX_CONSISTENCY_BEFORE`
+        public static let GRP_TRX_CONSISTENCY_BEFORE: ErrorCode = 3797
+        /// `ER_GRP_TRX_CONSISTENCY_AFTER_ON_TRX_BEGIN`
+        public static let GRP_TRX_CONSISTENCY_AFTER_ON_TRX_BEGIN: ErrorCode = 3798
+        /// `ER_GRP_TRX_CONSISTENCY_BEGIN_NOT_ALLOWED`
+        public static let GRP_TRX_CONSISTENCY_BEGIN_NOT_ALLOWED: ErrorCode = 3799
+        /// `ER_FUNCTIONAL_INDEX_ROW_VALUE_IS_NOT_ALLOWED`
+        public static let FUNCTIONAL_INDEX_ROW_VALUE_IS_NOT_ALLOWED: ErrorCode = 3800
+        /// `ER_RPL_ENCRYPTION_FAILED_TO_ENCRYPT`
+        public static let RPL_ENCRYPTION_FAILED_TO_ENCRYPT: ErrorCode = 3801
+        /// `ER_PAGE_TRACKING_NOT_STARTED`
+        public static let PAGE_TRACKING_NOT_STARTED: ErrorCode = 3802
+        /// `ER_PAGE_TRACKING_RANGE_NOT_TRACKED`
+        public static let PAGE_TRACKING_RANGE_NOT_TRACKED: ErrorCode = 3803
+        /// `ER_PAGE_TRACKING_CANNOT_PURGE`
+        public static let PAGE_TRACKING_CANNOT_PURGE: ErrorCode = 3804
+        /// `ER_RPL_ENCRYPTION_CANNOT_ROTATE_BINLOG_MASTER_KEY`
+        public static let RPL_ENCRYPTION_CANNOT_ROTATE_BINLOG_MASTER_KEY: ErrorCode = 3805
+        /// `ER_BINLOG_MASTER_KEY_RECOVERY_OUT_OF_COMBINATION`
+        public static let BINLOG_MASTER_KEY_RECOVERY_OUT_OF_COMBINATION: ErrorCode = 3806
+        /// `ER_BINLOG_MASTER_KEY_ROTATION_FAIL_TO_OPERATE_KEY`
+        public static let BINLOG_MASTER_KEY_ROTATION_FAIL_TO_OPERATE_KEY: ErrorCode = 3807
+        /// `ER_BINLOG_MASTER_KEY_ROTATION_FAIL_TO_ROTATE_LOGS`
+        public static let BINLOG_MASTER_KEY_ROTATION_FAIL_TO_ROTATE_LOGS: ErrorCode = 3808
+        /// `ER_BINLOG_MASTER_KEY_ROTATION_FAIL_TO_REENCRYPT_LOG`
+        public static let BINLOG_MASTER_KEY_ROTATION_FAIL_TO_REENCRYPT_LOG: ErrorCode = 3809
+        /// `ER_BINLOG_MASTER_KEY_ROTATION_FAIL_TO_CLEANUP_UNUSED_KEYS`
+        public static let BINLOG_MASTER_KEY_ROTATION_FAIL_TO_CLEANUP_UNUSED_KEYS: ErrorCode = 3810
+        /// `ER_BINLOG_MASTER_KEY_ROTATION_FAIL_TO_CLEANUP_AUX_KEY`
+        public static let BINLOG_MASTER_KEY_ROTATION_FAIL_TO_CLEANUP_AUX_KEY: ErrorCode = 3811
+        /// `ER_NON_BOOLEAN_EXPR_FOR_CHECK_CONSTRAINT`
+        public static let NON_BOOLEAN_EXPR_FOR_CHECK_CONSTRAINT: ErrorCode = 3812
+        /// `ER_COLUMN_CHECK_CONSTRAINT_REFERENCES_OTHER_COLUMN`
+        public static let COLUMN_CHECK_CONSTRAINT_REFERENCES_OTHER_COLUMN: ErrorCode = 3813
+        /// `ER_CHECK_CONSTRAINT_NAMED_FUNCTION_IS_NOT_ALLOWED`
+        public static let CHECK_CONSTRAINT_NAMED_FUNCTION_IS_NOT_ALLOWED: ErrorCode = 3814
+        /// `ER_CHECK_CONSTRAINT_FUNCTION_IS_NOT_ALLOWED`
+        public static let CHECK_CONSTRAINT_FUNCTION_IS_NOT_ALLOWED: ErrorCode = 3815
+        /// `ER_CHECK_CONSTRAINT_VARIABLES`
+        public static let CHECK_CONSTRAINT_VARIABLES: ErrorCode = 3816
+        /// `ER_CHECK_CONSTRAINT_ROW_VALUE`
+        public static let CHECK_CONSTRAINT_ROW_VALUE: ErrorCode = 3817
+        /// `ER_CHECK_CONSTRAINT_REFERS_AUTO_INCREMENT_COLUMN`
+        public static let CHECK_CONSTRAINT_REFERS_AUTO_INCREMENT_COLUMN: ErrorCode = 3818
+        /// `ER_CHECK_CONSTRAINT_VIOLATED`
+        public static let CHECK_CONSTRAINT_VIOLATED: ErrorCode = 3819
+        /// `ER_CHECK_CONSTRAINT_REFERS_UNKNOWN_COLUMN`
+        public static let CHECK_CONSTRAINT_REFERS_UNKNOWN_COLUMN: ErrorCode = 3820
+        /// `ER_CHECK_CONSTRAINT_NOT_FOUND`
+        public static let CHECK_CONSTRAINT_NOT_FOUND: ErrorCode = 3821
+        /// `ER_CHECK_CONSTRAINT_DUP_NAME`
+        public static let CHECK_CONSTRAINT_DUP_NAME: ErrorCode = 3822
+        /// `ER_CHECK_CONSTRAINT_CLAUSE_USING_FK_REFER_ACTION_COLUMN`
+        public static let CHECK_CONSTRAINT_CLAUSE_USING_FK_REFER_ACTION_COLUMN: ErrorCode = 3823
+        /// `WARN_UNENCRYPTED_TABLE_IN_ENCRYPTED_DB`
+        public static let UNENCRYPTED_TABLE_IN_ENCRYPTED_DB: ErrorCode = 3824
+        /// `ER_INVALID_ENCRYPTION_REQUEST`
+        public static let INVALID_ENCRYPTION_REQUEST: ErrorCode = 3825
+        /// `ER_CANNOT_SET_TABLE_ENCRYPTION`
+        public static let CANNOT_SET_TABLE_ENCRYPTION: ErrorCode = 3826
+        /// `ER_CANNOT_SET_DATABASE_ENCRYPTION`
+        public static let CANNOT_SET_DATABASE_ENCRYPTION: ErrorCode = 3827
+        /// `ER_CANNOT_SET_TABLESPACE_ENCRYPTION`
+        public static let CANNOT_SET_TABLESPACE_ENCRYPTION: ErrorCode = 3828
+        /// `ER_TABLESPACE_CANNOT_BE_ENCRYPTED`
+        public static let TABLESPACE_CANNOT_BE_ENCRYPTED: ErrorCode = 3829
+        /// `ER_TABLESPACE_CANNOT_BE_DECRYPTED`
+        public static let TABLESPACE_CANNOT_BE_DECRYPTED: ErrorCode = 3830
+        /// `ER_TABLESPACE_TYPE_UNKNOWN`
+        public static let TABLESPACE_TYPE_UNKNOWN: ErrorCode = 3831
+        /// `ER_TARGET_TABLESPACE_UNENCRYPTED`
+        public static let TARGET_TABLESPACE_UNENCRYPTED: ErrorCode = 3832
+        /// `ER_CANNOT_USE_ENCRYPTION_CLAUSE`
+        public static let CANNOT_USE_ENCRYPTION_CLAUSE: ErrorCode = 3833
+        /// `ER_INVALID_MULTIPLE_CLAUSES`
+        public static let INVALID_MULTIPLE_CLAUSES: ErrorCode = 3834
+        /// `ER_UNSUPPORTED_USE_OF_GRANT_AS`
+        public static let UNSUPPORTED_USE_OF_GRANT_AS: ErrorCode = 3835
+        /// `ER_UKNOWN_AUTH_ID_OR_ACCESS_DENIED_FOR_GRANT_AS`
+        public static let UKNOWN_AUTH_ID_OR_ACCESS_DENIED_FOR_GRANT_AS: ErrorCode = 3836
+        /// `ER_DEPENDENT_BY_FUNCTIONAL_INDEX`
+        public static let DEPENDENT_BY_FUNCTIONAL_INDEX: ErrorCode = 3837
+        /// `ER_PLUGIN_NOT_EARLY`
+        public static let PLUGIN_NOT_EARLY: ErrorCode = 3838
+        /// `ER_INNODB_REDO_LOG_ARCHIVE_START_SUBDIR_PATH`
+        public static let INNODB_REDO_LOG_ARCHIVE_START_SUBDIR_PATH: ErrorCode = 3839
+        /// `ER_INNODB_REDO_LOG_ARCHIVE_START_TIMEOUT`
+        public static let INNODB_REDO_LOG_ARCHIVE_START_TIMEOUT: ErrorCode = 3840
+        /// `ER_INNODB_REDO_LOG_ARCHIVE_DIRS_INVALID`
+        public static let INNODB_REDO_LOG_ARCHIVE_DIRS_INVALID: ErrorCode = 3841
+        /// `ER_INNODB_REDO_LOG_ARCHIVE_LABEL_NOT_FOUND`
+        public static let INNODB_REDO_LOG_ARCHIVE_LABEL_NOT_FOUND: ErrorCode = 3842
+        /// `ER_INNODB_REDO_LOG_ARCHIVE_DIR_EMPTY`
+        public static let INNODB_REDO_LOG_ARCHIVE_DIR_EMPTY: ErrorCode = 3843
+        /// `ER_INNODB_REDO_LOG_ARCHIVE_NO_SUCH_DIR`
+        public static let INNODB_REDO_LOG_ARCHIVE_NO_SUCH_DIR: ErrorCode = 3844
+        /// `ER_INNODB_REDO_LOG_ARCHIVE_DIR_CLASH`
+        public static let INNODB_REDO_LOG_ARCHIVE_DIR_CLASH: ErrorCode = 3845
+        /// `ER_INNODB_REDO_LOG_ARCHIVE_DIR_PERMISSIONS`
+        public static let INNODB_REDO_LOG_ARCHIVE_DIR_PERMISSIONS: ErrorCode = 3846
+        /// `ER_INNODB_REDO_LOG_ARCHIVE_FILE_CREATE`
+        public static let INNODB_REDO_LOG_ARCHIVE_FILE_CREATE: ErrorCode = 3847
+        /// `ER_INNODB_REDO_LOG_ARCHIVE_ACTIVE`
+        public static let INNODB_REDO_LOG_ARCHIVE_ACTIVE: ErrorCode = 3848
+        /// `ER_INNODB_REDO_LOG_ARCHIVE_INACTIVE`
+        public static let INNODB_REDO_LOG_ARCHIVE_INACTIVE: ErrorCode = 3849
+        /// `ER_INNODB_REDO_LOG_ARCHIVE_FAILED`
+        public static let INNODB_REDO_LOG_ARCHIVE_FAILED: ErrorCode = 3850
+        /// `ER_INNODB_REDO_LOG_ARCHIVE_SESSION`
+        public static let INNODB_REDO_LOG_ARCHIVE_SESSION: ErrorCode = 3851
+        /// `ER_STD_REGEX_ERROR`
+        public static let STD_REGEX_ERROR: ErrorCode = 3852
+        /// `ER_INVALID_JSON_TYPE`
+        public static let INVALID_JSON_TYPE: ErrorCode = 3853
+        /// `ER_CANNOT_CONVERT_STRING`
+        public static let CANNOT_CONVERT_STRING: ErrorCode = 3854
+        /// `ER_DEPENDENT_BY_PARTITION_FUNC`
+        public static let DEPENDENT_BY_PARTITION_FUNC: ErrorCode = 3855
+        /// `ER_WARN_DEPRECATED_FLOAT_AUTO_INCREMENT`
+        public static let WARN_DEPRECATED_FLOAT_AUTO_INCREMENT: ErrorCode = 3856
+        /// `ER_RPL_CANT_STOP_SLAVE_WHILE_LOCKED_BACKUP`
+        public static let RPL_CANT_STOP_SLAVE_WHILE_LOCKED_BACKUP: ErrorCode = 3857
+        /// `ER_WARN_DEPRECATED_FLOAT_DIGITS`
+        public static let WARN_DEPRECATED_FLOAT_DIGITS: ErrorCode = 3858
+        /// `ER_WARN_DEPRECATED_FLOAT_UNSIGNED`
+        public static let WARN_DEPRECATED_FLOAT_UNSIGNED: ErrorCode = 3859
+        /// `ER_WARN_DEPRECATED_INTEGER_DISPLAY_WIDTH`
+        public static let WARN_DEPRECATED_INTEGER_DISPLAY_WIDTH: ErrorCode = 3860
+        /// `ER_WARN_DEPRECATED_ZEROFILL`
+        public static let WARN_DEPRECATED_ZEROFILL: ErrorCode = 3861
+        /// `ER_CLONE_DONOR`
+        public static let CLONE_DONOR: ErrorCode = 3862
+        /// `ER_CLONE_PROTOCOL`
+        public static let CLONE_PROTOCOL: ErrorCode = 3863
+        /// `ER_CLONE_DONOR_VERSION`
+        public static let CLONE_DONOR_VERSION: ErrorCode = 3864
+        /// `ER_CLONE_OS`
+        public static let CLONE_OS: ErrorCode = 3865
+        /// `ER_CLONE_PLATFORM`
+        public static let CLONE_PLATFORM: ErrorCode = 3866
+        /// `ER_CLONE_CHARSET`
+        public static let CLONE_CHARSET: ErrorCode = 3867
+        /// `ER_CLONE_CONFIG`
+        public static let CLONE_CONFIG: ErrorCode = 3868
+        /// `ER_CLONE_SYS_CONFIG`
+        public static let CLONE_SYS_CONFIG: ErrorCode = 3869
+        /// `ER_CLONE_PLUGIN_MATCH`
+        public static let CLONE_PLUGIN_MATCH: ErrorCode = 3870
+        /// `ER_CLONE_LOOPBACK`
+        public static let CLONE_LOOPBACK: ErrorCode = 3871
+        /// `ER_CLONE_ENCRYPTION`
+        public static let CLONE_ENCRYPTION: ErrorCode = 3872
+        /// `ER_CLONE_DISK_SPACE`
+        public static let CLONE_DISK_SPACE: ErrorCode = 3873
+        /// `ER_CLONE_IN_PROGRESS`
+        public static let CLONE_IN_PROGRESS: ErrorCode = 3874
+        /// `ER_CLONE_DISALLOWED`
+        public static let CLONE_DISALLOWED: ErrorCode = 3875
+        /// `ER_CANNOT_GRANT_ROLES_TO_ANONYMOUS_USER`
+        public static let CANNOT_GRANT_ROLES_TO_ANONYMOUS_USER: ErrorCode = 3876
+        /// `ER_SECONDARY_ENGINE_PLUGIN`
+        public static let SECONDARY_ENGINE_PLUGIN: ErrorCode = 3877
+        /// `ER_SECOND_PASSWORD_CANNOT_BE_EMPTY`
+        public static let SECOND_PASSWORD_CANNOT_BE_EMPTY: ErrorCode = 3878
+        /// `ER_DB_ACCESS_DENIED`
+        public static let DB_ACCESS_DENIED: ErrorCode = 3879
+        /// `ER_DA_AUTH_ID_WITH_SYSTEM_USER_PRIV_IN_MANDATORY_ROLES`
+        public static let DA_AUTH_ID_WITH_SYSTEM_USER_PRIV_IN_MANDATORY_ROLES: ErrorCode = 3880
+        /// `ER_DA_RPL_GTID_TABLE_CANNOT_OPEN`
+        public static let DA_RPL_GTID_TABLE_CANNOT_OPEN: ErrorCode = 3881
+        /// `ER_GEOMETRY_IN_UNKNOWN_LENGTH_UNIT`
+        public static let GEOMETRY_IN_UNKNOWN_LENGTH_UNIT: ErrorCode = 3882
+        /// `ER_DA_PLUGIN_INSTALL_ERROR`
+        public static let DA_PLUGIN_INSTALL_ERROR: ErrorCode = 3883
+        /// `ER_NO_SESSION_TEMP`
+        public static let NO_SESSION_TEMP: ErrorCode = 3884
+        /// `ER_DA_UNKNOWN_ERROR_NUMBER`
+        public static let DA_UNKNOWN_ERROR_NUMBER: ErrorCode = 3885
+        /// `ER_COLUMN_CHANGE_SIZE`
+        public static let COLUMN_CHANGE_SIZE: ErrorCode = 3886
+        /// `ER_REGEXP_INVALID_CAPTURE_GROUP_NAME`
+        public static let REGEXP_INVALID_CAPTURE_GROUP_NAME: ErrorCode = 3887
+        /// `ER_DA_SSL_LIBRARY_ERROR`
+        public static let DA_SSL_LIBRARY_ERROR: ErrorCode = 3888
+        /// `ER_SECONDARY_ENGINE`
+        public static let SECONDARY_ENGINE: ErrorCode = 3889
+        /// `ER_SECONDARY_ENGINE_DDL`
+        public static let SECONDARY_ENGINE_DDL: ErrorCode = 3890
+        /// `ER_INCORRECT_CURRENT_PASSWORD`
+        public static let INCORRECT_CURRENT_PASSWORD: ErrorCode = 3891
+        /// `ER_MISSING_CURRENT_PASSWORD`
+        public static let MISSING_CURRENT_PASSWORD: ErrorCode = 3892
+        /// `ER_CURRENT_PASSWORD_NOT_REQUIRED`
+        public static let CURRENT_PASSWORD_NOT_REQUIRED: ErrorCode = 3893
+        /// `ER_PASSWORD_CANNOT_BE_RETAINED_ON_PLUGIN_CHANGE`
+        public static let PASSWORD_CANNOT_BE_RETAINED_ON_PLUGIN_CHANGE: ErrorCode = 3894
+        /// `ER_CURRENT_PASSWORD_CANNOT_BE_RETAINED`
+        public static let CURRENT_PASSWORD_CANNOT_BE_RETAINED: ErrorCode = 3895
+        /// `ER_PARTIAL_REVOKES_EXIST`
+        public static let PARTIAL_REVOKES_EXIST: ErrorCode = 3896
+        /// `ER_CANNOT_GRANT_SYSTEM_PRIV_TO_MANDATORY_ROLE`
+        public static let CANNOT_GRANT_SYSTEM_PRIV_TO_MANDATORY_ROLE: ErrorCode = 3897
+        /// `ER_XA_REPLICATION_FILTERS`
+        public static let XA_REPLICATION_FILTERS: ErrorCode = 3898
+        /// `ER_UNSUPPORTED_SQL_MODE`
+        public static let UNSUPPORTED_SQL_MODE: ErrorCode = 3899
+        /// `ER_REGEXP_INVALID_FLAG`
+        public static let REGEXP_INVALID_FLAG: ErrorCode = 3900
+        /// `ER_PARTIAL_REVOKE_AND_DB_GRANT_BOTH_EXISTS`
+        public static let PARTIAL_REVOKE_AND_DB_GRANT_BOTH_EXISTS: ErrorCode = 3901
+        /// `ER_UNIT_NOT_FOUND`
+        public static let UNIT_NOT_FOUND: ErrorCode = 3902
+        /// `ER_INVALID_JSON_VALUE_FOR_FUNC_INDEX`
+        public static let INVALID_JSON_VALUE_FOR_FUNC_INDEX: ErrorCode = 3903
+        /// `ER_JSON_VALUE_OUT_OF_RANGE_FOR_FUNC_INDEX`
+        public static let JSON_VALUE_OUT_OF_RANGE_FOR_FUNC_INDEX: ErrorCode = 3904
+        /// `ER_EXCEEDED_MV_KEYS_NUM`
+        public static let EXCEEDED_MV_KEYS_NUM: ErrorCode = 3905
+        /// `ER_EXCEEDED_MV_KEYS_SPACE`
+        public static let EXCEEDED_MV_KEYS_SPACE: ErrorCode = 3906
+        /// `ER_FUNCTIONAL_INDEX_DATA_IS_TOO_LONG`
+        public static let FUNCTIONAL_INDEX_DATA_IS_TOO_LONG: ErrorCode = 3907
+        /// `ER_WRONG_MVI_VALUE`
+        public static let WRONG_MVI_VALUE: ErrorCode = 3908
+        /// `ER_WARN_FUNC_INDEX_NOT_APPLICABLE`
+        public static let WARN_FUNC_INDEX_NOT_APPLICABLE: ErrorCode = 3909
+        /// `ER_GRP_RPL_UDF_ERROR`
+        public static let GRP_RPL_UDF_ERROR: ErrorCode = 3910
+        /// `ER_UPDATE_GTID_PURGED_WITH_GR`
+        public static let UPDATE_GTID_PURGED_WITH_GR: ErrorCode = 3911
+        /// `ER_GROUPING_ON_TIMESTAMP_IN_DST`
+        public static let GROUPING_ON_TIMESTAMP_IN_DST: ErrorCode = 3912
+        /// `ER_TABLE_NAME_CAUSES_TOO_LONG_PATH`
+        public static let TABLE_NAME_CAUSES_TOO_LONG_PATH: ErrorCode = 3913
+        /// `ER_AUDIT_LOG_INSUFFICIENT_PRIVILEGE`
+        public static let AUDIT_LOG_INSUFFICIENT_PRIVILEGE: ErrorCode = 3914
+        /// `ER_DA_GRP_RPL_STARTED_AUTO_REJOIN`
+        public static let DA_GRP_RPL_STARTED_AUTO_REJOIN: ErrorCode = 3916
+        /// `ER_SYSVAR_CHANGE_DURING_QUERY`
+        public static let SYSVAR_CHANGE_DURING_QUERY: ErrorCode = 3917
+        /// `ER_GLOBSTAT_CHANGE_DURING_QUERY`
+        public static let GLOBSTAT_CHANGE_DURING_QUERY: ErrorCode = 3918
+        /// `ER_GRP_RPL_MESSAGE_SERVICE_INIT_FAILURE`
+        public static let GRP_RPL_MESSAGE_SERVICE_INIT_FAILURE: ErrorCode = 3919
+        /// `ER_CHANGE_MASTER_WRONG_COMPRESSION_ALGORITHM_CLIENT`
+        public static let CHANGE_MASTER_WRONG_COMPRESSION_ALGORITHM_CLIENT: ErrorCode = 3920
+        /// `ER_CHANGE_MASTER_WRONG_COMPRESSION_LEVEL_CLIENT`
+        public static let CHANGE_MASTER_WRONG_COMPRESSION_LEVEL_CLIENT: ErrorCode = 3921
+        /// `ER_WRONG_COMPRESSION_ALGORITHM_CLIENT`
+        public static let WRONG_COMPRESSION_ALGORITHM_CLIENT: ErrorCode = 3922
+        /// `ER_WRONG_COMPRESSION_LEVEL_CLIENT`
+        public static let WRONG_COMPRESSION_LEVEL_CLIENT: ErrorCode = 3923
+        /// `ER_CHANGE_MASTER_WRONG_COMPRESSION_ALGORITHM_LIST_CLIENT`
+        public static let CHANGE_MASTER_WRONG_COMPRESSION_ALGORITHM_LIST_CLIENT: ErrorCode = 3924
+        /// `ER_CLIENT_PRIVILEGE_CHECKS_USER_CANNOT_BE_ANONYMOUS`
+        public static let CLIENT_PRIVILEGE_CHECKS_USER_CANNOT_BE_ANONYMOUS: ErrorCode = 3925
+        /// `ER_CLIENT_PRIVILEGE_CHECKS_USER_DOES_NOT_EXIST`
+        public static let CLIENT_PRIVILEGE_CHECKS_USER_DOES_NOT_EXIST: ErrorCode = 3926
+        /// `ER_CLIENT_PRIVILEGE_CHECKS_USER_CORRUPT`
+        public static let CLIENT_PRIVILEGE_CHECKS_USER_CORRUPT: ErrorCode = 3927
+        /// `ER_CLIENT_PRIVILEGE_CHECKS_USER_NEEDS_RPL_APPLIER_PRIV`
+        public static let CLIENT_PRIVILEGE_CHECKS_USER_NEEDS_RPL_APPLIER_PRIV: ErrorCode = 3928
+        /// `ER_WARN_DA_PRIVILEGE_NOT_REGISTERED`
+        public static let WARN_DA_PRIVILEGE_NOT_REGISTERED: ErrorCode = 3929
+        /// `ER_CLIENT_KEYRING_UDF_KEY_INVALID`
+        public static let CLIENT_KEYRING_UDF_KEY_INVALID: ErrorCode = 3930
+        /// `ER_CLIENT_KEYRING_UDF_KEY_TYPE_INVALID`
+        public static let CLIENT_KEYRING_UDF_KEY_TYPE_INVALID: ErrorCode = 3931
+        /// `ER_CLIENT_KEYRING_UDF_KEY_TOO_LONG`
+        public static let CLIENT_KEYRING_UDF_KEY_TOO_LONG: ErrorCode = 3932
+        /// `ER_CLIENT_KEYRING_UDF_KEY_TYPE_TOO_LONG`
+        public static let CLIENT_KEYRING_UDF_KEY_TYPE_TOO_LONG: ErrorCode = 3933
+        /// `ER_JSON_SCHEMA_VALIDATION_ERROR_WITH_DETAILED_REPORT`
+        public static let JSON_SCHEMA_VALIDATION_ERROR_WITH_DETAILED_REPORT: ErrorCode = 3934
+        /// `ER_DA_UDF_INVALID_CHARSET_SPECIFIED`
+        public static let DA_UDF_INVALID_CHARSET_SPECIFIED: ErrorCode = 3935
+        /// `ER_DA_UDF_INVALID_CHARSET`
+        public static let DA_UDF_INVALID_CHARSET: ErrorCode = 3936
+        /// `ER_DA_UDF_INVALID_COLLATION`
+        public static let DA_UDF_INVALID_COLLATION: ErrorCode = 3937
+        /// `ER_DA_UDF_INVALID_EXTENSION_ARGUMENT_TYPE`
+        public static let DA_UDF_INVALID_EXTENSION_ARGUMENT_TYPE: ErrorCode = 3938
+        /// `ER_MULTIPLE_CONSTRAINTS_WITH_SAME_NAME`
+        public static let MULTIPLE_CONSTRAINTS_WITH_SAME_NAME: ErrorCode = 3939
+        /// `ER_CONSTRAINT_NOT_FOUND`
+        public static let CONSTRAINT_NOT_FOUND: ErrorCode = 3940
+        /// `ER_ALTER_CONSTRAINT_ENFORCEMENT_NOT_SUPPORTED`
+        public static let ALTER_CONSTRAINT_ENFORCEMENT_NOT_SUPPORTED: ErrorCode = 3941
+        /// `ER_TABLE_VALUE_CONSTRUCTOR_MUST_HAVE_COLUMNS`
+        public static let TABLE_VALUE_CONSTRUCTOR_MUST_HAVE_COLUMNS: ErrorCode = 3942
+        /// `ER_TABLE_VALUE_CONSTRUCTOR_CANNOT_HAVE_DEFAULT`
+        public static let TABLE_VALUE_CONSTRUCTOR_CANNOT_HAVE_DEFAULT: ErrorCode = 3943
+        /// `ER_CLIENT_QUERY_FAILURE_INVALID_NON_ROW_FORMAT`
+        public static let CLIENT_QUERY_FAILURE_INVALID_NON_ROW_FORMAT: ErrorCode = 3944
+        /// `ER_REQUIRE_ROW_FORMAT_INVALID_VALUE`
+        public static let REQUIRE_ROW_FORMAT_INVALID_VALUE: ErrorCode = 3945
+        /// `ER_FAILED_TO_DETERMINE_IF_ROLE_IS_MANDATORY`
+        public static let FAILED_TO_DETERMINE_IF_ROLE_IS_MANDATORY: ErrorCode = 3946
+        /// `ER_FAILED_TO_FETCH_MANDATORY_ROLE_LIST`
+        public static let FAILED_TO_FETCH_MANDATORY_ROLE_LIST: ErrorCode = 3947
+        /// `ER_CLIENT_LOCAL_FILES_DISABLED`
+        public static let CLIENT_LOCAL_FILES_DISABLED: ErrorCode = 3948
+        /// `ER_IMP_INCOMPATIBLE_CFG_VERSION`
+        public static let IMP_INCOMPATIBLE_CFG_VERSION: ErrorCode = 3949
+        /// `ER_DA_OOM`
+        public static let DA_OOM: ErrorCode = 3950
+        /// `ER_DA_UDF_INVALID_ARGUMENT_TO_SET_CHARSET`
+        public static let DA_UDF_INVALID_ARGUMENT_TO_SET_CHARSET: ErrorCode = 3951
+        /// `ER_DA_UDF_INVALID_RETURN_TYPE_TO_SET_CHARSET`
+        public static let DA_UDF_INVALID_RETURN_TYPE_TO_SET_CHARSET: ErrorCode = 3952
+        /// `ER_MULTIPLE_INTO_CLAUSES`
+        public static let MULTIPLE_INTO_CLAUSES: ErrorCode = 3953
+        /// `ER_MISPLACED_INTO`
+        public static let MISPLACED_INTO: ErrorCode = 3954
+        /// `ER_USER_ACCESS_DENIED_FOR_USER_ACCOUNT_BLOCKED_BY_PASSWORD_LOCK`
+        public static let USER_ACCESS_DENIED_FOR_USER_ACCOUNT_BLOCKED_BY_PASSWORD_LOCK: ErrorCode = 3955
+        /// `ER_WARN_DEPRECATED_YEAR_UNSIGNED`
+        public static let WARN_DEPRECATED_YEAR_UNSIGNED: ErrorCode = 3956
+        /// `ER_CLONE_NETWORK_PACKET`
+        public static let CLONE_NETWORK_PACKET: ErrorCode = 3957
+        /// `ER_SDI_OPERATION_FAILED_MISSING_RECORD`
+        public static let SDI_OPERATION_FAILED_MISSING_RECORD: ErrorCode = 3958
+        /// `ER_DEPENDENT_BY_CHECK_CONSTRAINT`
+        public static let DEPENDENT_BY_CHECK_CONSTRAINT: ErrorCode = 3959
+        /// `ER_GRP_OPERATION_NOT_ALLOWED_GR_MUST_STOP`
+        public static let GRP_OPERATION_NOT_ALLOWED_GR_MUST_STOP: ErrorCode = 3960
+        /// `ER_WARN_DEPRECATED_JSON_TABLE_ON_ERROR_ON_EMPTY`
+        public static let WARN_DEPRECATED_JSON_TABLE_ON_ERROR_ON_EMPTY: ErrorCode = 3961
+        /// `ER_WARN_DEPRECATED_INNER_INTO`
+        public static let WARN_DEPRECATED_INNER_INTO: ErrorCode = 3962
+        /// `ER_WARN_DEPRECATED_VALUES_FUNCTION_ALWAYS_NULL`
+        public static let WARN_DEPRECATED_VALUES_FUNCTION_ALWAYS_NULL: ErrorCode = 3963
+        /// `ER_WARN_DEPRECATED_SQL_CALC_FOUND_ROWS`
+        public static let WARN_DEPRECATED_SQL_CALC_FOUND_ROWS: ErrorCode = 3964
+        /// `ER_WARN_DEPRECATED_FOUND_ROWS`
+        public static let WARN_DEPRECATED_FOUND_ROWS: ErrorCode = 3965
+        /// `ER_MISSING_JSON_VALUE`
+        public static let MISSING_JSON_VALUE: ErrorCode = 3966
+        /// `ER_MULTIPLE_JSON_VALUES`
+        public static let MULTIPLE_JSON_VALUES: ErrorCode = 3967
+        /// `ER_HOSTNAME_TOO_LONG`
+        public static let HOSTNAME_TOO_LONG: ErrorCode = 3968
+        /// `ER_WARN_CLIENT_DEPRECATED_PARTITION_PREFIX_KEY`
+        public static let WARN_CLIENT_DEPRECATED_PARTITION_PREFIX_KEY: ErrorCode = 3969
+        /// `ER_GROUP_REPLICATION_USER_EMPTY_MSG`
+        public static let GROUP_REPLICATION_USER_EMPTY_MSG: ErrorCode = 3970
+        /// `ER_GROUP_REPLICATION_USER_MANDATORY_MSG`
+        public static let GROUP_REPLICATION_USER_MANDATORY_MSG: ErrorCode = 3971
+        /// `ER_GROUP_REPLICATION_PASSWORD_LENGTH`
+        public static let GROUP_REPLICATION_PASSWORD_LENGTH: ErrorCode = 3972
+        /// `ER_SUBQUERY_TRANSFORM_REJECTED`
+        public static let SUBQUERY_TRANSFORM_REJECTED: ErrorCode = 3973
+        /// `ER_DA_GRP_RPL_RECOVERY_ENDPOINT_FORMAT`
+        public static let DA_GRP_RPL_RECOVERY_ENDPOINT_FORMAT: ErrorCode = 3974
+        /// `ER_DA_GRP_RPL_RECOVERY_ENDPOINT_INVALID`
+        public static let DA_GRP_RPL_RECOVERY_ENDPOINT_INVALID: ErrorCode = 3975
+        /// `ER_WRONG_VALUE_FOR_VAR_PLUS_ACTIONABLE_PART`
+        public static let WRONG_VALUE_FOR_VAR_PLUS_ACTIONABLE_PART: ErrorCode = 3976
+        /// `ER_STATEMENT_NOT_ALLOWED_AFTER_START_TRANSACTION`
+        public static let STATEMENT_NOT_ALLOWED_AFTER_START_TRANSACTION: ErrorCode = 3977
+        /// `ER_FOREIGN_KEY_WITH_ATOMIC_CREATE_SELECT`
+        public static let FOREIGN_KEY_WITH_ATOMIC_CREATE_SELECT: ErrorCode = 3978
+        /// `ER_NOT_ALLOWED_WITH_START_TRANSACTION`
+        public static let NOT_ALLOWED_WITH_START_TRANSACTION: ErrorCode = 3979
+        /// `ER_INVALID_JSON_ATTRIBUTE`
+        public static let INVALID_JSON_ATTRIBUTE: ErrorCode = 3980
+        /// `ER_ENGINE_ATTRIBUTE_NOT_SUPPORTED`
+        public static let ENGINE_ATTRIBUTE_NOT_SUPPORTED: ErrorCode = 3981
+        /// `ER_INVALID_USER_ATTRIBUTE_JSON`
+        public static let INVALID_USER_ATTRIBUTE_JSON: ErrorCode = 3982
+        /// `ER_INNODB_REDO_DISABLED`
+        public static let INNODB_REDO_DISABLED: ErrorCode = 3983
+        /// `ER_INNODB_REDO_ARCHIVING_ENABLED`
+        public static let INNODB_REDO_ARCHIVING_ENABLED: ErrorCode = 3984
+        /// `ER_MDL_OUT_OF_RESOURCES`
+        public static let MDL_OUT_OF_RESOURCES: ErrorCode = 3985
+        /// `ER_IMPLICIT_COMPARISON_FOR_JSON`
+        public static let IMPLICIT_COMPARISON_FOR_JSON: ErrorCode = 3986
+        /// `ER_FUNCTION_DOES_NOT_SUPPORT_CHARACTER_SET`
+        public static let FUNCTION_DOES_NOT_SUPPORT_CHARACTER_SET: ErrorCode = 3987
+        /// `ER_IMPOSSIBLE_STRING_CONVERSION`
+        public static let IMPOSSIBLE_STRING_CONVERSION: ErrorCode = 3988
+        /// `ER_SCHEMA_READ_ONLY`
+        public static let SCHEMA_READ_ONLY: ErrorCode = 3989
+        /// `ER_RPL_ASYNC_RECONNECT_GTID_MODE_OFF`
+        public static let RPL_ASYNC_RECONNECT_GTID_MODE_OFF: ErrorCode = 3990
+        /// `ER_RPL_ASYNC_RECONNECT_AUTO_POSITION_OFF`
+        public static let RPL_ASYNC_RECONNECT_AUTO_POSITION_OFF: ErrorCode = 3991
+        /// `ER_DISABLE_GTID_MODE_REQUIRES_ASYNC_RECONNECT_OFF`
+        public static let DISABLE_GTID_MODE_REQUIRES_ASYNC_RECONNECT_OFF: ErrorCode = 3992
+        /// `ER_DISABLE_AUTO_POSITION_REQUIRES_ASYNC_RECONNECT_OFF`
+        public static let DISABLE_AUTO_POSITION_REQUIRES_ASYNC_RECONNECT_OFF: ErrorCode = 3993
+        /// `ER_INVALID_PARAMETER_USE`
+        public static let INVALID_PARAMETER_USE: ErrorCode = 3994
+        /// `ER_CHARACTER_SET_MISMATCH`
+        public static let CHARACTER_SET_MISMATCH: ErrorCode = 3995
+        /// `ER_WARN_VAR_VALUE_CHANGE_NOT_SUPPORTED`
+        public static let WARN_VAR_VALUE_CHANGE_NOT_SUPPORTED: ErrorCode = 3996
+        /// `ER_INVALID_TIME_ZONE_INTERVAL`
+        public static let INVALID_TIME_ZONE_INTERVAL: ErrorCode = 3997
+        /// `ER_INVALID_CAST`
+        public static let INVALID_CAST: ErrorCode = 3998
+        /// `ER_HYPERGRAPH_NOT_SUPPORTED_YET`
+        public static let HYPERGRAPH_NOT_SUPPORTED_YET: ErrorCode = 3999
+        /// `ER_WARN_HYPERGRAPH_EXPERIMENTAL`
+        public static let WARN_HYPERGRAPH_EXPERIMENTAL: ErrorCode = 4000
+        /// `ER_DA_NO_ERROR_LOG_PARSER_CONFIGURED`
+        public static let DA_NO_ERROR_LOG_PARSER_CONFIGURED: ErrorCode = 4001
+        /// `ER_DA_ERROR_LOG_TABLE_DISABLED`
+        public static let DA_ERROR_LOG_TABLE_DISABLED: ErrorCode = 4002
+        /// `ER_DA_ERROR_LOG_MULTIPLE_FILTERS`
+        public static let DA_ERROR_LOG_MULTIPLE_FILTERS: ErrorCode = 4003
+        /// `ER_DA_CANT_OPEN_ERROR_LOG`
+        public static let DA_CANT_OPEN_ERROR_LOG: ErrorCode = 4004
+        /// `ER_USER_REFERENCED_AS_DEFINER`
+        public static let USER_REFERENCED_AS_DEFINER: ErrorCode = 4005
+        /// `ER_CANNOT_USER_REFERENCED_AS_DEFINER`
+        public static let CANNOT_USER_REFERENCED_AS_DEFINER: ErrorCode = 4006
+        /// `ER_REGEX_NUMBER_TOO_BIG`
+        public static let REGEX_NUMBER_TOO_BIG: ErrorCode = 4007
+        /// `ER_SPVAR_NONINTEGER_TYPE`
+        public static let SPVAR_NONINTEGER_TYPE: ErrorCode = 4008
+        /// `WARN_UNSUPPORTED_ACL_TABLES_READ`
+        public static let UNSUPPORTED_ACL_TABLES_READ: ErrorCode = 4009
+        /// `ER_BINLOG_UNSAFE_ACL_TABLE_READ_IN_DML_DDL`
+        public static let BINLOG_UNSAFE_ACL_TABLE_READ_IN_DML_DDL: ErrorCode = 4010
+        /// `ER_STOP_REPLICA_MONITOR_IO_THREAD_TIMEOUT`
+        public static let STOP_REPLICA_MONITOR_IO_THREAD_TIMEOUT: ErrorCode = 4011
+        /// `ER_STARTING_REPLICA_MONITOR_IO_THREAD`
+        public static let STARTING_REPLICA_MONITOR_IO_THREAD: ErrorCode = 4012
+        /// `ER_CANT_USE_ANONYMOUS_TO_GTID_WITH_GTID_MODE_NOT_ON`
+        public static let CANT_USE_ANONYMOUS_TO_GTID_WITH_GTID_MODE_NOT_ON: ErrorCode = 4013
+        /// `ER_CANT_COMBINE_ANONYMOUS_TO_GTID_AND_AUTOPOSITION`
+        public static let CANT_COMBINE_ANONYMOUS_TO_GTID_AND_AUTOPOSITION: ErrorCode = 4014
+        /// `ER_ASSIGN_GTIDS_TO_ANONYMOUS_TRANSACTIONS_REQUIRES_GTID_MODE_ON`
+        public static let ASSIGN_GTIDS_TO_ANONYMOUS_TRANSACTIONS_REQUIRES_GTID_MODE_ON: ErrorCode = 4015
+        /// `ER_SQL_SLAVE_SKIP_COUNTER_USED_WITH_GTID_MODE_ON`
+        public static let SQL_SLAVE_SKIP_COUNTER_USED_WITH_GTID_MODE_ON: ErrorCode = 4016
+        /// `ER_SQL_REPLICA_SKIP_COUNTER_USED_WITH_GTID_MODE_ON`
+        public static let SQL_REPLICA_SKIP_COUNTER_USED_WITH_GTID_MODE_ON: ErrorCode = 4016
+        /// `ER_USING_ASSIGN_GTIDS_TO_ANONYMOUS_TRANSACTIONS_AS_LOCAL_OR_UUID`
+        public static let USING_ASSIGN_GTIDS_TO_ANONYMOUS_TRANSACTIONS_AS_LOCAL_OR_UUID: ErrorCode = 4017
+        /// `ER_CANT_SET_ANONYMOUS_TO_GTID_AND_WAIT_UNTIL_SQL_THD_AFTER_GTIDS`
+        public static let CANT_SET_ANONYMOUS_TO_GTID_AND_WAIT_UNTIL_SQL_THD_AFTER_GTIDS: ErrorCode = 4018
+        /// `ER_CANT_SET_SQL_AFTER_OR_BEFORE_GTIDS_WITH_ANONYMOUS_TO_GTID`
+        public static let CANT_SET_SQL_AFTER_OR_BEFORE_GTIDS_WITH_ANONYMOUS_TO_GTID: ErrorCode = 4019
+        /// `ER_ANONYMOUS_TO_GTID_UUID_SAME_AS_GROUP_NAME`
+        public static let ANONYMOUS_TO_GTID_UUID_SAME_AS_GROUP_NAME: ErrorCode = 4020
+        /// `ER_CANT_USE_SAME_UUID_AS_GROUP_NAME`
+        public static let CANT_USE_SAME_UUID_AS_GROUP_NAME: ErrorCode = 4021
+        /// `ER_GRP_RPL_RECOVERY_CHANNEL_STILL_RUNNING`
+        public static let GRP_RPL_RECOVERY_CHANNEL_STILL_RUNNING: ErrorCode = 4022
+        /// `ER_INNODB_INVALID_AUTOEXTEND_SIZE_VALUE`
+        public static let INNODB_INVALID_AUTOEXTEND_SIZE_VALUE: ErrorCode = 4023
+        /// `ER_INNODB_INCOMPATIBLE_WITH_TABLESPACE`
+        public static let INNODB_INCOMPATIBLE_WITH_TABLESPACE: ErrorCode = 4024
+        /// `ER_INNODB_AUTOEXTEND_SIZE_OUT_OF_RANGE`
+        public static let INNODB_AUTOEXTEND_SIZE_OUT_OF_RANGE: ErrorCode = 4025
+        /// `ER_CANNOT_USE_AUTOEXTEND_SIZE_CLAUSE`
+        public static let CANNOT_USE_AUTOEXTEND_SIZE_CLAUSE: ErrorCode = 4026
+        /// `ER_ROLE_GRANTED_TO_ITSELF`
+        public static let ROLE_GRANTED_TO_ITSELF: ErrorCode = 4027
+        /// `ER_TABLE_MUST_HAVE_A_VISIBLE_COLUMN`
+        public static let TABLE_MUST_HAVE_A_VISIBLE_COLUMN: ErrorCode = 4028
+        /// `ER_INNODB_COMPRESSION_FAILURE`
+        public static let INNODB_COMPRESSION_FAILURE: ErrorCode = 4029
+        /// `ER_WARN_ASYNC_CONN_FAILOVER_NETWORK_NAMESPACE`
+        public static let WARN_ASYNC_CONN_FAILOVER_NETWORK_NAMESPACE: ErrorCode = 4030
+        /// `ER_CLIENT_INTERACTION_TIMEOUT`
+        public static let CLIENT_INTERACTION_TIMEOUT: ErrorCode = 4031
+        /// `ER_INVALID_CAST_TO_GEOMETRY`
+        public static let INVALID_CAST_TO_GEOMETRY: ErrorCode = 4032
+        /// `ER_INVALID_CAST_POLYGON_RING_DIRECTION`
+        public static let INVALID_CAST_POLYGON_RING_DIRECTION: ErrorCode = 4033
+        /// `ER_GIS_DIFFERENT_SRIDS_AGGREGATION`
+        public static let GIS_DIFFERENT_SRIDS_AGGREGATION: ErrorCode = 4034
+        /// `ER_RELOAD_KEYRING_FAILURE`
+        public static let RELOAD_KEYRING_FAILURE: ErrorCode = 4035
+        /// `ER_SDI_GET_KEYS_INVALID_TABLESPACE`
+        public static let SDI_GET_KEYS_INVALID_TABLESPACE: ErrorCode = 4036
+        /// `ER_CHANGE_RPL_SRC_WRONG_COMPRESSION_ALGORITHM_SIZE`
+        public static let CHANGE_RPL_SRC_WRONG_COMPRESSION_ALGORITHM_SIZE: ErrorCode = 4037
+        /// `ER_WARN_DEPRECATED_TLS_VERSION_FOR_CHANNEL_CLI`
+        public static let WARN_DEPRECATED_TLS_VERSION_FOR_CHANNEL_CLI: ErrorCode = 4038
+        /// `ER_CANT_USE_SAME_UUID_AS_VIEW_CHANGE_UUID`
+        public static let CANT_USE_SAME_UUID_AS_VIEW_CHANGE_UUID: ErrorCode = 4039
+        /// `ER_ANONYMOUS_TO_GTID_UUID_SAME_AS_VIEW_CHANGE_UUID`
+        public static let ANONYMOUS_TO_GTID_UUID_SAME_AS_VIEW_CHANGE_UUID: ErrorCode = 4040
+        /// `ER_GRP_RPL_VIEW_CHANGE_UUID_FAIL_GET_VARIABLE`
+        public static let GRP_RPL_VIEW_CHANGE_UUID_FAIL_GET_VARIABLE: ErrorCode = 4041
+        /// `ER_WARN_ADUIT_LOG_MAX_SIZE_AND_PRUNE_SECONDS`
+        public static let WARN_ADUIT_LOG_MAX_SIZE_AND_PRUNE_SECONDS: ErrorCode = 4042
+        /// `ER_WARN_ADUIT_LOG_MAX_SIZE_CLOSE_TO_ROTATE_ON_SIZE`
+        public static let WARN_ADUIT_LOG_MAX_SIZE_CLOSE_TO_ROTATE_ON_SIZE: ErrorCode = 4043
+        /// `ER_KERBEROS_CREATE_USER`
+        public static let KERBEROS_CREATE_USER: ErrorCode = 4044
+        /// `ER_INSTALL_PLUGIN_CONFLICT_CLIENT`
+        public static let INSTALL_PLUGIN_CONFLICT_CLIENT: ErrorCode = 4045
+        /// `ER_DA_ERROR_LOG_COMPONENT_FLUSH_FAILED`
+        public static let DA_ERROR_LOG_COMPONENT_FLUSH_FAILED: ErrorCode = 4046
+        /// `ER_WARN_SQL_AFTER_MTS_GAPS_GAP_NOT_CALCULATED`
+        public static let WARN_SQL_AFTER_MTS_GAPS_GAP_NOT_CALCULATED: ErrorCode = 4047
+        /// `ER_INVALID_ASSIGNMENT_TARGET`
+        public static let INVALID_ASSIGNMENT_TARGET: ErrorCode = 4048
+        /// `ER_OPERATION_NOT_ALLOWED_ON_GR_SECONDARY`
+        public static let OPERATION_NOT_ALLOWED_ON_GR_SECONDARY: ErrorCode = 4049
+        /// `ER_GRP_RPL_FAILOVER_CHANNEL_STATUS_PROPAGATION`
+        public static let GRP_RPL_FAILOVER_CHANNEL_STATUS_PROPAGATION: ErrorCode = 4050
+        /// `ER_WARN_AUDIT_LOG_FORMAT_UNIX_TIMESTAMP_ONLY_WHEN_JSON`
+        public static let WARN_AUDIT_LOG_FORMAT_UNIX_TIMESTAMP_ONLY_WHEN_JSON: ErrorCode = 4051
+        /// `ER_INVALID_MFA_PLUGIN_SPECIFIED`
+        public static let INVALID_MFA_PLUGIN_SPECIFIED: ErrorCode = 4052
+        /// `ER_IDENTIFIED_BY_UNSUPPORTED`
+        public static let IDENTIFIED_BY_UNSUPPORTED: ErrorCode = 4053
+        /// `ER_INVALID_PLUGIN_FOR_REGISTRATION`
+        public static let INVALID_PLUGIN_FOR_REGISTRATION: ErrorCode = 4054
+        /// `ER_PLUGIN_REQUIRES_REGISTRATION`
+        public static let PLUGIN_REQUIRES_REGISTRATION: ErrorCode = 4055
+        /// `ER_MFA_METHOD_EXISTS`
+        public static let MFA_METHOD_EXISTS: ErrorCode = 4056
+        /// `ER_MFA_METHOD_NOT_EXISTS`
+        public static let MFA_METHOD_NOT_EXISTS: ErrorCode = 4057
+        /// `ER_AUTHENTICATION_POLICY_MISMATCH`
+        public static let AUTHENTICATION_POLICY_MISMATCH: ErrorCode = 4058
+        /// `ER_PLUGIN_REGISTRATION_DONE`
+        public static let PLUGIN_REGISTRATION_DONE: ErrorCode = 4059
+        /// `ER_INVALID_USER_FOR_REGISTRATION`
+        public static let INVALID_USER_FOR_REGISTRATION: ErrorCode = 4060
+        /// `ER_USER_REGISTRATION_FAILED`
+        public static let USER_REGISTRATION_FAILED: ErrorCode = 4061
+        /// `ER_MFA_METHODS_INVALID_ORDER`
+        public static let MFA_METHODS_INVALID_ORDER: ErrorCode = 4062
+        /// `ER_MFA_METHODS_IDENTICAL`
+        public static let MFA_METHODS_IDENTICAL: ErrorCode = 4063
+        /// `ER_INVALID_MFA_OPERATIONS_FOR_PASSWORDLESS_USER`
+        public static let INVALID_MFA_OPERATIONS_FOR_PASSWORDLESS_USER: ErrorCode = 4064
+        /// `ER_CHANGE_REPLICATION_SOURCE_NO_OPTIONS_FOR_GTID_ONLY`
+        public static let CHANGE_REPLICATION_SOURCE_NO_OPTIONS_FOR_GTID_ONLY: ErrorCode = 4065
+        /// `ER_CHANGE_REP_SOURCE_CANT_DISABLE_REQ_ROW_FORMAT_WITH_GTID_ONLY`
+        public static let CHANGE_REP_SOURCE_CANT_DISABLE_REQ_ROW_FORMAT_WITH_GTID_ONLY: ErrorCode = 4066
+        /// `ER_CHANGE_REP_SOURCE_CANT_DISABLE_AUTO_POSITION_WITH_GTID_ONLY`
+        public static let CHANGE_REP_SOURCE_CANT_DISABLE_AUTO_POSITION_WITH_GTID_ONLY: ErrorCode = 4067
+        /// `ER_CHANGE_REP_SOURCE_CANT_DISABLE_GTID_ONLY_WITHOUT_POSITIONS`
+        public static let CHANGE_REP_SOURCE_CANT_DISABLE_GTID_ONLY_WITHOUT_POSITIONS: ErrorCode = 4068
+        /// `ER_CHANGE_REP_SOURCE_CANT_DISABLE_AUTO_POS_WITHOUT_POSITIONS`
+        public static let CHANGE_REP_SOURCE_CANT_DISABLE_AUTO_POS_WITHOUT_POSITIONS: ErrorCode = 4069
+        /// `ER_CHANGE_REP_SOURCE_GR_CHANNEL_WITH_GTID_MODE_NOT_ON`
+        public static let CHANGE_REP_SOURCE_GR_CHANNEL_WITH_GTID_MODE_NOT_ON: ErrorCode = 4070
+        /// `ER_CANT_USE_GTID_ONLY_WITH_GTID_MODE_NOT_ON`
+        public static let CANT_USE_GTID_ONLY_WITH_GTID_MODE_NOT_ON: ErrorCode = 4071
+        /// `ER_WARN_C_DISABLE_GTID_ONLY_WITH_SOURCE_AUTO_POS_INVALID_POS`
+        public static let WARN_C_DISABLE_GTID_ONLY_WITH_SOURCE_AUTO_POS_INVALID_POS: ErrorCode = 4072
+        /// `ER_DA_SSL_FIPS_MODE_ERROR`
+        public static let DA_SSL_FIPS_MODE_ERROR: ErrorCode = 4073
+        /// `ER_VALUE_OUT_OF_RANGE`
+        public static let VALUE_OUT_OF_RANGE: ErrorCode = 4074
+        /// `ER_FULLTEXT_WITH_ROLLUP`
+        public static let FULLTEXT_WITH_ROLLUP: ErrorCode = 4075
+        /// `ER_REGEXP_MISSING_RESOURCE`
+        public static let REGEXP_MISSING_RESOURCE: ErrorCode = 4076
+        /// `ER_WARN_REGEXP_USING_DEFAULT`
+        public static let WARN_REGEXP_USING_DEFAULT: ErrorCode = 4077
+        /// `ER_REGEXP_MISSING_FILE`
+        public static let REGEXP_MISSING_FILE: ErrorCode = 4078
+        /// `ER_WARN_DEPRECATED_COLLATION`
+        public static let WARN_DEPRECATED_COLLATION: ErrorCode = 4079
+        /// `ER_CONCURRENT_PROCEDURE_USAGE`
+        public static let CONCURRENT_PROCEDURE_USAGE: ErrorCode = 4080
+        /// `ER_DA_GLOBAL_CONN_LIMIT`
+        public static let DA_GLOBAL_CONN_LIMIT: ErrorCode = 4081
+        /// `ER_DA_CONN_LIMIT`
+        public static let DA_CONN_LIMIT: ErrorCode = 4082
+        /// `ER_ALTER_OPERATION_NOT_SUPPORTED_REASON_COLUMN_TYPE_INSTANT`
+        public static let ALTER_OPERATION_NOT_SUPPORTED_REASON_COLUMN_TYPE_INSTANT: ErrorCode = 4083
+        /// `ER_WARN_SF_UDF_NAME_COLLISION`
+        public static let WARN_SF_UDF_NAME_COLLISION: ErrorCode = 4084
+        /// `ER_CANNOT_PURGE_BINLOG_WITH_BACKUP_LOCK`
+        public static let CANNOT_PURGE_BINLOG_WITH_BACKUP_LOCK: ErrorCode = 4085
+        /// `ER_TOO_MANY_WINDOWS`
+        public static let TOO_MANY_WINDOWS: ErrorCode = 4086
+        /// `ER_MYSQLBACKUP_CLIENT_MSG`
+        public static let MYSQLBACKUP_CLIENT_MSG: ErrorCode = 4087
+        /// `ER_COMMENT_CONTAINS_INVALID_STRING`
+        public static let COMMENT_CONTAINS_INVALID_STRING: ErrorCode = 4088
+        /// `ER_DEFINITION_CONTAINS_INVALID_STRING`
+        public static let DEFINITION_CONTAINS_INVALID_STRING: ErrorCode = 4089
+        /// `ER_CANT_EXECUTE_COMMAND_WITH_ASSIGNED_GTID_NEXT`
+        public static let CANT_EXECUTE_COMMAND_WITH_ASSIGNED_GTID_NEXT: ErrorCode = 4090
+        /// `ER_XA_TEMP_TABLE`
+        public static let XA_TEMP_TABLE: ErrorCode = 4091
+        /// `ER_INNODB_MAX_ROW_VERSION`
+        public static let INNODB_MAX_ROW_VERSION: ErrorCode = 4092
+        /// `ER_INNODB_INSTANT_ADD_NOT_SUPPORTED_MAX_SIZE`
+        public static let INNODB_INSTANT_ADD_NOT_SUPPORTED_MAX_SIZE: ErrorCode = 4093
+        /// `ER_OPERATION_NOT_ALLOWED_WHILE_PRIMARY_CHANGE_IS_RUNNING`
+        public static let OPERATION_NOT_ALLOWED_WHILE_PRIMARY_CHANGE_IS_RUNNING: ErrorCode = 4094
+        /// `ER_WARN_DEPRECATED_DATETIME_DELIMITER`
+        public static let WARN_DEPRECATED_DATETIME_DELIMITER: ErrorCode = 4095
+        /// `ER_WARN_DEPRECATED_SUPERFLUOUS_DELIMITER`
+        public static let WARN_DEPRECATED_SUPERFLUOUS_DELIMITER: ErrorCode = 4096
+        /// `ER_CANNOT_PERSIST_SENSITIVE_VARIABLES`
+        public static let CANNOT_PERSIST_SENSITIVE_VARIABLES: ErrorCode = 4097
+        /// `ER_WARN_CANNOT_SECURELY_PERSIST_SENSITIVE_VARIABLES`
+        public static let WARN_CANNOT_SECURELY_PERSIST_SENSITIVE_VARIABLES: ErrorCode = 4098
+        /// `ER_WARN_TRG_ALREADY_EXISTS`
+        public static let WARN_TRG_ALREADY_EXISTS: ErrorCode = 4099
+        /// `ER_IF_NOT_EXISTS_UNSUPPORTED_TRG_EXISTS_ON_DIFFERENT_TABLE`
+        public static let IF_NOT_EXISTS_UNSUPPORTED_TRG_EXISTS_ON_DIFFERENT_TABLE: ErrorCode = 4100
+        /// `ER_IF_NOT_EXISTS_UNSUPPORTED_UDF_NATIVE_FCT_NAME_COLLISION`
+        public static let IF_NOT_EXISTS_UNSUPPORTED_UDF_NATIVE_FCT_NAME_COLLISION: ErrorCode = 4101
+        /// `ER_SET_PASSWORD_AUTH_PLUGIN_ERROR`
+        public static let SET_PASSWORD_AUTH_PLUGIN_ERROR: ErrorCode = 4102
+        /// `ER_REDUCED_DBLWR_FILE_CORRUPTED`
+        public static let REDUCED_DBLWR_FILE_CORRUPTED: ErrorCode = 4103
+        /// `ER_REDUCED_DBLWR_PAGE_FOUND`
+        public static let REDUCED_DBLWR_PAGE_FOUND: ErrorCode = 4104
+
         
         public var rawValue: UInt16
         
@@ -3184,6 +4619,91 @@ extension MySQLProtocol {
             case 1883: return "PLUGIN_CANNOT_BE_UNINSTALLED"
             case 1884: return "GTID_UNSAFE_BINLOG_SPLITTABLE_STATEMENT_AND_GTID_GROUP"
             case 1885: return "SLAVE_HAS_MORE_GTIDS_THAN_MASTER"
+            case 1886: return "MISSING_KEY"
+            case 1887: return "WARN_NAMED_PIPE_ACCESS_EVERYONE"
+            case 1900: return "MARIADB_UNUSED_18"
+            case 1901: return "MARIADB_GENERATED_COLUMN_FUNCTION_IS_NOT_ALLOWED"
+            case 1902: return "MARIADB_UNUSED_19"
+            case 1903: return "MARIADB_PRIMARY_KEY_BASED_ON_GENERATED_COLUMN"
+            case 1904: return "MARIADB_KEY_BASED_ON_GENERATED_VIRTUAL_COLUMN"
+            case 1905: return "MARIADB_WRONG_FK_OPTION_FOR_GENERATED_COLUMN"
+            case 1906: return "MARIADB_WARNING_NON_DEFAULT_VALUE_FOR_GENERATED_COLUMN"
+            case 1907: return "MARIADB_UNSUPPORTED_ACTION_ON_GENERATED_COLUMN"
+            case 1908: return "MARIADB_UNUSED_20"
+            case 1909: return "MARIADB_UNUSED_21"
+            case 1910: return "MARIADB_UNSUPPORTED_ENGINE_FOR_GENERATED_COLUMNS"
+            case 1911: return "MARIADB_UNKNOWN_OPTION"
+            case 1912: return "MARIADB_BAD_OPTION_VALUE"
+            case 1913: return "MARIADB_UNUSED_6"
+            case 1914: return "MARIADB_UNUSED_7"
+            case 1915: return "MARIADB_UNUSED_8"
+            case 1916: return "MARIADB_DATA_OVERFLOW"
+            case 1917: return "MARIADB_DATA_TRUNCATED"
+            case 1918: return "MARIADB_BAD_DATA"
+            case 1919: return "MARIADB_DYN_COL_WRONG_FORMAT"
+            case 1920: return "MARIADB_DYN_COL_IMPLEMENTATION_LIMIT"
+            case 1921: return "MARIADB_DYN_COL_DATA"
+            case 1922: return "MARIADB_DYN_COL_WRONG_CHARSET"
+            case 1923: return "MARIADB_ILLEGAL_SUBQUERY_OPTIMIZER_SWITCHES"
+            case 1924: return "MARIADB_QUERY_CACHE_IS_DISABLED"
+            case 1925: return "MARIADB_QUERY_CACHE_IS_GLOBALY_DISABLED"
+            case 1926: return "MARIADB_VIEW_ORDERBY_IGNORED"
+            case 1927: return "MARIADB_CONNECTION_KILLED"
+            case 1928: return "MARIADB_UNUSED_11"
+            case 1929: return "MARIADB_INSIDE_TRANSACTION_PREVENTS_SWITCH_SKIP_REPLICATION"
+            case 1930: return "MARIADB_STORED_FUNCTION_PREVENTS_SWITCH_SKIP_REPLICATION"
+            case 1931: return "MARIADB_QUERY_EXCEEDED_ROWS_EXAMINED_LIMIT"
+            case 1932: return "MARIADB_NO_SUCH_TABLE_IN_ENGINE"
+            case 1933: return "MARIADB_TARGET_NOT_EXPLAINABLE"
+            case 1934: return "MARIADB_CONNECTION_ALREADY_EXISTS"
+            case 1935: return "MARIADB_MASTER_LOG_PREFIX"
+            case 1936: return "MARIADB_CANT_START_STOP_SLAVE"
+            case 1937: return "MARIADB_SLAVE_STARTED"
+            case 1938: return "MARIADB_SLAVE_STOPPED"
+            case 1939: return "MARIADB_SQL_DISCOVER_ERROR"
+            case 1940: return "MARIADB_FAILED_GTID_STATE_INIT"
+            case 1941: return "MARIADB_INCORRECT_GTID_STATE"
+            case 1942: return "MARIADB_CANNOT_UPDATE_GTID_STATE"
+            case 1943: return "MARIADB_DUPLICATE_GTID_DOMAIN"
+            case 1944: return "MARIADB_GTID_OPEN_TABLE_FAILED"
+            case 1945: return "MARIADB_GTID_POSITION_NOT_FOUND_IN_BINLOG"
+            case 1946: return "MARIADB_CANNOT_LOAD_SLAVE_GTID_STATE"
+            case 1947: return "MARIADB_MASTER_GTID_POS_CONFLICTS_WITH_BINLOG"
+            case 1948: return "MARIADB_MASTER_GTID_POS_MISSING_DOMAIN"
+            case 1949: return "MARIADB_UNTIL_REQUIRES_USING_GTID"
+            case 1950: return "MARIADB_GTID_STRICT_OUT_OF_ORDER"
+            case 1951: return "MARIADB_GTID_START_FROM_BINLOG_HOLE"
+            case 1952: return "MARIADB_SLAVE_UNEXPECTED_MASTER_SWITCH"
+            case 1953: return "MARIADB_INSIDE_TRANSACTION_PREVENTS_SWITCH_GTID_DOMAIN_ID_SEQ_NO"
+            case 1954: return "MARIADB_STORED_FUNCTION_PREVENTS_SWITCH_GTID_DOMAIN_ID_SEQ_NO"
+            case 1955: return "MARIADB_GTID_POSITION_NOT_FOUND_IN_BINLOG2"
+            case 1956: return "MARIADB_BINLOG_MUST_BE_EMPTY"
+            case 1957: return "MARIADB_NO_SUCH_QUERY"
+            case 1958: return "MARIADB_BAD_BASE64_DATA"
+            case 1959: return "MARIADB_INVALID_ROLE"
+            case 1960: return "MARIADB_INVALID_CURRENT_USER"
+            case 1961: return "MARIADB_CANNOT_GRANT_ROLE"
+            case 1962: return "MARIADB_CANNOT_REVOKE_ROLE"
+            case 1963: return "MARIADB_CHANGE_SLAVE_PARALLEL_THREADS_ACTIVE"
+            case 1964: return "MARIADB_PRIOR_COMMIT_FAILED"
+            case 1965: return "MARIADB_IT_IS_A_VIEW"
+            case 1966: return "MARIADB_SLAVE_SKIP_NOT_IN_GTID"
+            case 1967: return "MARIADB_TABLE_DEFINITION_TOO_BIG"
+            case 1968: return "MARIADB_PLUGIN_INSTALLED"
+            case 1969: return "MARIADB_STATEMENT_TIMEOUT"
+            case 1970: return "MARIADB_SUBQUERIES_NOT_SUPPORTED"
+            case 1971: return "MARIADB_SET_STATEMENT_NOT_SUPPORTED"
+            case 1972: return "MARIADB_UNUSED_9"
+            case 1973: return "MARIADB_USER_CREATE_EXISTS"
+            case 1974: return "MARIADB_USER_DROP_EXISTS"
+            case 1975: return "MARIADB_ROLE_CREATE_EXISTS"
+            case 1976: return "MARIADB_ROLE_DROP_EXISTS"
+            case 1977: return "MARIADB_CANNOT_CONVERT_CHARACTER"
+            case 1978: return "MARIADB_INVALID_DEFAULT_VALUE_FOR_FIELD"
+            case 1979: return "MARIADB_KILL_QUERY_DENIED_ERROR"
+            case 1980: return "MARIADB_NO_EIS_FOR_FIELD"
+            case 1981: return "MARIADB_WARN_AGGFUNC_DEPENDENCE"
+            case 1982: return "MARIADB_INNODB_PARTITION_OPTION_IGNORED"
             case 2000: return "UNKNOWN_ERROR"
             case 2001: return "SOCKET_CREATE_ERROR"
             case 2002: return "CONNECTION_ERROR"
@@ -3247,6 +4767,18 @@ extension MySQLProtocol {
             case 2060: return "DUPLICATE_CONNECTION_ATTR"
             case 2061: return "AUTH_PLUGIN_ERR"
             case 2062: return "INSECURE_API_ERR"
+            case 2063: return "FILE_NAME_TOO_LONG"
+            case 2064: return "SSL_FIPS_MODE_ERR"
+            case 2065: return "COMPRESSION_NOT_SUPPORTED"
+            case 2065: return "DEPRECATED_COMPRESSION_NOT_SUPPORTED"
+            case 2066: return "COMPRESSION_WRONGLY_CONFIGURED"
+            case 2067: return "KERBEROS_USER_NOT_FOUND"
+            case 2068: return "LOAD_DATA_LOCAL_INFILE_REJECTED"
+            case 2069: return "LOAD_DATA_LOCAL_INFILE_REALPATH_FAIL"
+            case 2070: return "DNS_SRV_LOOKUP_FAILED"
+            case 2071: return "MANDATORY_TRACKER_NOT_FOUND"
+            case 2072: return "INVALID_FACTOR_NO"
+            case 2073: return "CANT_GET_SESSION_DATA"
             case 3000: return "FILE_CORRUPT"
             case 3001: return "ERROR_ON_MASTER"
             case 3002: return "INCONSISTENT_ERROR"
@@ -3441,6 +4973,626 @@ extension MySQLProtocol {
             case 3191: return "GROUP_REPLICATION_MAX_GROUP_SIZE"
             case 3192: return "CANNOT_ADD_FOREIGN_BASE_COL_STORED"
             case 3193: return "TABLE_REFERENCED"
+            case 3197: return "XA_RETRY"
+            case 3198: return "KEYRING_AWS_UDF_AWS_KMS_ERROR"
+            case 3199: return "BINLOG_UNSAFE_XA"
+            case 3200: return "UDF_ERROR"
+            case 3201: return "KEYRING_MIGRATION_FAILURE"
+            case 3202: return "KEYRING_ACCESS_DENIED_ERROR"
+            case 3203: return "KEYRING_MIGRATION_STATUS"
+            case 3218: return "AUDIT_LOG_UDF_READ_INVALID_MAX_ARRAY_LENGTH_ARG_VALUE"
+            case 3231: return "WRITE_SET_EXCEEDS_LIMIT"
+            case 3500: return "UNSUPPORT_COMPRESSED_TEMPORARY_TABLE"
+            case 3501: return "ACL_OPERATION_FAILED"
+            case 3502: return "UNSUPPORTED_INDEX_ALGORITHM"
+            case 3503: return "NO_SUCH_DB"
+            case 3504: return "TOO_BIG_ENUM"
+            case 3505: return "TOO_LONG_SET_ENUM_VALUE"
+            case 3506: return "INVALID_DD_OBJECT"
+            case 3507: return "UPDATING_DD_TABLE"
+            case 3508: return "INVALID_DD_OBJECT_ID"
+            case 3509: return "INVALID_DD_OBJECT_NAME"
+            case 3510: return "TABLESPACE_MISSING_WITH_NAME"
+            case 3511: return "TOO_LONG_ROUTINE_COMMENT"
+            case 3512: return "SP_LOAD_FAILED"
+            case 3513: return "INVALID_BITWISE_OPERANDS_SIZE"
+            case 3514: return "INVALID_BITWISE_AGGREGATE_OPERANDS_SIZE"
+            case 3515: return "WARN_UNSUPPORTED_HINT"
+            case 3516: return "UNEXPECTED_GEOMETRY_TYPE"
+            case 3517: return "SRS_PARSE_ERROR"
+            case 3518: return "SRS_PROJ_PARAMETER_MISSING"
+            case 3519: return "WARN_SRS_NOT_FOUND"
+            case 3520: return "SRS_NOT_CARTESIAN"
+            case 3521: return "SRS_NOT_CARTESIAN_UNDEFINED"
+            case 3522: return "PK_INDEX_CANT_BE_INVISIBLE"
+            case 3523: return "UNKNOWN_AUTHID"
+            case 3524: return "FAILED_ROLE_GRANT"
+            case 3525: return "OPEN_ROLE_TABLES"
+            case 3526: return "FAILED_DEFAULT_ROLES"
+            case 3527: return "COMPONENTS_NO_SCHEME"
+            case 3528: return "COMPONENTS_NO_SCHEME_SERVICE"
+            case 3529: return "COMPONENTS_CANT_LOAD"
+            case 3530: return "ROLE_NOT_GRANTED"
+            case 3531: return "FAILED_REVOKE_ROLE"
+            case 3532: return "RENAME_ROLE"
+            case 3533: return "COMPONENTS_CANT_ACQUIRE_SERVICE_IMPLEMENTATION"
+            case 3534: return "COMPONENTS_CANT_SATISFY_DEPENDENCY"
+            case 3535: return "COMPONENTS_LOAD_CANT_REGISTER_SERVICE_IMPLEMENTATION"
+            case 3536: return "COMPONENTS_LOAD_CANT_INITIALIZE"
+            case 3537: return "COMPONENTS_UNLOAD_NOT_LOADED"
+            case 3538: return "COMPONENTS_UNLOAD_CANT_DEINITIALIZE"
+            case 3539: return "COMPONENTS_CANT_RELEASE_SERVICE"
+            case 3540: return "COMPONENTS_UNLOAD_CANT_UNREGISTER_SERVICE"
+            case 3541: return "COMPONENTS_CANT_UNLOAD"
+            case 3542: return "WARN_UNLOAD_THE_NOT_PERSISTED"
+            case 3543: return "COMPONENT_TABLE_INCORRECT"
+            case 3544: return "COMPONENT_MANIPULATE_ROW_FAILED"
+            case 3545: return "COMPONENTS_UNLOAD_DUPLICATE_IN_GROUP"
+            case 3546: return "CANT_SET_GTID_PURGED_DUE_SETS_CONSTRAINTS"
+            case 3547: return "CANNOT_LOCK_USER_MANAGEMENT_CACHES"
+            case 3548: return "SRS_NOT_FOUND"
+            case 3549: return "VARIABLE_NOT_PERSISTED"
+            case 3550: return "IS_QUERY_INVALID_CLAUSE"
+            case 3551: return "UNABLE_TO_STORE_STATISTICS"
+            case 3552: return "NO_SYSTEM_SCHEMA_ACCESS"
+            case 3553: return "NO_SYSTEM_TABLESPACE_ACCESS"
+            case 3554: return "NO_SYSTEM_TABLE_ACCESS"
+            case 3555: return "NO_SYSTEM_TABLE_ACCESS_FOR_DICTIONARY_TABLE"
+            case 3556: return "NO_SYSTEM_TABLE_ACCESS_FOR_SYSTEM_TABLE"
+            case 3557: return "NO_SYSTEM_TABLE_ACCESS_FOR_TABLE"
+            case 3558: return "INVALID_OPTION_KEY"
+            case 3559: return "INVALID_OPTION_VALUE"
+            case 3560: return "INVALID_OPTION_KEY_VALUE_PAIR"
+            case 3561: return "INVALID_OPTION_START_CHARACTER"
+            case 3562: return "INVALID_OPTION_END_CHARACTER"
+            case 3563: return "INVALID_OPTION_CHARACTERS"
+            case 3564: return "DUPLICATE_OPTION_KEY"
+            case 3565: return "WARN_SRS_NOT_FOUND_AXIS_ORDER"
+            case 3566: return "NO_ACCESS_TO_NATIVE_FCT"
+            case 3567: return "RESET_MASTER_TO_VALUE_OUT_OF_RANGE"
+            case 3568: return "UNRESOLVED_TABLE_LOCK"
+            case 3569: return "DUPLICATE_TABLE_LOCK"
+            case 3570: return "BINLOG_UNSAFE_SKIP_LOCKED"
+            case 3571: return "BINLOG_UNSAFE_NOWAIT"
+            case 3572: return "LOCK_NOWAIT"
+            case 3573: return "CTE_RECURSIVE_REQUIRES_UNION"
+            case 3574: return "CTE_RECURSIVE_REQUIRES_NONRECURSIVE_FIRST"
+            case 3575: return "CTE_RECURSIVE_FORBIDS_AGGREGATION"
+            case 3576: return "CTE_RECURSIVE_FORBIDDEN_JOIN_ORDER"
+            case 3577: return "CTE_RECURSIVE_REQUIRES_SINGLE_REFERENCE"
+            case 3578: return "SWITCH_TMP_ENGINE"
+            case 3579: return "WINDOW_NO_SUCH_WINDOW"
+            case 3580: return "WINDOW_CIRCULARITY_IN_WINDOW_GRAPH"
+            case 3581: return "WINDOW_NO_CHILD_PARTITIONING"
+            case 3582: return "WINDOW_NO_INHERIT_FRAME"
+            case 3583: return "WINDOW_NO_REDEFINE_ORDER_BY"
+            case 3584: return "WINDOW_FRAME_START_ILLEGAL"
+            case 3585: return "WINDOW_FRAME_END_ILLEGAL"
+            case 3586: return "WINDOW_FRAME_ILLEGAL"
+            case 3587: return "WINDOW_RANGE_FRAME_ORDER_TYPE"
+            case 3588: return "WINDOW_RANGE_FRAME_TEMPORAL_TYPE"
+            case 3589: return "WINDOW_RANGE_FRAME_NUMERIC_TYPE"
+            case 3590: return "WINDOW_RANGE_BOUND_NOT_CONSTANT"
+            case 3591: return "WINDOW_DUPLICATE_NAME"
+            case 3592: return "WINDOW_ILLEGAL_ORDER_BY"
+            case 3593: return "WINDOW_INVALID_WINDOW_FUNC_USE"
+            case 3594: return "WINDOW_INVALID_WINDOW_FUNC_ALIAS_USE"
+            case 3595: return "WINDOW_NESTED_WINDOW_FUNC_USE_IN_WINDOW_SPEC"
+            case 3596: return "WINDOW_ROWS_INTERVAL_USE"
+            case 3597: return "WINDOW_NO_GROUP_ORDER"
+            case 3597: return "WINDOW_NO_GROUP_ORDER_UNUSED"
+            case 3598: return "WINDOW_EXPLAIN_JSON"
+            case 3599: return "WINDOW_FUNCTION_IGNORES_FRAME"
+            case 3600: return "WINDOW_SE_NOT_ACCEPTABLE"
+            case 3600: return "WL9236_NOW_UNUSED"
+            case 3601: return "INVALID_NO_OF_ARGS"
+            case 3602: return "FIELD_IN_GROUPING_NOT_GROUP_BY"
+            case 3603: return "TOO_LONG_TABLESPACE_COMMENT"
+            case 3604: return "ENGINE_CANT_DROP_TABLE"
+            case 3605: return "ENGINE_CANT_DROP_MISSING_TABLE"
+            case 3606: return "TABLESPACE_DUP_FILENAME"
+            case 3607: return "DB_DROP_RMDIR2"
+            case 3608: return "IMP_NO_FILES_MATCHED"
+            case 3609: return "IMP_SCHEMA_DOES_NOT_EXIST"
+            case 3610: return "IMP_TABLE_ALREADY_EXISTS"
+            case 3611: return "IMP_INCOMPATIBLE_MYSQLD_VERSION"
+            case 3612: return "IMP_INCOMPATIBLE_DD_VERSION"
+            case 3613: return "IMP_INCOMPATIBLE_SDI_VERSION"
+            case 3614: return "WARN_INVALID_HINT"
+            case 3615: return "VAR_DOES_NOT_EXIST"
+            case 3616: return "LONGITUDE_OUT_OF_RANGE"
+            case 3617: return "LATITUDE_OUT_OF_RANGE"
+            case 3618: return "NOT_IMPLEMENTED_FOR_GEOGRAPHIC_SRS"
+            case 3619: return "ILLEGAL_PRIVILEGE_LEVEL"
+            case 3620: return "NO_SYSTEM_VIEW_ACCESS"
+            case 3621: return "COMPONENT_FILTER_FLABBERGASTED"
+            case 3622: return "PART_EXPR_TOO_LONG"
+            case 3623: return "UDF_DROP_DYNAMICALLY_REGISTERED"
+            case 3624: return "UNABLE_TO_STORE_COLUMN_STATISTICS"
+            case 3625: return "UNABLE_TO_UPDATE_COLUMN_STATISTICS"
+            case 3626: return "UNABLE_TO_DROP_COLUMN_STATISTICS"
+            case 3627: return "UNABLE_TO_BUILD_HISTOGRAM"
+            case 3628: return "MANDATORY_ROLE"
+            case 3629: return "MISSING_TABLESPACE_FILE"
+            case 3630: return "PERSIST_ONLY_ACCESS_DENIED_ERROR"
+            case 3631: return "CMD_NEED_SUPER"
+            case 3632: return "PATH_IN_DATADIR"
+            case 3633: return "DDL_IN_PROGRESS"
+            case 3633: return "CLONE_DDL_IN_PROGRESS"
+            case 3634: return "TOO_MANY_CONCURRENT_CLONES"
+            case 3634: return "CLONE_TOO_MANY_CONCURRENT_CLONES"
+            case 3635: return "APPLIER_LOG_EVENT_VALIDATION_ERROR"
+            case 3636: return "CTE_MAX_RECURSION_DEPTH"
+            case 3637: return "NOT_HINT_UPDATABLE_VARIABLE"
+            case 3638: return "CREDENTIALS_CONTRADICT_TO_HISTORY"
+            case 3639: return "WARNING_PASSWORD_HISTORY_CLAUSES_VOID"
+            case 3640: return "CLIENT_DOES_NOT_SUPPORT"
+            case 3641: return "I_S_SKIPPED_TABLESPACE"
+            case 3642: return "TABLESPACE_ENGINE_MISMATCH"
+            case 3643: return "WRONG_SRID_FOR_COLUMN"
+            case 3644: return "CANNOT_ALTER_SRID_DUE_TO_INDEX"
+            case 3645: return "WARN_BINLOG_PARTIAL_UPDATES_DISABLED"
+            case 3646: return "WARN_BINLOG_V1_ROW_EVENTS_DISABLED"
+            case 3647: return "WARN_BINLOG_PARTIAL_UPDATES_SUGGESTS_PARTIAL_IMAGES"
+            case 3648: return "COULD_NOT_APPLY_JSON_DIFF"
+            case 3649: return "CORRUPTED_JSON_DIFF"
+            case 3650: return "RESOURCE_GROUP_EXISTS"
+            case 3651: return "RESOURCE_GROUP_NOT_EXISTS"
+            case 3652: return "INVALID_VCPU_ID"
+            case 3653: return "INVALID_VCPU_RANGE"
+            case 3654: return "INVALID_THREAD_PRIORITY"
+            case 3655: return "DISALLOWED_OPERATION"
+            case 3656: return "RESOURCE_GROUP_BUSY"
+            case 3657: return "RESOURCE_GROUP_DISABLED"
+            case 3658: return "FEATURE_UNSUPPORTED"
+            case 3659: return "ATTRIBUTE_IGNORED"
+            case 3660: return "INVALID_THREAD_ID"
+            case 3661: return "RESOURCE_GROUP_BIND_FAILED"
+            case 3662: return "INVALID_USE_OF_FORCE_OPTION"
+            case 3663: return "GROUP_REPLICATION_COMMAND_FAILURE"
+            case 3664: return "SDI_OPERATION_FAILED"
+            case 3665: return "MISSING_JSON_TABLE_VALUE"
+            case 3666: return "WRONG_JSON_TABLE_VALUE"
+            case 3667: return "TF_MUST_HAVE_ALIAS"
+            case 3668: return "TF_FORBIDDEN_JOIN_TYPE"
+            case 3669: return "JT_VALUE_OUT_OF_RANGE"
+            case 3670: return "JT_MAX_NESTED_PATH"
+            case 3671: return "PASSWORD_EXPIRATION_NOT_SUPPORTED_BY_AUTH_METHOD"
+            case 3672: return "INVALID_GEOJSON_CRS_NOT_TOP_LEVEL"
+            case 3673: return "BAD_NULL_ERROR_NOT_IGNORED"
+            case 3674: return "USELESS_SPATIAL_INDEX"
+            case 3675: return "DISK_FULL_NOWAIT"
+            case 3676: return "PARSE_ERROR_IN_DIGEST_FN"
+            case 3677: return "UNDISCLOSED_PARSE_ERROR_IN_DIGEST_FN"
+            case 3678: return "SCHEMA_DIR_EXISTS"
+            case 3679: return "SCHEMA_DIR_MISSING"
+            case 3680: return "SCHEMA_DIR_CREATE_FAILED"
+            case 3681: return "SCHEMA_DIR_UNKNOWN"
+            case 3682: return "ONLY_IMPLEMENTED_FOR_SRID_0_AND_4326"
+            case 3683: return "BINLOG_EXPIRE_LOG_DAYS_AND_SECS_USED_TOGETHER"
+            case 3684: return "REGEXP_STRING_NOT_TERMINATED"
+            case 3684: return "REGEXP_BUFFER_OVERFLOW"
+            case 3685: return "REGEXP_ILLEGAL_ARGUMENT"
+            case 3686: return "REGEXP_INDEX_OUTOFBOUNDS_ERROR"
+            case 3687: return "REGEXP_INTERNAL_ERROR"
+            case 3688: return "REGEXP_RULE_SYNTAX"
+            case 3689: return "REGEXP_BAD_ESCAPE_SEQUENCE"
+            case 3690: return "REGEXP_UNIMPLEMENTED"
+            case 3691: return "REGEXP_MISMATCHED_PAREN"
+            case 3692: return "REGEXP_BAD_INTERVAL"
+            case 3693: return "REGEXP_MAX_LT_MIN"
+            case 3694: return "REGEXP_INVALID_BACK_REF"
+            case 3695: return "REGEXP_LOOK_BEHIND_LIMIT"
+            case 3696: return "REGEXP_MISSING_CLOSE_BRACKET"
+            case 3697: return "REGEXP_INVALID_RANGE"
+            case 3698: return "REGEXP_STACK_OVERFLOW"
+            case 3699: return "REGEXP_TIME_OUT"
+            case 3700: return "REGEXP_PATTERN_TOO_BIG"
+            case 3701: return "CANT_SET_ERROR_LOG_SERVICE"
+            case 3702: return "EMPTY_PIPELINE_FOR_ERROR_LOG_SERVICE"
+            case 3703: return "COMPONENT_FILTER_DIAGNOSTICS"
+            case 3704: return "INNODB_CANNOT_BE_IGNORED"
+            case 3704: return "NOT_IMPLEMENTED_FOR_CARTESIAN_SRS"
+            case 3705: return "NOT_IMPLEMENTED_FOR_PROJECTED_SRS"
+            case 3706: return "NONPOSITIVE_RADIUS"
+            case 3707: return "RESTART_SERVER_FAILED"
+            case 3708: return "SRS_MISSING_MANDATORY_ATTRIBUTE"
+            case 3709: return "SRS_MULTIPLE_ATTRIBUTE_DEFINITIONS"
+            case 3710: return "SRS_NAME_CANT_BE_EMPTY_OR_WHITESPACE"
+            case 3711: return "SRS_ORGANIZATION_CANT_BE_EMPTY_OR_WHITESPACE"
+            case 3712: return "SRS_ID_ALREADY_EXISTS"
+            case 3713: return "WARN_SRS_ID_ALREADY_EXISTS"
+            case 3714: return "CANT_MODIFY_SRID_0"
+            case 3715: return "WARN_RESERVED_SRID_RANGE"
+            case 3716: return "CANT_MODIFY_SRS_USED_BY_COLUMN"
+            case 3717: return "SRS_INVALID_CHARACTER_IN_ATTRIBUTE"
+            case 3718: return "SRS_ATTRIBUTE_STRING_TOO_LONG"
+            case 3719: return "DEPRECATED_UTF8_ALIAS"
+            case 3720: return "DEPRECATED_NATIONAL"
+            case 3721: return "INVALID_DEFAULT_UTF8MB4_COLLATION"
+            case 3722: return "UNABLE_TO_COLLECT_LOG_STATUS"
+            case 3723: return "RESERVED_TABLESPACE_NAME"
+            case 3724: return "UNABLE_TO_SET_OPTION"
+            case 3725: return "SLAVE_POSSIBLY_DIVERGED_AFTER_DDL"
+            case 3726: return "SRS_NOT_GEOGRAPHIC"
+            case 3727: return "POLYGON_TOO_LARGE"
+            case 3728: return "SPATIAL_UNIQUE_INDEX"
+            case 3729: return "INDEX_TYPE_NOT_SUPPORTED_FOR_SPATIAL_INDEX"
+            case 3730: return "FK_CANNOT_DROP_PARENT"
+            case 3731: return "GEOMETRY_PARAM_LONGITUDE_OUT_OF_RANGE"
+            case 3732: return "GEOMETRY_PARAM_LATITUDE_OUT_OF_RANGE"
+            case 3733: return "FK_CANNOT_USE_VIRTUAL_COLUMN"
+            case 3734: return "FK_NO_COLUMN_PARENT"
+            case 3735: return "CANT_SET_ERROR_SUPPRESSION_LIST"
+            case 3736: return "SRS_GEOGCS_INVALID_AXES"
+            case 3737: return "SRS_INVALID_SEMI_MAJOR_AXIS"
+            case 3738: return "SRS_INVALID_INVERSE_FLATTENING"
+            case 3739: return "SRS_INVALID_ANGULAR_UNIT"
+            case 3740: return "SRS_INVALID_PRIME_MERIDIAN"
+            case 3741: return "TRANSFORM_SOURCE_SRS_NOT_SUPPORTED"
+            case 3742: return "TRANSFORM_TARGET_SRS_NOT_SUPPORTED"
+            case 3743: return "TRANSFORM_SOURCE_SRS_MISSING_TOWGS84"
+            case 3744: return "TRANSFORM_TARGET_SRS_MISSING_TOWGS84"
+            case 3745: return "TEMP_TABLE_PREVENTS_SWITCH_SESSION_BINLOG_FORMAT"
+            case 3746: return "TEMP_TABLE_PREVENTS_SWITCH_GLOBAL_BINLOG_FORMAT"
+            case 3747: return "RUNNING_APPLIER_PREVENTS_SWITCH_GLOBAL_BINLOG_FORMAT"
+            case 3748: return "CLIENT_GTID_UNSAFE_CREATE_DROP_TEMP_TABLE_IN_TRX_IN_SBR"
+            case 3750: return "TABLE_WITHOUT_PK"
+            case 3751: return "DATA_TRUNCATED_FUNCTIONAL_INDEX"
+            case 3751: return "WARN_DATA_TRUNCATED_FUNCTIONAL_INDEX"
+            case 3752: return "WARN_DATA_OUT_OF_RANGE_FUNCTIONAL_INDEX"
+            case 3753: return "FUNCTIONAL_INDEX_ON_JSON_OR_GEOMETRY_FUNCTION"
+            case 3754: return "FUNCTIONAL_INDEX_REF_AUTO_INCREMENT"
+            case 3755: return "CANNOT_DROP_COLUMN_FUNCTIONAL_INDEX"
+            case 3756: return "FUNCTIONAL_INDEX_PRIMARY_KEY"
+            case 3757: return "FUNCTIONAL_INDEX_ON_LOB"
+            case 3758: return "FUNCTIONAL_INDEX_FUNCTION_IS_NOT_ALLOWED"
+            case 3759: return "FULLTEXT_FUNCTIONAL_INDEX"
+            case 3760: return "SPATIAL_FUNCTIONAL_INDEX"
+            case 3761: return "WRONG_KEY_COLUMN_FUNCTIONAL_INDEX"
+            case 3762: return "FUNCTIONAL_INDEX_ON_FIELD"
+            case 3763: return "GENERATED_COLUMN_NAMED_FUNCTION_IS_NOT_ALLOWED"
+            case 3764: return "GENERATED_COLUMN_ROW_VALUE"
+            case 3765: return "GENERATED_COLUMN_VARIABLES"
+            case 3766: return "DEPENDENT_BY_DEFAULT_GENERATED_VALUE"
+            case 3767: return "DEFAULT_VAL_GENERATED_NON_PRIOR"
+            case 3768: return "DEFAULT_VAL_GENERATED_REF_AUTO_INC"
+            case 3769: return "DEFAULT_VAL_GENERATED_FUNCTION_IS_NOT_ALLOWED"
+            case 3770: return "DEFAULT_VAL_GENERATED_NAMED_FUNCTION_IS_NOT_ALLOWED"
+            case 3771: return "DEFAULT_VAL_GENERATED_ROW_VALUE"
+            case 3772: return "DEFAULT_VAL_GENERATED_VARIABLES"
+            case 3773: return "DEFAULT_AS_VAL_GENERATED"
+            case 3774: return "UNSUPPORTED_ACTION_ON_DEFAULT_VAL_GENERATED"
+            case 3775: return "GTID_UNSAFE_ALTER_ADD_COL_WITH_DEFAULT_EXPRESSION"
+            case 3776: return "FK_CANNOT_CHANGE_ENGINE"
+            case 3777: return "WARN_DEPRECATED_USER_SET_EXPR"
+            case 3778: return "WARN_DEPRECATED_UTF8MB3_COLLATION"
+            case 3779: return "WARN_DEPRECATED_NESTED_COMMENT_SYNTAX"
+            case 3780: return "FK_INCOMPATIBLE_COLUMNS"
+            case 3781: return "GR_HOLD_WAIT_TIMEOUT"
+            case 3782: return "GR_HOLD_KILLED"
+            case 3783: return "GR_HOLD_MEMBER_STATUS_ERROR"
+            case 3784: return "RPL_ENCRYPTION_FAILED_TO_FETCH_KEY"
+            case 3785: return "RPL_ENCRYPTION_KEY_NOT_FOUND"
+            case 3786: return "RPL_ENCRYPTION_KEYRING_INVALID_KEY"
+            case 3787: return "RPL_ENCRYPTION_HEADER_ERROR"
+            case 3788: return "RPL_ENCRYPTION_FAILED_TO_ROTATE_LOGS"
+            case 3789: return "RPL_ENCRYPTION_KEY_EXISTS_UNEXPECTED"
+            case 3790: return "RPL_ENCRYPTION_FAILED_TO_GENERATE_KEY"
+            case 3791: return "RPL_ENCRYPTION_FAILED_TO_STORE_KEY"
+            case 3792: return "RPL_ENCRYPTION_FAILED_TO_REMOVE_KEY"
+            case 3793: return "RPL_ENCRYPTION_UNABLE_TO_CHANGE_OPTION"
+            case 3794: return "RPL_ENCRYPTION_MASTER_KEY_RECOVERY_FAILED"
+            case 3795: return "SLOW_LOG_MODE_IGNORED_WHEN_NOT_LOGGING_TO_FILE"
+            case 3796: return "GRP_TRX_CONSISTENCY_NOT_ALLOWED"
+            case 3797: return "GRP_TRX_CONSISTENCY_BEFORE"
+            case 3798: return "GRP_TRX_CONSISTENCY_AFTER_ON_TRX_BEGIN"
+            case 3799: return "GRP_TRX_CONSISTENCY_BEGIN_NOT_ALLOWED"
+            case 3800: return "FUNCTIONAL_INDEX_ROW_VALUE_IS_NOT_ALLOWED"
+            case 3801: return "RPL_ENCRYPTION_FAILED_TO_ENCRYPT"
+            case 3802: return "PAGE_TRACKING_NOT_STARTED"
+            case 3803: return "PAGE_TRACKING_RANGE_NOT_TRACKED"
+            case 3804: return "PAGE_TRACKING_CANNOT_PURGE"
+            case 3805: return "RPL_ENCRYPTION_CANNOT_ROTATE_BINLOG_MASTER_KEY"
+            case 3806: return "BINLOG_MASTER_KEY_RECOVERY_OUT_OF_COMBINATION"
+            case 3807: return "BINLOG_MASTER_KEY_ROTATION_FAIL_TO_OPERATE_KEY"
+            case 3808: return "BINLOG_MASTER_KEY_ROTATION_FAIL_TO_ROTATE_LOGS"
+            case 3809: return "BINLOG_MASTER_KEY_ROTATION_FAIL_TO_REENCRYPT_LOG"
+            case 3810: return "BINLOG_MASTER_KEY_ROTATION_FAIL_TO_CLEANUP_UNUSED_KEYS"
+            case 3811: return "BINLOG_MASTER_KEY_ROTATION_FAIL_TO_CLEANUP_AUX_KEY"
+            case 3812: return "NON_BOOLEAN_EXPR_FOR_CHECK_CONSTRAINT"
+            case 3813: return "COLUMN_CHECK_CONSTRAINT_REFERENCES_OTHER_COLUMN"
+            case 3814: return "CHECK_CONSTRAINT_NAMED_FUNCTION_IS_NOT_ALLOWED"
+            case 3815: return "CHECK_CONSTRAINT_FUNCTION_IS_NOT_ALLOWED"
+            case 3816: return "CHECK_CONSTRAINT_VARIABLES"
+            case 3817: return "CHECK_CONSTRAINT_ROW_VALUE"
+            case 3818: return "CHECK_CONSTRAINT_REFERS_AUTO_INCREMENT_COLUMN"
+            case 3819: return "CHECK_CONSTRAINT_VIOLATED"
+            case 3820: return "CHECK_CONSTRAINT_REFERS_UNKNOWN_COLUMN"
+            case 3821: return "CHECK_CONSTRAINT_NOT_FOUND"
+            case 3822: return "CHECK_CONSTRAINT_DUP_NAME"
+            case 3823: return "CHECK_CONSTRAINT_CLAUSE_USING_FK_REFER_ACTION_COLUMN"
+            case 3824: return "UNENCRYPTED_TABLE_IN_ENCRYPTED_DB"
+            case 3825: return "INVALID_ENCRYPTION_REQUEST"
+            case 3826: return "CANNOT_SET_TABLE_ENCRYPTION"
+            case 3827: return "CANNOT_SET_DATABASE_ENCRYPTION"
+            case 3828: return "CANNOT_SET_TABLESPACE_ENCRYPTION"
+            case 3829: return "TABLESPACE_CANNOT_BE_ENCRYPTED"
+            case 3830: return "TABLESPACE_CANNOT_BE_DECRYPTED"
+            case 3831: return "TABLESPACE_TYPE_UNKNOWN"
+            case 3832: return "TARGET_TABLESPACE_UNENCRYPTED"
+            case 3833: return "CANNOT_USE_ENCRYPTION_CLAUSE"
+            case 3834: return "INVALID_MULTIPLE_CLAUSES"
+            case 3835: return "UNSUPPORTED_USE_OF_GRANT_AS"
+            case 3836: return "UKNOWN_AUTH_ID_OR_ACCESS_DENIED_FOR_GRANT_AS"
+            case 3837: return "DEPENDENT_BY_FUNCTIONAL_INDEX"
+            case 3838: return "PLUGIN_NOT_EARLY"
+            case 3839: return "INNODB_REDO_LOG_ARCHIVE_START_SUBDIR_PATH"
+            case 3840: return "INNODB_REDO_LOG_ARCHIVE_START_TIMEOUT"
+            case 3841: return "INNODB_REDO_LOG_ARCHIVE_DIRS_INVALID"
+            case 3842: return "INNODB_REDO_LOG_ARCHIVE_LABEL_NOT_FOUND"
+            case 3843: return "INNODB_REDO_LOG_ARCHIVE_DIR_EMPTY"
+            case 3844: return "INNODB_REDO_LOG_ARCHIVE_NO_SUCH_DIR"
+            case 3845: return "INNODB_REDO_LOG_ARCHIVE_DIR_CLASH"
+            case 3846: return "INNODB_REDO_LOG_ARCHIVE_DIR_PERMISSIONS"
+            case 3847: return "INNODB_REDO_LOG_ARCHIVE_FILE_CREATE"
+            case 3848: return "INNODB_REDO_LOG_ARCHIVE_ACTIVE"
+            case 3849: return "INNODB_REDO_LOG_ARCHIVE_INACTIVE"
+            case 3850: return "INNODB_REDO_LOG_ARCHIVE_FAILED"
+            case 3851: return "INNODB_REDO_LOG_ARCHIVE_SESSION"
+            case 3852: return "STD_REGEX_ERROR"
+            case 3853: return "INVALID_JSON_TYPE"
+            case 3854: return "CANNOT_CONVERT_STRING"
+            case 3855: return "DEPENDENT_BY_PARTITION_FUNC"
+            case 3856: return "WARN_DEPRECATED_FLOAT_AUTO_INCREMENT"
+            case 3857: return "RPL_CANT_STOP_SLAVE_WHILE_LOCKED_BACKUP"
+            case 3858: return "WARN_DEPRECATED_FLOAT_DIGITS"
+            case 3859: return "WARN_DEPRECATED_FLOAT_UNSIGNED"
+            case 3860: return "WARN_DEPRECATED_INTEGER_DISPLAY_WIDTH"
+            case 3861: return "WARN_DEPRECATED_ZEROFILL"
+            case 3862: return "CLONE_DONOR"
+            case 3863: return "CLONE_PROTOCOL"
+            case 3864: return "CLONE_DONOR_VERSION"
+            case 3865: return "CLONE_OS"
+            case 3866: return "CLONE_PLATFORM"
+            case 3867: return "CLONE_CHARSET"
+            case 3868: return "CLONE_CONFIG"
+            case 3869: return "CLONE_SYS_CONFIG"
+            case 3870: return "CLONE_PLUGIN_MATCH"
+            case 3871: return "CLONE_LOOPBACK"
+            case 3872: return "CLONE_ENCRYPTION"
+            case 3873: return "CLONE_DISK_SPACE"
+            case 3874: return "CLONE_IN_PROGRESS"
+            case 3875: return "CLONE_DISALLOWED"
+            case 3876: return "CANNOT_GRANT_ROLES_TO_ANONYMOUS_USER"
+            case 3877: return "SECONDARY_ENGINE_PLUGIN"
+            case 3878: return "SECOND_PASSWORD_CANNOT_BE_EMPTY"
+            case 3879: return "DB_ACCESS_DENIED"
+            case 3880: return "DA_AUTH_ID_WITH_SYSTEM_USER_PRIV_IN_MANDATORY_ROLES"
+            case 3881: return "DA_RPL_GTID_TABLE_CANNOT_OPEN"
+            case 3882: return "GEOMETRY_IN_UNKNOWN_LENGTH_UNIT"
+            case 3883: return "DA_PLUGIN_INSTALL_ERROR"
+            case 3884: return "NO_SESSION_TEMP"
+            case 3885: return "DA_UNKNOWN_ERROR_NUMBER"
+            case 3886: return "COLUMN_CHANGE_SIZE"
+            case 3887: return "REGEXP_INVALID_CAPTURE_GROUP_NAME"
+            case 3888: return "DA_SSL_LIBRARY_ERROR"
+            case 3889: return "SECONDARY_ENGINE"
+            case 3890: return "SECONDARY_ENGINE_DDL"
+            case 3891: return "INCORRECT_CURRENT_PASSWORD"
+            case 3892: return "MISSING_CURRENT_PASSWORD"
+            case 3893: return "CURRENT_PASSWORD_NOT_REQUIRED"
+            case 3894: return "PASSWORD_CANNOT_BE_RETAINED_ON_PLUGIN_CHANGE"
+            case 3895: return "CURRENT_PASSWORD_CANNOT_BE_RETAINED"
+            case 3896: return "PARTIAL_REVOKES_EXIST"
+            case 3897: return "CANNOT_GRANT_SYSTEM_PRIV_TO_MANDATORY_ROLE"
+            case 3898: return "XA_REPLICATION_FILTERS"
+            case 3899: return "UNSUPPORTED_SQL_MODE"
+            case 3900: return "REGEXP_INVALID_FLAG"
+            case 3901: return "PARTIAL_REVOKE_AND_DB_GRANT_BOTH_EXISTS"
+            case 3902: return "UNIT_NOT_FOUND"
+            case 3903: return "INVALID_JSON_VALUE_FOR_FUNC_INDEX"
+            case 3904: return "JSON_VALUE_OUT_OF_RANGE_FOR_FUNC_INDEX"
+            case 3905: return "EXCEEDED_MV_KEYS_NUM"
+            case 3906: return "EXCEEDED_MV_KEYS_SPACE"
+            case 3907: return "FUNCTIONAL_INDEX_DATA_IS_TOO_LONG"
+            case 3908: return "WRONG_MVI_VALUE"
+            case 3909: return "WARN_FUNC_INDEX_NOT_APPLICABLE"
+            case 3910: return "GRP_RPL_UDF_ERROR"
+            case 3911: return "UPDATE_GTID_PURGED_WITH_GR"
+            case 3912: return "GROUPING_ON_TIMESTAMP_IN_DST"
+            case 3913: return "TABLE_NAME_CAUSES_TOO_LONG_PATH"
+            case 3914: return "AUDIT_LOG_INSUFFICIENT_PRIVILEGE"
+            case 3916: return "DA_GRP_RPL_STARTED_AUTO_REJOIN"
+            case 3917: return "SYSVAR_CHANGE_DURING_QUERY"
+            case 3918: return "GLOBSTAT_CHANGE_DURING_QUERY"
+            case 3919: return "GRP_RPL_MESSAGE_SERVICE_INIT_FAILURE"
+            case 3920: return "CHANGE_MASTER_WRONG_COMPRESSION_ALGORITHM_CLIENT"
+            case 3921: return "CHANGE_MASTER_WRONG_COMPRESSION_LEVEL_CLIENT"
+            case 3922: return "WRONG_COMPRESSION_ALGORITHM_CLIENT"
+            case 3923: return "WRONG_COMPRESSION_LEVEL_CLIENT"
+            case 3924: return "CHANGE_MASTER_WRONG_COMPRESSION_ALGORITHM_LIST_CLIENT"
+            case 3925: return "CLIENT_PRIVILEGE_CHECKS_USER_CANNOT_BE_ANONYMOUS"
+            case 3926: return "CLIENT_PRIVILEGE_CHECKS_USER_DOES_NOT_EXIST"
+            case 3927: return "CLIENT_PRIVILEGE_CHECKS_USER_CORRUPT"
+            case 3928: return "CLIENT_PRIVILEGE_CHECKS_USER_NEEDS_RPL_APPLIER_PRIV"
+            case 3929: return "WARN_DA_PRIVILEGE_NOT_REGISTERED"
+            case 3930: return "CLIENT_KEYRING_UDF_KEY_INVALID"
+            case 3931: return "CLIENT_KEYRING_UDF_KEY_TYPE_INVALID"
+            case 3932: return "CLIENT_KEYRING_UDF_KEY_TOO_LONG"
+            case 3933: return "CLIENT_KEYRING_UDF_KEY_TYPE_TOO_LONG"
+            case 3934: return "JSON_SCHEMA_VALIDATION_ERROR_WITH_DETAILED_REPORT"
+            case 3935: return "DA_UDF_INVALID_CHARSET_SPECIFIED"
+            case 3936: return "DA_UDF_INVALID_CHARSET"
+            case 3937: return "DA_UDF_INVALID_COLLATION"
+            case 3938: return "DA_UDF_INVALID_EXTENSION_ARGUMENT_TYPE"
+            case 3939: return "MULTIPLE_CONSTRAINTS_WITH_SAME_NAME"
+            case 3940: return "CONSTRAINT_NOT_FOUND"
+            case 3941: return "ALTER_CONSTRAINT_ENFORCEMENT_NOT_SUPPORTED"
+            case 3942: return "TABLE_VALUE_CONSTRUCTOR_MUST_HAVE_COLUMNS"
+            case 3943: return "TABLE_VALUE_CONSTRUCTOR_CANNOT_HAVE_DEFAULT"
+            case 3944: return "CLIENT_QUERY_FAILURE_INVALID_NON_ROW_FORMAT"
+            case 3945: return "REQUIRE_ROW_FORMAT_INVALID_VALUE"
+            case 3946: return "FAILED_TO_DETERMINE_IF_ROLE_IS_MANDATORY"
+            case 3947: return "FAILED_TO_FETCH_MANDATORY_ROLE_LIST"
+            case 3948: return "CLIENT_LOCAL_FILES_DISABLED"
+            case 3949: return "IMP_INCOMPATIBLE_CFG_VERSION"
+            case 3950: return "DA_OOM"
+            case 3951: return "DA_UDF_INVALID_ARGUMENT_TO_SET_CHARSET"
+            case 3952: return "DA_UDF_INVALID_RETURN_TYPE_TO_SET_CHARSET"
+            case 3953: return "MULTIPLE_INTO_CLAUSES"
+            case 3954: return "MISPLACED_INTO"
+            case 3955: return "USER_ACCESS_DENIED_FOR_USER_ACCOUNT_BLOCKED_BY_PASSWORD_LOCK"
+            case 3956: return "WARN_DEPRECATED_YEAR_UNSIGNED"
+            case 3957: return "CLONE_NETWORK_PACKET"
+            case 3958: return "SDI_OPERATION_FAILED_MISSING_RECORD"
+            case 3959: return "DEPENDENT_BY_CHECK_CONSTRAINT"
+            case 3960: return "GRP_OPERATION_NOT_ALLOWED_GR_MUST_STOP"
+            case 3961: return "WARN_DEPRECATED_JSON_TABLE_ON_ERROR_ON_EMPTY"
+            case 3962: return "WARN_DEPRECATED_INNER_INTO"
+            case 3963: return "WARN_DEPRECATED_VALUES_FUNCTION_ALWAYS_NULL"
+            case 3964: return "WARN_DEPRECATED_SQL_CALC_FOUND_ROWS"
+            case 3965: return "WARN_DEPRECATED_FOUND_ROWS"
+            case 3966: return "MISSING_JSON_VALUE"
+            case 3967: return "MULTIPLE_JSON_VALUES"
+            case 3968: return "HOSTNAME_TOO_LONG"
+            case 3969: return "WARN_CLIENT_DEPRECATED_PARTITION_PREFIX_KEY"
+            case 3970: return "GROUP_REPLICATION_USER_EMPTY_MSG"
+            case 3971: return "GROUP_REPLICATION_USER_MANDATORY_MSG"
+            case 3972: return "GROUP_REPLICATION_PASSWORD_LENGTH"
+            case 3973: return "SUBQUERY_TRANSFORM_REJECTED"
+            case 3974: return "DA_GRP_RPL_RECOVERY_ENDPOINT_FORMAT"
+            case 3975: return "DA_GRP_RPL_RECOVERY_ENDPOINT_INVALID"
+            case 3976: return "WRONG_VALUE_FOR_VAR_PLUS_ACTIONABLE_PART"
+            case 3977: return "STATEMENT_NOT_ALLOWED_AFTER_START_TRANSACTION"
+            case 3978: return "FOREIGN_KEY_WITH_ATOMIC_CREATE_SELECT"
+            case 3979: return "NOT_ALLOWED_WITH_START_TRANSACTION"
+            case 3980: return "INVALID_JSON_ATTRIBUTE"
+            case 3981: return "ENGINE_ATTRIBUTE_NOT_SUPPORTED"
+            case 3982: return "INVALID_USER_ATTRIBUTE_JSON"
+            case 3983: return "INNODB_REDO_DISABLED"
+            case 3984: return "INNODB_REDO_ARCHIVING_ENABLED"
+            case 3985: return "MDL_OUT_OF_RESOURCES"
+            case 3986: return "IMPLICIT_COMPARISON_FOR_JSON"
+            case 3987: return "FUNCTION_DOES_NOT_SUPPORT_CHARACTER_SET"
+            case 3988: return "IMPOSSIBLE_STRING_CONVERSION"
+            case 3989: return "SCHEMA_READ_ONLY"
+            case 3990: return "RPL_ASYNC_RECONNECT_GTID_MODE_OFF"
+            case 3991: return "RPL_ASYNC_RECONNECT_AUTO_POSITION_OFF"
+            case 3992: return "DISABLE_GTID_MODE_REQUIRES_ASYNC_RECONNECT_OFF"
+            case 3993: return "DISABLE_AUTO_POSITION_REQUIRES_ASYNC_RECONNECT_OFF"
+            case 3994: return "INVALID_PARAMETER_USE"
+            case 3995: return "CHARACTER_SET_MISMATCH"
+            case 3996: return "WARN_VAR_VALUE_CHANGE_NOT_SUPPORTED"
+            case 3997: return "INVALID_TIME_ZONE_INTERVAL"
+            case 3998: return "INVALID_CAST"
+            case 3999: return "HYPERGRAPH_NOT_SUPPORTED_YET"
+            case 4000: return "WARN_HYPERGRAPH_EXPERIMENTAL"
+            case 4001: return "DA_NO_ERROR_LOG_PARSER_CONFIGURED"
+            case 4002: return "DA_ERROR_LOG_TABLE_DISABLED"
+            case 4003: return "DA_ERROR_LOG_MULTIPLE_FILTERS"
+            case 4004: return "DA_CANT_OPEN_ERROR_LOG"
+            case 4005: return "USER_REFERENCED_AS_DEFINER"
+            case 4006: return "CANNOT_USER_REFERENCED_AS_DEFINER"
+            case 4007: return "REGEX_NUMBER_TOO_BIG"
+            case 4008: return "SPVAR_NONINTEGER_TYPE"
+            case 4009: return "UNSUPPORTED_ACL_TABLES_READ"
+            case 4010: return "BINLOG_UNSAFE_ACL_TABLE_READ_IN_DML_DDL"
+            case 4011: return "STOP_REPLICA_MONITOR_IO_THREAD_TIMEOUT"
+            case 4012: return "STARTING_REPLICA_MONITOR_IO_THREAD"
+            case 4013: return "CANT_USE_ANONYMOUS_TO_GTID_WITH_GTID_MODE_NOT_ON"
+            case 4014: return "CANT_COMBINE_ANONYMOUS_TO_GTID_AND_AUTOPOSITION"
+            case 4015: return "ASSIGN_GTIDS_TO_ANONYMOUS_TRANSACTIONS_REQUIRES_GTID_MODE_ON"
+            case 4016: return "SQL_SLAVE_SKIP_COUNTER_USED_WITH_GTID_MODE_ON"
+            case 4016: return "SQL_REPLICA_SKIP_COUNTER_USED_WITH_GTID_MODE_ON"
+            case 4017: return "USING_ASSIGN_GTIDS_TO_ANONYMOUS_TRANSACTIONS_AS_LOCAL_OR_UUID"
+            case 4018: return "CANT_SET_ANONYMOUS_TO_GTID_AND_WAIT_UNTIL_SQL_THD_AFTER_GTIDS"
+            case 4019: return "CANT_SET_SQL_AFTER_OR_BEFORE_GTIDS_WITH_ANONYMOUS_TO_GTID"
+            case 4020: return "ANONYMOUS_TO_GTID_UUID_SAME_AS_GROUP_NAME"
+            case 4021: return "CANT_USE_SAME_UUID_AS_GROUP_NAME"
+            case 4022: return "GRP_RPL_RECOVERY_CHANNEL_STILL_RUNNING"
+            case 4023: return "INNODB_INVALID_AUTOEXTEND_SIZE_VALUE"
+            case 4024: return "INNODB_INCOMPATIBLE_WITH_TABLESPACE"
+            case 4025: return "INNODB_AUTOEXTEND_SIZE_OUT_OF_RANGE"
+            case 4026: return "CANNOT_USE_AUTOEXTEND_SIZE_CLAUSE"
+            case 4027: return "ROLE_GRANTED_TO_ITSELF"
+            case 4028: return "TABLE_MUST_HAVE_A_VISIBLE_COLUMN"
+            case 4029: return "INNODB_COMPRESSION_FAILURE"
+            case 4030: return "WARN_ASYNC_CONN_FAILOVER_NETWORK_NAMESPACE"
+            case 4031: return "CLIENT_INTERACTION_TIMEOUT"
+            case 4032: return "INVALID_CAST_TO_GEOMETRY"
+            case 4033: return "INVALID_CAST_POLYGON_RING_DIRECTION"
+            case 4034: return "GIS_DIFFERENT_SRIDS_AGGREGATION"
+            case 4035: return "RELOAD_KEYRING_FAILURE"
+            case 4036: return "SDI_GET_KEYS_INVALID_TABLESPACE"
+            case 4037: return "CHANGE_RPL_SRC_WRONG_COMPRESSION_ALGORITHM_SIZE"
+            case 4038: return "WARN_DEPRECATED_TLS_VERSION_FOR_CHANNEL_CLI"
+            case 4039: return "CANT_USE_SAME_UUID_AS_VIEW_CHANGE_UUID"
+            case 4040: return "ANONYMOUS_TO_GTID_UUID_SAME_AS_VIEW_CHANGE_UUID"
+            case 4041: return "GRP_RPL_VIEW_CHANGE_UUID_FAIL_GET_VARIABLE"
+            case 4042: return "WARN_ADUIT_LOG_MAX_SIZE_AND_PRUNE_SECONDS"
+            case 4043: return "WARN_ADUIT_LOG_MAX_SIZE_CLOSE_TO_ROTATE_ON_SIZE"
+            case 4044: return "KERBEROS_CREATE_USER"
+            case 4045: return "INSTALL_PLUGIN_CONFLICT_CLIENT"
+            case 4046: return "DA_ERROR_LOG_COMPONENT_FLUSH_FAILED"
+            case 4047: return "WARN_SQL_AFTER_MTS_GAPS_GAP_NOT_CALCULATED"
+            case 4048: return "INVALID_ASSIGNMENT_TARGET"
+            case 4049: return "OPERATION_NOT_ALLOWED_ON_GR_SECONDARY"
+            case 4050: return "GRP_RPL_FAILOVER_CHANNEL_STATUS_PROPAGATION"
+            case 4051: return "WARN_AUDIT_LOG_FORMAT_UNIX_TIMESTAMP_ONLY_WHEN_JSON"
+            case 4052: return "INVALID_MFA_PLUGIN_SPECIFIED"
+            case 4053: return "IDENTIFIED_BY_UNSUPPORTED"
+            case 4054: return "INVALID_PLUGIN_FOR_REGISTRATION"
+            case 4055: return "PLUGIN_REQUIRES_REGISTRATION"
+            case 4056: return "MFA_METHOD_EXISTS"
+            case 4057: return "MFA_METHOD_NOT_EXISTS"
+            case 4058: return "AUTHENTICATION_POLICY_MISMATCH"
+            case 4059: return "PLUGIN_REGISTRATION_DONE"
+            case 4060: return "INVALID_USER_FOR_REGISTRATION"
+            case 4061: return "USER_REGISTRATION_FAILED"
+            case 4062: return "MFA_METHODS_INVALID_ORDER"
+            case 4063: return "MFA_METHODS_IDENTICAL"
+            case 4064: return "INVALID_MFA_OPERATIONS_FOR_PASSWORDLESS_USER"
+            case 4065: return "CHANGE_REPLICATION_SOURCE_NO_OPTIONS_FOR_GTID_ONLY"
+            case 4066: return "CHANGE_REP_SOURCE_CANT_DISABLE_REQ_ROW_FORMAT_WITH_GTID_ONLY"
+            case 4067: return "CHANGE_REP_SOURCE_CANT_DISABLE_AUTO_POSITION_WITH_GTID_ONLY"
+            case 4068: return "CHANGE_REP_SOURCE_CANT_DISABLE_GTID_ONLY_WITHOUT_POSITIONS"
+            case 4069: return "CHANGE_REP_SOURCE_CANT_DISABLE_AUTO_POS_WITHOUT_POSITIONS"
+            case 4070: return "CHANGE_REP_SOURCE_GR_CHANNEL_WITH_GTID_MODE_NOT_ON"
+            case 4071: return "CANT_USE_GTID_ONLY_WITH_GTID_MODE_NOT_ON"
+            case 4072: return "WARN_C_DISABLE_GTID_ONLY_WITH_SOURCE_AUTO_POS_INVALID_POS"
+            case 4073: return "DA_SSL_FIPS_MODE_ERROR"
+            case 4074: return "VALUE_OUT_OF_RANGE"
+            case 4075: return "FULLTEXT_WITH_ROLLUP"
+            case 4076: return "REGEXP_MISSING_RESOURCE"
+            case 4077: return "WARN_REGEXP_USING_DEFAULT"
+            case 4078: return "REGEXP_MISSING_FILE"
+            case 4079: return "WARN_DEPRECATED_COLLATION"
+            case 4080: return "CONCURRENT_PROCEDURE_USAGE"
+            case 4081: return "DA_GLOBAL_CONN_LIMIT"
+            case 4082: return "DA_CONN_LIMIT"
+            case 4083: return "ALTER_OPERATION_NOT_SUPPORTED_REASON_COLUMN_TYPE_INSTANT"
+            case 4084: return "WARN_SF_UDF_NAME_COLLISION"
+            case 4085: return "CANNOT_PURGE_BINLOG_WITH_BACKUP_LOCK"
+            case 4086: return "TOO_MANY_WINDOWS"
+            case 4087: return "MYSQLBACKUP_CLIENT_MSG"
+            case 4088: return "COMMENT_CONTAINS_INVALID_STRING"
+            case 4089: return "DEFINITION_CONTAINS_INVALID_STRING"
+            case 4090: return "CANT_EXECUTE_COMMAND_WITH_ASSIGNED_GTID_NEXT"
+            case 4091: return "XA_TEMP_TABLE"
+            case 4092: return "INNODB_MAX_ROW_VERSION"
+            case 4093: return "INNODB_INSTANT_ADD_NOT_SUPPORTED_MAX_SIZE"
+            case 4094: return "OPERATION_NOT_ALLOWED_WHILE_PRIMARY_CHANGE_IS_RUNNING"
+            case 4095: return "WARN_DEPRECATED_DATETIME_DELIMITER"
+            case 4096: return "WARN_DEPRECATED_SUPERFLUOUS_DELIMITER"
+            case 4097: return "CANNOT_PERSIST_SENSITIVE_VARIABLES"
+            case 4098: return "WARN_CANNOT_SECURELY_PERSIST_SENSITIVE_VARIABLES"
+            case 4099: return "WARN_TRG_ALREADY_EXISTS"
+            case 4100: return "IF_NOT_EXISTS_UNSUPPORTED_TRG_EXISTS_ON_DIFFERENT_TABLE"
+            case 4101: return "IF_NOT_EXISTS_UNSUPPORTED_UDF_NATIVE_FCT_NAME_COLLISION"
+            case 4102: return "SET_PASSWORD_AUTH_PLUGIN_ERROR"
+            case 4103: return "REDUCED_DBLWR_FILE_CORRUPTED"
+            case 4104: return "REDUCED_DBLWR_PAGE_FOUND"
             default: return "UNKNOWN"
             }
         }
