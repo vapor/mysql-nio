@@ -1,3 +1,5 @@
+import NIOCore
+
 extension MySQLProtocol {
     /// `Protocol::ColumnDefinition41`
     ///
@@ -24,7 +26,11 @@ extension MySQLProtocol {
         /// `org_name (lenenc_str)` -- physical column name
         let orgName: String
         
+        /// array of type strings received in extended metadata (usually empty)
+        let extendedTypes: [String]
         
+        /// array of format strings received in extended metadata (usually empty)
+        let extendedFormats: [String]
         
         /// `character_set (2)` -- the column character set, defined in `Protocol::CharacterSet`.
         let characterSet: CharacterSet
@@ -42,77 +48,94 @@ extension MySQLProtocol {
         /// - `0x00` for integers and static strings
         /// - `0x1f` for dynamic strings, double, float
         /// - `0x00` to `0x51` for decimals
-        /// note: decimals and `column_length` can be used for text-output formatting.
+        /// note: `decimals` and `column_length` can be used for text-output formatting.
         let decimals: UInt8
         
+        init(
+            catalog: String = "def",
+            schema: String,
+            table: String,
+            orgTable: String,
+            name: String,
+            orgName: String,
+            extendedTypes: [String] = [],
+            extendedFormats: [String] = [],
+            characterSet: CharacterSet,
+            columnLength: UInt32,
+            columnType: DataType,
+            flags: ColumnFlags,
+            decimals: UInt8
+        ) {
+            self.catalog = catalog
+            self.schema = schema
+            self.table = table
+            self.orgTable = orgTable
+            self.name = name
+            self.orgName = orgName
+            self.extendedTypes = extendedTypes
+            self.extendedFormats = extendedFormats
+            self.characterSet = characterSet
+            self.columnLength = columnLength
+            self.columnType = columnType
+            self.flags = flags
+            self.decimals = decimals
+        }
+        
+        init(from packet: inout MySQLPacket, capabilities: MySQLProtocol.CapabilityFlags) throws {
+            self.catalog = try packet.readLengthEncodedString()
+            self.schema = try packet.readLengthEncodedString()
+            self.table = try packet.readLengthEncodedString()
+            self.orgTable = try packet.readLengthEncodedString()
+            self.name = try packet.readLengthEncodedString()
+            self.orgName = try packet.readLengthEncodedString()
+            
+            (self.extendedTypes, self.extendedFormats) = !capabilities.contains(.MARIADB_CLIENT_EXTENDED_METADATA) ? ([], []) :
+                try packet.withLengthEncodedSlice { s in
+                    var types: [String] = [], formats: [String] = []
+                    while let dataType = s.payload.readInteger(endianness: .little, as: UInt8.self) { switch dataType {
+                        case 0: types.append(try s.readLengthEncodedString())
+                        case 1: formats.append(try s.readLengthEncodedString())
+                        default: throw MySQLPacket.Error.packetReadFailure
+                    } }
+                    return (types, formats)
+                }
+            
+            guard try packet.readLengthEncodedInteger() == 0xc else { throw MySQLPacket.Error.packetReadFailure }
+            
+            self.characterSet = try packet.readInteger(endianness: .little, as: CharacterSet.self)
+            self.columnLength = try packet.readInteger(endianness: .little, as: UInt32.self)
+            self.columnType = try packet.readInteger(endianness: .little, as: DataType.self)
+            self.flags = try packet.readInteger(endianness: .little, as: ColumnFlags.self)
+            self.decimals = try packet.readInteger(endianness: .little, as: UInt8.self)
+            try packet.readReservedBytes(length: 2)
+        }
+        
         /// `MySQLPacketDecodable` conformance.
-        public static func decode(from packet: inout MySQLPacket, capabilities: MySQLProtocol.CapabilityFlags) throws -> ColumnDefinition41 {
-            guard let catalog = packet.payload.readLengthEncodedString() else {
-                fatalError()
+        static func decode(from packet: inout MySQLPacket, capabilities: MySQLProtocol.CapabilityFlags) throws -> ColumnDefinition41 {
+            return .init(from: &packet, capabilities: capabilities)
+        }
+        
+        /// `MySQLPacketEncodable` conformance.
+        func encode(to packet: inout MySQLPacket, capabilities: MySQLProtocol.CapabilityFlags) throws {
+            packet.payload.writeLengthEncodedString(self.catalog)
+            packet.payload.writeLengthEncodedString(self.schema)
+            packet.payload.writeLengthEncodedString(self.table)
+            packet.payload.writeLengthEncodedString(self.orgTable)
+            packet.payload.writeLengthEncodedString(self.name)
+            packet.payload.writeLengthEncodedString(self.orgName)
+            if capabilities.contains(.MARIADB_CLIENT_EXTENDED_METADATA) {
+                var buf = ByteBuffer()
+                self.extendedTypes.reduce(into: ()) { buf.writeInteger(0 as UInt8); buf.writeLengthEncodedString($1) }
+                self.extendedFormats.reduce(into: ()) { buf.writeInteger(1 as UInt8); buf.writeLengthEncodedString($1) }
+                packet.payload.writeImmutableLengthEncodedSlice(buf)
             }
-            guard let schema = packet.payload.readLengthEncodedString() else {
-                fatalError()
-            }
-            guard let table = packet.payload.readLengthEncodedString() else {
-                fatalError()
-            }
-            guard let orgTable = packet.payload.readLengthEncodedString() else {
-                fatalError()
-            }
-            guard let name = packet.payload.readLengthEncodedString() else {
-                fatalError()
-            }
-            guard let orgName = packet.payload.readLengthEncodedString() else {
-                fatalError()
-            }
-            /// next_length (lenenc_int) -- length of the following fields (always 0x0c)
-            guard let fixedLength = packet.payload.readLengthEncodedInteger() else {
-                fatalError()
-            }
-            assert(fixedLength == 0x0C, "invalid fixed length: \(fixedLength)")
-            // TODO: check if character set > 255
-            guard let characterSet = packet.payload.readInteger(endianness: .little, as: CharacterSet.self) else {
-                fatalError()
-            }
-            guard let collate = packet.payload.readInteger(endianness: .little, as: UInt8.self) else {
-                fatalError()
-            }
-            assert(collate == 0)
-            
-            guard let columnLength = packet.payload.readInteger(endianness: .little, as: UInt32.self) else {
-                fatalError()
-            }
-            guard let columnType = packet.payload.readInteger(endianness: .little, as: DataType.self) else {
-                fatalError()
-            }
-            guard let flags = packet.payload.readInteger(endianness: .little, as: ColumnFlags.self) else {
-                fatalError()
-            }
-            guard let decimals = packet.payload.readInteger(endianness: .little, as: UInt8.self) else {
-                fatalError()
-            }
-            /// 2              filler [00] [00]
-            guard let filler = packet.payload.readBytes(length: 2) else {
-                fatalError()
-            }
-            assert(filler == [0, 0])
-            assert(packet.payload.readableBytes == 0)
-            
-            /// FIXME: check if `if command was COM_FIELD_LIST {` for default values
-            
-            return .init(
-                catalog: catalog,
-                schema: schema,
-                table: table,
-                orgTable: orgTable,
-                name: name,
-                orgName: orgName,
-                characterSet: characterSet,
-                columnLength: columnLength,
-                columnType: columnType,
-                flags: flags,
-                decimals: decimals
-            )
+            packet.payload.writeInteger(self.characterSet, endianness: .little, as: CharacterSet.self)
+            packet.payload.writeInteger(self.columnLength, endianness: .little, as: UInt32.self)
+            packet.payload.writeInteger(self.columnType, endianness: .little, as: DataType.self)
+            packet.payload.writeInteger(self.flags, endianness: .little, as: ColumnFlags.self)
+            packet.payload.writeInteger(self.decimals, endianness: .little, as: UInt8.self)
+            packet.payload.writeRepeatingByte(0, count: 2)
         }
     }
+
 }
