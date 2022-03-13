@@ -1,12 +1,12 @@
 import NIOCore
 
-public protocol MySQLPacketDecodable {
+protocol MySQLPacketDecodable {
     static func decode(from packet: inout MySQLPacket, capabilities: MySQLProtocol.CapabilityFlags) throws -> Self
 }
 
 extension MySQLPacket {
     /// Attempt to decode a given specific packet type from a raw payload.
-    public mutating func decode<T>(_ type: T.Type, capabilities: MySQLProtocol.CapabilityFlags) throws -> T
+    mutating func decode<T>(_ type: T.Type, capabilities: MySQLProtocol.CapabilityFlags) throws -> T
         where T: MySQLPacketDecodable
     {
         do {

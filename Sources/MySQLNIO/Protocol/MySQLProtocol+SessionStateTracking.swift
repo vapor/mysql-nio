@@ -136,7 +136,7 @@ extension MySQLProtocol.SessionTrackedChange {
         case corruptSessionTrackData
     }
     
-    static func readOneChange(from buffer: inout ByteBuffer) throws -> SessionTrackedChange {
+    static func readOneChange(from buffer: inout ByteBuffer) throws -> Self {
         guard let stateType = buffer.readInteger(endianness: .little, as: SessionStateChangeType.self),
               var stateData = buffer.readLengthEncodedSlice()
         else {
@@ -147,7 +147,7 @@ extension MySQLProtocol.SessionTrackedChange {
         return result
     }
     
-    private static func decode(from buffer: inout ByteBuffer, type: SessionStateChangeType) throws -> SessionTrackedChange {
+    private static func decode(from buffer: inout ByteBuffer, type: MySQLProtocol.SessionStateChangeType) throws -> Self {
         switch stateType {
         case .SESSION_TRACK_SYSTEM_VARIABLES:
             var pairs = [SessionTrackedSystemVar]()

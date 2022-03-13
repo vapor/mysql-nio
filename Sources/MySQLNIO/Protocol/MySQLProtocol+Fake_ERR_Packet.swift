@@ -22,7 +22,7 @@ extension MySQLProtocol {
         public var sqlState: String?
         public var errorMessage: String
         
-        public static func decode(from packet: inout MySQLPacket, capabilities: CapabilityFlags) throws -> ERR_Packet {
+        static func decode(from packet: inout MySQLPacket, capabilities: CapabilityFlags) throws -> Self {
             guard let flag = packet.payload.readInteger(endianness: .little, as: UInt8.self) else { throw DecodeError.missingFlag }
             guard flag == 0xFF else { throw DecodeError.invalidFlag(flag) }
             guard let errorCode = packet.payload.readInteger(endianness: .little, as: ErrorCode.self) else { throw DecodeError.missingErrorCode }

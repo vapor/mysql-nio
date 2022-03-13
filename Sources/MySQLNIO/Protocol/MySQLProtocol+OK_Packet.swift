@@ -23,27 +23,27 @@ extension MySQLProtocol {
         }
         
         /// `int<1>           header                  [00] or [fe] OK or EOF indicator`
-        public var type: UInt8
+        var type: UInt8
         
         /// `int<lenenc>      affected_rows           affected rows`
-        public var affectedRows: UInt64
+        var affectedRows: UInt64
         
         /// `int<lenenc>      last_insert_id          last insert-id`
-        public var lastInsertID: UInt64?
+        var lastInsertID: UInt64?
         
         /// `int<2>           status_flags            Status Flags`
-        public var statusFlags: StatusFlags
+        var statusFlags: StatusFlags
         
         /// `int<2>           warnings                number of warnings`
-        public var warningsCount: UInt16
+        var warningsCount: UInt16
         
         /// `string<lenenc>   info                    human readable status information`
-        public var info: String
+        var info: String
         
         /// `string<lenenc>   session_state_changes   session state info`
-        public var sessionStateChanges: [SessionTrackedChange]?
+        var sessionStateChanges: [SessionTrackedChange]?
         
-        public static func decode(from packet: inout MySQLPacket, capabilities: CapabilityFlags) throws -> OK_Packet {
+        static func decode(from packet: inout MySQLPacket, capabilities: CapabilityFlags) throws -> OK_Packet {
             guard let flag = packet.payload.readInteger(endianness: .little, as: UInt8.self) else {
                 throw Error.missingFlag
             }
@@ -86,7 +86,7 @@ extension MySQLProtocol {
             }
         }
         
-        public func encode(to packet: inout MySQLPacket, capabilities: MySQLProtocol.CapabilityFlags) throws {
+        func encode(to packet: inout MySQLPacket, capabilities: MySQLProtocol.CapabilityFlags) throws {
             switch self.type {
                 case 0xfe:
                     guard self.affectedRows == 0, self.lastInsertID == nil, self.info.isEmpty, self.sessionStateChanges == nil else {

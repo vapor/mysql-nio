@@ -8,7 +8,7 @@ extension MySQLProtocol {
         var values: [ByteBuffer?]
         
         /// Parses a `MySQLBinaryResultsetRow` from the `ByteBuffer`.
-        public static func decode(from packet: inout MySQLPacket, columns: [ColumnDefinition41]) throws -> BinaryResultSetRow {
+        static func decode(from packet: inout MySQLPacket, columns: [ColumnDefinition41]) throws -> BinaryResultSetRow {
             guard let header = packet.payload.readInteger(endianness: .little, as: UInt8.self) else {
                 fatalError()
             }

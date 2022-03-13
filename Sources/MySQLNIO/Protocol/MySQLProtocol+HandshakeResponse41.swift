@@ -190,7 +190,7 @@ extension MySQLProtocol.CapabilityFlags {
     /// This initializer is used by the handshake response packet decoder to gracefully handle the possible
     /// presence of MariaDB extensions and calculate the set of _effective_ capabilities in force (i.e. only
     /// those specified by both server and client).
-    fileprivate init?(checking initial: CapabilityFlags, general: UInt32, extended: UInt32) {
+    fileprivate init?(checking initial: Self, general: UInt32, extended: UInt32) {
         guard extended == 0 || (initial.general | general) & CLIENT_MYSQL.general == 0 else {
             return nil
         }
