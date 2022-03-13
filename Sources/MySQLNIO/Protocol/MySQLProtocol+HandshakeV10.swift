@@ -25,28 +25,28 @@ extension MySQLProtocol {
             case missingAuthPluginName
         }
         
-        /// protocol_version (1) -- 0x0a protocol_version
+        /// `protocol_version` (1) -- `0x0a` `protocol_version`
         public var protocolVersion: UInt8
         
-        /// server_version (string.NUL) -- human-readable server version
+        /// `server_version` (`string.NUL`) -- human-readable server version
         public var serverVersion: String
         
-        /// connection_id (4) -- connection id
+        /// `connection_id` (4) -- connection id
         public var connectionID: UInt32
         
-        /// auth_plugin_data_part_1 (string.fix_len) -- [len=8] first 8 bytes of the auth-plugin data
+        /// `auth_plugin_data_part_1` (`string.fix_len`) -- [len=8] first 8 bytes of the auth-plugin data
         public var authPluginData: ByteBuffer
         
         /// The server's capabilities.
         public var capabilities: CapabilityFlags
         
-        /// character_set (1) -- default server character-set, only the lower 8-bits Protocol::CharacterSet (optional)
+        /// `character_set` (1) -- default server character-set, only the lower 8-bits `Protocol::CharacterSet` (optional)
         public var characterSet: CharacterSet?
         
-        /// status_flags (2) -- Protocol::StatusFlags (optional)
+        /// `status_flags` (2) -- `Protocol::StatusFlags` (optional)
         public var statusFlags: StatusFlags?
         
-        /// auth_plugin_name (string.NUL) -- name of the auth_method that the auth_plugin_data belongs to
+        /// `auth_plugin_name` (`string.NUL`) -- name of the `auth_method` that the `auth_plugin_data` belongs to
         public var authPluginName: String?
         
         /// `MySQLPacketDecodable` conformance.

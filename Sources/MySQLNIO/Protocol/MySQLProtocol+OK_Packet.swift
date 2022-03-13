@@ -1,8 +1,8 @@
 extension MySQLProtocol {
-    /// 14.1.3.1 OK_Packet
+    /// 14.1.3.1 `OK_Packet`
     ///
     /// An OK packet is sent from the server to the client to signal successful completion of a command.
-    /// As of MySQL 5.7.5, OK packes are also used to indicate EOF, and EOF packets are deprecated.
+    /// As of MySQL 5.7.5, OK packets are also used to indicate EOF, and EOF packets are deprecated.
     ///
     /// If CLIENT_PROTOCOL_41 is set, the packet contains a warning count.
     public struct OK_Packet: MySQLPacketDecodable {
@@ -17,22 +17,22 @@ extension MySQLProtocol {
             case missingSessionStateChanges
         }
         
-        /// int<lenenc>    affected_rows    affected rows
+        /// `int<lenenc>      affected_rows           affected rows`
         public var affectedRows: UInt64
         
-        /// int<lenenc>    last_insert_id    last insert-id
+        /// `int<lenenc>      last_insert_id          last insert-id`
         public var lastInsertID: UInt64?
         
-        /// int<2>    status_flags    Status Flags
+        /// `int<2>           status_flags            Status Flags`
         public var statusFlags: StatusFlags
         
-        ///  int<2>    warnings    number of warnings
+        /// `int<2>           warnings                number of warnings`
         public var warningsCount: UInt16?
         
-        ///  string<lenenc>    info    human readable status information
+        /// `string<lenenc>   info                    human readable status information`
         public var info: String
         
-        /// string<lenenc>    session_state_changes    session state info
+        /// `string<lenenc>   session_state_changes   session state info`
         public var sessionStateChanges: String?
         
         public static func decode(from packet: inout MySQLPacket, capabilities: CapabilityFlags) throws -> OK_Packet {
