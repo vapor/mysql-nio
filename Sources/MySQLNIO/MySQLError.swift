@@ -8,7 +8,9 @@ public enum MySQLError: Error, CustomStringConvertible, LocalizedError {
     case missingOrInvalidAuthPluginInlineCommand(command: UInt8?)
     case missingAuthPluginInlineData
     case unsupportedServer(message: String)
-    case protocolError
+    case packetDecodingError(type: String) // failed to read a packet of the given time (incomplete, corrupt, or unsupported)
+    case packetEncodingError(type: String) // the configuration of an outgoing packet is invalid or unsupported by the server
+    case protocolError // any generic protocol-level failure not covered elsewhere
     case server(MySQLProtocol.ServerErrorDetails)
     case closed
     
