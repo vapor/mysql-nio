@@ -134,7 +134,7 @@ extension MySQLProtocol {
         public static let utf8mb4: CharacterSet = 255
         
         /// `charset_nr` (2) -- number of the character set and collation
-        public var rawValue: UInt8
+        public var rawValue: UInt16
         
         /// `CustomStringConvertible` conformance.
         public var description: String {
@@ -191,16 +191,23 @@ extension MySQLProtocol {
             }
         }
         
-        /// Creates a new `CharacterSet` from `UInt8`
+        /// Creates a new `CharacterSet` from a `UInt8` (as sent in the handshake and handshake response packets)
         ///
-        /// - Parameter raw: `UInt8` value of character set.
+        /// - Parameter rawValue: `UInt8` value of character set.
         public init(rawValue: UInt8) {
+            self.init(rawValue: UInt16(rawValue))
+        }
+        
+        /// Creates a new `CharacterSet` from a `UInt16`
+        ///
+        /// - Parameter rawValue: `UInt16` value of character set.
+        public init(rawValue: UInt16) {
             self.rawValue = rawValue
         }
         
         /// `ExpressibleByIntegerLiteral` conformance.
-        public init(integerLiteral value: UInt8) {
-            self.rawValue = value
+        public init(integerLiteral value: UInt16) {
+            self.init(rawValue: value)
         }
     }
 }
