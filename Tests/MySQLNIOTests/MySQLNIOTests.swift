@@ -656,6 +656,62 @@ final class MySQLNIOTests: XCTestCase {
         XCTAssertEqual(rows[0].column("qux")?.int, 3)
     }
     
+    func testExplainQuery() throws {
+        let conn = try MySQLConnection.test(on: self.eventLoop).wait()
+        defer { try! conn.close().wait() }
+
+        final class explainResult: CustomStringConvertible {
+            enum JoinType: String {
+                case system, const, eq_ref, ref, fulltext, ref_or_null, index_merge, unique_subquery, index_subquery, range, index, ALL
+            }
+            
+            let id: Int, select_type: String, table: String, partitions: String?, type: JoinType, possible_keys: [String]?,
+                 key: String?, key_len: Int?, ref: String?, rows: Int, filtered: Double, extra: [String]
+            
+            init(
+                id: Int, select_type: String, table: String, partitions: String? = nil, type: JoinType,
+                possible_keys: [String]? = nil, key: String? = nil, key_len: Int? = nil, ref: String? = nil,
+                rows: Int, filtered: Double, extra: [String] = []
+            ) {
+                (self.id, self.select_type, self.table, self.partitions) = (id, select_type, table, partitions)
+                (self.type, self.possible_keys, self.key, self.key_len) = (type, possible_keys, key, key_len)
+                (self.ref, self.rows, self.filtered, self.extra) = (ref, rows, filtered, extra)
+            }
+            
+            init?(from row: MySQLRow) {
+                guard let id = row.column("id")?.int, let selectType = row.column("select_type")?.string,
+                      let table = row.column("table")?.string, let type = row.column("type")?.string.flatMap(JoinType.init(rawValue:)),
+                      let rows = row.column("rows")?.int, let filtered = row.column("filtered")?.double,
+                      let partitions = row.column("partitions"), partitions.isNullOrString,
+                      let possibleKeys = row.column("possible_keys"), possibleKeys.isNullOrString,
+                      let key = row.column("key"), key.isNullOrString, let keyLen = row.column("key_len"), keyLen.isNullOrInt,
+                      let ref = row.column("ref"), ref.isNullOrString, let extra = row.column("Extra"), extra.isNullOrString
+                else {
+                    return nil
+                }
+                self.id = id; self.select_type = selectType; self.table = table; self.type = type; self.rows = rows; self.filtered = filtered
+                self.partitions = partitions.string; self.key = key.string; self.key_len = keyLen.int; self.ref = ref.string
+                self.possible_keys = possibleKeys.string?.split(separator: ",").map(String.init)
+                self.extra = extra.string?.split(separator: ";").map({ String($0.drop { $0.isWhitespace }) }) ?? []
+            }
+
+            var description: String { return """
+                \(id) - \(select_type) <\(table)>: \(type) {\(key ?? "NULL")[\(key_len ?? 0)]} \(ref ?? "NULL") (\(filtered)=\(rows))
+                    Possible keys: \(possible_keys?.joined(separator: ", ") ?? "none")\(extra.isEmpty ? "" : "\n        Notes:\n            \(extra.joined(separator: "\n            "))")
+            """ }
+        }
+        var res: [explainResult] = []
+        
+        _ = try conn.query("explain select k.name as keyword, t.name as topic, c.name as category, t.url from mysql.help_keyword k inner join mysql.help_relation r using (help_keyword_id) inner join mysql.help_topic t using (help_topic_id) inner join mysql.help_category c using (help_category_id) where k.help_keyword_id between ? and ?", [1, 9999], onRow: { row in
+            guard let pres = explainResult(from: row) else {
+                return XCTFail("bad result")
+            }
+            res.append(pres)
+        }, onMetadata: { _ in }).wait()
+        
+        print(res.map(\.description).joined(separator: "\n"))
+    }
+    
     override func setUpWithError() throws {
         self.group = MultiThreadedEventLoopGroup(numberOfThreads: 1)
         XCTAssert(isLoggingConfigured)
@@ -663,6 +719,27 @@ final class MySQLNIOTests: XCTestCase {
     
     override func tearDownWithError() throws {
         try self.group.syncShutdownGracefully()
+    }
+}
+
+extension MySQLData {
+    var isNull: Bool { return self.type == .null || self.buffer == nil }
+    var isNullOrString: Bool { return self.isNull || self.string != nil }
+    var isNullOrInt: Bool { return self.isNull || self.int != nil }
+}
+
+extension KeyedDecodingContainer {
+    /// A trivial overload to permit type inference.
+    public func decode<T>(type: T.Type = T.self, for key: Key) throws -> T where T : Decodable {
+        return try self.decode(T.self, forKey: key)
+    }
+
+    public func decode<T>(type: T?.Type = T?.self, for key: Key) throws -> T? where T : Decodable {
+        return try self.decodeIfPresent(T.self, forKey: key)
+    }
+
+    public func decodeIfPresent<T>(type: T.Type = T.self, for key: Self.Key) throws -> T? where T : Decodable {
+        return try self.decodeIfPresent(T.self, forKey: key)
     }
 }
 
