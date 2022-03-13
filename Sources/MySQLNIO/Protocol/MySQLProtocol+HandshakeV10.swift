@@ -66,11 +66,9 @@ extension MySQLProtocol {
             guard let authPluginDataPart1 = packet.payload.readSlice(length: 8) else {
                 throw Error.missingAuthPluginData
             }
-            guard let filler1 = packet.payload.readInteger(as: UInt8.self) else {
+            guard let filler1 = packet.payload.readInteger(as: UInt8.self), filler1 == 0x00 else {
                 throw Error.missingFiller
             }
-            // filler_1 (1) -- 0x00
-            assert(filler1 == 0x00)
             // capability_flag_1 (2) -- lower 2 bytes of the Protocol::CapabilityFlags (optional)
             guard let capabilitiesLower = packet.payload.readInteger(endianness: .little, as: UInt16.self) else {
                 throw Error.missingCapabilityFlag1
@@ -99,19 +97,19 @@ extension MySQLProtocol {
                     throw Error.missingAuthPluginDataLength
                 }
                 if !capabilities.contains(.CLIENT_PLUGIN_AUTH) {
-                    assert(authPluginDataLength == 0x00, "invalid auth plugin data filler: \(authPluginDataLength)")
+                    guard authPluginDataLength == 0x00 else {
+                        throw Error.missingAuthPluginDataLength
+                    }
                 }
                 /// string[6]     reserved (all [00])
-                guard let reserved1 = packet.payload.readSlice(length: 6) else {
+                guard let reserved1 = packet.payload.readSlice(length: 6), reserved1.readableBytesView.allSatisfy({ $0 == 0 }) else {
                     throw Error.missingReserved
                 }
-                assert(reserved1.readableBytesView.allSatisfy { $0 == 0 }, "invalid reserve 1 \(reserved1)")
                 if capabilities.contains(.CLIENT_LONG_PASSWORD) {
                     /// string[4]     reserved (all [00])
-                    guard let reserved2 = packet.payload.readSlice(length: 4) else {
+                    guard let reserved2 = packet.payload.readSlice(length: 4), reserved2.readableBytesView.allSatisfy({ $0 == 0 }) else {
                         throw Error.missingReserved
                     }
-                    assert(reserved2.readableBytesView.allSatisfy { $0 == 0 }, "invalid reserve 2: \(reserved2)")
                 } else {
                     /// Capabilities 3rd part. MariaDB specific flags.
                     /// MariaDB Initial Handshake Packet specific flags
@@ -135,10 +133,9 @@ extension MySQLProtocol {
                     authPluginData = authPluginDataPart1
                     authPluginData.writeBuffer(&authPluginDataPart2)
                     if !capabilities.contains(.CLIENT_PLUGIN_AUTH) {
-                        guard let filler = packet.payload.readInteger(endianness: .little, as: UInt8.self) else {
+                        guard let filler = packet.payload.readInteger(endianness: .little, as: UInt8.self), filler == 0x00 else {
                             throw Error.missingFiller
                         }
-                        assert(filler == 0x00)
                     }
                 } else {
                     authPluginData = authPluginDataPart1
