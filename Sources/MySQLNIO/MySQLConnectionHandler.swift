@@ -230,7 +230,7 @@ final class MySQLConnectionHandler: ChannelDuplexHandler {
 
         let hash = try doInitialAuthPluginHandling(authPluginName: authPluginName, isTLS: isTLS, passwordInput: state.password, authPluginData: handshakeRequest.authPluginData, done: state.done)
 
-        let res = MySQLPacket.HandshakeResponse41(
+        let res = MySQLProtocol.HandshakeResponse41(
             capabilities: .clientDefault,
             maxPacketSize: 0,
             characterSet: .utf8mb4,

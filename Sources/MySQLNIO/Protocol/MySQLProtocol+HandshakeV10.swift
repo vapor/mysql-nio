@@ -157,7 +157,7 @@ extension MySQLProtocol {
                     guard let mariaDBSpecific = packet.payload.readInteger(endianness: .little, as: UInt32.self) else {
                         throw Error.missingMariaDBCapabilities
                     }
-                    capabilities.rawValue |= UInt64(mariaDBSpecific) << 32
+                    capabilities.mariaDBSpecific = mariaDBSpecific
                 }
                 
                 if capabilities.contains(.CLIENT_SECURE_CONNECTION) {
