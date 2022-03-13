@@ -5,12 +5,13 @@ extension MySQLProtocol {
     public struct CapabilityFlags: OptionSet, CustomStringConvertible {
         /// Use the improved version of Old Password Authentication.
         /// note: Assumed to be set since 4.1.1.
+        /// important: MariaDB **unsets** this flag to signal the presence of extended capability flags
         public static let CLIENT_LONG_PASSWORD = CapabilityFlags(rawValue: 0x00000001)
         
-        /// Send found rows instead of affected rows in EOF_Packet.
+        /// Send found rows instead of affected rows in `EOF_Packet`.
         public static let CLIENT_FOUND_ROWS = CapabilityFlags(rawValue: 0x00000002)
         
-        /// Longer flags in Protocol::ColumnDefinition320.
+        /// Longer flags in `Protocol::ColumnDefinition320`.
         /// Server: Supports longer flags.
         /// Client: Expects longer flags.
         public static let CLIENT_LONG_FLAG = CapabilityFlags(rawValue: 0x00000004)
@@ -20,7 +21,7 @@ extension MySQLProtocol {
         /// Client: Handshake Response Packet contains a schema-name.
         public static let CLIENT_CONNECT_WITH_DB = CapabilityFlags(rawValue: 0x00000008)
         
-        /// Server: Do not permit database.table.column.
+        /// Server: Do not permit `database.table.column`.
         public static let CLIENT_NO_SCHEMA = CapabilityFlags(rawValue: 0x00000010)
         
         /// Compression protocol supported.
@@ -32,9 +33,9 @@ extension MySQLProtocol {
         /// note: No special behavior since 3.22.
         public static let CLIENT_ODBC = CapabilityFlags(rawValue: 0x00000040)
         
-        /// Can use LOAD DATA LOCAL.
-        /// Server: Enables the LOCAL INFILE request of LOAD DATA|XML.
-        /// Client: Will handle LOCAL INFILE request.
+        /// Can use `LOAD DATA LOCAL`.
+        /// Server: Enables the `LOCAL INFILE` request of `LOAD DATA|XML`.
+        /// Client: Will handle `LOCAL INFILE` request.
         public static let CLIENT_LOCAL_FILES = CapabilityFlags(rawValue: 0x00000080)
         
         /// Server: Parser can ignore spaces before '('.
@@ -43,63 +44,63 @@ extension MySQLProtocol {
         
         /// Server: Supports the 4.1 protocol.
         /// Client: Uses the 4.1 protocol.
-        /// note: this value was CLIENT_CHANGE_USER in 3.22, unused in 4.0
+        /// note: this value was `CLIENT_CHANGE_USER` in 3.22, unused in 4.0
         public static let CLIENT_PROTOCOL_41 = CapabilityFlags(rawValue: 0x00000200)
         
-        /// wait_timeout versus wait_interactive_timeout.
+        /// `wait_timeout` versus `wait_interactive_timeout`.
         /// Server: Supports interactive and noninteractive clients.
         /// Client: Client is interactive.
-        /// See mysql_real_connect()
+        /// See `mysql_real_connect()`
         public static let CLIENT_INTERACTIVE = CapabilityFlags(rawValue: 0x00000400)
         
         /// Server: Supports SSL.
         /// Client: Switch to SSL after sending the capability-flags.
         public static let CLIENT_SSL = CapabilityFlags(rawValue: 0x00000800)
         
-        /// Client: Do not issue SIGPIPE if network failures occur (libmysqlclient only).
-        /// See mysql_real_connect()
+        /// Client: Do not issue `SIGPIPE` if network failures occur (`libmysqlclient` only).
+        /// See `mysql_real_connect()`
         public static let CLIENT_IGNORE_SIGPIPE = CapabilityFlags(rawValue: 0x00001000)
         
-        /// Server: Can send status flags in EOF_Packet.
-        /// Client: Expects status flags in EOF_Packet.
-        /// note: This flag is optional in 3.23, but always set by the server since 4.0.
+        /// Server: Can send status flags in `EOF_Packet`.
+        /// Client: Expects status flags in `EOF_Packet`.
+        /// - Note: This flag is optional in 3.23, but always set by the server since 4.0.
         public static let CLIENT_TRANSACTIONS = CapabilityFlags(rawValue: 0x00002000)
         
         /// Unused.
-        /// note: Was named CLIENT_PROTOCOL_41 in 4.1.0.
+        /// note: Was named `CLIENT_PROTOCOL_41` in 4.1.0.
         public static let CLIENT_RESERVED = CapabilityFlags(rawValue: 0x00004000)
         
-        /// Server: Supports Authentication::Native41.
-        /// Client: Supports Authentication::Native41.
+        /// Server: Supports `Authentication::Native41`.
+        /// Client: Supports `Authentication::Native41`.
         public static let CLIENT_SECURE_CONNECTION = CapabilityFlags(rawValue: 0x00008000)
         
-        /// Server: Can handle multiple statements per COM_QUERY and COM_STMT_PREPARE.
-        /// Client: May send multiple statements per COM_QUERY and COM_STMT_PREPARE.
-        /// note: Was named CLIENT_MULTI_QUERIES in 4.1.0, renamed later.
-        /// requires: CLIENT_PROTOCOL_41
+        /// Server: Can handle multiple statements per `COM_QUERY` and `COM_STMT_PREPARE`.
+        /// Client: May send multiple statements per `COM_QUERY` and `COM_STMT_PREPARE`.
+        /// note: Was named `CLIENT_MULTI_QUERIES` in 4.1.0, renamed later.
+        /// requires: `CLIENT_PROTOCOL_41`
         public static let CLIENT_MULTI_STATEMENTS = CapabilityFlags(rawValue: 0x00010000)
         
-        /// Server: Can send multiple resultsets for COM_QUERY.
-        /// Client: Can handle multiple resultsets for COM_QUERY.
-        /// requires: CLIENT_PROTOCOL_41
+        /// Server: Can send multiple resultsets for `COM_QUERY`.
+        /// Client: Can handle multiple resultsets for `COM_QUERY`.
+        /// requires: `CLIENT_PROTOCOL_41`
         public static let CLIENT_MULTI_RESULTS = CapabilityFlags(rawValue: 0x00020000)
         
-        /// Server: Can send multiple resultsets for COM_STMT_EXECUTE.
-        /// Client: Can handle multiple resultsets for COM_STMT_EXECUTE.
-        /// requires: CLIENT_PROTOCOL_41
+        /// Server: Can send multiple resultsets for `COM_STMT_EXECUTE`.
+        /// Client: Can handle multiple resultsets for `COM_STMT_EXECUTE`.
+        /// requires: `CLIENT_PROTOCOL_41`
         public static let CLIENT_PS_MULTI_RESULTS = CapabilityFlags(rawValue: 0x00040000)
         
         /// Server: Sends extra data in Initial Handshake Packet and supports the pluggable authentication protocol.
         /// Client: Supports authentication plugins.
-        /// Requires: CLIENT_PROTOCOL_41
+        /// Requires: `CLIENT_PROTOCOL_41`
         public static let CLIENT_PLUGIN_AUTH = CapabilityFlags(rawValue: 0x00080000)
         
-        /// Server: Permits connection attributes in Protocol::HandshakeResponse41.
-        /// Client: Sends connection attributes in Protocol::HandshakeResponse41.
+        /// Server: Permits connection attributes in `Protocol::HandshakeResponse41`.
+        /// Client: Sends connection attributes in `Protocol::HandshakeResponse41`.
         public static let CLIENT_CONNECT_ATTRS = CapabilityFlags(rawValue: 0x00100000)
         
-        /// Server: Understands length-encoded integer for auth response data in Protocol::HandshakeResponse41.
-        /// Client: Length of auth response data in Protocol::HandshakeResponse41 is a length-encoded integer.
+        /// Server: Understands length-encoded integer for auth response data in `Protocol::HandshakeResponse41`.
+        /// Client: Length of auth response data in `Protocol::HandshakeResponse41` is a length-encoded integer.
         /// note: The flag was introduced in 5.6.6, but had the wrong value.
         public static let CLIENT_PLUGIN_AUTH_LENENC_CLIENT_DATA = CapabilityFlags(rawValue: 0x00200000)
         
@@ -108,13 +109,13 @@ extension MySQLProtocol {
         /// https://dev.mysql.com/doc/internals/en/cs-sect-expired-password.html
         public static let CLIENT_CAN_HANDLE_EXPIRED_PASSWORDS = CapabilityFlags(rawValue: 0x00400000)
         
-        /// Server: Can set SERVER_SESSION_STATE_CHANGED in the Status Flags and send session-state change data after a OK packet.
+        /// Server: Can set `SERVER_SESSION_STATE_CHANGED` in the Status Flags and send session-state change data after a OK packet.
         /// Client: Expects the server to send sesson-state changes after a OK packet.
         public static let CLIENT_SESSION_TRACK = CapabilityFlags(rawValue: 0x00800000)
         
         /// Server: Can send OK after a Text Resultset.
         /// Client: Expects an OK (instead of EOF) after the resultset rows of a Text Resultset.
-        /// To support CLIENT_SESSION_TRACK, additional information must be sent after all successful commands.
+        /// To support `CLIENT_SESSION_TRACK`, additional information must be sent after all successful commands.
         /// Although the OK packet is extensible, the EOF packet is not due to the overlap of its bytes with the content of the Text Resultset Row.
         /// Therefore, the EOF packet in the Text Resultset is replaced with an OK packet. EOF packets are deprecated as of MySQL 5.7.5.
         public static let CLIENT_DEPRECATE_EOF = CapabilityFlags(rawValue: 0x01000000)
@@ -124,7 +125,7 @@ extension MySQLProtocol {
         /// Client support progress indicator (since 10.2).
         public static let MARIADB_CLIENT_PROGRESS = CapabilityFlags(rawValue: 0x0100000000) // 1 << 32
         
-        /// Permit COM_MULTI protocol.
+        /// Permit `COM_MULTI` protocol.
         public static let MARIADB_CLIENT_COM_MULTI = CapabilityFlags(rawValue: 0x0200000000) // 1 << 33
         
         /// Permit bulk insert.
@@ -182,6 +183,11 @@ extension MySQLProtocol {
             .CLIENT_CAN_HANDLE_EXPIRED_PASSWORDS,
             .CLIENT_SESSION_TRACK,
             .CLIENT_DEPRECATE_EOF,
+            .MARIADB_CLIENT_PROGRESS,
+            .MARIADB_CLIENT_COM_MULTI,
+            .MARIADB_CLIENT_STMT_BULK_OPERATIONS,
+            .MARIADB_CLIENT_EXTENDED_TYPE_INFO,
+            .MARIADB_CLIENT_CACHE_METADATA,
         ]
         
         /// The raw capabilities value.
@@ -214,6 +220,11 @@ extension MySQLProtocol {
             case .CLIENT_CAN_HANDLE_EXPIRED_PASSWORDS: return "CLIENT_CAN_HANDLE_EXPIRED_PASSWORDS"
             case .CLIENT_SESSION_TRACK: return "CLIENT_SESSION_TRACK"
             case .CLIENT_DEPRECATE_EOF: return "CLIENT_DEPRECATE_EOF"
+            case .MARIADB_CLIENT_PROGRESS: return "MARIADB_CLIENT_PROGRESS"
+            case .MARIADB_CLIENT_COM_MULTI: return "MARIADB_CLIENT_COM_MULTI"
+            case .MARIADB_CLIENT_STMT_BULK_OPERATIONS: return "MARIADB_CLIENT_STMT_BULK_OPERATIONS"
+            case .MARIADB_CLIENT_EXTENDED_TYPE_INFO: return "MARIADB_CLIENT_EXTENDED_TYPE_INFO"
+            case .MARIADB_CLIENT_CACHE_METADATA: return "MARIADB_CLIENT_CACHE_METADATA"
             default: return "UNKNOWN(\(self.rawValue))"
             }
         }
