@@ -2,13 +2,12 @@ import NIOCore
 import Logging
 import Foundation
 
-/// MARK: Date
-
-/// MYSQL_TIME
+/// `MYSQL_TIME`
 ///
-/// This structure is used to send and receive DATE, TIME, DATETIME, and TIMESTAMP data directly to and from the server.
-/// Set the buffer member to point to a MYSQL_TIME structure, and set the buffer_type member of a MYSQL_BIND structure
-/// to one of the temporal types (MYSQL_TYPE_TIME, MYSQL_TYPE_DATE, MYSQL_TYPE_DATETIME, MYSQL_TYPE_TIMESTAMP).
+/// This structure is used to send and receive `DATE`, `TIME`, `DATETIME`, and `TIMESTAMP` data directly to and from
+/// the server. Set the buffer to point to a `MYSQL_TIME` structure, and set the `buffer_type` of a `MYSQL_BIND`
+/// structure to one of the temporal types (`MYSQL_TYPE_TIME`, `MYSQL_TYPE_DATE`, `MYSQL_TYPE_DATETIME`,
+/// `MYSQL_TYPE_TIMESTAMP`).
 ///
 /// https://dev.mysql.com/doc/refman/5.7/en/c-api-prepared-statement-data-structures.html
 public struct MySQLTime: Equatable, MySQLDataConvertible {
@@ -52,7 +51,7 @@ public struct MySQLTime: Equatable, MySQLDataConvertible {
         self.microsecond = microsecond
     }
     
-    /// Creates a new `MySQLTime` from a Swift Date using current calendar and GMT timezone.
+    /// Creates a new `MySQLTime` from a Foundation `Date` using current calendar and GMT timezone.
     public init(date: Date) {
         // let comps = Calendar.current.dateComponents(in: .gmt, from: date)
         var rawtime = Int(date.timeIntervalSince1970)
@@ -211,63 +210,45 @@ extension ByteBuffer {
             // date
             time = MySQLTime(
                 year: self.readInteger(endianness: .little),
-                month: self.readInteger(endianness: .little, as: UInt8.self)
-                    .flatMap(numericCast),
-                day: self.readInteger(endianness: .little, as: UInt8.self)
-                    .flatMap(numericCast)
+                month: self.readInteger(endianness: .little, as: UInt8.self).flatMap(numericCast),
+                day: self.readInteger(endianness: .little, as: UInt8.self).flatMap(numericCast)
             )
         case 7:
             // date + time
             time = MySQLTime(
                 year: self.readInteger(endianness: .little),
-                month: self.readInteger(endianness: .little, as: UInt8.self)
-                    .flatMap(numericCast),
-                day: self.readInteger(endianness: .little, as: UInt8.self)
-                    .flatMap(numericCast),
-                hour: self.readInteger(endianness: .little, as: UInt8.self)
-                    .flatMap(numericCast),
-                minute: self.readInteger(endianness: .little, as: UInt8.self)
-                    .flatMap(numericCast),
-                second: self.readInteger(endianness: .little, as: UInt8.self)
-                    .flatMap(numericCast)
+                month: self.readInteger(endianness: .little, as: UInt8.self).flatMap(numericCast),
+                day: self.readInteger(endianness: .little, as: UInt8.self).flatMap(numericCast),
+                hour: self.readInteger(endianness: .little, as: UInt8.self).flatMap(numericCast),
+                minute: self.readInteger(endianness: .little, as: UInt8.self).flatMap(numericCast),
+                second: self.readInteger(endianness: .little, as: UInt8.self).flatMap(numericCast)
             )
         case 8:
             // time
             self.moveReaderIndex(forwardBy: 5)
             time = MySQLTime(
-                hour: self.readInteger(endianness: .little, as: UInt8.self)
-                    .flatMap(numericCast),
-                minute: self.readInteger(endianness: .little, as: UInt8.self)
-                    .flatMap(numericCast),
-                second: self.readInteger(endianness: .little, as: UInt8.self)
-                    .flatMap(numericCast)
+                hour: self.readInteger(endianness: .little, as: UInt8.self).flatMap(numericCast),
+                minute: self.readInteger(endianness: .little, as: UInt8.self).flatMap(numericCast),
+                second: self.readInteger(endianness: .little, as: UInt8.self).flatMap(numericCast)
             )
         case 11:
             // date + time + fractional seconds
             time = MySQLTime(
                 year: self.readInteger(endianness: .little),
-                month: self.readInteger(endianness: .little, as: UInt8.self)
-                    .flatMap(numericCast),
-                day: self.readInteger(endianness: .little, as: UInt8.self)
-                    .flatMap(numericCast),
-                hour: self.readInteger(endianness: .little, as: UInt8.self)
-                    .flatMap(numericCast),
-                minute: self.readInteger(endianness: .little, as: UInt8.self)
-                    .flatMap(numericCast),
-                second: self.readInteger(endianness: .little, as: UInt8.self)
-                    .flatMap(numericCast),
+                month: self.readInteger(endianness: .little, as: UInt8.self).flatMap(numericCast),
+                day: self.readInteger(endianness: .little, as: UInt8.self).flatMap(numericCast),
+                hour: self.readInteger(endianness: .little, as: UInt8.self).flatMap(numericCast),
+                minute: self.readInteger(endianness: .little, as: UInt8.self).flatMap(numericCast),
+                second: self.readInteger(endianness: .little, as: UInt8.self).flatMap(numericCast),
                 microsecond: self.readInteger(endianness: .little)
             )
         case 12:
             // time + fractional seconds
             self.moveReaderIndex(forwardBy: 5)
             time = MySQLTime(
-                hour: self.readInteger(endianness: .little, as: UInt8.self)
-                    .flatMap(numericCast),
-                minute: self.readInteger(endianness: .little, as: UInt8.self)
-                    .flatMap(numericCast),
-                second: self.readInteger(endianness: .little, as: UInt8.self)
-                    .flatMap(numericCast),
+                hour: self.readInteger(endianness: .little, as: UInt8.self).flatMap(numericCast),
+                minute: self.readInteger(endianness: .little, as: UInt8.self).flatMap(numericCast),
+                second: self.readInteger(endianness: .little, as: UInt8.self).flatMap(numericCast),
                 microsecond: self.readInteger(endianness: .little)
             )
         default: return nil

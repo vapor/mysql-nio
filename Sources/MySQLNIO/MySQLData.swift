@@ -163,19 +163,12 @@ public struct MySQLData: CustomStringConvertible, ExpressibleByStringLiteral, Ex
     public func json<Value>(as type: Value.Type) throws -> Value?
         where Value: Decodable
     {
-        guard var buffer = self.buffer else {
-            return nil
-        }
-        guard let data = buffer.readBytes(length: buffer.readableBytes) else {
-            return nil
-        }
-        return try JSONDecoder().decode(Value.self, from: Data(data))
+        guard let buffer = self.buffer else { return nil }
+        return try JSONDecoder().decode(Value.self, from: Data(buffer.readableBytesView))
     }
     
     public var string: String? {
-        guard var buffer = self.buffer else {
-            return nil
-        }
+        guard var buffer = self.buffer else { return nil }
         switch format {
         case .text:
             return buffer.readString(length: buffer.readableBytes)
@@ -191,30 +184,37 @@ public struct MySQLData: CustomStringConvertible, ExpressibleByStringLiteral, Ex
         }
     }
 
+    public var decimal: Decimal? {
+        switch self.format {
+        case .binary:
+            switch self.type {
+            case .double:
+                return self.double.flatMap(Decimal.init(floatLiteral:))
+            case .float:
+                return self.float.flatMap { Decimal(Double($0)) }
+            case .newdecimal, .varchar, .varString, .string, .blob, .tinyBlob, .mediumBlob, .longBlob:
+                guard var buffer = self.buffer else { return nil }
+                return buffer.readString(length: buffer.readableBytes).flatMap { Decimal(string: $0) }
+            default:
+                return nil
+            }
+        case .text:
+            return self.string.flatMap { Decimal(string: $0) }
+        }
+    }
+
     public var double: Double? {
         switch self.format {
         case .binary:
             switch self.type {
             case .double:
-                guard var buffer = self.buffer else {
-                    return nil
-                }
-                guard let bytes = buffer.readBytes(length: MemoryLayout<Double>.size) else {
-                    return nil
-                }
-                var double: Double = 0
-                Swift.withUnsafeMutableBytes(of: &double) { buffer in
-                    buffer.copyBytes(from: bytes)
-                }
-                return double
+                guard var buffer = self.buffer, let bits = buffer.readInteger(endianness: .little, as: UInt64.self) else { return nil }
+                return Double(bitPattern: bits)
             case .float:
                 return self.float.flatMap(Double.init)
             case .newdecimal:
-                guard var buffer = self.buffer else {
-                    return nil
-                }
-                return buffer.readString(length: buffer.readableBytes)
-                    .flatMap(Double.init)
+                guard var buffer = self.buffer else { return nil }
+                return buffer.readString(length: buffer.readableBytes).flatMap(Double.init)
             default:
                 return nil
             }
@@ -223,68 +223,18 @@ public struct MySQLData: CustomStringConvertible, ExpressibleByStringLiteral, Ex
         }
     }
 
-    public var decimal: Decimal? {
-        switch self.format {
-        case .binary:
-            switch self.type {
-            case .double:
-                guard var buffer = self.buffer else {
-                    return nil
-                }
-                guard let bytes = buffer.readBytes(length: MemoryLayout<Double>.size) else {
-                    return nil
-                }
-                var double: Double = 0
-                Swift.withUnsafeMutableBytes(of: &double) { buffer in
-                    buffer.copyBytes(from: bytes)
-                }
-                return Decimal(floatLiteral: double)
-            case .float:
-                return self.float.flatMap { Decimal(Double($0)) }
-            case .newdecimal:
-                guard var buffer = self.buffer else {
-                    return nil
-                }
-                return buffer.readString(length: buffer.readableBytes)
-                    .flatMap{ Decimal(string: $0)  }
-            case .varchar, .varString, .string, .blob, .tinyBlob, .mediumBlob, .longBlob:
-                guard var buffer = self.buffer else {
-                    return nil
-                }
-                return buffer.readString(length: buffer.readableBytes)
-                        .flatMap{ Decimal(string: $0)  }
-            default:
-                return nil
-            }
-        case .text:
-            return self.string.flatMap{ Decimal(string: $0) }
-        }
-    }
-
     public var float: Float? {
         switch self.format {
         case .binary:
             switch self.type {
             case .float:
-                guard var buffer = self.buffer else {
-                    return nil
-                }
-                guard let bytes = buffer.readBytes(length: MemoryLayout<Float>.size) else {
-                    return nil
-                }
-                var float: Float = 0
-                Swift.withUnsafeMutableBytes(of: &float) { buffer in
-                    buffer.copyBytes(from: bytes)
-                }
-                return float
+                guard var buffer = self.buffer, let bits = buffer.readInteger(endianness: .little, as: UInt32.self) else { return nil }
+                return Float(bitPattern: bits)
             case .double:
                 return self.double.flatMap(Float.init)
             case .newdecimal:
-                guard var buffer = self.buffer else {
-                    return nil
-                }
-                return buffer.readString(length: buffer.readableBytes)
-                    .flatMap(Float.init)
+                guard var buffer = self.buffer else { return nil }
+                return buffer.readString(length: buffer.readableBytes).flatMap(Float.init)
             default:
                 return nil
             }
@@ -296,15 +246,8 @@ public struct MySQLData: CustomStringConvertible, ExpressibleByStringLiteral, Ex
     public var uuid: UUID? {
         switch self.format {
         case .binary:
-            guard var buffer = self.buffer else {
-                return nil
-            }
-            guard buffer.readableBytes == 16 else {
-                return nil
-            }
-            guard let bytes = buffer.readBytes(length: 16) else {
-                return nil
-            }
+            guard let bytes = self.buffer?.readableBytesView, bytes.count == 16 else { return nil }
+            
             return UUID(uuid: (
                 bytes[0], bytes[1], bytes[2], bytes[3],
                 bytes[4], bytes[5], bytes[6], bytes[7],
@@ -317,112 +260,71 @@ public struct MySQLData: CustomStringConvertible, ExpressibleByStringLiteral, Ex
     }
 
     public var bool: Bool? {
-        switch self.string {
-        case "true", "1": return true
-        case "false", "0": return false
-        default: return nil
+        guard self.buffer != nil else { return nil }
+        switch (self.format, self.type) {
+            case (.binary, .longlong), (.binary, .long), (.binary, .int24), (.binary, .short), (.binary, .tiny), (.binary, .bit):
+                return self.int != 0
+            default:
+                // TODO: This check seems suspicious. The MySQL wire protocol has no concept of a boolean; why these strings and why only lowercase?
+                switch self.string {
+                    case "true", "1": return true
+                    case "false", "0": return false
+                    default: return nil
+                }
         }
     }
     
-    public var int: Int? {
-        self.fwi()
-    }
-
-    public var int8: Int8? {
-        self.fwi()
-    }
-
-    public var int16: Int16? {
-        self.fwi()
-    }
-
-    public var int32: Int32? {
-        self.fwi()
-    }
-
-    public var int64: Int64? {
-        self.fwi()
-    }
-
-    public var uint: UInt? {
-        self.fwi()
-    }
-
-    public var uint8: UInt8? {
-        self.fwi()
-    }
-
-    public var uint16: UInt16? {
-        self.fwi()
-    }
-
-    public var uint32: UInt32? {
-        self.fwi()
-    }
-
-    public var uint64: UInt64? {
-        self.fwi()
-    }
-
+    public var int: Int? { self.fwi() }
+    public var int8: Int8? { self.fwi() }
+    public var int16: Int16? { self.fwi() }
+    public var int32: Int32? { self.fwi() }
+    public var int64: Int64? { self.fwi() }
+    public var uint: UInt? { self.fwi() }
+    public var uint8: UInt8? { self.fwi() }
+    public var uint16: UInt16? { self.fwi() }
+    public var uint32: UInt32? { self.fwi() }
+    public var uint64: UInt64? { self.fwi() }
+    
     private func fwi<I>(_ type: I.Type = I.self) -> I?
         where I: FixedWidthInteger
     {
         guard var buffer = self.buffer else {
             return nil
         }
-        switch format {
-        case .text:
+        switch (self.format, self.type) {
+        case (.text, _), (_, .varchar), (_, .varString), (_, .newdecimal):
             return buffer.readString(length: buffer.readableBytes).flatMap(I.init)
-        default:
-            switch self.type {
-            case .varchar, .varString:
-                return buffer.readString(length: buffer.readableBytes).flatMap(I.init)
-            case .longlong:
-                if self.isUnsigned {
-                    return buffer.readInteger(endianness: .little, as: UInt64.self)
-                        .flatMap(I.init)
-                } else {
-                    return buffer.readInteger(endianness: .little, as: Int64.self)
-                        .flatMap(I.init)
-                }
-            case .long, .int24:
-                if self.isUnsigned {
-                    return buffer.readInteger(endianness: .little, as: UInt32.self)
-                        .flatMap(I.init)
-                } else {
-                    return buffer.readInteger(endianness: .little, as: Int32.self)
-                        .flatMap(I.init)
-                }
-            case .short:
-                if self.isUnsigned {
-                    return buffer.readInteger(endianness: .little, as: UInt16.self)
-                        .flatMap(I.init)
-                } else {
-                    return buffer.readInteger(endianness: .little, as: Int16.self)
-                        .flatMap(I.init)
-                }
-            case .tiny, .bit:
-                if self.isUnsigned {
-                    return buffer.readInteger(endianness: .little, as: UInt8.self)
-                        .flatMap(I.init)
-                } else {
-                    return buffer.readInteger(endianness: .little, as: Int8.self)
-                        .flatMap(I.init)
-                }
-            case .newdecimal:
-                return buffer.readString(length: buffer.readableBytes)
-                    .flatMap(I.init)
-            default:
-                return nil
+        case (_, .longlong):
+            if self.isUnsigned {
+                return buffer.readInteger(endianness: .little, as: UInt64.self).flatMap(I.init)
+            } else {
+                return buffer.readInteger(endianness: .little, as: Int64.self).flatMap(I.init)
             }
+        case (_, .long), (_, .int24):
+            if self.isUnsigned {
+                return buffer.readInteger(endianness: .little, as: UInt32.self).flatMap(I.init)
+            } else {
+                return buffer.readInteger(endianness: .little, as: Int32.self).flatMap(I.init)
+            }
+        case (_, .short):
+            if self.isUnsigned {
+                return buffer.readInteger(endianness: .little, as: UInt16.self).flatMap(I.init)
+            } else {
+                return buffer.readInteger(endianness: .little, as: Int16.self).flatMap(I.init)
+            }
+        case (_, .tiny), (_, .bit):
+            if self.isUnsigned {
+                return buffer.readInteger(endianness: .little, as: UInt8.self).flatMap(I.init)
+            } else {
+                return buffer.readInteger(endianness: .little, as: Int8.self).flatMap(I.init)
+            }
+        default:
+            return nil
         }
     }
     
     public var date: Date? {
-        guard let time = self.time else {
-            return nil
-        }
-        return time.date
+        return self.time?.date
     }
     
     public var time: MySQLTime? {
