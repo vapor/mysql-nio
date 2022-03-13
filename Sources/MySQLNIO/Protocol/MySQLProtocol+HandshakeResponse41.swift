@@ -11,10 +11,15 @@ extension MySQLPacket {
     /// if the server announced it in its Initial Handshake Packet. Otherwise (talking to an old server)
     /// the `Protocol::HandshakeResponse320` packet must be used.
     ///
-    /// - Note: This implementation does not support or implement the old `HandshakeResponse320` packet.
+    /// - Note: This implementation does not support the `HandshakeResponse320` packet.
+    ///
+    /// - Note: All string fields must be representable in the character set specified in the packet. The current
+    ///   implementation theoretically allows using character sets other than `utf8mb4`, but doing so is **not**
+    ///   recommended.
     ///
     /// https://dev.mysql.com/doc/internals/en/connection-phase-packets.html#packet-Protocol::HandshakeResponse
-    public struct HandshakeResponse41: MySQLPacketDecodable, MySQLPacketEncodable {
+    /// https://mariadb.com/kb/en/connection/
+    public struct HandshakeResponse41: MySQLPacketCodable {
         /// `capability_flags` (4)
         /// capability flags of the client as defined in `Protocol::CapabilityFlags`
         public var capabilities: MySQLProtocol.CapabilityFlags

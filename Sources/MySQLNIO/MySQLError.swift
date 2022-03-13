@@ -9,7 +9,7 @@ public enum MySQLError: Error, CustomStringConvertible, LocalizedError {
     case missingAuthPluginInlineData
     case unsupportedServer(message: String)
     case protocolError
-    case server(MySQLProtocol.ERR_Packet)
+    case server(MySQLProtocol.ServerErrorDetails)
     case closed
     
     /// A uniqueness constraint was violated. Associated value is message from server with details.

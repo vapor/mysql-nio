@@ -1,21 +1,6 @@
 import NIOCore
 
 extension ByteBuffer {
-    mutating func readNullTerminatedString() -> String? {
-        guard let nullIndex = readableBytesView.firstIndex(of: 0) else {
-            return nil
-        }
-
-        defer { moveReaderIndex(forwardBy: 1) }
-        return readString(length: nullIndex - readerIndex)
-    }
-    
-    @discardableResult
-    mutating func writeNullTerminatedString(_ string: String) -> Int {
-        return self.writeString(string)
-             + self.writeInteger(0, as: UInt8.self)
-    }
-    
     mutating func readInteger<T>(endianness: Endianness = .big, as: T.Type = T.self) -> T?
         where T: RawRepresentable, T.RawValue: FixedWidthInteger
     {
@@ -41,6 +26,11 @@ extension ByteBuffer {
     mutating func writeLengthEncodedSlice(_ buffer: inout ByteBuffer) -> Int {
         return self.writeLengthEncodedInteger(numericCast(buffer.readableBytes))
              + self.writeBuffer(&buffer)
+    }
+    
+    @discardableResult
+    mutating func writeLengthEncodedString(_ string: String) -> Int {
+        return self.writeLengthEncodedInteger(numericCast(string.utf8.count)) + self.writeString(string)
     }
     
     mutating func readLengthEncodedString() -> String? {

@@ -43,6 +43,8 @@ public protocol MySQLPacketEncodable {
     func encode(to packet: inout MySQLPacket, capabilities: MySQLProtocol.CapabilityFlags) throws
 }
 
+public protocol MySQLPacketCodable: MySQLPacketDecodable, MySQLPacketEncodable {}
+
 extension MySQLPacket {
     public mutating func decode<T>(_ type: T.Type, capabilities: MySQLProtocol.CapabilityFlags) throws -> T
         where T: MySQLPacketDecodable
