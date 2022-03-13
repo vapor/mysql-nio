@@ -86,36 +86,24 @@ extension MySQLProtocol {
         func encode(to packet: inout MySQLPacket, capabilities: MySQLProtocol.CapabilityFlags) throws {
             // Calculate the set of capability flags both reported by the server _and_ selected for this response.
             let sharedCapabilities = self.capabilities.intersection(capabilities)
+            assert(sharedCapabilities.contains(.CLIENT_SECURE_CONNECTION), "pre-4.1 auth not supported")
 
             // Check auth response data isn't oversized, if needed. We don't support the case where `CLIENT_SECURE_CONNECTION`
             // isn't set, but that check is handled elsewhere so there's need to add additional logic for it here.
-            guard sharedCapabilities.contains(.CLIENT_PLUGIN_AUTH_LENENC_CLIENT_DATA) || self.authResponse.readableBytes <= UInt8.max else {
-                throw Error.authResponseDataTooLong
-            }
-            guard sharedCapabilities.contains(.CLIENT_CONNECT_WITH_DB) || self.database.isEmpty else {
-                throw Error.settingDatabaseEarlyUnsupported
-            }
-            guard sharedCapabilities.contains(.CLIENT_PLUGIN_AUTH) || self.authPluginName.isEmpty else {
-                throw Error.authPluginsUnsupported
-            }
+            guard sharedCapabilities.contains(.CLIENT_CONNECT_WITH_DB) || self.database.isEmpty else { throw Error.settingDatabaseEarlyUnsupported }
+            guard sharedCapabilities.contains(.CLIENT_PLUGIN_AUTH) || self.authPluginName.isEmpty else { throw Error.authPluginsUnsupported }
             
             // N.B.: Send all specified capability flags; some are client-only and will be missing from the shared set.
             packet.payload.writeInteger(self.capabilities.general, endianness: .little)
             packet.payload.writeInteger(self.maxPacketSize, endianness: .little)
             packet.payload.writeInteger(self.characterSet.rawValue, endianness: .little)
-            if !sharedCapabilities.contains(.CLIENT_LONG_PASSWORD) {
-                packet.payload.writeBytes(repeatElement(UInt8.zero, count: 19))
-                packet.payload.writeInteger(self.capabilities.mariaDBSpecific, endianness: .little, as: UInt32.self)
-            } else {
-                packet.payload.writeBytes(repeatElement(UInt8.zero, count: 23))
-            }
+            packet.payload.writeRepeatingByte(0, count: 19)
+            packet.payload.writeInteger(sharedCapabilities.contains(.CLIENT_MYSQL) ? self.capabilities.mariaDBSpecific : 0, endianness: .little, as: UInt32.self)
             packet.payload.writeNullTerminatedString(self.username)
             if sharedCapabilities.contains(.CLIENT_PLUGIN_AUTH_LENENC_CLIENT_DATA) {
                 packet.payload.writeImmutableLengthEncodedSlice(self.authResponse)
             } else {
-                assert(sharedCapabilities.contains(.CLIENT_SECURE_CONNECTION), "pre-4.1 auth not supported")
-                packet.payload.writeInteger(UInt8(self.authResponse.readableBytes), endianness: .little)
-                packet.payload.writeImmutableBuffer(self.authResponse)
+                packet.payload.writeLengthPrefixed(as: UInt8.self, writeMessage: { $0.writeImmutableBuffer(self.authResponse) })
             }
             if sharedCapabilities.contains(.CLIENT_CONNECT_WITH_DB) {
                 packet.payload.writeNullTerminatedString(self.database)
@@ -124,97 +112,59 @@ extension MySQLProtocol {
                 packet.payload.writeNullTerminatedString(self.authPluginName)
             }
             if sharedCapabilities.contains(.CLIENT_CONNECT_ATTRS) {
-                var subdata = ByteBuffer()
-                self.connectionAttributes.forEach {
-                    subdata.writeLengthEncodedString($0.rawValue)
-                    subdata.writeLengthEncodedString($1)
+                let subdata = self.connectionAttributes.reduce(into: ByteBuffer()) {
+                    $0.writeLengthEncodedString($1.key.rawValue)
+                    $0.writeLengthEncodedString($1.value)
                 }
-                guard subdata.readableBytes < UInt16.max { throw Error.connectionAtrributesTooLarge }
-                packet.payload.writeLengthEncodedSlice(&subdata)
+                guard subdata.writerIndex < UInt16.max { throw Error.connectionAtrributesTooLarge }
+                packet.payload.writeImmutableLengthEncodedSlice(subdata)
             }
         }
 
         /// `MySQLPacketDecodable` conformance.
         static func decode(from packet: inout MySQLPacket, capabilities: MySQLProtocol.CapabilityFlags) throws -> HandshakeResponse41 {
-            guard let rawClientCapabilities = packet.payload.readInteger(endianness: .little, as: UInt32.self) else { throw Error.missingCapabilities }
-            guard let maxPacketSize = packet.payload.readInteger(endianness: .little, as: UInt32.self) else { throw Error.missingPacketSize }
-            guard let rawCharacterSet = packet.payload.readInteger(endianness: .little, as: UInt8.self) else { throw Error.missingCharacterSet }
-            
-            var clientCapabilities = CapabilityFlags(rawValue: numericCast(rawClientCapabilities))
-            if !CapabilityFlags(rawValue: numericCast(rawClientCapabilities)).union(capabilities).contains(.CLIENT_LONG_PASSWORD) {
-                guard let reserved = packet.payload.readSlice(length: 19), reserved.readableBytesView.allSatisfy({ $0 == 0 }) else { throw Error.missingReservedData }
-                guard let extraClientCapabilities = packet.payload.readInteger(endianness: .little, as: UInt32.self) else { throw Error.missingCapabilities }
-                clientCapabilities.mariaDBSpecific = extraClientCapabilities
-            } else {
-                guard let reserved = packet.payload.readSlice(length: 23), reserved.readableBytesView.allSatisfy({ $0 == 0 }) else { throw Error.missingReservedData }
-            }
-            var sharedCapabilities = capabilities.intersection(clientCapabilities)
-            
-            let characterSet = MySQLProtocol.CharacterSet(rawValue: rawCharacterSet)
-            
-            guard let username = packet.payload.readNullTerminatedString() else { throw Error.missingUsername }
-            
-            let authResponse: ByteBuffer
-            if sharedCapabilities.contains(.CLIENT_PLUGIN_AUTH_LENENC_CLIENT_DATA) {
-                guard let lenencAuthResponse = packet.payload.readLengthEncodedSlice() else { throw Error.missingAuthResponse }
-                authResponse = lenencAuthResponse
-            } else if sharedCapabilities.contains(.CLIENT_SECURE_CONNECTION) {
-                guard let authResponseLength = packet.payload.readInteger(endianness: .little, as: UInt8.self) else { throw Error.missingAuthResponse }
-                guard let secAuthResponse = packet.payload.readSlice(length: numericCast(authResponseLength)) else { throw Error.missingAuthResponse }
-                authResponse = secAuthResponse
-            } else {
-                throw MySQLError.protocolError // pre-4.1 auth not supported
-            }
-            
-            let database: String?
-            if sharedCapabilities.contains(.CLIENT_CONNECT_WITH_DB) {
-                guard let databaseName = packet.payload.readNullTerminatedString() else { throw Error.missingDatabaseName }
-                database = databaseName
-            } else {
-                database = nil
-            }
-            
-            let authPlugin: String?
-            if sharedCapabilities.contains(.CLIENT_PLUGIN_AUTH) {
-                guard let authPluginName = packet.payload.readNullTerminatedString() else { throw Error.missingAuthPluginName }
-                authPlugin = authPluginName
-            } else {
-                authPlugin = nil
-            }
+            // N.B.: It is an error if `CLIENT_SECURE_CONNECTION` isn't specified; we don't and shouldn't support pre-4.1 auth.
+            guard let clientCapabilities = packet.payload.readInteger(endianness: .little, as: UInt32.self),
+                  let maxPacketSize = packet.payload.readInteger(endianness: .little, as: UInt32.self),
+                  let rawCharacterSet = packet.payload.readInteger(endianness: .little, as: UInt8.self),
+                  packet.payload.readReservedBytes(length: 19),
+                  let maybeExtraCapabilities = packet.payload.readInteger(endianness: .little, as: UInt32.self),
+                  let username = packet.payload.readNullTerminatedString()
+                  let effectiveCapabilities = CapabilityFlags(checking: capabilities, general: clientCapabilities, extended: maybeExtraCapabilities),
+                  effectiveCapabilities.contains(.CLIENT_SECURE_CONNECTION),
+                  let authResponse = (effectiveCapabilities.contains(.CLIENT_PLUGIN_AUTH_LENENC_CLIENT_DATA) ?
+                    packet.payload.readLengthEncodedSlice() : packet.payload.readLengthPrefixedSlice(as: UInt8.self)
+                  ),
+                  let database = (effectiveCapabilities.contains(.CLIENT_CONNECT_WITH_DB) ? packet.payload.readNullTerminatedString() : ""),
+                  let authPlugin = (effectiveCapabilities.contains(.CLIENT_PLUGIN_AUTH) ? packet.payload.readNullTerminatedString() : "")
+            else { throw Error.invalidHandshakeResponse }
             
             var connectionAttrs: [ConnectionAttributeName: String] = [:]
-            if sharedCapabilities.contains(.CLIENT_CONNECT_ATTRS) {
-                guard var attrData = packet.payload.readLengthEncodedSlice() else { throw Error.missingConnectionAttributes }
+            if effectiveCapabilities.contains(.CLIENT_CONNECT_ATTRS) {
+                guard var attrData = packet.payload.readLengthEncodedSlice() else { throw Error.invalidHandshakeResponse }
                 while attrData.readableBytes > 0 {
-                    guard let attrName = packet.payload.readLengthEncodedString() else { throw Error.missingConnectionAttributes }
-                    guard let attrValue = packet.payload.readLengthEncodedString() else { throw Error.missingConnectionAttributes }
+                    guard let attrName = packet.payload.readLengthEncodedString(),
+                          let attrValue = packet.payload.readLengthEncodedString()
+                    else { throw Error.invalidHandshakeResponse }
+
                     connectionAttrs[.init(name: attrName)] = attrValue
                 }
             }
             
             return .init(
-                capabilities: clientCapabilities,
+                capabilities: .init(general: clientCapabilities, extended: maybeExtraCapabilities),
                 maxPacketSize: maxPacketSize,
-                characterSet: characterSet,
+                characterSet: .init(rawValue: rawCharacterSet),
                 username: username,
                 authResponse: authResponse,
-                database: database ?? "",
-                authPluginName: authPlugin ?? "",
+                database: database,
+                authPluginName: authPlugin,
                 connectionAttributes: connectionAttrs
             )
         }
 
         enum Error: Swift.Error {
-            case missingCapabilities
-            case missingPacketSize
-            case missingCharacterSet
-            case missingReservedData
-            case invalidReservedData([UInt8])
-            case missingUsername
-            case missingAuthResponse
-            case missingDatabaseName
-            case missingAuthPluginName
-            case missingConnectionAttributes
+            case invalidHandshakeResponse
             
             case authResponseDataTooLong // CLIENT_PLUGIN_AUTH_LENENC_CLIENT_DATA not available and auth data longer than 255 bytes
             case settingDatabaseEarlyUnsupported // CLIENT_CONNECT_WITH_DB not available and a database name was specified for the connection
@@ -224,15 +174,27 @@ extension MySQLProtocol {
     }
 }
 
-extension ByteBuffer {
-    // Verbatim copy of `ByteBuffer.getNullTerminatedStringLength(at:)`.
-    fileprivate func getNullTerminatedBytesLength(at index: Int) -> Int? {
-        guard self.readerIndex <= index && index < self.writerIndex else {
+extension MySQLProtocol.CapabilityFlags {
+    /// Create a `CapabilityFlags` from an existing set of flags, and the lower and upper 32-bit halves of
+    /// a potentially extended flags value. The semantics are as follows:
+    ///
+    /// - If either the existing capability flags value _or_ the lower 32-bit raw value specify the
+    ///   `CLIENT_LONG_PASSWORD` capability (also referred to as `CLIENT_MYSQL`), the upper ("extended")
+    ///   raw value _must_ be zero. If it is not, `nil` is returned.
+    /// - If `CLIENT_LONG_PASSWORD` is not specified by either general input value, the upper raw value
+    ///   is treated as extended MariaDB flags.
+    ///
+    /// The final `CapabilityFlags` set represents the _intersection_ of the existing capability flags value
+    /// with the value resulting from the handling of the raw inputs specified above.
+    ///
+    /// This initializer is used by the handshake response packet decoder to gracefully handle the possible
+    /// presence of MariaDB extensions and calculate the set of _effective_ capabilities in force (i.e. only
+    /// those specified by both server and client).
+    fileprivate init?(checking initial: CapabilityFlags, general: UInt32, extended: UInt32) {
+        guard extended == 0 || (initial.general | general) & CLIENT_MYSQL.general == 0 else {
             return nil
         }
-        guard let endIndex = self.readableBytesView[index...].firstIndex(of: 0) else {
-            return nil
-        }
-        return endIndex &- index
+        self.init(general: general, extended: extended)
+        self.formIntersection(initial)
     }
 }
