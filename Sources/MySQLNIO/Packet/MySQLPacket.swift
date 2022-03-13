@@ -35,28 +35,4 @@ extension MySQLPacket: CustomStringConvertible {
     }
 }
 
-public protocol MySQLPacketDecodable {
-    static func decode(from packet: inout MySQLPacket, capabilities: MySQLProtocol.CapabilityFlags) throws -> Self
-}
-
-public protocol MySQLPacketEncodable {
-    func encode(to packet: inout MySQLPacket, capabilities: MySQLProtocol.CapabilityFlags) throws
-}
-
 public protocol MySQLPacketCodable: MySQLPacketDecodable, MySQLPacketEncodable {}
-
-extension MySQLPacket {
-    public mutating func decode<T>(_ type: T.Type, capabilities: MySQLProtocol.CapabilityFlags) throws -> T
-        where T: MySQLPacketDecodable
-    {
-        return try T.decode(from: &self, capabilities: capabilities)
-    }
-    
-    public static func encode<T>(_ type: T, capabilities: MySQLProtocol.CapabilityFlags) throws -> MySQLPacket
-        where T: MySQLPacketEncodable
-    {
-        var packet = MySQLPacket()
-        try type.encode(to: &packet, capabilities: capabilities)
-        return packet
-    }
-}
