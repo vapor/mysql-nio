@@ -1,47 +1,49 @@
 extension MySQLProtocol {
-    /// Protocol::ColumnDefinition41
+    /// `Protocol::ColumnDefinition41`
     ///
     /// Column Definition
-    /// if CLIENT_PROTOCOL_41 is set Protocol::ColumnDefinition41 is used, Protocol::ColumnDefinition320 otherwise
+    /// if `CLIENT_PROTOCOL_41` is set `Protocol::ColumnDefinition41` is used, `Protocol::ColumnDefinition320` otherwise
     ///
     /// https://dev.mysql.com/doc/internals/en/com-query-response.html#packet-Protocol::ColumnDefinition
-    public struct ColumnDefinition41: MySQLPacketDecodable {
-        /// catalog (lenenc_str) -- catalog (always "def")
-        public var catalog: String
+    struct ColumnDefinition41: MySQLPacketCodable {
+        /// `catalog (lenenc_str)` -- catalog (always "def")
+        let catalog: String
         
-        /// schema (lenenc_str) -- schema-name
-        public var schema: String
+        /// `schema (lenenc_str)` -- schema name
+        let schema: String
         
-        /// table (lenenc_str) -- virtual table-name
-        public var table: String
+        /// `table (lenenc_str)` -- virtual table-name
+        let table: String
         
-        /// org_table (lenenc_str) -- physical table-name
-        public var orgTable: String
+        /// `org_table (lenenc_str)` -- physical table name
+        let orgTable: String
         
-        /// name (lenenc_str) -- virtual column name
-        public var name: String
+        /// `name (lenenc_str)` -- virtual column name
+        let name: String
         
-        /// org_name (lenenc_str) -- physical column name
-        public var orgName: String
+        /// `org_name (lenenc_str)` -- physical column name
+        let orgName: String
         
-        /// character_set (2) -- is the column character set and is defined in Protocol::CharacterSet.
-        public var characterSet: CharacterSet
         
-        /// column_length (4) -- maximum length of the field
-        public var columnLength: UInt32
         
-        /// column_type (1) -- type of the column as defined in Column Type
-        public var columnType: DataType
+        /// `character_set (2)` -- the column character set, defined in `Protocol::CharacterSet`.
+        let characterSet: CharacterSet
         
-        /// flags (2) -- flags
-        public var flags: ColumnFlags
+        /// `column_length (4)` -- maximum length of the field
+        let columnLength: UInt32
         
-        /// decimals (1) -- max shown decimal digits
-        /// - 0x00 for integers and static strings
-        /// - 0x1f for dynamic strings, double, float
-        /// - 0x00 to 0x51 for decimals
-        /// note: decimals and column_length can be used for text-output formatting.
-        public var decimals: UInt8
+        /// `column_type (1)` -- type of the column as defined in Column Type
+        let columnType: DataType
+        
+        /// `flags (2)` -- flags
+        let flags: ColumnFlags
+        
+        /// `decimals (1)` -- max shown decimal digits
+        /// - `0x00` for integers and static strings
+        /// - `0x1f` for dynamic strings, double, float
+        /// - `0x00` to `0x51` for decimals
+        /// note: decimals and `column_length` can be used for text-output formatting.
+        let decimals: UInt8
         
         /// `MySQLPacketDecodable` conformance.
         public static func decode(from packet: inout MySQLPacket, capabilities: MySQLProtocol.CapabilityFlags) throws -> ColumnDefinition41 {
