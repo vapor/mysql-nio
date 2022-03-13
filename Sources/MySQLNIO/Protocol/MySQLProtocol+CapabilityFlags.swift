@@ -137,6 +137,9 @@ extension MySQLProtocol {
         /// Permit skipping metadata.
         public static let MARIADB_CLIENT_CACHE_METADATA = CapabilityFlags(rawValue: 0x1000000000) // 1 << 36
         
+        /// MariaDB's alternate name for ``CLIENT_LONG_PASSWORD``.
+        static let CLIENT_MYSQL = Self.CLIENT_LONG_PASSWORD
+        
         /// Default capabilities.
         ///
         /// - CLIENT_PROTOCOL_41,
@@ -240,19 +243,26 @@ extension MySQLProtocol {
         
         /// MySQL specific flags
         internal var general: UInt32 {
-            get { return UInt32(rawValue & 0xFFFFFFFF) }
+            get { return UInt32(self.rawValue & 0xFFFFFFFF) }
+            set { self.rawValue = (UInt64(self.mariaDBSpecific) << 32) | UInt64(newValue) }
         }
         
         /// MariaDB Initial Handshake Packet specific flags
         /// https://mariadb.com/kb/en/library/1-connecting-connecting/
         internal var mariaDBSpecific: UInt32 {
-            get { return UInt32(rawValue >> 32) }
-            set { rawValue |= UInt64(newValue) << 32 }
+            get { return UInt32(self.rawValue >> 32) }
+            set { self.rawValue = (UInt64(newValue) << 32) | UInt64(self.general) }
         }
         
-        /// Create a new `MySQLCapabilityFlags` from the upper and lower values.
+        /// Create a new `MySQLCapabilityFlags` from a full-width bitfield.
         public init(rawValue: UInt64) {
             self.rawValue = rawValue
+        }
+        
+        /// Create a `CapabilityFlags` from the combination of general and extended flags.
+        internal init(general: UInt32, extended: UInt32) {
+            self.init(rawValue: numericCast(general))
+            self.mariaDBSpecific = extended
         }
         
         /// Create a new `MySQLCapabilities` from the upper and lower values.
