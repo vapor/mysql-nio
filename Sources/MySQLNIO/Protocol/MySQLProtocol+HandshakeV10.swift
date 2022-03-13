@@ -1,7 +1,7 @@
 import NIOCore
 
 extension MySQLProtocol {
-    /// Protocol::Handshake
+    /// `Protocol::Handshake`
     ///
     /// When the client connects to the server the server sends a handshake packet to the client.
     /// Depending on the server version and configuration options different variants of the initial packet are sent.
@@ -110,7 +110,7 @@ extension MySQLProtocol {
             guard let filler1 = packet.payload.readInteger(as: UInt8.self), filler1 == 0x00 else {
                 throw Error.missingFiller
             }
-            // capability_flag_1 (2) -- lower 2 bytes of the Protocol::CapabilityFlags (optional)
+            /// `capability_flag_1` (2) -- lower 2 bytes of the `Protocol::CapabilityFlags` (optional)
             guard let capabilitiesLower = packet.payload.readInteger(endianness: .little, as: UInt16.self) else {
                 throw Error.missingCapabilityFlag1
             }
@@ -129,7 +129,7 @@ extension MySQLProtocol {
                     throw Error.missingStatusFlags
                 }
                 statusFlags = status
-                // capability_flags_2 (2) -- upper 2 bytes of the Protocol::CapabilityFlags
+                /// `capability_flags_2` (2) -- upper 2 bytes of the `Protocol::CapabilityFlags`
                 guard let capabilitiesUpper = packet.payload.readInteger(endianness: .little, as: UInt16.self) else {
                     throw Error.missingUpperCapabilities
                 }
@@ -142,19 +142,18 @@ extension MySQLProtocol {
                         throw Error.missingAuthPluginDataLength
                     }
                 }
-                /// string[6]     reserved (all [00])
+                /// `string[6]     reserved (all [00])`
                 guard let reserved1 = packet.payload.readSlice(length: 6), reserved1.readableBytesView.allSatisfy({ $0 == 0 }) else {
                     throw Error.missingReserved
                 }
                 if capabilities.contains(.CLIENT_LONG_PASSWORD) {
-                    /// string[4]     reserved (all [00])
+                    /// `string[4]     reserved (all [00])`
                     guard let reserved2 = packet.payload.readSlice(length: 4), reserved2.readableBytesView.allSatisfy({ $0 == 0 }) else {
                         throw Error.missingReserved
                     }
                 } else {
-                    /// Capabilities 3rd part. MariaDB specific flags.
-                    /// MariaDB Initial Handshake Packet specific flags
-                    /// https://mariadb.com/kb/en/library/1-connecting-connecting/
+                    /// Capabilities 3rd part - MariaDB specific flags
+                    /// https://mariadb.com/kb/en/connection/
                     guard let mariaDBSpecific = packet.payload.readInteger(endianness: .little, as: UInt32.self) else {
                         throw Error.missingMariaDBCapabilities
                     }

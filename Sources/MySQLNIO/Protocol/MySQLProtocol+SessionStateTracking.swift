@@ -1,4 +1,3 @@
-import NIOCore
 extension MySQLProtocol {
     
     /// State-change information is sent in the OK packet as a array of state-change blocks

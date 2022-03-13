@@ -1,139 +1,139 @@
 extension MySQLProtocol {
-    /// A character set is defined in the protocol as a integer.
+    /// A character set, including collation, is defined in the protocol as a integer.
     ///
     /// MySQL has a very flexible character set support as documented in Character Sets, Collations, Unicode.
     /// https://dev.mysql.com/doc/internals/en/character-set.html#packet-Protocol::CharacterSet
     public struct CharacterSet: RawRepresentable, Equatable, CustomStringConvertible, ExpressibleByIntegerLiteral {
-        /// big5_chinese_ci
+        /// `big5_chinese_ci`
         public static let big5: CharacterSet = 1
         
-        /// dec8_swedish_ci
+        /// `dec8_swedish_ci`
         public static let dec8: CharacterSet = 3
         
-        /// cp850_general_ci
+        /// `cp850_general_ci`
         public static let cp850: CharacterSet = 4
         
-        /// hp8_english_ci
+        /// `hp8_english_ci`
         public static let hp8: CharacterSet = 6
         
-        /// koi8r_general_ci
+        /// `koi8r_general_ci`
         public static let koi8r: CharacterSet = 7
         
-        /// latin1_swedish_ci
+        /// `latin1_swedish_ci`
         public static let latin1: CharacterSet = 8
         
-        /// latin2_general_ci
+        /// `latin2_general_ci`
         public static let latin2: CharacterSet = 9
         
-        /// swe7_swedish_ci
+        /// `swe7_swedish_ci`
         public static let swe7: CharacterSet = 10
         
-        /// ascii_general_ci
+        /// `ascii_general_ci`
         public static let ascii: CharacterSet = 11
         
-        /// ujis_japanese_ci
+        /// `ujis_japanese_ci`
         public static let ujis: CharacterSet = 12
         
-        /// sjis_japanese_ci
+        /// `sjis_japanese_ci`
         public static let sjis: CharacterSet = 13
         
-        /// hebrew_general_ci
+        /// `hebrew_general_ci`
         public static let hebrew: CharacterSet = 16
         
-        /// tis620_thai_ci
+        /// `tis620_thai_ci`
         public static let tis620: CharacterSet = 18
         
-        /// euckr_korean_ci
+        /// `euckr_korean_ci`
         public static let euckr: CharacterSet = 19
         
-        /// koi8u_general_ci
+        /// `koi8u_general_ci`
         public static let koi8u: CharacterSet = 22
         
-        /// gb2312_chinese_ci
+        /// `gb2312_chinese_ci`
         public static let gb2312: CharacterSet = 24
         
-        /// greek_general_ci
+        /// `greek_general_ci`
         public static let greek: CharacterSet = 25
         
-        /// cp1250_general_ci
+        /// `cp1250_general_ci`
         public static let cp1250: CharacterSet = 26
         
-        /// gbk_chinese_ci
+        /// `gbk_chinese_ci`
         public static let gbk: CharacterSet = 28
         
-        /// latin5_turkish_ci
+        /// `latin5_turkish_ci`
         public static let latin5: CharacterSet = 30
         
-        /// armscii8_general_ci
+        /// `armscii8_general_ci`
         public static let armscii8: CharacterSet = 32
         
-        /// utf8_general_ci
+        /// `utf8_general_ci`
         public static let utf8: CharacterSet = 33
         
-        /// ucs2_general_ci
+        /// `ucs2_general_ci`
         public static let ucs2: CharacterSet = 35
         
-        /// cp866_general_ci
+        /// `cp866_general_ci`
         public static let cp866: CharacterSet = 36
         
-        /// keybcs2_general_ci
+        /// `keybcs2_general_ci`
         public static let keybcs2: CharacterSet = 37
         
-        /// macce_general_ci
+        /// `macce_general_ci`
         public static let macce: CharacterSet = 38
         
-        /// macroman_general_ci
+        /// `macroman_general_ci`
         public static let macroman: CharacterSet = 39
         
-        /// cp852_general_ci
+        /// `cp852_general_ci`
         public static let cp852: CharacterSet = 40
         
-        /// latin7_general_ci
+        /// `latin7_general_ci`
         public static let latin7: CharacterSet = 41
         
-        /// cp1251_general_ci
+        /// `cp1251_general_ci`
         public static let cp1251: CharacterSet = 51
         
-        /// utf16_general_ci
+        /// `utf16_general_ci`
         public static let utf16: CharacterSet = 54
         
-        /// utf16le_general_ci
+        /// `utf16le_general_ci`
         public static let utf16le: CharacterSet = 56
         
-        /// cp1256_general_ci
+        /// `cp1256_general_ci`
         public static let cp1256: CharacterSet = 57
         
-        /// cp1257_general_ci
+        /// `cp1257_general_ci`
         public static let cp1257: CharacterSet = 59
         
-        /// utf32_general_ci
+        /// `utf32_general_ci`
         public static let utf32: CharacterSet = 60
         
-        /// binary
+        /// `binary`
         public static let binary: CharacterSet = 63
         
-        /// geostd8_general_ci
+        /// `geostd8_general_ci`
         public static let geostd8: CharacterSet = 92
         
-        /// cp932_japanese_ci
+        /// `cp932_japanese_ci`
         public static let cp932: CharacterSet = 95
         
-        /// eucjpms_japanese_ci
+        /// `eucjpms_japanese_ci`
         public static let eucjpms: CharacterSet = 97
         
-        /// gb18030_chinese_ci
+        /// `gb18030_chinese_ci`
         public static let gb18030: CharacterSet = 248
         
-        /// utf8mb4_unicode_ci (MySQL 5.7)
+        /// `utf8mb4_unicode_ci` (MySQL 5.7)
         public static let utf8mb4_57: CharacterSet = 224
         
-        /// utf8mb4_unicode_520_ci (MySQL 5.7)
+        /// `utf8mb4_unicode_520_ci` (MySQL 5.7)
         public static let utf8mb4_57_ext: CharacterSet = 246
         
-        /// utf8mb4_0900_ai_ci
+        /// `utf8mb4_0900_ai_ci`
         public static let utf8mb4: CharacterSet = 255
         
-        /// charset_nr (2) -- number of the character set and collation
+        /// `charset_nr` (2) -- number of the character set and collation
         public var rawValue: UInt8
         
         /// `CustomStringConvertible` conformance.
