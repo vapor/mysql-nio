@@ -130,6 +130,12 @@ extension MySQLProtocol {
         /// Permit bulk insert.
         public static let MARIADB_CLIENT_STMT_BULK_OPERATIONS = CapabilityFlags(rawValue: 0x0400000000) // 1 << 34
         
+        /// Add extended metadata information.
+        public static let MARIADB_CLIENT_EXTENDED_TYPE_INFO = CapabilityFlags(rawValue: 0x0800000000) // 1 << 35
+        
+        /// Permit skipping metadata.
+        public static let MARIADB_CLIENT_CACHE_METADATA = CapabilityFlags(rawValue: 0x1000000000) // 1 << 36
+        
         /// Default capabilities.
         ///
         /// - CLIENT_PROTOCOL_41,
