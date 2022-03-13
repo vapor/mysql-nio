@@ -67,5 +67,27 @@ extension ByteBuffer {
                 return numericCast(byte)
         }
     }
-}
+    
+    /// Reads the specified number of bytes from the buffer and ensures that they are all zeroes. Returns `true`
+    /// on success, `false` if there are insufficient readable bytes available, or if any of the read bytes are nonzero.
+    mutating func readReservedBytes(length: Int) -> Bool {
+        guard self.readableBytes >= length,
+              self.readableBytesView[..<length].allSatisfy({ $0 == 0 })
+        else {
+            return false
+        }
+        self.moveReaderIndex(forwardBy: length)
+        return true
+    }
 
+    // Verbatim copy of `ByteBuffer.getNullTerminatedStringLength(at:)`.
+    fileprivate func getNullTerminatedBytesLength(at index: Int) -> Int? {
+        guard self.readerIndex <= index && index < self.writerIndex else {
+            return nil
+        }
+        guard let endIndex = self.readableBytesView[index...].firstIndex(of: 0) else {
+            return nil
+        }
+        return endIndex &- index
+    }
+}
