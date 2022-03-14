@@ -1,108 +1,68 @@
 import NIOCore
+import Algorithms
 
 extension MySQLProtocol {
     /// 14.7.2.1 NULL-Bitmap
     ///
-    /// The binary protocol sends NULL values as bits inside a bitmap instead of a full byte as the ProtocolText::ResultsetRow does.
-    /// If many NULL values are sent, it is more efficient than the old way.
+    /// The binary protocol sends `NULL` values packed as individual bit flags rather than using a full byte for each
+    /// as the text protocol does. This can result in a considerable savings in network bandwidth, with minimal
+    /// computational penalty, for large result sets containing many `NULL` values.
     ///
     /// https://dev.mysql.com/doc/internals/en/null-bitmap.html
-    public struct NullBitmap: CustomStringConvertible {
-        /// Creates a new `MySQLNullBitmap` suitable for com statement execute packets.
-        public static func comExecuteBitmap(count: Int) -> NullBitmap {
-            return .init(count: count, offset: 0)
-        }
-        
-        /// Creates a new `MySQLNullBitmap` suitable for binary result set packets.
-        public static func binaryResultSetBitmap(bytes: [UInt8]) -> NullBitmap {
-            return .init(bytes: bytes, offset: 2)
-        }
-        
-        /// Reads a `MySQLNullBitmap` for binary result sets from the `ByteBuffer`.
-        public static func readResultSetNullBitmap(count: Int, from buffer: inout ByteBuffer) -> NullBitmap? {
-            guard let bytes = buffer.readBytes(length: self.length(count: count, offset: 2)) else {
-                return nil
-            }
-            return NullBitmap.binaryResultSetBitmap(bytes: bytes)
-        }
-        
-        /// NULL-bitmap, length: (num-params+7)/8
-        private static func length(count: Int, offset: Int) -> Int {
-            return (count + 7 + offset) / 8
-        }
-        
-        /// This bitmap's static offset. This varies depending on which packet
-        /// the bitmap is being used in.
-        public let offset: Int
+    struct NullBitmap: CustomStringConvertible, RandomAccessCollection {
+        /// This NULL bitmap's static offset. The first two bits of a binary resultset row's NULL bitmap are reserved
+        /// (and completely unused most of the time; they serve no purpose whatseover), meaning the `NULL` flag of the
+        /// first field in the row (position 0) is stored in the third bit. This appears to be yet another entirely
+        /// arbitrary (or at best mandated by technical debt) and pointless massively overcomplicating quirk of MySQL's
+        /// wire protocol. It sometimes seems as if the protocol itself is bound and determined to ensure that it shall
+        /// be impossible to write a conformant implementation which exhibits temporal efficiency (faster operations).
+        /// Length-encoded integers and strings make it impossible to precalculate offsets when parsing or avoid excess
+        /// data copying during serialization; endless quirks of packet structure and behavior, usually archaic
+        /// remnants of much older server versions, complicate safe data parsing and accurate input validation; the
+        /// wire protocol's documentation is breathtakingly incomplete and tends to be inaccurate even it isn't just
+        /// plain outdated. Menawhile, the arbitrarily variable-length encoding implied by the NULL bitmap prevents
+        /// even being able to parse binary resultset rows as a linear stride even if they contain only fixed-width
+        /// fields - and the X protocol doesn't do any better.
+        let offset: Int
         
         /// the raw bitmap bytes.
-        public var bytes: [UInt8]
+        var bytes: [UInt8]
         
-        /// Creates a new `MySQLNullBitmap` from column count and an offset.
-        private init(count: Int, offset: Int) {
-            self.offset = offset
-            self.bytes = [UInt8](
-                repeating: 0,
-                count: NullBitmap.length(count: count, offset: offset)
-            )
+        /// Create a bitmap with capacity for up to `count + offset` fields, applying `offset` to all field indexes.
+        /// See the ``offset`` property for additional details.
+        init(count: Int, offset: Int) {
+            self.init(bytes: .init(repeating: 0, count: (count + offset + 7) >> 3), offset: offset)
         }
         
-        /// Creates a new `MySQLNullBitmap` from bytes and an offset.
+        /// Create a bitmap from a preexisting series of raw bytes, applying `offset` to all field indexes.
         private init(bytes: [UInt8], offset: Int) {
             self.offset = offset
             self.bytes = bytes
         }
         
-        /// Sets the position to null.
-        public mutating func setNull(at pos: Int) {
-            /// NULL-bitmap-byte = ((field-pos + offset) / 8)
-            /// NULL-bitmap-bit  = ((field-pos + offset) % 8)
-            let NULL_bitmap_byte = (pos + self.offset) / 8
-            let NULL_bitmap_bit = (pos + self.offset) % 8
-            
-            self.bytes[NULL_bitmap_byte] |= 0b1 << NULL_bitmap_bit
-        }
+        var startIndex: Int { 0 } // no, we do _not_ want to add the offset here
+        var endIndex: Int { (self.bytes.count << 3) - self.offset }
         
-        /// Returns `true` if the bitmap is null at the supplied position.
-        public func isNull(at pos: Int) -> Bool {
-            /// NULL-bitmap-byte = ((field-pos + offset) / 8)
-            /// NULL-bitmap-bit  = ((field-pos + offset) % 8)
-            let NULL_bitmap_byte = (pos + self.offset) / 8
-            let NULL_bitmap_bit = (pos + self.offset) % 8
-            
-            let check = self.bytes[NULL_bitmap_byte] & (0b1 << NULL_bitmap_bit)
-            return check > 0
-        }
-        
-        /// See `CustomStringConvertible.description`
-        public var description: String {
-            var desc: String = "0b"
-            let tests: [UInt8] = [
-                0b1000_0000,
-                0b0100_0000,
-                0b0010_0000,
-                0b0001_0000,
-                0b0000_1000,
-                0b0000_0100,
-                0b0000_0010,
-                0b0000_0001,
-            ]
-            for byte in bytes {
-                if desc != "0b" {
-                    desc.append(" ")
-                }
-                for test in tests {
-                    if test == 0b0000_1000 {
-                        desc.append("_")
-                    }
-                    if byte & test > 0 {
-                        desc.append("1")
-                    } else {
-                        desc.append("0")
-                    }
-                }
+        /// Check or update the `NULL` flag of the field at the given position. The position value must be greater than
+        /// or equal to zero and less than the field count specified when the bitmap was created.
+        subscript(pos: Int) -> Bool {
+            get {
+                let pos = pos + self.offset, idx = pos >> 3, mask = 1 << (pos & 0x7)
+                return self.bytes[idx] & mask != 0
             }
-            return desc
+            set {
+                let pos = pos + self.offset, idx = pos >> 3, mask = 1 << (pos & 0x7), rev: UInt8 = newValue ? ~0 : 0
+                self.bytes[idx] ^= (self.bytes[idx] ^ rev) & mask // https://graphics.stanford.edu/~seander/bithacks.html#ConditionalSetOrClearBitsWithoutBranching
+            }
         }
+                
+        /// See ``CustomStringConvertible.description``
+        public var description: String { "NULLmap(\(self.count)):[\(self.map(\.binaryDescription).joined(separator: " "))" }
+    }
+}
+
+extension UInt8 {
+    var binaryDescription: String {
+        "\(String(repeating: "0", count: self.leadingZeroBitCount))\(String(self, radix: 2))"
     }
 }
