@@ -1,20 +1,14 @@
-public final class MySQLPacketSequence {
-    public var current: UInt8?
+final class MySQLPacketSequence {
+    var current: UInt8 = 0
     
-    public init() {
-        self.current = nil
+    init() {}
+    
+    func reset() {
+        self.current = 0
     }
     
-    public func reset() {
-        self.current = nil
-    }
-    
-    public func next() -> UInt8 {
-        if let existing = self.current {
-            self.current = existing &+ 1
-        } else {
-            self.current = 0
-        }
-        return self.current!
+    func next() -> UInt8 {
+        defer { self.current &+= 1 }
+        return self.current
     }
 }
