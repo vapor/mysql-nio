@@ -13,7 +13,7 @@ public struct MySQLPacket {
     
     public var isError: Bool { self.headerFlag == 0xFF }
     public var isOK: Bool { self.headerFlag == 0x00 }
-    public var isEOF: Bool { self.headerFlag == 0xFE }
+    public var isEOF: Bool { self.headerFlag == 0xFE && self.payload.writerIndex < 8 } // EOF may be no longer than 7 bytes
     
     var headerFlag: UInt8? { self.payload.getInteger(at: 0) }
 }

@@ -45,6 +45,11 @@ extension MySQLPacket {
         return i
     }
 
+    mutating func readUInt24(endianness: Endianness = .big) throws -> UInt32 {
+        guard let i = self.payload.readUInt24(endianness: endianness) else { throw Error.packetReadFailure }
+        return i
+    }
+
     mutating func readString(length: Int) throws -> String {
         guard let s = self.payload.readString(length: length) else throw { Error.packetReadFailure }
         return s

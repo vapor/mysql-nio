@@ -41,16 +41,11 @@ private final class MySQLSimpleQueryCommand: MySQLCommand {
         guard !packet.isError else {
             self.state = .done
             let errorPacket = try packet.decode(MySQLProtocol.ERR_Packet.self, capabilities: capabilities)
-            let error: Error
             switch errorPacket.errorCode {
-            case .DUP_ENTRY:
-                error = MySQLError.duplicateEntry(errorPacket.errorMessage)
-            case .PARSE_ERROR:
-                error = MySQLError.invalidSyntax(errorPacket.errorMessage)
-            default:
-                error = MySQLError.server(errorPacket)
+                case .DUP_ENTRY: throw MySQLError.duplicateEntry(errorPacket.errorMessage)
+                case .PARSE_ERROR: throw MySQLError.invalidSyntax(errorPacket.errorMessage)
+                default: throw MySQLError.server(.synthesize(from: errorPacket))
             }
-            throw error
         }
         switch self.state {
         case .ready:

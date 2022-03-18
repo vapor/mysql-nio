@@ -56,23 +56,25 @@ extension MySQLProtocol {
         
         /// `MySQLPacketDecodable` conformance.
         static func decode(from packet: inout MySQLPacket, capabilities: CapabilityFlags) throws -> ERR_Packet {
-            guard let flag = packet.payload.readInteger(endianness: .little, as: UInt8.self), flag = 0xff else { throw DecodeError.missingFlag }
-            guard let errorCode = packet.payload.readInteger(endianness: .little, as: ErrorCode.self) else { throw DecodeError.missingErrorCode }
+            guard try packet.readInteger(endianness: .little, as: UInt8.self) == 0xff else { throw MySQLError.protocolError }
+            
+            let errorCode = try packet.readInteger(endianness: .little, as: ErrorCode.self)
             
             if errorCode < .max || !capabilities.contains(.MARIADB_CLIENT_PROGRESS) {
-                guard let sqlState = packet.payload.readString(length: 6), sqlState.first == "#" else { throw DecodeError.missingSQLState }
-                guard let errorMessage = packet.payload.readString(length: packet.payload.readableBytes) else { throw DecodeError.missingErrorMessage }
+                let sqlState = try packet.readString(length: 6)
+                guard sqlState.first == "#" else { throw MySQLError.protocolError }
+                let errorMessage = try packet.readString(length: packet.payload.readableBytes)
                 
                 return .init(contents: .error(.init(errorCode: errorCode, sqlState: .init(sqlState.dropFirst()), errorMessage: errorMessage)))
             } else {
-                guard let numStrings = packet.payload.readInteger(endianness: .little, as: UInt8.self), numStrings == 1,
-                      let stage = packet.payload.readInteger(endianness: .little, as: UInt8.self),
-                      let maxStage = packet.payload.readInteger(endianness: .little, as: UInt8.self),
-                      let progress = packet.payload.readBytes(length: 3)?.reversed().reduce(0, { ($0 << 8) | $1 }),
-                      let status = packet.payload.readLengthEncodedString()
-                else { throw DecodeError.missingProgressInfo }
+                guard try packet.readInteger(endianness: .little, as: UInt8.self) == 1 else { throw MySQLError.protocolError }
                 
-                return .init(contents: .progress(.init(stage: stage, maxStage: maxStage, percentDone: Double(progress) / 1000.0, status: status)))
+                return .init(contents: .progress(.init(
+                    stage: try packet.readInteger(endianness: .little, as: UInt8.self),
+                    maxStage: try packet.readInteger(endianness: .little, as: UInt8.self),
+                    percentDone: Double(try packet.readUInt24(endianness: .little)) / 1000.0,
+                    status: try packet.readLengthEncodedString()
+                )))
             }
         }
         
@@ -90,7 +92,7 @@ extension MySQLProtocol {
                     packet.payload.writeInteger(1, endianness: .little, as: UInt8.self)
                     packet.payload.writeInteger(info.stage, endianness: .little, as: UInt8.self)
                     packet.payload.writeInteger(info.maxStage, endianness: .little, as: UInt8.self)
-                    packet.payload.writeBytes([.init(progress & 0xff), .init(progress >> 8 & 0xff), .init(progress >> 16 & 0xff)])
+                    packet.payload.writeUInt24(progress, endianness: .little)
                     packet.payload.writeLengthEncodedString(info.status)
             }
         }

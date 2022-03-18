@@ -18,28 +18,15 @@ extension MySQLProtocol {
         }
         
         public var errorCode: ErrorCode
-        public var sqlStateMarker: String?
+        public var sqlStateMarker: String? { "#" }
         public var sqlState: String?
         public var errorMessage: String
         
-        static func decode(from packet: inout MySQLPacket, capabilities: CapabilityFlags) throws -> Self {
-            guard let flag = packet.payload.readInteger(endianness: .little, as: UInt8.self) else { throw DecodeError.missingFlag }
-            guard flag == 0xFF else { throw DecodeError.invalidFlag(flag) }
-            guard let errorCode = packet.payload.readInteger(endianness: .little, as: ErrorCode.self) else { throw DecodeError.missingErrorCode }
-            
-            var sqlStateMarker: String? = nil, sqlState: String? = nil
-            if capabilities.contains(.CLIENT_PROTOCOL_41) {
-                guard let marker = packet.payload.readString(length: 1) else { throw DecodeError.missingSQLStateMarker }
-                sqlStateMarker = marker
-                guard let state = packet.payload.readString(length: 5) else { throw DecodeError.missingSQLState }
-                sqlState = state
-            }
-            guard let errorMessage = packet.payload.readString(length: packet.payload.readableBytes) else { throw DecodeError.missingErrorMessage }
-            return .init(errorCode: errorCode, sqlStateMarker: sqlStateMarker, sqlState: sqlState, errorMessage: errorMessage)
-        }
-        
         internal static func synthesize(from realPacket: ERR_Packet) -> Self {
-        
+            guard case .error(let serverError) = realPacket.contents else {
+                return .init(errorCode: .UNKNOWN_COM_ERROR, sqlStateMarker: "#", sqlState: "0000", errorMessage: "Mishandled error response")
+            }
+            return .init(errorCode: serverError.errorCode, sqlState: serverError.sqlState, errorMessage: serverError.errorMessage)
         }
     }
 }
