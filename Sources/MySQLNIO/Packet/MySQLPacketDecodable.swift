@@ -51,37 +51,42 @@ extension MySQLPacket {
     }
 
     mutating func readString(length: Int) throws -> String {
-        guard let s = self.payload.readString(length: length) else throw { Error.packetReadFailure }
+        guard let s = self.payload.readString(length: length) else { throw Error.packetReadFailure }
         return s
     }
     
     mutating func readBytes(length: Int) throws -> [UInt8] {
-        guard let b = self.payload.readBytes(length: length) else throw { Error.packetReadFailure }
+        guard let b = self.payload.readBytes(length: length) else { throw Error.packetReadFailure }
         return b
     }
 
     mutating func readSlice(length: Int) throws -> ByteBuffer {
-        guard let s = self.payload.readSlice(length: length) else throw { Error.packetReadFailure }
+        guard let s = self.payload.readSlice(length: length) else { throw Error.packetReadFailure }
         return s
     }
     
     mutating func readLengthEncodedInteger() throws -> UInt64 {
-        guard let i = self.payload.readLengthEncodedInteger() else throw { Error.packetReadFailure }
+        guard let i = self.payload.readLengthEncodedInteger() else { throw Error.packetReadFailure }
         return i
     }
     
     mutating func readLengthEncodedString() throws -> String {
-        guard let s = self.payload.readLengthEncodedString() else throw { Error.packetReadFailure }
+        guard let s = self.payload.readLengthEncodedString() else { throw Error.packetReadFailure }
         return s
     }
     
     mutating func readLengthEncodedSlice() throws -> ByteBuffer {
-        guard let s = self.payload.readLengthEncodedSlice() else throw { Error.packetReadFailure }
+        guard let s = self.payload.readLengthEncodedSlice() else { throw Error.packetReadFailure }
+        return s
+    }
+    
+    mutating func readLengthPrefixedSlice<I: FixedWidthInteger>(as: I.Type) throws -> ByteBuffer {
+        guard let s = self.payload.readLengthPrefixedSlice(as: I.self) else { throw Error.packetReadFailure }
         return s
     }
     
     mutating func readNullTerminatedString() throws -> String {
-        guard let s = self.payload.readNullTerminatedString() else throw { Error.packetReadFailure }
+        guard let s = self.payload.readNullTerminatedString() else { throw Error.packetReadFailure }
         return s
     }
     
