@@ -235,13 +235,25 @@ extension MySQLProtocol {
             (0 ..< RawValue.bitWidth).map { .init(rawValue: 1 << $0) }.filter(self.contains(_:)).map(\.name).joined(separator: ", ")
         }
         
-        /// MySQL specific flags
+        /// General capability flags
         internal var general: UInt32 {
             get { return UInt32(self.rawValue & 0xFFFFFFFF) }
             set { self.rawValue = (UInt64(self.mariaDBSpecific) << 32) | UInt64(newValue) }
         }
         
-        /// MariaDB Initial Handshake Packet specific flags
+        /// General capability flags, low half
+        internal var lowerGeneral: UInt16 {
+            get { return UInt16(self.rawValue & 0xFFFF) }
+            set { self.rawValue = (UInt64(self.mariaDBSpecific) << 32) | (UInt64(self.upperGeneral) << 16) | UInt64(newValue) }
+        }
+
+        /// General capability flags, high half
+        internal var upperGeneral: UInt16 {
+            get { return UInt16(self.rawValue >> 16 & 0xFFFF) }
+            set { self.rawValue = (UInt64(self.mariaDBSpecific) << 32) | (UInt64(newValue) << 16) | UInt64(self.lowerGeneral) }
+        }
+
+        /// MariaDB-specific capability flags
         /// https://mariadb.com/kb/en/library/1-connecting-connecting/
         internal var mariaDBSpecific: UInt32 {
             get { return UInt32(self.rawValue >> 32) }
@@ -260,15 +272,8 @@ extension MySQLProtocol {
         }
         
         /// Create a new `MySQLCapabilities` from the upper and lower values.
-        init(upper: UInt16? = nil, lower: UInt16) {
-            var raw: UInt64 = 0
-            if let upper = upper {
-                raw = numericCast(lower)
-                raw |= numericCast(upper) << 16
-            } else {
-                raw = numericCast(lower)
-            }
-            self.init(rawValue: raw)
+        init(upper: UInt16, lower: UInt16) {
+            self.init(rawValue: numericCast(lower) | (numericCast(upper) << 16))
         }
     }
 }
