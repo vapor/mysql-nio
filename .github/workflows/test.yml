@@ -12,13 +12,12 @@ jobs:
         dbimage:
           - mysql:5.7
           - mysql:8.0
-          - mariadb:10.2
+          - mariadb:10.3
           - mariadb:10.7
-          - percona:5.7
           - percona:8.0
         swiftver:
-          - swift:5.2
           - swift:5.5
+          - swift:5.6
           - swiftlang/swift:nightly-main
         swiftos:
           - focal
@@ -57,24 +56,24 @@ jobs:
           MYSQL_DATABASE: test_database
     steps:
       - name: Check out package
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with: { path: 'mysql-nio' }
       - name: Run tests
-        run: swift test --package-path mysql-nio --enable-test-discovery
+        run: swift test --package-path mysql-nio
       - name: Check out mysql-kit dependent
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with: { repository: 'vapor/mysql-kit', path: 'mysql-kit' }
       - name: Check out fluent-mysql-driver dependent
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with: { repository: 'vapor/fluent-mysql-driver', path: 'fluent-mysql-driver' }
       - name: Use local package in dependents
         run: |
           swift package --package-path mysql-kit edit mysql-nio --path mysql-nio
           swift package --package-path fluent-mysql-driver edit mysql-nio --path mysql-nio
       - name: Run mysql-kit tests
-        run: swift test --package-path mysql-kit --enable-test-discovery
+        run: swift test --package-path mysql-kit
       - name: Run fluent-mysql-driver tests
-        run: swift test --package-path fluent-mysql-driver --enable-test-discovery
+        run: swift test --package-path fluent-mysql-driver
 
   macos-all:
     strategy:
@@ -87,11 +86,14 @@ jobs:
         xcode:
           - latest-stable
           - latest
+        macos:
+          - macos-11
+          - macos-12
         include:
           - username: root
           - dbimage: mariadb
             username: runner
-    runs-on: macos-11
+    runs-on: ${{ matrix.macos }}
     env:
       LOG_LEVEL: debug
       MYSQL_DATABASE: 'test_database'
@@ -115,19 +117,6 @@ jobs:
           SQL
         timeout-minutes: 5
       - name: Check out code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - name: Run all tests
         run: swift test
-
-# Leave Windows disabled until NIO works there.
-#  windows-all:
-#    runs-on: windows-latest
-#    steps:
-#      - uses: compnerd/gha-setup-swift@main
-#        with:
-#          branch: swift-5.5-release
-#          tag: 5.5-RELEASE
-#      - name: Check out code
-#        uses: actions/checkout@v2
-#      - name: Run tests
-#        run: swift test
