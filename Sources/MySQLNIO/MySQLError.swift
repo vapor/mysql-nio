@@ -13,6 +13,7 @@ public enum MySQLError: Error, CustomStringConvertible, LocalizedError {
     case protocolError // any generic protocol-level failure not covered elsewhere
     case server(MySQLProtocol.ServerErrorDetails)
     case closed
+    case connection(underlying: Error)
     
     /// A uniqueness constraint was violated. Associated value is message from server with details.
     case duplicateEntry(String)
@@ -42,6 +43,8 @@ public enum MySQLError: Error, CustomStringConvertible, LocalizedError {
             return "Server error: \(error.errorMessage)"
         case .closed:
             return "Connection closed."
+        case .connection(let underlyingError)
+            return "Underlying connection error: \(error)"
         case .duplicateEntry(let message):
             return "Duplicate entry: \(message)"
         case .invalidSyntax(let message):

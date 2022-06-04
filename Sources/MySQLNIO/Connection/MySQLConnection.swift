@@ -51,11 +51,11 @@ public final class MySQLConnection: MySQLDatabase {
     
     public let channel: Channel
     
+    public private(set) var logger: Logger
+    
     public var eventLoop: EventLoop {
         return self.channel.eventLoop
     }
-    
-    public private(set) var logger: Logger
     
     public var isClosed: Bool {
         return !self.channel.isActive

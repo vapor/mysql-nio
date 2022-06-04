@@ -17,7 +17,7 @@ extension MySQLProtocol {
         public static let SERVER_STATUS_NO_INDEX_USED = StatusFlags(rawValue: 0x0020)
         
         /// Used by Binary Protocol Resultset to signal that
-        /// COM_STMT_FETCH must be used to fetch the row-data.
+        /// `COM_STMT_FETCH` must be used to fetch the row-data.
         public static let SERVER_STATUS_CURSOR_EXISTS = StatusFlags(rawValue: 0x0040)
         
         public static let SERVER_STATUS_LAST_ROW_SENT = StatusFlags(rawValue: 0x0080)
