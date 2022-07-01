@@ -1,3 +1,4 @@
+import NIOCore
 import NIOSSL
 import NIOCore
 import Logging
@@ -41,57 +42,160 @@ final class MySQLConnectionHandler: ChannelDuplexHandler {
         case busy
     }
 
-    let logger: Logger
     var state: State
-    var serverCapabilities: MySQLProtocol.CapabilityFlags?
+    var serverVersion: MySQLProtocol.ServerVersion?
+    var activeCapabilities: MySQLProtocol.CapabilityFlags
+    var serverStatus: MySQLProtocol.StatusFlags
     var queue: CircularBuffer<MySQLCommandContext>
     let sequence: MySQLPacketSequence
     var commandState: CommandState
+    let logger: Logger
     
-    init(logger: Logger, state: State, sequence: MySQLPacketSequence) {
+    static func newClientHandler(sequence: MySQLPacketSequence, configuration: MySQLConnection.Configuration, handshakeCompletion promise: EventLoopPromise<Void>, logger: Logger) -> Self {
+        let handler = Self.init(sequence: sequence, logger: logger)
+        
+        handler.queue.append(.init(
+            handler: MySQLHandshakeCommand(
+                logger: logger,
+                configuration: configuration,
+                desiredClientCapabilities: .clientDefault,
+                desiredCharacterSet: .utf8mb4,
+                commandPacketSizeLimit: 0
+            ),
+            promise: promise
+        ))
+        return handler
+    }
+    
+    init(sequence: MySQLPacketSequence, logger: Logger) {
         self.logger = logger
         self.state = state
+        self.activeCapabilities = .init()
+        self.serverStatus = .init()
         self.queue = .init()
         self.sequence = sequence
         self.commandState = .ready
     }
     
+    // MARK: - NIO channel handler callbacks
+    
     func channelRead(context: ChannelHandlerContext, data: NIOAny) {
         var packet = self.unwrapInboundIn(data)
-        switch self.state {
-        case .handshake(let state):
-            do {
-                try self.handleHandshake(context: context, packet: &packet, state: state)
-            } catch {
-                state.done.fail(error)
+        
+        guard let current = self.queue.first else { assertionFailure("unhandled packet: \(packet.payload.debugDescription)") }
+    
+        do {
+            guard let capabilities = self.serverCapabilities else {
+                throw MySQLError.protocolError
             }
-        case .authenticating(let state):
-            do {
-                self.logger.trace("Handle authentication packet")
-                try self.handleAuthentication(context: context, packet: &packet, state: state)
-            } catch {
-                state.done.fail(error)
-            }
-        case .commandPhase:
-            if let current = self.queue.first {
-                do {
-                    guard let capabilities = self.serverCapabilities else {
-                        throw MySQLError.protocolError
-                    }
-                    let commandState = try current.handler.handle(packet: &packet, capabilities: capabilities)
-                    self.handleCommandState(context: context, commandState)
-                } catch {
-                    self.queue.removeFirst()
-                    self.commandState = .ready
-                    current.promise.fail(error)
-                    self.sendEnqueuedCommandIfReady(context: context)
+            let commandState = try current.handler.handle(packet: &packet, capabilities: capabilities)
+            
+            self.handleCommandState(context: context, commandState)
+        } catch {
+            self.queue.removeFirst()
+            self.commandState = .ready
+            current.promise.fail(error)
+            self.sendEnqueuedCommandIfReady(context: context)
+        }
+    }
+
+    func write(context: ChannelHandlerContext, data: NIOAny, promise: EventLoopPromise<Void>?) {
+        let command = self.unwrapOutboundIn(data)
+        self.queue.append(command)
+        self.sendEnqueuedCommandIfReady(context: context)
+        promise?.succeed(())
+    }
+    
+    func close(context: ChannelHandlerContext, mode: CloseMode, promise: EventLoopPromise<Void>?) {
+        self.sequence.reset()
+        let quit = MySQLProtocol.COM_QUIT()
+        // N.B.: It is possible to get here without having processed a handshake packet yet, in which case there will
+        // not be any serverCapabilities. Since COM_QUIT doesn't care about any of those anyway, don't crash if they're
+        // not there!
+        context.write(self.wrapOutboundOut(.encode(quit, capabilities: self.serverCapabilities ?? .init())), promise: nil)
+        context.flush()
+        
+        if let promise = promise {
+            // we need to do some error mapping here, so create a new promise and forward the close to it
+            let p = context.eventLoop.makePromise(of: Void.self)
+            context.close(mode: mode, promise: p)
+            
+            // forward close results, explicitly ignoring unclean TLS shutdown
+            p.futureResult.whenComplete {
+                if case .failure(let error) = $0, case .uncleanShutdown = error as? NIOSSLError, self.queue.isEmpty {
+                    promise.succeed(())
+                } else {
+                    promise.fail(error)
                 }
-            } else {
-                assertionFailure("unhandled packet: \(packet.payload.debugDescription)")
             }
+        } else {
+            context.close(mode: mode, promise: nil) // no close promise anyway, just forward request
         }
     }
     
+    func channelInactive(context: ChannelHandlerContext) {
+        while let next = self.queue.popLast() {
+            next.promise.fail(MySQLError.closed)
+        }
+    }
+    
+    func errorCaught(context: ChannelHandlerContext, error: Error) {
+        if let current = self.queue.first {
+            self.queue.removeFirst()
+            current.promise.fail(error)
+        }
+    }
+    
+    // MARK: - Utility
+    
+    func sendEnqueuedCommandIfReady(context: ChannelHandlerContext) {
+        guard case .ready = self.commandState else {
+            return
+        }
+        guard let command = self.queue.first else {
+            return
+        }
+        guard let capabilities = self.serverCapabilities else {
+            command.promise.fail(MySQLError.protocolError)
+            return
+        }
+        self.commandState = .busy
+        
+        // send initial
+        do {
+            self.sequence.current = nil
+            let commandState = try command.handler.activate(capabilities: capabilities)
+            self.handleCommandState(context: context, commandState)
+        } catch {
+            self.queue.removeFirst()
+            self.commandState = .ready
+            command.promise.fail(error)
+            self.sendEnqueuedCommandIfReady(context: context)
+        }
+    }
+    
+    func handleCommandState(context: ChannelHandlerContext, _ commandState: MySQLCommandState) {
+        if commandState.resetSequence {
+            self.sequence.reset()
+        }
+        if !commandState.response.isEmpty {
+            for packet in commandState.response {
+                context.write(self.wrapOutboundOut(packet), promise: nil)
+            }
+            context.flush()
+        }
+        if commandState.done {
+            let current = self.queue.removeFirst()
+            self.commandState = .ready
+            if let error = commandState.error {
+                current.promise.fail(error)
+            } else {
+                current.promise.succeed(())
+            }
+            self.sendEnqueuedCommandIfReady(context: context)
+        }
+    }
+
     func handleHandshake(context: ChannelHandlerContext, packet: inout MySQLPacket, state: HandshakeState) throws {
         guard !packet.isError else {
             let errPacket = try packet.decode(MySQLProtocol.ERR_Packet.self, capabilities: [])
@@ -370,127 +474,6 @@ final class MySQLConnectionHandler: ChannelDuplexHandler {
             }
         default:
             throw MySQLError.unsupportedAuthPlugin(name: state.authPluginName)
-        }
-    }
-    
-    func write(context: ChannelHandlerContext, data: NIOAny, promise: EventLoopPromise<Void>?) {
-        let command = self.unwrapOutboundIn(data)
-        self.queue.append(command)
-        self.sendEnqueuedCommandIfReady(context: context)
-        promise?.succeed(())
-    }
-    
-    func sendEnqueuedCommandIfReady(context: ChannelHandlerContext) {
-        guard case .ready = self.commandState else {
-            return
-        }
-        guard let command = self.queue.first else {
-            return
-        }
-        guard let capabilities = self.serverCapabilities else {
-            command.promise.fail(MySQLError.protocolError)
-            return
-        }
-        self.commandState = .busy
-        
-        // send initial
-        do {
-            self.sequence.current = nil
-            let commandState = try command.handler.activate(capabilities: capabilities)
-            self.handleCommandState(context: context, commandState)
-        } catch {
-            self.queue.removeFirst()
-            self.commandState = .ready
-            command.promise.fail(error)
-            self.sendEnqueuedCommandIfReady(context: context)
-        }
-    }
-    
-    func handleCommandState(context: ChannelHandlerContext, _ commandState: MySQLCommandState) {
-        if commandState.resetSequence {
-            self.sequence.reset()
-        }
-        if !commandState.response.isEmpty {
-            for packet in commandState.response {
-                context.write(self.wrapOutboundOut(packet), promise: nil)
-            }
-            context.flush()
-        }
-        if commandState.done {
-            let current = self.queue.removeFirst()
-            self.commandState = .ready
-            if let error = commandState.error {
-                current.promise.fail(error)
-            } else {
-                current.promise.succeed(())
-            }
-            self.sendEnqueuedCommandIfReady(context: context)
-        }
-    }
-    
-    func close(context: ChannelHandlerContext, mode: CloseMode, promise: EventLoopPromise<Void>?) {
-        do {
-            try self._close(context: context, mode: mode, promise: promise)
-        } catch {
-            self.errorCaught(context: context, error: error)
-        }
-    }
-    
-    private func _close(context: ChannelHandlerContext, mode: CloseMode, promise: EventLoopPromise<Void>?) throws {
-        self.sequence.reset()
-        let quit = MySQLProtocol.COM_QUIT()
-        // N.B.: It is possible to get here without having processed a handshake packet yet, in which case there will
-        // not be any serverCapabilities. Since COM_QUIT doesn't care about any of those anyway, don't crash if they're
-        // not there!
-        try context.write(self.wrapOutboundOut(.encode(quit, capabilities: self.serverCapabilities ?? .init())), promise: nil)
-        context.flush()
-        
-        if let promise = promise {
-            // we need to do some error mapping here, so create a new promise
-            let p = context.eventLoop.makePromise(of: Void.self)
-            
-            // forward the close request with our new promise
-            context.close(mode: mode, promise: p)
-            
-            // forward close future results based on whether
-            // the close was successful
-            p.futureResult.whenSuccess { promise.succeed(()) }
-            p.futureResult.whenFailure { error in
-                if
-                    let sslError = error as? NIOSSLError,
-                    case .uncleanShutdown = sslError,
-                    self.queue.isEmpty
-                {
-                    // we can ignore unclear shutdown errors
-                    // since no requests are pending
-                    promise.succeed(())
-                } else {
-                    promise.fail(error)
-                }
-            }
-        } else {
-            // no close promise anyway, just forward request
-            context.close(mode: mode, promise: nil)
-        }
-    }
-    
-    func channelInactive(context: ChannelHandlerContext) {
-        while let next = self.queue.popLast() {
-            next.promise.fail(MySQLError.closed)
-        }
-    }
-    
-    func errorCaught(context: ChannelHandlerContext, error: Error) {
-        switch self.state {
-        case .handshake(let state):
-            state.done.fail(error)
-        case .authenticating(let state):
-            state.done.fail(error)
-        case .commandPhase:
-            if let current = self.queue.first {
-                self.queue.removeFirst()
-                current.promise.fail(error)
-            }
         }
     }
 }
