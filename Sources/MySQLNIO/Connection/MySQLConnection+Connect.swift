@@ -70,7 +70,7 @@ extension MySQLConnection {
             private init(_ base: Base) { self.base = base }
             
             /// Set up MySQL channel handlers on an existing NIO channel and wait for a server handshake packet.
-            public static func existingChannel(_ channel: Channel) -> Self { .init(base: .existingChannel(channel)) }
+            public static func existingChannel(_ channel: Channel) -> Self { .init(.existingChannel(channel)) }
             
             /// Connect to a raw `SocketAddress`. (Warning: TLS is never enabled for raw address connections.)
             public static func socketAddress(_ address: SocketAddress) -> Self { .init(.socketAddress(address)) }
@@ -99,7 +99,7 @@ extension MySQLConnection {
             switch configuration.connection {
                 case .existingChannel(let channel): channelFuture = eventLoop.makeSucceededFuture(channel)
                 case .socketAddress(let address): channelFuture = self.makeBootstrap(on: eventLoop).connect(to: address)
-                case .networkHost(let host, let port, _): channelFuture = self.makeBootstrap(on: eventLoop).connect(host: host, port: port)
+                case .networkHost(let host, let port): channelFuture = self.makeBootstrap(on: eventLoop).connect(host: host, port: port)
                 case .unixSocket(let path): channelFuture = self.makeBootstrap(on: eventLoop).connect(unixDomainSocketPath: path)
             }
             
