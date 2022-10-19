@@ -14,6 +14,10 @@ public protocol MySQLAuthPluginResponder {
     /// provided to allow responders that handle multiple plugin names to distinguish specific
     /// methods as needed. Returning `nil` means "don't send anything at all in response"; returning
     /// an empty array means "send the next appropriate packet but without any auth data".
+    ///
+    /// - Note: There is an exception to the above behavior: If the server is awaiting the initial
+    ///   handshake reply, both `nil` and an empty array are treated identically; the handshake
+    ///   reply is sent either way, with no authentication data included.
     func handle(pluginName: String, configuration: MySQLConnection.Configuration, isSecureConnection: Bool, data: [UInt8]) throws -> [UInt8]?
 }
 

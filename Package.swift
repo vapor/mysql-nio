@@ -13,11 +13,12 @@ let package = Package(
         .library(name: "MySQLNIO", targets: ["MySQLNIO"]),
     ],
     dependencies: [
-        .package(url: "https://github.com/gwynne/swift-crypto.git", .branch("gwynne/rsa-encrypt-decrypt")),
+        .package(url: "https://github.com/apple/swift-crypto.git", "1.0.0" ..< "3.0.0"),
         .package(url: "https://github.com/apple/swift-log.git", from: "1.0.0"),
         .package(url: "https://github.com/apple/swift-algorithms.git", from: "1.0.0"),
         .package(url: "https://github.com/apple/swift-nio.git", from: "2.0.0"),
         .package(url: "https://github.com/apple/swift-nio-ssl.git", from: "2.14.0"),
+        .package(url: "https://github.com/gwynne/swift-mini-rsa-crypt.git", from: "0.0.1"),
     ],
     targets: [
         .target(name: "MySQLNIO", dependencies: [
@@ -26,6 +27,7 @@ let package = Package(
             .product(name: "Algorithms", package: "swift-algorithms"),
             .product(name: "NIO", package: "swift-nio"),
             .product(name: "NIOSSL", package: "swift-nio-ssl"),
+            .product(name: "MiniRSACrypt", package: "swift-mini-rsa-crypt"),
         ]),
         .testTarget(name: "MySQLNIOTests", dependencies: [
             .target(name: "MySQLNIO"),

@@ -141,8 +141,8 @@ internal final class MySQLHandshakeCommand: MySQLCommand {
         // Initial error packet indicates server is not accepting connections.
         guard !packet.isError else {
             let errPacket = try packet.decode(MySQLProtocol.ERR_Packet.self, capabilities: [])
-            self.logger.trace("MySQL server opened with error \(errPacket.errorMessage)")
-            throw MySQLError.server(errPacket)
+            self.logger.trace("MySQL server opened with error \(errPacket.asServerError?.errorMessage ?? "<invalid data>")")
+            throw MySQLError.server(.synthesize(from: errPacket))
         }
 
         // Decode and validate the server's handshake.
@@ -162,7 +162,7 @@ internal final class MySQLHandshakeCommand: MySQLCommand {
                 // resumes at `.activate(capabilities:)`
             default:
                 // immediately skip to `.activate`
-                return try self.activate(capabilities: capabilities)
+                return try self.activate(capabilities: checkedCapabilities)
         }
     }
     
@@ -179,7 +179,13 @@ internal final class MySQLHandshakeCommand: MySQLCommand {
         
         self.state = .preparingForAuthentication
         
-        
+        return .init(updateCapabilities: capabilities, queueCommands: [(MySQLAuthenticateCommand(
+            logger: self.logger,
+            configuration: self.configuration,
+            desiredCharacterSet: self.desiredCharacterSet,
+            commandPacketSizeLimit: self.commandPacketSizeLimit,
+            serverHandshake: serverHandshake
+        ), .next)], complete: .success(()))
     }
 /*
             let promise = context.channel.eventLoop.makePromise(of: Void.self)

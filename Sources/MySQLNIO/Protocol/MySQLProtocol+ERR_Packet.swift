@@ -14,14 +14,6 @@ extension MySQLProtocol {
     /// https://dev.mysql.com/doc/internals/en/packet-ERR_Packet.html
     /// https://mariadb.com/kb/en/err_packet/
     struct ERR_Packet: MySQLPacketCodable {
-        enum DecodeError: Swift.Error {
-            case missingFlag
-            case missingErrorCode
-            case missingSQLState
-            case missingErrorMessage
-            case missingProgressInfo
-        }
-        
         /// `error_code     error-code`
         /// see below
         let contents: Contents
@@ -52,6 +44,28 @@ extension MySQLProtocol {
         enum Contents {
             case error(ServerError)
             case progress(ServerProgress)
+        }
+        
+        func requireServerError() throws -> ServerError {
+            guard case .error(let serverError) = self.contents else {
+                throw MySQLError.protocolError
+            }
+            return serverError
+        }
+        
+        var asServerError: ServerError? {
+            guard case .error(let serverError) = self.contents else {
+                return nil
+            }
+            return serverError
+        }
+        
+        var isProgressReport: Bool {
+            if case .progress(_) = self.contents {
+                return true
+            } else {
+                return false
+            }
         }
         
         /// `MySQLPacketDecodable` conformance.

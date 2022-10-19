@@ -1,5 +1,5 @@
 import Crypto
-import _CryptoExtras
+import MiniRSACrypt
 import Foundation
 import NIOSSL
 
