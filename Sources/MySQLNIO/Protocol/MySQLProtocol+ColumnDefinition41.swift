@@ -112,7 +112,7 @@ extension MySQLProtocol {
         
         /// `MySQLPacketDecodable` conformance.
         static func decode(from packet: inout MySQLPacket, capabilities: MySQLProtocol.CapabilityFlags) throws -> ColumnDefinition41 {
-            return .init(from: &packet, capabilities: capabilities)
+            return try .init(from: &packet, capabilities: capabilities)
         }
         
         /// `MySQLPacketEncodable` conformance.
@@ -129,10 +129,10 @@ extension MySQLProtocol {
                 self.extendedFormats.reduce(into: ()) { buf.writeInteger(1 as UInt8); buf.writeLengthEncodedString($1) }
                 packet.payload.writeImmutableLengthEncodedSlice(buf)
             }
-            packet.payload.writeInteger(self.characterSet, endianness: .little, as: CharacterSet.self)
+            packet.payload.writeInteger(self.characterSet, endianness: .little)
             packet.payload.writeInteger(self.columnLength, endianness: .little, as: UInt32.self)
-            packet.payload.writeInteger(self.columnType, endianness: .little, as: DataType.self)
-            packet.payload.writeInteger(self.flags, endianness: .little, as: ColumnFlags.self)
+            packet.payload.writeInteger(self.columnType, endianness: .little)
+            packet.payload.writeInteger(self.flags, endianness: .little)
             packet.payload.writeInteger(self.decimals, endianness: .little, as: UInt8.self)
             packet.payload.writeRepeatingByte(0, count: 2)
         }

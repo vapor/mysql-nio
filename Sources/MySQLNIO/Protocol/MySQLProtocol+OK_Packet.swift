@@ -93,7 +93,7 @@ extension MySQLProtocol {
                         throw Error.invalidFlag(self.type)
                     }
                     packet.payload.writeInteger(self.warningsCount, endianness: .little, as: UInt16.self)
-                    packet.payload.writeInteger(self.statusFlags, endianness: .little, as: StatusFlags.self)
+                    packet.payload.writeInteger(self.statusFlags, endianness: .little)
                 case 0x00:
                     guard self.sessionStateChanges == nil ||
                           (capabilities.contains(.CLIENT_SESSION_TRACK) && self.statusFlags.contains(.SERVER_SESSION_STATE_CHANGED)) else {
@@ -101,13 +101,13 @@ extension MySQLProtocol {
                     }
                     packet.payload.writeLengthEncodedInteger(self.affectedRows)
                     packet.payload.writeLengthEncodedInteger(self.lastInsertID ?? 0)
-                    packet.payload.writeInteger(self.statusFlags, endianness: .little, as: StatusFlags.self)
+                    packet.payload.writeInteger(self.statusFlags, endianness: .little)
                     packet.payload.writeInteger(self.warningsCount, endianness: .little, as: UInt16.self)
                     if capabilities.contains(.CLIENT_SESSION_TRACK) {
                         packet.payload.writeLengthEncodedString(self.info)
                         if let sessionStateChanges = self.sessionStateChanges, self.statusFlags.contains(.SERVER_SESSION_STATE_CHANGED) {
                             var buffer = ByteBuffer()
-                            for let change in sessionStateChanges {
+                            for change in sessionStateChanges {
                                 change.write(to: &buffer)
                             }
                             packet.payload.writeLengthEncodedSlice(&buffer)

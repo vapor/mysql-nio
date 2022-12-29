@@ -45,7 +45,7 @@ extension MySQLProtocol {
             let arch = "unknown" // TODO: Should we try asking `uname()` here? What about on Windows?
 #endif
 
-#warning "Don't release without fixing the .clientVersion atrribute!"
+#warning("Don't release without fixing the .clientVersion atrribute!")
             return [
                 .clientName: "MySQLNIO",
                 .clientVersion: "1.5.0", // TODO: Figure out a way to put a real value here. Do NOT let this become an arbitrary hardcoded value.

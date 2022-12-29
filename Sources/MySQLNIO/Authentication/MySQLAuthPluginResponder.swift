@@ -32,9 +32,9 @@ public protocol MySQLAuthPluginResponder {
 /// A new instance of the appropriate responder is created for each usage.
 public enum MySQLAuthPluginResponderRegistry {
     private static var storage: [String: (String) -> any MySQLAuthPluginResponder] = [:]
-    private static var lock = Lock()
+    private static var lock = NIOLock()
     
-    public static func handle(pluginName: String, using responderFactory: (_ authPluginName: String) -> any MySQLAuthPluginResponder) {
+    public static func handle(pluginName: String, using responderFactory: @escaping (_ authPluginName: String) -> any MySQLAuthPluginResponder) {
         self.lock.withLock {
             self.storage[pluginName] = responderFactory
         }

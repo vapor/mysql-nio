@@ -25,7 +25,7 @@ extension ByteBuffer {
     
     @discardableResult
     mutating func writeInteger<T>(_ value: T, endianness: Endianness = .big) -> Int
-        where T.RawRepresentable, T.RawValue: FixedWidthInteger
+        where T: RawRepresentable, T.RawValue: FixedWidthInteger
     {
         return self.writeInteger(value.rawValue, endianness: endianness)
     }
@@ -88,9 +88,9 @@ extension ByteBuffer {
         // We just treat it as invalid outright.
         switch self.getInteger(at: index, endianness: endianness, as: UInt8.self) {
             case .none, 0xfb, 0xff: return nil
-            case 0xfc: return (getInteger(at: index + 1, endianness: endianness, as: UInt16.self).map(numericCast), MemoryLayout<UInt16>.size)
-            case 0xfd: return (getUInt24(at: index + 1, endianness: endianness).map(numericCast), 3)
-            case 0xfe: return (getInteger(at: index + 1, endianness: endianness, as: UInt64.self), MemoryLayout<UInt64>.size)
+            case 0xfc: return getInteger(at: index + 1, endianness: endianness, as: UInt16.self).map { (UInt64($0), MemoryLayout<UInt16>.size) }
+            case 0xfd: return getUInt24(at: index + 1, endianness: endianness).map { (UInt64($0), 3) }
+            case 0xfe: return getInteger(at: index + 1, endianness: endianness, as: UInt64.self).map { ($0, MemoryLayout<UInt64>.size) }
             case .some(let byte): return (numericCast(byte), 0)
         }
     }
@@ -108,10 +108,10 @@ extension ByteBuffer {
     @discardableResult
     mutating func setLengthEncodedInteger(_ integer: UInt64, at index: Int, endianness: Endianness = .little) -> Int {
         switch integer {
-        case ..<0xfb:  return self.setInteger(integer, at: index, endianness: endianness, as: UInt8.self)
-        case ..<1<<16: return self.setBytes([0xfc], at: index) + self.setInteger(integer, at: index + 1, endianness: endianness, as: UInt16.self)
-        case ..<1<<24: return self.setBytes([0xfd], at: index) + self.setUInt24(integer, at: index + 1, endianness: endianness)
-        default:       return self.setBytes([0xfe], at: index) + self.setInteger(integer, at: index + 1, endianness: endianness, as: UInt64.self)
+        case ..<0xfb:    return self.setInteger(UInt8(integer), at: index, endianness: endianness, as: UInt8.self)
+        case ..<(1<<16): return self.setBytes([0xfc], at: index) + self.setInteger(UInt16(integer), at: index + 1, endianness: endianness, as: UInt16.self)
+        case ..<(1<<24): return self.setBytes([0xfd], at: index) + self.setUInt24(integer, at: index + 1, endianness: endianness)
+        default:         return self.setBytes([0xfe], at: index) + self.setInteger(integer, at: index + 1, endianness: endianness, as: UInt64.self)
         }
     }
     

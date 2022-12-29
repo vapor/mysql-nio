@@ -15,7 +15,7 @@ internal final class MySQLHandshakeCommand: MySQLCommand {
         }
     }
     
-    enum State: Equatable {
+    enum State {
         case awaitingServerGreeting
         case awaitingReactivation(MySQLProtocol.HandshakeV10)
         case preparingForAuthentication
@@ -133,7 +133,7 @@ internal final class MySQLHandshakeCommand: MySQLCommand {
     }
     
     func handle(packet: inout MySQLPacket, capabilities: MySQLProtocol.CapabilityFlags) throws -> MySQLCommandAction {
-        guard self.state == .awaitingServerGreeting else {
+        guard case .awaitingServerGreeting = self.state else {
             self.logger.debug("Packet sequencing error - handshake command still active after greeting received.")
             throw MySQLError.protocolError
         }
@@ -167,7 +167,7 @@ internal final class MySQLHandshakeCommand: MySQLCommand {
     }
     
     func activate(capabilities: MySQLProtocol.CapabilityFlags) throws -> MySQLCommandAction {
-        if self.state == .awaitingServerGreeting {
+        if case .awaitingServerGreeting = self.state {
             // initial command activation; ignore
             return .init()
         }
@@ -254,5 +254,5 @@ internal final class MySQLHandshakeCommand: MySQLCommand {
         try context.write(self.wrapOutboundOut(.encode(res, capabilities: capabilities)), promise: nil)
         context.flush()
     }
-}
 */
+}

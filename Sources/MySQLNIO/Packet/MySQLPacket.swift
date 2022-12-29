@@ -20,7 +20,7 @@ public struct MySQLPacket {
 
 extension MySQLPacket: CustomStringConvertible {
     public var description: String {
-        "\(self.payload.getBytes(at: 0, length: 16))... (err: \(self.isError), ok: \(self.isOK), eof: \(self.isEOF))"
+        "\(self.payload.getBytes(at: 0, length: 16) ?? [])... (err: \(self.isError), ok: \(self.isOK), eof: \(self.isEOF))"
     }
 }
 

@@ -1,3 +1,7 @@
+extension Collection {
+    subscript(idx: Self.Index, default default: Self.Element) -> Self.Element { self.indices.contains(idx) ? self[idx] : `default` }
+}
+
 extension MySQLProtocol {
     /// MySQL 5.7:          "5.7.38"
     /// MySQL 8.0:          "8.0.29"
@@ -19,17 +23,16 @@ extension MySQLProtocol {
         /// version than to reject alternate formats unnecessarily.
         init?<S>(string: S) where S: StringProtocol {
             guard !string.isEmpty else { return nil }
-            func val(at idx: Int, of list: [String]) -> Int { if idx < list.count { return Int(list[idx]) ?? 0 } else { return nil } }
             
-            self.raw = string
+            self.raw = .init(string)
             let pieces = string.split(separator: "-", omittingEmptySubsequences: false)
             assert(!pieces.isEmpty)
             
             let primaryParts = pieces[0].split(separator: ".", omittingEmptySubsequences: false)
-            let (pMajor, pMinor, pPatch) = (val(at: 0, of: primaryParts), val(at: 1, of: primaryParts), val(at: 2, of: primaryParts))
+            let (pMajor, pMinor, pPatch) = (Int(primaryParts[0, default: "0"]) ?? 0, Int(primaryParts[1, default: "0"]) ?? 0, Int(primaryParts[2, default: "0"]) ?? 0)
             
             let secondaryParts = pieces.dropFirst(1).first?.split(separator: ".", omittingEmptySubsequences: false) ?? []
-            let (sMajor, sMinor, sPatch) = (val(at: 0, of: secondaryParts), val(at: 1, of: secondaryParts), val(at: 2, of: secondaryParts))
+            let (sMajor, sMinor, sPatch) = (Int(secondaryParts[0, default: "0"]) ?? 0, Int(secondaryParts[1, default: "0"]) ?? 0, Int(secondaryParts[2, default: "0"]) ?? 0)
             
             let remainder = pieces.dropFirst(2).first ?? ""
             

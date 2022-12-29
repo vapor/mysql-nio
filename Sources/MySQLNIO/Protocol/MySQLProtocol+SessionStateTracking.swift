@@ -34,14 +34,14 @@ extension MySQLProtocol {
         }
         
         var description: String {
-            switch self.rawValue {
-                case SESSION_TRACK_SYSTEM_VARIABLES: return "SESSION_TRACK_SYSTEM_VARIABLES"
-                case SESSION_TRACK_SCHEMA: return "SESSION_TRACK_SCHEMA"
-                case SESSION_TRACK_STATE_CHANGE: return "SESSION_TRACK_STATE_CHANGE"
-                case SESSION_TRACK_GTIDS: return "SESSION_TRACK_GTIDS"
-                case SESSION_TRACK_TRANSACTION_CHARACTERISTICS: return "SESSION_TRACK_TRANSACTION_CHARACTERISTICS"
-                case SESSION_TRACK_TRANSACTION_STATE: return "SESSION_TRACK_TRANSACTION_STATE"
-                case let value: return "SESSION_TRACK_UNKNOWN(\(value))"
+            switch self {
+                case Self.SESSION_TRACK_SYSTEM_VARIABLES: return "SESSION_TRACK_SYSTEM_VARIABLES"
+                case Self.SESSION_TRACK_SCHEMA: return "SESSION_TRACK_SCHEMA"
+                case Self.SESSION_TRACK_STATE_CHANGE: return "SESSION_TRACK_STATE_CHANGE"
+                case Self.SESSION_TRACK_GTIDS: return "SESSION_TRACK_GTIDS"
+                case Self.SESSION_TRACK_TRANSACTION_CHARACTERISTICS: return "SESSION_TRACK_TRANSACTION_CHARACTERISTICS"
+                case Self.SESSION_TRACK_TRANSACTION_STATE: return "SESSION_TRACK_TRANSACTION_STATE"
+                case let value: return "SESSION_TRACK_UNKNOWN(\(value.rawValue))"
             }
         }
     }
@@ -73,7 +73,7 @@ extension MySQLProtocol {
         }
         
         /// true == autocommit transaction, false == explicit transaction, nil == no transaction
-        let implicitTransacton: Bool?
+        let implicitTransaction: Bool?
         let nontransactionalReadFlag: Bool
         let transactionalReadFlag: Bool
         let unsafeWritesFlag: Bool
@@ -83,15 +83,23 @@ extension MySQLProtocol {
         let lockTablesFlag: Bool
         
         init?(rawValue: String) {
-            var rawIter = rawSequence.makeIterator()
+            do {
+                try self.init(parsing: rawValue)
+            } catch {
+                return nil
+            }
+        }
+        
+        init(parsing: String) throws {
+            var rawIter = rawValue.makeIterator()
             func check(_ c: Character?, for valid: Character) throws -> Bool { switch c {
                 case valid, "_": return c == valid
                 default: throw Error.invalidRawSequence
             } }
             switch rawIter.next() {
-                case "_" where rawSequence == "________": self.implicitTransacton = nil
-                case "T": self.implicitTransacton = false
-                case "I": self.implicitTransacton = true
+                case "_" where rawValue == "________": self.implicitTransaction = nil
+                case "T": self.implicitTransaction = false
+                case "I": self.implicitTransaction = true
                 default: throw Error.invalidRawSequence
             }
             self.nontransactionalReadFlag = try check(rawIter.next(), for: "r")
@@ -105,9 +113,9 @@ extension MySQLProtocol {
         }
         
         var rawValue: String {
-            guard let implicitTransacton = self.implicitTransacton else { return "________" }
+            guard let implicitTransaction = self.implicitTransaction else { return "________" }
             return """
-                \(self.implicitTransacton ? "I" : "T")\
+                \(implicitTransaction ? "I" : "T")\
                 \(self.nontransactionalReadFlag ? "r" : "_")\
                 \(self.transactionalReadFlag ? "R" : "_")\
                 \(self.unsafeWritesFlag ? "w" : "_")\
@@ -137,7 +145,7 @@ extension MySQLProtocol.SessionTrackedChange {
     }
     
     static func readOneChange(from buffer: inout ByteBuffer) throws -> Self {
-        guard let stateType = buffer.readInteger(endianness: .little, as: SessionStateChangeType.self),
+        guard let stateType = buffer.readInteger(endianness: .little, as: MySQLProtocol.SessionStateChangeType.self),
               var stateData = buffer.readLengthEncodedSlice()
         else {
             throw Error.corruptSessionTrackData
@@ -148,9 +156,9 @@ extension MySQLProtocol.SessionTrackedChange {
     }
     
     private static func decode(from buffer: inout ByteBuffer, type: MySQLProtocol.SessionStateChangeType) throws -> Self {
-        switch stateType {
+        switch type {
         case .SESSION_TRACK_SYSTEM_VARIABLES:
-            var pairs = [SessionTrackedSystemVar]()
+            var pairs = [MySQLProtocol.SessionTrackedSystemVar]()
             while buffer.readableBytes > 0 {
                 guard let name = buffer.readLengthEncodedString(), let value = buffer.readLengthEncodedString() else {
                     throw Error.corruptSessionTrackData
@@ -183,29 +191,29 @@ extension MySQLProtocol.SessionTrackedChange {
         
         switch self {
             case .systemVars(let sysvars):
-                buffer.writeInteger(SessionStateChangeType.SESSION_TRACK_SYSTEM_VARIABLES)
+                buffer.writeInteger(MySQLProtocol.SessionStateChangeType.SESSION_TRACK_SYSTEM_VARIABLES)
                 for pair in sysvars {
                     scratchBuffer.writeLengthEncodedString(pair.name)
                     scratchBuffer.writeLengthEncodedString(pair.value)
                 }
                 buffer.writeLengthEncodedSlice(&scratchBuffer)
             case .schema(let info):
-                buffer.writeInteger(SessionStateChangeType.SESSION_TRACK_SCHEMA)
+                buffer.writeInteger(MySQLProtocol.SessionStateChangeType.SESSION_TRACK_SCHEMA)
                 scratchBuffer.writeLengthEncodedString(info.schema)
                 buffer.writeLengthEncodedSlice(&scratchBuffer)
             case .trackingFlag(let info):
-                buffer.writeInteger(SessionStateChangeType.SESSION_TRACK_STATE_CHANGE)
+                buffer.writeInteger(MySQLProtocol.SessionStateChangeType.SESSION_TRACK_STATE_CHANGE)
                 buffer.writeBytes([0x2, 0x1, info.trackingEnabled ? 0x31 : 0x30])
             case .gtid(let info):
-                buffer.writeInteger(SessionStateChangeType.SESSION_TRACK_GTIDS)
+                buffer.writeInteger(MySQLProtocol.SessionStateChangeType.SESSION_TRACK_GTIDS)
                 scratchBuffer.writeLengthEncodedString(info.gtid)
                 buffer.writeLengthEncodedSlice(&scratchBuffer)
             case .transactionCharacteristic(let info):
-                buffer.writeInteger(SessionStateChangeType.SESSION_TRACK_TRANSACTION_CHARACTERISTICS)
+                buffer.writeInteger(MySQLProtocol.SessionStateChangeType.SESSION_TRACK_TRANSACTION_CHARACTERISTICS)
                 scratchBuffer.writeLengthEncodedString(info.recreateTransactionSql)
                 buffer.writeLengthEncodedSlice(&scratchBuffer)
             case .transactionState(let info):
-                buffer.writeInteger(SessionStateChangeType.SESSION_TRACK_TRANSACTION_STATE)
+                buffer.writeInteger(MySQLProtocol.SessionStateChangeType.SESSION_TRACK_TRANSACTION_STATE)
                 scratchBuffer.writeLengthEncodedString(info.rawValue)
                 buffer.writeLengthEncodedSlice(&scratchBuffer)
             case .unknown(let type, var slice):

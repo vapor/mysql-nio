@@ -24,9 +24,13 @@ extension MySQLProtocol {
         
         internal static func synthesize(from realPacket: ERR_Packet) -> Self {
             guard case .error(let serverError) = realPacket.contents else {
-                return .init(errorCode: .UNKNOWN_COM_ERROR, sqlStateMarker: "#", sqlState: "0000", errorMessage: "Mishandled error response")
+                return .init(errorCode: .UNKNOWN_COM_ERROR, sqlState: "0000", errorMessage: "Mishandled error response")
             }
             return .init(errorCode: serverError.errorCode, sqlState: serverError.sqlState, errorMessage: serverError.errorMessage)
+        }
+        
+        public static func decode(from packet: inout MySQLPacket, capabilities: MySQLProtocol.CapabilityFlags) throws -> MySQLProtocol.ServerErrorDetails {
+            throw MySQLError.protocolError
         }
     }
 }

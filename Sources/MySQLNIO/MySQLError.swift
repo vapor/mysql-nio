@@ -37,14 +37,14 @@ public enum MySQLError: Error, CustomStringConvertible, LocalizedError {
             return "Auth plugin was supposed to send us some data."
         case .unsupportedServer(let message):
             return "Unsupported server: \(message)"
-        case .protocolError:
+        case .packetDecodingError(type: _), .packetEncodingError(type: _), .protocolError:
             return "Unknown protocol error"
         case .server(let error):
             return "Server error: \(error.errorMessage)"
         case .closed:
             return "Connection closed."
-        case .connection(let underlyingError)
-            return "Underlying connection error: \(error)"
+        case .connection(let underlyingError):
+            return "Underlying connection error: \(underlyingError)"
         case .duplicateEntry(let message):
             return "Duplicate entry: \(message)"
         case .invalidSyntax(let message):

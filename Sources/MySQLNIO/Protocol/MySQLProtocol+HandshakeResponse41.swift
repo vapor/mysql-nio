@@ -103,7 +103,7 @@ extension MySQLProtocol {
             if sharedCapabilities.contains(.CLIENT_PLUGIN_AUTH_LENENC_CLIENT_DATA) {
                 packet.payload.writeImmutableLengthEncodedSlice(self.authResponse)
             } else {
-                packet.payload.writeLengthPrefixed(as: UInt8.self, writeMessage: { $0.writeImmutableBuffer(self.authResponse) })
+                try packet.payload.writeLengthPrefixed(as: UInt8.self, writeMessage: { $0.writeImmutableBuffer(self.authResponse) })
             }
             if sharedCapabilities.contains(.CLIENT_CONNECT_WITH_DB) {
                 packet.payload.writeNullTerminatedString(self.database)
@@ -116,7 +116,7 @@ extension MySQLProtocol {
                     $0.writeLengthEncodedString($1.key.rawValue)
                     $0.writeLengthEncodedString($1.value)
                 }
-                guard subdata.writerIndex < UInt16.max { throw Error.connectionAtrributesTooLarge }
+                guard subdata.writerIndex < UInt16.max else { throw Error.connectionAtrributesTooLarge }
                 packet.payload.writeImmutableLengthEncodedSlice(subdata)
             }
         }
@@ -142,7 +142,7 @@ extension MySQLProtocol {
             }
             
             return .init(
-                capabilities: .init(general: clientCapabilities, extended: maybeExtraCapabilities),
+                capabilities: effectiveCapabilities,
                 maxPacketSize: maxPacketSize,
                 characterSet: characterSet,
                 username: username,
@@ -180,8 +180,8 @@ extension MySQLProtocol.CapabilityFlags {
     /// This initializer is used by the handshake response packet decoder to gracefully handle the possible
     /// presence of MariaDB extensions and calculate the set of _effective_ capabilities in force (i.e. only
     /// those specified by both server and client).
-    fileprivate init(checking initial: Self, general: UInt32, extended: UInt32) throws {
-        guard extended == 0 || (initial.general | general) & CLIENT_MYSQL.general == 0 else {
+    internal init(checking initial: Self, general: UInt32, extended: UInt32) throws {
+        guard extended == 0 || (initial.general | general) & Self.CLIENT_MYSQL.general == 0 else {
             throw MySQLProtocol.HandshakeResponse41.Error.invalidHandshakeResponse
         }
         self.init(general: general, extended: extended)

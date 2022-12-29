@@ -47,10 +47,10 @@ extension MySQLProtocol {
             /// The iteration-count is always 1.
             packet.payload.writeInteger(0x01, endianness: .little, as: UInt32.self)
             if self.values.count > 0 {
-                var nullBitmap = NullBitmap.comExecuteBitmap(count: self.values.count)
+                var nullBitmap = NullBitmap.init(count: self.values.count, offset: 0)
                 for (i, value) in values.enumerated() {
                     switch value.buffer {
-                    case .none: nullBitmap.setNull(at: i)
+                    case .none: nullBitmap[i] = true
                     case .some: break
                     }
                 }

@@ -14,7 +14,7 @@ final class MySQLPacketEncoder: MessageToByteEncoder {
     
     func encode(data: MySQLPacket, out: inout ByteBuffer) throws {
         self.logger.trace("MySQLPacketDecoder.encode: \(data)")
-        out.writeUInt24(data.payload.readableBytes)
+        out.writeUInt24(UInt32(data.payload.readableBytes))
         out.writeInteger(self.sequence.next())
         out.writeImmutableBuffer(data.payload)
     }

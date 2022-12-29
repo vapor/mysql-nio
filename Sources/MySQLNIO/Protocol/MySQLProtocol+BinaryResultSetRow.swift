@@ -13,17 +13,13 @@ extension MySQLProtocol {
                 fatalError()
             }
             assert(header == 0x00)
-            guard let nullBitmap = NullBitmap.readResultSetNullBitmap(
-                count: columns.count, from: &packet.payload
-            ) else {
-                fatalError()
-            }
+            let nullBitmap = try MySQLProtocol.NullBitmap(bytes: packet.readBytes(length: (columns.count + 9) >> 3), offset: 2)
             
             var values: [ByteBuffer?] = []
             values.reserveCapacity(columns.count)
             for (i, column) in columns.enumerated() {
                 let storage: ByteBuffer?
-                if nullBitmap.isNull(at: i) {
+                if nullBitmap[i] {
                     storage = nil
                 } else {
                     var slice: ByteBuffer

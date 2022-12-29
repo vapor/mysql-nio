@@ -74,7 +74,7 @@ extension MySQLProtocol {
             
             let errorCode = try packet.readInteger(endianness: .little, as: ErrorCode.self)
             
-            if errorCode < .max || !capabilities.contains(.MARIADB_CLIENT_PROGRESS) {
+            if errorCode.rawValue < .max || !capabilities.contains(.MARIADB_CLIENT_PROGRESS) {
                 let sqlState = try packet.readString(length: 6)
                 guard sqlState.first == "#" else { throw MySQLError.protocolError }
                 let errorMessage = try packet.readString(length: packet.payload.readableBytes)
@@ -97,12 +97,12 @@ extension MySQLProtocol {
             packet.payload.writeInteger(0xff, endianness: .little, as: UInt8.self)
             switch self.contents {
                 case .error(let info):
-                    packet.payload.writeInteger(info.errorCode, endianness: .little, as: ErrorCode.self)
+                    packet.payload.writeInteger(info.errorCode, endianness: .little)
                     packet.payload.writeString("#\(info.sqlState)")
                     packet.payload.writeString(info.errorMessage)
                 case .progress(let info):
                     let progress = UInt32(info.percentDone * 1000.0)
-                    packet.payload.writeInteger(0xffff, endianness: .little, as: ErrorCode.self)
+                    packet.payload.writeInteger(0xffff, endianness: .little)
                     packet.payload.writeInteger(1, endianness: .little, as: UInt8.self)
                     packet.payload.writeInteger(info.stage, endianness: .little, as: UInt8.self)
                     packet.payload.writeInteger(info.maxStage, endianness: .little, as: UInt8.self)

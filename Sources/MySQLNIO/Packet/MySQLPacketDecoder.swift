@@ -13,7 +13,7 @@ struct MySQLPacketDecoder: ByteToMessageDecoder {
     }
     
     mutating func decode(context: ChannelHandlerContext, buffer: inout ByteBuffer) throws -> DecodingState {
-        guard let length = Int(buffer.getUInt24(at: buffer.readerIndex, endianness: .little)),
+        guard let length = buffer.getUInt24(at: buffer.readerIndex, endianness: .little).map(Int.init(_:)),
               let sequenceID = buffer.getInteger(at: buffer.readerIndex + 3, endianness: .little, as: UInt8.self),
               let payload = buffer.getSlice(at: buffer.readerIndex + 4, length: length)
         else {

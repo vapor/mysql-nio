@@ -1,7 +1,7 @@
 import Logging
 
 internal final class MySQLAuthenticateCommand: MySQLCommand {
-    enum State: Equatable {
+    enum State {
         case respondingToInitialHandshake(MySQLProtocol.HandshakeV10, desiredCharacterSet: MySQLProtocol.CharacterSet, commandPacketSizeLimit: UInt32)
         case awaitingAuthResult(activePluginName: String)
     }
@@ -42,7 +42,7 @@ internal final class MySQLAuthenticateCommand: MySQLCommand {
             self.activeAuthPluginResponder = pluginResponder
             self.state = .awaitingAuthResult(activePluginName: pluginName)
             
-            let authReplyData = try self.activeAuthPluginResponder.handle(
+            let authReplyData = try self.activeAuthPluginResponder!.handle(
                 pluginName: pluginName,
                 configuration: self.configuration,
                 isSecureConnection: capabilities.contains(.CLIENT_SSL),
@@ -60,7 +60,7 @@ internal final class MySQLAuthenticateCommand: MySQLCommand {
                 connectionAttributes: MySQLProtocol.ConnectionAttributeName.defaultAttributeValues()
             )
             
-            return .init(sendResponse: [.encode(handshakeReply, capabilities: capabilities)])
+            return try .init(sendResponse: [.encode(handshakeReply, capabilities: capabilities)])
         default:
             self.logger.debug("Packet sequencing error - authentication command reactivated after initial handshake reply sent")
             throw MySQLError.protocolError

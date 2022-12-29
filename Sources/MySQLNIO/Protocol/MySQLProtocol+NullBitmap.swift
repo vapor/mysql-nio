@@ -35,7 +35,7 @@ extension MySQLProtocol {
         }
         
         /// Create a bitmap from a preexisting series of raw bytes, applying `offset` to all field indexes.
-        private init(bytes: [UInt8], offset: Int) {
+        init(bytes: [UInt8], offset: Int) {
             self.offset = offset
             self.bytes = bytes
         }
@@ -47,17 +47,17 @@ extension MySQLProtocol {
         /// or equal to zero and less than the field count specified when the bitmap was created.
         subscript(pos: Int) -> Bool {
             get {
-                let pos = pos + self.offset, idx = pos >> 3, mask = 1 << (pos & 0x7)
+                let pos = pos + self.offset, idx = pos >> 3, mask = UInt8(1 << (pos & 0x7))
                 return self.bytes[idx] & mask != 0
             }
             set {
-                let pos = pos + self.offset, idx = pos >> 3, mask = 1 << (pos & 0x7), rev: UInt8 = newValue ? ~0 : 0
+                let pos = pos + self.offset, idx = pos >> 3, mask = UInt8(1 << (pos & 0x7)), rev: UInt8 = newValue ? ~0 : 0
                 self.bytes[idx] ^= (self.bytes[idx] ^ rev) & mask // https://graphics.stanford.edu/~seander/bithacks.html#ConditionalSetOrClearBitsWithoutBranching
             }
         }
                 
         /// See ``CustomStringConvertible.description``
-        public var description: String { "NULLmap(\(self.count)):[\(self.map(\.binaryDescription).joined(separator: " "))" }
+        public var description: String { "NULLmap(\(self.count)):[\(self.bytes.map(\.binaryDescription).joined(separator: " "))" }
     }
 }
 

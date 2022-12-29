@@ -52,12 +52,12 @@ extension MySQLProtocol {
                   let rawCharacterSet = packet.payload.readInteger(endianness: .little, as: UInt8.self),
                   packet.payload.readReservedBytes(length: 19),
                   let maybeExtraCapabilities = packet.payload.readInteger(endianness: .little, as: UInt32.self),
-                  let effectiveCapabilities = CapabilityFlags(checking: capabilities, general: clientCapabilities, extended: maybeExtraCapabilities),
+                  let effectiveCapabilities = Optional.some(try CapabilityFlags(checking: capabilities, general: clientCapabilities, extended: maybeExtraCapabilities)),
                   effectiveCapabilities.contains(.CLIENT_SSL)
             else { throw Error.invalidTLSRequest }
             
             return .init(
-                capabilities: .init(general: clientCapabilities, extended: maybeExtraCapabilities),
+                capabilities: effectiveCapabilities,
                 maxPacketSize: maxPacketSize,
                 characterSet: .init(rawValue: rawCharacterSet)
             )
