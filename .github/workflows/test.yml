@@ -18,6 +18,7 @@ jobs:
         swiftver:
           - swift:5.5
           - swift:5.6
+          - swift:5.7
           - swiftlang/swift:nightly-main
         swiftos:
           - focal
