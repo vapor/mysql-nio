@@ -4,41 +4,73 @@ on:
 defaults:
   run:
     shell: bash
+
+env:
+  LOG_LEVEL: debug
+  # Unfortunately, fluent-mysql-driver details leak through here
+  MYSQL_DATABASE: 'test_database'
+  MYSQL_DATABASE_A: 'test_database'
+  MYSQL_DATABASE_B: 'test_database'
+  MYSQL_USER: 'test_username'
+  MYSQL_USERNAME: 'test_username'
+  MYSQL_USERNAME_A: 'test_username'
+  MYSQL_USERNAME_B: 'test_username'
+  MYSQL_PASSWORD: 'test_password'
+  MYSQL_PASSWORD_A: 'test_password'
+  MYSQL_PASSWORD_B: 'test_password'
+  MYSQL_HOSTNAME: 'mysql-a'
+  MYSQL_HOSTNAME_A: 'mysql-a'
+  MYSQL_HOSTNAME_B: 'mysql-b'
+
 jobs:
-  linux-all:
+  linux-unit:
+    if: github.event.pull_request.draft == false
     strategy:
       fail-fast: false
       matrix:
         dbimage:
           - mysql:5.7
           - mysql:8.0
-          - mariadb:10.3
-          - mariadb:10.7
+          - mariadb:10.4
+          - mariadb:10.10
           - percona:8.0
         swiftver:
-          - swift:5.5
-          - swift:5.6
-          - swiftlang/swift:nightly-main
-        swiftos:
-          - focal
-    container: ${{ format('{0}-{1}', matrix.swiftver, matrix.swiftos) }}
+          - swift:5.6-focal
+          - swift:5.7-jammy
+          - swiftlang/swift:nightly-main-jammy
+    container: ${{ matrix.swiftver }}
     runs-on: ubuntu-latest
-    env:
-      LOG_LEVEL: debug
-      # Unfortunately, fluent-mysql-driver details leak through here
-      MYSQL_DATABASE: 'test_database'
-      MYSQL_DATABASE_A: 'test_database'
-      MYSQL_DATABASE_B: 'test_database'
-      MYSQL_USER: 'test_username'
-      MYSQL_USERNAME: 'test_username'
-      MYSQL_USERNAME_A: 'test_username'
-      MYSQL_USERNAME_B: 'test_username'
-      MYSQL_PASSWORD: 'test_password'
-      MYSQL_PASSWORD_A: 'test_password'
-      MYSQL_PASSWORD_B: 'test_password'
-      MYSQL_HOSTNAME: 'mysql-a'
-      MYSQL_HOSTNAME_A: 'mysql-a'
-      MYSQL_HOSTNAME_B: 'mysql-b'
+    services:
+      mysql-a:
+        image: ${{ matrix.dbimage }}
+        env: 
+          MYSQL_ALLOW_EMPTY_PASSWORD: "true"
+          MYSQL_USER: test_username
+          MYSQL_PASSWORD: test_password
+          MYSQL_DATABASE: test_database
+    steps:
+      - name: Check out package
+        uses: actions/checkout@v3
+      - name: Run tests
+        run: swift test
+
+  linux-dependents:
+    if: github.event.pull_request.draft == false
+    strategy:
+      fail-fast: false
+      matrix:
+        dbimage:
+          - mysql:5.7
+          - mysql:8.0
+          - mariadb:10.4
+          - mariadb:10.10
+          - percona:8.0
+        swiftver:
+          - swift:5.6-focal
+          - swift:5.7-jammy
+          - swiftlang/swift:nightly-main-jammy
+    container: ${{ matrix.swiftver }}
+    runs-on: ubuntu-latest
     services:
       mysql-a:
         image: ${{ matrix.dbimage }}
@@ -58,8 +90,6 @@ jobs:
       - name: Check out package
         uses: actions/checkout@v3
         with: { path: 'mysql-nio' }
-      - name: Run tests
-        run: swift test --package-path mysql-nio
       - name: Check out mysql-kit dependent
         uses: actions/checkout@v3
         with: { repository: 'vapor/mysql-kit', path: 'mysql-kit' }
@@ -76,6 +106,7 @@ jobs:
         run: swift test --package-path fluent-mysql-driver
 
   macos-all:
+    if: github.event.pull_request.draft == false
     strategy:
       fail-fast: false
       matrix:
