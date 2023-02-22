@@ -1,3 +1,6 @@
+import NIOCore
+import Logging
+
 public struct MySQLPacketDecoder: ByteToMessageDecoder {
     public typealias InboundOut = MySQLPacket
 

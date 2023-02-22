@@ -1,3 +1,6 @@
+import Logging
+import NIOCore
+
 public protocol MySQLDatabase {
     var eventLoop: EventLoop { get }
     var logger: Logger { get }

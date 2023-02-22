@@ -1,3 +1,5 @@
+import NIOCore
+
 public struct MySQLPacket {
     public var payload: ByteBuffer
     

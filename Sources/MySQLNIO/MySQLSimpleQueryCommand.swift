@@ -1,3 +1,5 @@
+import NIOCore
+
 extension MySQLDatabase {
     public func simpleQuery(_ sql: String) -> EventLoopFuture<[MySQLRow]> {
         var rows = [MySQLRow]()

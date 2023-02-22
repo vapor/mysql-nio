@@ -1,3 +1,5 @@
+import NIOCore
+
 extension MySQLProtocol {
     /// A Binary Protocol Resultset Row is made up of the NULL bitmap containing as many bits as we have columns
     /// in the resultset + 2 and the values for columns that are not NULL in the Binary Protocol Value format.

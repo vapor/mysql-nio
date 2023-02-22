@@ -1,3 +1,6 @@
+import NIOCore
+import Logging
+
 public struct MySQLQueryMetadata {
     /// int<lenenc>    affected_rows    affected rows
     public let affectedRows: UInt64

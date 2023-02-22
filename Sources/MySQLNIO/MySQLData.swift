@@ -1,10 +1,5 @@
-@_exported import struct Foundation.Date
-@_exported import struct Foundation.UUID
-@_exported import struct Foundation.Decimal
-
-import class Foundation.JSONEncoder
-import class Foundation.JSONDecoder
-import struct Foundation.Data
+import NIOCore
+import Foundation
 
 public struct MySQLData: CustomStringConvertible, ExpressibleByStringLiteral, ExpressibleByIntegerLiteral, ExpressibleByBooleanLiteral, MySQLDataConvertible {
     public enum Format {

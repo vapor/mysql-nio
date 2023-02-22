@@ -1,3 +1,5 @@
+import NIOCore
+
 extension MySQLProtocol {
     /// ProtocolText::ResultsetRow
     ///

@@ -1,5 +1,6 @@
 import MySQLNIO
 import NIOSSL
+import NIOCore
 
 extension MySQLConnection {
     static func test(on eventLoop: EventLoop) -> EventLoopFuture<MySQLConnection> {
