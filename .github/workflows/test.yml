@@ -1,6 +1,9 @@
 name: test
 on:
   - pull_request
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 env:
   LOG_LEVEL: debug
   SWIFT_DETERMINISTIC_HASHING: 1
