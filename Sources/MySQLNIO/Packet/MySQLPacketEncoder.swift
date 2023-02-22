@@ -1,3 +1,6 @@
+import Logging
+import NIOCore
+
 public final class MySQLPacketEncoder: MessageToByteEncoder {
     public typealias OutboundIn = MySQLPacket
     

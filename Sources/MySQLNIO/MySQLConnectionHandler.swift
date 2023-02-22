@@ -1,4 +1,6 @@
 import NIOSSL
+import NIOCore
+import Logging
 
 internal struct MySQLCommandContext {
     var handler: MySQLCommand

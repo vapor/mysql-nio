@@ -1,3 +1,5 @@
+import NIOCore
+
 public struct MySQLRow: CustomStringConvertible {
     public let format: MySQLData.Format
     public let columnDefinitions: [MySQLProtocol.ColumnDefinition41]

@@ -1,3 +1,5 @@
+import NIOCore
+
 extension MySQLProtocol {
     /// 14.7.2.1 NULL-Bitmap
     ///
