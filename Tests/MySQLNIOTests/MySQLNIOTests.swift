@@ -661,4 +661,26 @@ final class MySQLNIOTests: XCTestCase {
         XCTAssertNil(rows[0].column("baz")?.int)
         XCTAssertEqual(rows[0].column("qux")?.int, 3)
     }
+    
+    // https://github.com/vapor/mysql-nio/issues/87
+    func testUnexpectedPacketHandling() async throws {
+        struct PingCommand: MySQLCommand {
+            func handle(packet: inout MySQLPacket, capabilities: MySQLProtocol.CapabilityFlags) throws -> MySQLCommandState { preconditionFailure("") }
+            func activate(capabilities: MySQLProtocol.CapabilityFlags) throws -> MySQLCommandState { .init(response: [.init(payload: .init(bytes: [0x0e]))], done: true) }
+        }
+        let conn = try await MySQLConnection.test(on: self.eventLoop).get()
+        do {
+            try await conn.send(PingCommand(), logger: conn.logger).get()
+            try await Task.sleep(nanoseconds: 1_000_000) // to let the reply come in without any other command queued
+            do {
+                _ = try await conn.simpleQuery("SELECT 1").get()
+                XCTFail("did not throw an error")
+            } catch MySQLError.closed {
+                // pass
+            }
+        } catch {
+            XCTFail("threw an error: \(String(reflecting: error))")
+        }
+        try? await conn.close().get()
+    }
 }

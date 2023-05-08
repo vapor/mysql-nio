@@ -88,7 +88,13 @@ final class MySQLConnectionHandler: ChannelDuplexHandler {
                     self.sendEnqueuedCommandIfReady(context: context)
                 }
             } else {
-                assertionFailure("unhandled packet: \(packet.payload.debugDescription)")
+                if packet.isError, let errorPacket = try? packet.decode(MySQLProtocol.ERR_Packet.self, capabilities: serverCapabilities ?? .init()) {
+                    self.errorCaught(context: context, error: MySQLError.server(errorPacket))
+                    self.close(context: context, mode: .all, promise: nil)
+                } else {
+                    self.errorCaught(context: context, error: MySQLError.protocolError)
+                    context.close(mode: .all, promise: nil) // Don't send a COM_QUIT, this is a protocol error anyway
+                }
             }
         }
     }
