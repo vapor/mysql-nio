@@ -49,26 +49,26 @@ extension Array where Element == ByteBuffer {
 
 private extension OpaquePointer {
     func convert<T>() -> UnsafePointer<T> {
-        return .init(self)
+        .init(self)
     }
     
     func convert<T>() -> UnsafeMutablePointer<T> {
-        return .init(self)
+        .init(self)
     }
     
     func convert() -> OpaquePointer {
-        return self
+        self
     }
 }
 
 private extension UnsafePointer {
     func convert() -> OpaquePointer {
-        return .init(self)
+        .init(self)
     }
 }
 
 private extension UnsafeMutablePointer {
     func convert() -> OpaquePointer {
-        return .init(self)
+        .init(self)
     }
 }

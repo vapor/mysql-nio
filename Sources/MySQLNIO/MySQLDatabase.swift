@@ -2,9 +2,9 @@ import Logging
 import NIOCore
 
 public protocol MySQLDatabase {
-    var eventLoop: EventLoop { get }
+    var eventLoop: any EventLoop { get }
     var logger: Logger { get }
-    func send(_ command: MySQLCommand, logger: Logger) -> EventLoopFuture<Void>
+    func send(_ command: any MySQLCommand, logger: Logger) -> EventLoopFuture<Void>
     func withConnection<T>(_ closure: @escaping (MySQLConnection) -> EventLoopFuture<T>) -> EventLoopFuture<T>
 }
 
@@ -46,22 +46,22 @@ public protocol MySQLCommand {
 
 
 extension MySQLDatabase {
-    public func logging(to logger: Logger) -> MySQLDatabase {
+    public func logging(to logger: Logger) -> any MySQLDatabase {
         _MySQLDatabaseWithLogger(database: self, logger: logger)
     }
 }
 
 private struct _MySQLDatabaseWithLogger {
-    let database: MySQLDatabase
+    let database: any MySQLDatabase
     let logger: Logger
 }
 
 extension _MySQLDatabaseWithLogger: MySQLDatabase {
-    var eventLoop: EventLoop {
+    var eventLoop: any EventLoop {
         self.database.eventLoop
     }
     
-    func send(_ command: MySQLCommand, logger: Logger) -> EventLoopFuture<Void> {
+    func send(_ command: any MySQLCommand, logger: Logger) -> EventLoopFuture<Void> {
         self.database.send(command, logger: logger)
     }
     

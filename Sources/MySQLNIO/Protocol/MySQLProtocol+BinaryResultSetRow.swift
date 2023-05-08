@@ -9,14 +9,11 @@ extension MySQLProtocol {
         
         /// Parses a `MySQLBinaryResultsetRow` from the `ByteBuffer`.
         public static func decode(from packet: inout MySQLPacket, columns: [ColumnDefinition41]) throws -> BinaryResultSetRow {
-            guard let header = packet.payload.readInteger(endianness: .little, as: UInt8.self) else {
-                fatalError()
+            guard let header = packet.payload.readInteger(endianness: .little, as: UInt8.self), header == 0x00 else {
+                throw MySQLError.protocolError
             }
-            assert(header == 0x00)
-            guard let nullBitmap = NullBitmap.readResultSetNullBitmap(
-                count: columns.count, from: &packet.payload
-            ) else {
-                fatalError()
+            guard let nullBitmap = NullBitmap.readResultSetNullBitmap(count: columns.count, from: &packet.payload) else {
+                throw MySQLError.protocolError
             }
             
             var values: [ByteBuffer?] = []
@@ -29,12 +26,12 @@ extension MySQLProtocol {
                     var slice: ByteBuffer
                     if let length = column.columnType.encodingLength {
                         guard let data = packet.payload.readSlice(length: length) else {
-                            fatalError()
+                            throw MySQLError.protocolError
                         }
                         slice = data
                     } else {
                         guard let data = packet.payload.readLengthEncodedSlice() else {
-                            fatalError()
+                            throw MySQLError.protocolError
                         }
                         slice = data
                     }

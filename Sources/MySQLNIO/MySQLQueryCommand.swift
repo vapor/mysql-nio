@@ -2,10 +2,10 @@ import NIOCore
 import Logging
 
 public struct MySQLQueryMetadata {
-    /// int<lenenc>    affected_rows    affected rows
+    /// `int<lenenc>`    `affected_rows`    affected rows
     public let affectedRows: UInt64
     
-    /// int<lenenc>    last_insert_id    last insert-id
+    /// `int<lenenc>`    `last_insert_id`    last insert-id
     public let lastInsertID: UInt64?
 }
 
@@ -159,7 +159,7 @@ private final class MySQLQueryCommand: MySQLCommand {
                 return try self.done(packet: &packet, capabilities: capabilities)
             }
             guard let count = packet.payload.readLengthEncodedInteger() else {
-                fatalError()
+                throw MySQLError.protocolError
             }
             self.state = .executeColumns(remaining: numericCast(count))
             return .noResponse

@@ -1,7 +1,7 @@
 extension MySQLProtocol {
-    /// 14.1.3.2 ERR_Packet
+    /// 14.1.3.2 `ERR_Packet`
     ///
-    /// This packet signals that an error occurred. It contains a SQL state value if CLIENT_PROTOCOL_41 is enabled.
+    /// This packet signals that an error occurred. It contains a SQL state value if `CLIENT_PROTOCOL_41` is enabled.
     ///
     /// https://dev.mysql.com/doc/internals/en/packet-ERR_Packet.html
     public struct ERR_Packet: MySQLPacketDecodable {
@@ -14,19 +14,19 @@ extension MySQLProtocol {
             case missingErrorMessage
         }
         
-        /// error_code    error-code
+        /// `error_code`    `error-code`
         public var errorCode: ErrorCode
         
-        /// string[1] sql_state_marker    # marker of the SQL State
+        /// `string[1]` `sql_state_marker`    # marker of the SQL State
         public var sqlStateMarker: String?
         
-        /// string[5] sql_state    SQL State
+        /// `string[5]` `sql_state`    SQL State
         public var sqlState: String?
         
-        /// string<EOF>    error_message    human readable error message
+        /// `string<EOF>`    `error_message`    human readable error message
         public var errorMessage: String
         
-        /// `MySQLPacketDecodable` conformance.
+        /// See ``MySQLPacketDecodable/decode(from:capabilities:)``.
         public static func decode(from packet: inout MySQLPacket, capabilities: CapabilityFlags) throws -> ERR_Packet {
             guard let flag = packet.payload.readInteger(endianness: .little, as: UInt8.self) else {
                 throw DecodeError.missingFlag

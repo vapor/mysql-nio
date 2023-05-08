@@ -12,19 +12,19 @@ public struct MySQLPacket {
     }
     
     public var isError: Bool {
-        return self.headerFlag == 0xFF
+        self.headerFlag == 0xFF
     }
     
     public var isOK: Bool {
-        return self.headerFlag == 0x00
+        self.headerFlag == 0x00
     }
     
     public var isEOF: Bool {
-        return self.headerFlag == 0xFE
+        self.headerFlag == 0xFE
     }
     
     var headerFlag: UInt8? {
-        return self.payload.getInteger(at: self.payload.readerIndex)
+        self.payload.getInteger(at: self.payload.readerIndex)
     }
 }
 
@@ -44,17 +44,13 @@ public protocol MySQLPacketEncodable {
 }
 
 extension MySQLPacket {
-    public mutating func decode<T>(_ type: T.Type, capabilities: MySQLProtocol.CapabilityFlags) throws -> T
-        where T: MySQLPacketDecodable
-    {
-        return try T.decode(from: &self, capabilities: capabilities)
+    public mutating func decode<T: MySQLPacketDecodable>(_: T.Type, capabilities: MySQLProtocol.CapabilityFlags) throws -> T {
+        try T.decode(from: &self, capabilities: capabilities)
     }
     
-    public static func encode<T>(_ type: T, capabilities: MySQLProtocol.CapabilityFlags) throws -> MySQLPacket
-        where T: MySQLPacketEncodable
-    {
+    public static func encode<T: MySQLPacketEncodable>(_ value: T, capabilities: MySQLProtocol.CapabilityFlags) throws -> MySQLPacket {
         var packet = MySQLPacket()
-        try type.encode(to: &packet, capabilities: capabilities)
+        try value.encode(to: &packet, capabilities: capabilities)
         return packet
     }
 }

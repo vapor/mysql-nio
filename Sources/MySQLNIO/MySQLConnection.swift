@@ -12,7 +12,7 @@ public final class MySQLConnection: MySQLDatabase {
         tlsConfiguration: TLSConfiguration? = .makeClientConfiguration(),
         serverHostname: String? = nil,
         logger: Logger = .init(label: "codes.vapor.mysql"),
-        on eventLoop: EventLoop
+        on eventLoop: any EventLoop
     ) -> EventLoopFuture<MySQLConnection> {
         let bootstrap = ClientBootstrap(group: eventLoop)
             .channelOption(ChannelOptions.socket(SocketOptionLevel(SOL_SOCKET), SO_REUSEADDR), value: 1)
@@ -49,19 +49,19 @@ public final class MySQLConnection: MySQLDatabase {
         }
     }
     
-    public let channel: Channel
+    public let channel: any Channel
     
-    public var eventLoop: EventLoop {
-        return self.channel.eventLoop
+    public var eventLoop: any EventLoop {
+        self.channel.eventLoop
     }
     
     public let logger: Logger
     
     public var isClosed: Bool {
-        return !self.channel.isActive
+        !self.channel.isActive
     }
     
-    internal init(channel: Channel, logger: Logger) {
+    internal init(channel: any Channel, logger: Logger) {
         self.channel = channel
         self.logger = logger
     }
@@ -73,7 +73,7 @@ public final class MySQLConnection: MySQLDatabase {
         return self.channel.close(mode: .all)
     }
     
-    public func send(_ command: MySQLCommand, logger: Logger) -> EventLoopFuture<Void> {
+    public func send(_ command: any MySQLCommand, logger: Logger) -> EventLoopFuture<Void> {
         guard self.channel.isActive else {
             return self.channel.eventLoop.makeFailedFuture(MySQLError.closed)
         }
@@ -102,7 +102,7 @@ final class ErrorHandler: ChannelInboundHandler {
     
     init() { }
     
-    func errorCaught(context: ChannelHandlerContext, error: Error) {
+    func errorCaught(context: ChannelHandlerContext, error: any Error) {
         assertionFailure("uncaught error: \(error)")
     }
 }

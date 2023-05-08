@@ -7,10 +7,7 @@ public final class MySQLPacketEncoder: MessageToByteEncoder {
     public let sequence: MySQLPacketSequence
     let logger: Logger
 
-    public init(
-        sequence: MySQLPacketSequence,
-        logger: Logger
-    ) {
+    public init(sequence: MySQLPacketSequence, logger: Logger) {
         self.sequence = sequence
         self.logger = logger
     }

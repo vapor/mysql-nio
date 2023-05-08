@@ -3,7 +3,7 @@ import NIOCore
 import Logging
 
 internal struct MySQLCommandContext {
-    var handler: MySQLCommand
+    var handler: any MySQLCommand
     var promise: EventLoopPromise<Void>
 }
 

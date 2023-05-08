@@ -5,11 +5,18 @@ import NIOCore
 import NIOPosix
 
 final class MySQLNIOTests: XCTestCase {
-    private var group: EventLoopGroup!
-    private var eventLoop: EventLoop {
-        return self.group.next()
+    private var eventLoopGroup: (any EventLoopGroup)!
+    private var eventLoop: any EventLoop { self.eventLoopGroup.any() }
+    
+    override func setUpWithError() throws {
+        XCTAssert(isLoggingConfigured)
+        self.eventLoopGroup = MultiThreadedEventLoopGroup(numberOfThreads: 1)
     }
     
+    override func tearDownWithError() throws {
+        try self.eventLoopGroup.syncShutdownGracefully()
+    }
+
     func testDecodingSumOfIntsWithNoRows() throws {
         let conn = try MySQLConnection.test(on: self.eventLoop).wait()
         defer { try! conn.close().wait() }
@@ -582,7 +589,7 @@ final class MySQLNIOTests: XCTestCase {
         let conn = try MySQLConnection.test(on: self.eventLoop).wait()
         defer { try! conn.close().wait() }
 
-        _ = try! conn.simpleQuery("DROP TABLE IF EXISTS foo").wait()
+        _ = try conn.simpleQuery("DROP TABLE IF EXISTS foo").wait()
         _ = try conn.simpleQuery("CREATE TABLE foo (bar DATETIME(6))").wait()
         defer {
             _ = try! conn.simpleQuery("DROP TABLE IF EXISTS foo").wait()
@@ -617,7 +624,7 @@ final class MySQLNIOTests: XCTestCase {
         let conn = try MySQLConnection.test(on: self.eventLoop).wait()
         defer { try! conn.close().wait() }
 
-        _ = try! conn.simpleQuery("DROP TABLE IF EXISTS foo").wait()
+        _ = try conn.simpleQuery("DROP TABLE IF EXISTS foo").wait()
         _ = try conn.simpleQuery("CREATE TABLE foo (bar TIME(6))").wait()
         defer {
             _ = try! conn.simpleQuery("DROP TABLE IF EXISTS foo").wait()
@@ -642,7 +649,6 @@ final class MySQLNIOTests: XCTestCase {
         let conn = try MySQLConnection.test(on: self.eventLoop).wait()
         defer { try! conn.close().wait() }
         
-        
         _ = try conn.simpleQuery("DROP TABLE IF EXISTS foo").wait()
         _ = try conn.simpleQuery("CREATE TABLE foo (bar INT, baz INT, qux INT)").wait()
         defer {
@@ -655,26 +661,4 @@ final class MySQLNIOTests: XCTestCase {
         XCTAssertNil(rows[0].column("baz")?.int)
         XCTAssertEqual(rows[0].column("qux")?.int, 3)
     }
-    
-    override func setUpWithError() throws {
-        self.group = MultiThreadedEventLoopGroup(numberOfThreads: 1)
-        XCTAssert(isLoggingConfigured)
-    }
-    
-    override func tearDownWithError() throws {
-        try self.group.syncShutdownGracefully()
-    }
-}
-
-let isLoggingConfigured: Bool = {
-    LoggingSystem.bootstrap { label in
-        var handler = StreamLogHandler.standardOutput(label: label)
-        handler.logLevel = env("LOG_LEVEL").flatMap { Logger.Level(rawValue: $0) } ?? .info
-        return handler
-    }
-    return true
-}()
-
-func env(_ name: String) -> String? {
-    ProcessInfo.processInfo.environment[name]
 }
