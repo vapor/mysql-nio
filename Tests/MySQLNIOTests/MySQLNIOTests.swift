@@ -671,10 +671,11 @@ final class MySQLNIOTests: XCTestCase {
                     typealias InboundIn = ByteBuffer; typealias OutboundOut = ByteBuffer
                     func channelActive(context: ChannelHandlerContext) {
                         var packet = MySQLPacket(), buf = ByteBuffer()
+                        let context = NIOLoopBound(context, eventLoop: context.eventLoop)
                         packet.payload.writeMultipleIntegers(0xff/*flag*/, 2006/*CR_SERVER_GONE_ERROR*/, endianness: .little, as: (UInt8, UInt16).self)
                         packet.payload.writeString("#HY000Server gone")
                         try! MySQLPacketEncoder(sequence: .init(), logger: .init(label: "") { _ in SwiftLogNoOpLogHandler() }).encode(data: packet, out: &buf) // Never actually throws
-                        context.writeAndFlush(wrapOutboundOut(buf)).whenComplete { _ in context.close(mode: .all, promise: nil) }
+                        context.value.writeAndFlush(wrapOutboundOut(buf)).whenComplete { _ in context.value.close(mode: .all, promise: nil) }
                     }
                 }
                 return channel.pipeline.addHandler(Handler())
@@ -695,6 +696,3 @@ final class MySQLNIOTests: XCTestCase {
         try? await serverChannel.close(mode: .all)
     }
 }
-
-// TODO: THIS IS A TERRIBLE HORRIFYING CHEATING WORKAROUND, GET RID OF THIS AS SOON AS POSSIBLE!!
-extension NIOCore.ChannelHandlerContext: @unchecked Sendable {}
