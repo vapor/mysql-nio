@@ -621,6 +621,16 @@ final class MySQLNIOTests: XCTestCase {
         XCTAssertEqual(time.date, nil)
     }
     
+    func testTextMySQLTimeParse() throws {
+        let conn = try MySQLConnection.test(on: self.eventLoop).wait()
+        defer { try! conn.close().wait() }
+        
+        // The text protocol returns timestamp columns in text format.
+        // Ensure these can be converted to MySQLTime without error.
+        let rows = try conn.simpleQuery("SELECT CURRENT_TIMESTAMP() AS foo").wait()
+        XCTAssertNotNil(rows[0].column("foo")?.time)
+    }
+    
     func testNull() throws {
         let conn = try MySQLConnection.test(on: self.eventLoop).wait()
         defer { try! conn.close().wait() }
