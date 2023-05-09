@@ -683,4 +683,42 @@ final class MySQLNIOTests: XCTestCase {
         }
         try? await conn.close().get()
     }
+    
+    // https://github.com/vapor/mysql-nio/issues/91
+    func testBeforeHandshakeErrorHandling() async throws {
+        // There's no way to force a real server to throw a pre-handshake error, fake it with a mock server and a handcrafted ERR_Packet.
+        let serverChannel = try await ServerBootstrap(group: self.eventLoopGroup)
+            .serverChannelOption(ChannelOptions.socket(SOL_SOCKET, SO_REUSEADDR), value: 1)
+            .childChannelOption(ChannelOptions.socket(SOL_SOCKET, SO_REUSEADDR), value: 1)
+            .childChannelInitializer { channel in
+                final class Handler: ChannelInboundHandler {
+                    typealias InboundIn = ByteBuffer; typealias OutboundOut = ByteBuffer
+                    func channelActive(context: ChannelHandlerContext) {
+                        var packet = MySQLPacket(), buf = ByteBuffer()
+                        packet.payload.writeMultipleIntegers(0xff/*flag*/, 2006/*CR_SERVER_GONE_ERROR*/, endianness: .little, as: (UInt8, UInt16).self)
+                        packet.payload.writeString("#HY000Server gone")
+                        try! MySQLPacketEncoder(sequence: .init(), logger: .init(label: "") { _ in SwiftLogNoOpLogHandler() }).encode(data: packet, out: &buf) // Never actually throws
+                        context.writeAndFlush(wrapOutboundOut(buf)).whenComplete { _ in context.close(mode: .all, promise: nil) }
+                    }
+                }
+                return channel.pipeline.addHandler(Handler())
+            }
+            .bind(host: "127.0.0.1", port: 3307).get()
+        do {
+            let connection = try await MySQLConnection.connect(to: .init(ipAddress: "127.0.0.1", port: 3307), username: "", database: "", tlsConfiguration: nil, on: self.eventLoop).get()
+            XCTFail("Should have thrown a server error.")
+            try? await connection.close().get() // connection is *only* open if we get to this point
+        } catch MySQLError.server(let err) {
+            XCTAssertEqual(err.errorCode, .SERVER_GONE_ERROR)
+            XCTAssertEqual(err.sqlStateMarker, "#")
+            XCTAssertEqual(err.sqlState, "HY000")
+            XCTAssertEqual(err.errorMessage, "Server gone")
+        } catch {
+            XCTFail("Threw something other than the expected error: \(String(reflecting: error))")
+        }
+        try? await serverChannel.close(mode: .all)
+    }
 }
+
+// TODO: THIS IS A TERRIBLE HORRIFYING CHEATING WORKAROUND, GET RID OF THIS AS SOON AS POSSIBLE!!
+extension NIOCore.ChannelHandlerContext: @unchecked Sendable {}

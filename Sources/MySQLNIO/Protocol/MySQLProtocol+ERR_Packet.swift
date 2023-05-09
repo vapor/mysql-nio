@@ -40,7 +40,7 @@ extension MySQLProtocol {
             
             let sqlStateMarker: String?
             let sqlState: String?
-            if capabilities.contains(.CLIENT_PROTOCOL_41) {
+            if capabilities.contains(.CLIENT_PROTOCOL_41) || packet.payload.getString(at: packet.payload.readerIndex, length: 1) == "#" {
                 guard let marker = packet.payload.readString(length: 1) else {
                     throw DecodeError.missingSQLStateMarker
                 }

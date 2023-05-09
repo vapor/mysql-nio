@@ -100,9 +100,17 @@ final class MySQLConnectionHandler: ChannelDuplexHandler {
     }
     
     func handleHandshake(context: ChannelHandlerContext, packet: inout MySQLPacket, state: HandshakeState) throws {
+        // https://github.com/vapor/mysql-nio/issues/91
+        guard !packet.isError else {
+            let errorPacket = try packet.decode(MySQLProtocol.ERR_Packet.self, capabilities: [])
+            self.logger.trace("Received early server error before handshake: \(errorPacket)")
+            throw MySQLError.server(errorPacket)
+        }
         let handshakeRequest = try packet.decode(MySQLProtocol.HandshakeV10.self, capabilities: [])
         self.logger.trace("Handling MySQL handshake \(handshakeRequest)")
-        assert(handshakeRequest.capabilities.contains(.CLIENT_PROTOCOL_41), "Client protocol 4.1 required")
+        guard handshakeRequest.capabilities.contains(.CLIENT_PROTOCOL_41) else {
+            throw MySQLError.unsupportedServer(message: "Client protocol 4.1 required")
+        }
         self.serverCapabilities = handshakeRequest.capabilities
         if let tlsConfiguration = state.tlsConfiguration, handshakeRequest.capabilities.contains(.CLIENT_SSL) {
             var capabilities = MySQLProtocol.CapabilityFlags.clientDefault
@@ -459,7 +467,7 @@ final class MySQLConnectionHandler: ChannelDuplexHandler {
                     case .uncleanShutdown = sslError,
                     self.queue.isEmpty
                 {
-                    // we can ignore unclear shutdown errors
+                    // we can ignore unclean shutdown errors
                     // since no requests are pending
                     promise.succeed(())
                 } else {
