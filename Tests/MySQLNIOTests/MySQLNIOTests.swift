@@ -664,8 +664,8 @@ final class MySQLNIOTests: XCTestCase {
     func testBeforeHandshakeErrorHandling() async throws {
         // There's no way to force a real server to throw a pre-handshake error, fake it with a mock server and a handcrafted ERR_Packet.
         let serverChannel = try await ServerBootstrap(group: self.eventLoopGroup)
-            .serverChannelOption(ChannelOptions.socket(SOL_SOCKET, SO_REUSEADDR), value: 1)
-            .childChannelOption(ChannelOptions.socket(SOL_SOCKET, SO_REUSEADDR), value: 1)
+            .serverChannelOption(ChannelOptions.socket(SocketOptionLevel(SOL_SOCKET), SocketOptionName(SO_REUSEADDR)), value: SocketOptionValue(1))
+            .childChannelOption(ChannelOptions.socket(SocketOptionLevel(SOL_SOCKET), SocketOptionName(SO_REUSEADDR)), value: SocketOptionValue(1))
             .childChannelInitializer { channel in
                 final class Handler: ChannelInboundHandler {
                     typealias InboundIn = ByteBuffer; typealias OutboundOut = ByteBuffer
