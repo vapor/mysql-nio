@@ -8,17 +8,17 @@ extension MySQLProtocol {
     ///
     /// https://dev.mysql.com/doc/internals/en/null-bitmap.html
     public struct NullBitmap: CustomStringConvertible {
-        /// Creates a new `MySQLNullBitmap` suitable for com statement execute packets.
+        /// Creates a new ``MySQLNullBitmap`` suitable for com statement execute packets.
         public static func comExecuteBitmap(count: Int) -> NullBitmap {
             return .init(count: count, offset: 0)
         }
         
-        /// Creates a new `MySQLNullBitmap` suitable for binary result set packets.
+        /// Creates a new ``MySQLNullBitmap`` suitable for binary result set packets.
         public static func binaryResultSetBitmap(bytes: [UInt8]) -> NullBitmap {
             return .init(bytes: bytes, offset: 2)
         }
         
-        /// Reads a `MySQLNullBitmap` for binary result sets from the `ByteBuffer`.
+        /// Reads a ``MySQLNullBitmap`` for binary result sets from the ``ByteBuffer``.
         public static func readResultSetNullBitmap(count: Int, from buffer: inout ByteBuffer) -> NullBitmap? {
             guard let bytes = buffer.readBytes(length: self.length(count: count, offset: 2)) else {
                 return nil
@@ -28,7 +28,7 @@ extension MySQLProtocol {
         
         /// NULL-bitmap, length: (num-params+7)/8
         private static func length(count: Int, offset: Int) -> Int {
-            return (count + 7 + offset) / 8
+            (count + 7 + offset) / 8
         }
         
         /// This bitmap's static offset. This varies depending on which packet
@@ -38,13 +38,10 @@ extension MySQLProtocol {
         /// the raw bitmap bytes.
         public var bytes: [UInt8]
         
-        /// Creates a new `MySQLNullBitmap` from column count and an offset.
+        /// Creates a new ``MySQLNullBitmap`` from column count and an offset.
         private init(count: Int, offset: Int) {
             self.offset = offset
-            self.bytes = [UInt8](
-                repeating: 0,
-                count: NullBitmap.length(count: count, offset: offset)
-            )
+            self.bytes = [UInt8](repeating: 0, count: NullBitmap.length(count: count, offset: offset))
         }
         
         /// Creates a new `MySQLNullBitmap` from bytes and an offset.
@@ -55,8 +52,8 @@ extension MySQLProtocol {
         
         /// Sets the position to null.
         public mutating func setNull(at pos: Int) {
-            /// NULL-bitmap-byte = ((field-pos + offset) / 8)
-            /// NULL-bitmap-bit  = ((field-pos + offset) % 8)
+            /// `NULL-bitmap-byte = ((field-pos + offset) / 8)`
+            /// `NULL-bitmap-bit  = ((field-pos + offset) % 8)`
             let NULL_bitmap_byte = (pos + self.offset) / 8
             let NULL_bitmap_bit = (pos + self.offset) % 8
             
@@ -65,8 +62,8 @@ extension MySQLProtocol {
         
         /// Returns `true` if the bitmap is null at the supplied position.
         public func isNull(at pos: Int) -> Bool {
-            /// NULL-bitmap-byte = ((field-pos + offset) / 8)
-            /// NULL-bitmap-bit  = ((field-pos + offset) % 8)
+            /// `NULL-bitmap-byte = ((field-pos + offset) / 8)`
+            /// `NULL-bitmap-bit  = ((field-pos + offset) % 8)`
             let NULL_bitmap_byte = (pos + self.offset) / 8
             let NULL_bitmap_bit = (pos + self.offset) % 8
             

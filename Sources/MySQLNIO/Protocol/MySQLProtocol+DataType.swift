@@ -1,97 +1,97 @@
 extension MySQLProtocol {
     /// Table 14.4 Column Types
     public struct DataType: RawRepresentable, Equatable, CustomStringConvertible {
-        /// Implemented by ProtocolBinary::MYSQL_TYPE_DECIMAL
+        /// Implemented by `ProtocolBinary::MYSQL_TYPE_DECIMAL`
         public static let decimal = DataType(rawValue: 0x00)
         
-        /// Implemented by ProtocolBinary::MYSQL_TYPE_TINY
+        /// Implemented by `ProtocolBinary::MYSQL_TYPE_TINY`
         public static let tiny = DataType(rawValue: 0x01)
         
-        /// Implemented by ProtocolBinary::MYSQL_TYPE_SHORT
+        /// Implemented by `ProtocolBinary::MYSQL_TYPE_SHORT`
         public static let short = DataType(rawValue: 0x02)
         
-        /// Implemented by ProtocolBinary::MYSQL_TYPE_LONG
+        /// Implemented by `ProtocolBinary::MYSQL_TYPE_LONG`
         public static let long = DataType(rawValue: 0x03)
         
-        /// Implemented by ProtocolBinary::MYSQL_TYPE_FLOAT
+        /// Implemented by `ProtocolBinary::MYSQL_TYPE_FLOAT`
         public static let float = DataType(rawValue: 0x04)
         
-        /// Implemented by ProtocolBinary::MYSQL_TYPE_DOUBLE
+        /// Implemented by `ProtocolBinary::MYSQL_TYPE_DOUBLE`
         public static let double = DataType(rawValue: 0x05)
         
-        /// Implemented by ProtocolBinary::MYSQL_TYPE_NULL
+        /// Implemented by `ProtocolBinary::MYSQL_TYPE_NULL`
         public static let null = DataType(rawValue: 0x06)
         
-        /// Implemented by ProtocolBinary::MYSQL_TYPE_TIMESTAMP
+        /// Implemented by `ProtocolBinary::MYSQL_TYPE_TIMESTAMP`
         public static let timestamp = DataType(rawValue: 0x07)
         
-        /// Implemented by ProtocolBinary::MYSQL_TYPE_LONGLONG
+        /// Implemented by `ProtocolBinary::MYSQL_TYPE_LONGLONG`
         public static let longlong = DataType(rawValue: 0x08)
         
-        /// Implemented by ProtocolBinary::MYSQL_TYPE_INT24
+        /// Implemented by `ProtocolBinary::MYSQL_TYPE_INT24`
         public static let int24 = DataType(rawValue: 0x09)
         
-        /// Implemented by ProtocolBinary::MYSQL_TYPE_DATE
+        /// Implemented by `ProtocolBinary::MYSQL_TYPE_DATE`
         public static let date = DataType(rawValue: 0x0a)
         
-        /// Implemented by ProtocolBinary::MYSQL_TYPE_TIME
+        /// Implemented by `ProtocolBinary::MYSQL_TYPE_TIME`
         public static let time = DataType(rawValue: 0x0b)
         
-        /// Implemented by ProtocolBinary::MYSQL_TYPE_DATETIME
+        /// Implemented by `ProtocolBinary::MYSQL_TYPE_DATETIME`
         public static let datetime = DataType(rawValue: 0x0c)
         
-        /// Implemented by ProtocolBinary::MYSQL_TYPE_YEAR
+        /// Implemented by `ProtocolBinary::MYSQL_TYPE_YEAR`
         public static let year = DataType(rawValue: 0x0d)
         
-        /// see Protocol::MYSQL_TYPE_DATE
+        /// see `Protocol::MYSQL_TYPE_DATE`
         public static let newdate = DataType(rawValue: 0x0e)
         
-        /// Implemented by ProtocolBinary::MYSQL_TYPE_VARCHAR
+        /// Implemented by `ProtocolBinary::MYSQL_TYPE_VARCHAR`
         public static let varchar = DataType(rawValue: 0x0f)
         
-        /// Implemented by ProtocolBinary::MYSQL_TYPE_BIT
+        /// Implemented by `ProtocolBinary::MYSQL_TYPE_BIT`
         public static let bit = DataType(rawValue: 0x10)
         
-        /// see Protocol::MYSQL_TYPE_TIMESTAMP2
+        /// see `Protocol::MYSQL_TYPE_TIMESTAMP2`
         public static let timestamp2 = DataType(rawValue: 0x11)
         
-        /// see Protocol::MYSQL_TYPE_DATETIME2
+        /// see `Protocol::MYSQL_TYPE_DATETIME2`
         public static let datetime2 = DataType(rawValue: 0x12)
         
-        /// see Protocol::MYSQL_TYPE_TIME2
+        /// see `Protocol::MYSQL_TYPE_TIME2`
         public static let time2 = DataType(rawValue: 0x13)
         
-        /// Implemented by ProtocolBinary::MYSQL_TYPE_JSON
+        /// Implemented by `ProtocolBinary::MYSQL_TYPE_JSON`
         public static let json = DataType(rawValue: 0xf5)
         
-        /// Implemented by ProtocolBinary::MYSQL_TYPE_NEWDECIMAL
+        /// Implemented by `ProtocolBinary::MYSQL_TYPE_NEWDECIMAL`
         public static let newdecimal = DataType(rawValue: 0xf6)
         
-        /// Implemented by ProtocolBinary::MYSQL_TYPE_ENUM
+        /// Implemented by `ProtocolBinary::MYSQL_TYPE_ENUM`
         public static let `enum` = DataType(rawValue: 0xf7)
         
-        /// Implemented by ProtocolBinary::MYSQL_TYPE_SET
+        /// Implemented by `ProtocolBinary::MYSQL_TYPE_SET`
         public static let set = DataType(rawValue: 0xf8)
         
-        /// Implemented by ProtocolBinary::MYSQL_TYPE_TINY_BLOB
+        /// Implemented by `ProtocolBinary::MYSQL_TYPE_TINY_BLOB`
         public static let tinyBlob = DataType(rawValue: 0xf9)
         
-        /// Implemented by ProtocolBinary::MYSQL_TYPE_MEDIUM_BLOB
+        /// Implemented by `ProtocolBinary::MYSQL_TYPE_MEDIUM_BLOB`
         public static let mediumBlob = DataType(rawValue: 0xfa)
         
-        /// Implemented by ProtocolBinary::MYSQL_TYPE_LONG_BLOB
+        /// Implemented by `ProtocolBinary::MYSQL_TYPE_LONG_BLOB`
         public static let longBlob = DataType(rawValue: 0xfb)
         
-        /// Implemented by ProtocolBinary::MYSQL_TYPE_BLOB
+        /// Implemented by `ProtocolBinary::MYSQL_TYPE_BLOB`
         public static let blob = DataType(rawValue: 0xfc)
         
-        /// Implemented by ProtocolBinary::MYSQL_TYPE_VAR_STRING
+        /// Implemented by `ProtocolBinary::MYSQL_TYPE_VAR_STRING`
         public static let varString = DataType(rawValue: 0xfd)
         
-        /// Implemented by ProtocolBinary::MYSQL_TYPE_STRING
+        /// Implemented by `ProtocolBinary::MYSQL_TYPE_STRING`
         public static let string = DataType(rawValue: 0xfe)
         
-        /// Implemented by ProtocolBinary::MYSQL_TYPE_GEOMETRY
+        /// Implemented by `ProtocolBinary::MYSQL_TYPE_GEOMETRY`
         public static let geometry = DataType(rawValue: 0xff)
         
         /// Length that this type encodes to. If `nil`, the encoded
@@ -117,7 +117,8 @@ extension MySQLProtocol {
             case .double:
                 length = 8
             default:
-                fatalError("Unsupported type: \(self)")
+                // guess
+                length = nil
             }
             return length
         }
@@ -125,7 +126,7 @@ extension MySQLProtocol {
         /// The raw byte.
         public let rawValue: UInt8
         
-        /// Creates a new `MySQLColumnType`.
+        /// See ``RawRepresentable/init(rawValue:)``.
         public init(rawValue: UInt8) {
             self.rawValue = rawValue
         }

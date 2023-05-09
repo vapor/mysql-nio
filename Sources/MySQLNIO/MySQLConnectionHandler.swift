@@ -3,7 +3,7 @@ import NIOCore
 import Logging
 
 internal struct MySQLCommandContext {
-    var handler: MySQLCommand
+    var handler: any MySQLCommand
     var promise: EventLoopPromise<Void>
 }
 
@@ -88,15 +88,29 @@ final class MySQLConnectionHandler: ChannelDuplexHandler {
                     self.sendEnqueuedCommandIfReady(context: context)
                 }
             } else {
-                assertionFailure("unhandled packet: \(packet.payload.debugDescription)")
+                if packet.isError, let errorPacket = try? packet.decode(MySQLProtocol.ERR_Packet.self, capabilities: serverCapabilities ?? .init()) {
+                    self.errorCaught(context: context, error: MySQLError.server(errorPacket))
+                    self.close(context: context, mode: .all, promise: nil)
+                } else {
+                    self.errorCaught(context: context, error: MySQLError.protocolError)
+                    context.close(mode: .all, promise: nil) // Don't send a COM_QUIT, this is a protocol error anyway
+                }
             }
         }
     }
     
     func handleHandshake(context: ChannelHandlerContext, packet: inout MySQLPacket, state: HandshakeState) throws {
+        // https://github.com/vapor/mysql-nio/issues/91
+        guard !packet.isError else {
+            let errorPacket = try packet.decode(MySQLProtocol.ERR_Packet.self, capabilities: [])
+            self.logger.trace("Received early server error before handshake: \(errorPacket)")
+            throw MySQLError.server(errorPacket)
+        }
         let handshakeRequest = try packet.decode(MySQLProtocol.HandshakeV10.self, capabilities: [])
         self.logger.trace("Handling MySQL handshake \(handshakeRequest)")
-        assert(handshakeRequest.capabilities.contains(.CLIENT_PROTOCOL_41), "Client protocol 4.1 required")
+        guard handshakeRequest.capabilities.contains(.CLIENT_PROTOCOL_41) else {
+            throw MySQLError.unsupportedServer(message: "Client protocol 4.1 required")
+        }
         self.serverCapabilities = handshakeRequest.capabilities
         if let tlsConfiguration = state.tlsConfiguration, handshakeRequest.capabilities.contains(.CLIENT_SSL) {
             var capabilities = MySQLProtocol.CapabilityFlags.clientDefault
@@ -453,7 +467,7 @@ final class MySQLConnectionHandler: ChannelDuplexHandler {
                     case .uncleanShutdown = sslError,
                     self.queue.isEmpty
                 {
-                    // we can ignore unclear shutdown errors
+                    // we can ignore unclean shutdown errors
                     // since no requests are pending
                     promise.succeed(())
                 } else {

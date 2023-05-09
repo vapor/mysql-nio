@@ -7,10 +7,7 @@ public struct MySQLPacketDecoder: ByteToMessageDecoder {
     public let sequence: MySQLPacketSequence
     let logger: Logger
     
-    public init(
-        sequence: MySQLPacketSequence,
-        logger: Logger
-    ) {
+    public init(sequence: MySQLPacketSequence, logger: Logger) {
         self.sequence = sequence
         self.logger = logger
     }
@@ -37,6 +34,6 @@ public struct MySQLPacketDecoder: ByteToMessageDecoder {
     }
     
     public mutating func decodeLast(context: ChannelHandlerContext, buffer: inout ByteBuffer, seenEOF: Bool) throws -> DecodingState {
-        return .needMoreData
+        .needMoreData
     }
 }

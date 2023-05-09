@@ -1,9 +1,11 @@
 import MySQLNIO
 import NIOSSL
 import NIOCore
+import Logging
+import class Foundation.ProcessInfo
 
 extension MySQLConnection {
-    static func test(on eventLoop: EventLoop) -> EventLoopFuture<MySQLConnection> {
+    static func test(on eventLoop: any EventLoop) -> EventLoopFuture<MySQLConnection> {
         let addr: SocketAddress
         do {
             addr = try SocketAddress.makeAddressResolvingHost(
@@ -24,4 +26,17 @@ extension MySQLConnection {
             on: eventLoop
         )
     }
+}
+
+let isLoggingConfigured: Bool = {
+    LoggingSystem.bootstrap { label in
+        var handler = StreamLogHandler.standardOutput(label: label)
+        handler.logLevel = env("LOG_LEVEL").flatMap { Logger.Level(rawValue: $0) } ?? .info
+        return handler
+    }
+    return true
+}()
+
+func env(_ name: String) -> String? {
+    ProcessInfo.processInfo.environment[name]
 }
