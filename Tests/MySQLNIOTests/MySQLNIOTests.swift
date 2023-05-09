@@ -647,7 +647,7 @@ final class MySQLNIOTests: XCTestCase {
         let conn = try await MySQLConnection.test(on: self.eventLoop).get()
         do {
             try await conn.send(PingCommand(), logger: conn.logger).get()
-            try await Task.sleep(nanoseconds: 1_000_000) // to let the reply come in without any other command queued
+            try await Task.sleep(nanoseconds: 10_000_000) // to let the reply come in without any other command queued
             do {
                 _ = try await conn.simpleQuery("SELECT 1").get()
                 XCTFail("did not throw an error")
