@@ -167,10 +167,9 @@ final class MySQLNIOTests: XCTestCase {
     func testQuery_selectMixed() throws {
         let conn = try MySQLConnection.test(on: self.eventLoop).wait()
         defer { try! conn.close().wait() }
-        let rows = try! conn.query("SELECT '1' as one, 2 as two").wait()
+        let rows = try conn.query("SELECT '1' as one, 2 as two").wait()
         guard rows.count == 1 else {
-            XCTFail("invalid row count")
-            return
+            return XCTFail("invalid row count")
         }
         XCTAssertEqual(rows[0].column("one")?.string, "1")
         XCTAssertEqual(rows[0].column("two")?.string, "2")
@@ -179,7 +178,7 @@ final class MySQLNIOTests: XCTestCase {
     func testQuery_selectBoundParams() throws {
         let conn = try MySQLConnection.test(on: self.eventLoop).wait()
         defer { try! conn.close().wait() }
-        let rows = try! conn.query("SELECT ? as one, ? as two", ["1", "2"]).wait()
+        let rows = try conn.query("SELECT ? as one, ? as two", ["1", "2"]).wait()
         guard rows.count == 1 else {
             return XCTFail("invalid row count")
         }
@@ -286,7 +285,7 @@ final class MySQLNIOTests: XCTestCase {
         let conn = try MySQLConnection.test(on: self.eventLoop).wait()
         defer { try! conn.close().wait() }
         let string = String(repeating: "a", count: 128)
-        let rows = try! conn.query("SELECT ? as s", [MySQLData(string: string)]).wait()
+        let rows = try conn.query("SELECT ? as s", [MySQLData(string: string)]).wait()
         XCTAssertEqual(rows[0].column("s")?.string, string)
     }
 
@@ -294,7 +293,7 @@ final class MySQLNIOTests: XCTestCase {
         let conn = try MySQLConnection.test(on: self.eventLoop).wait()
         defer { try! conn.close().wait() }
         let string = String(repeating: "a", count: 512)
-        let rows = try! conn.query("SELECT ? as s", [MySQLData(string: string)]).wait()
+        let rows = try conn.query("SELECT ? as s", [MySQLData(string: string)]).wait()
         XCTAssertEqual(rows[0].column("s")?.string, string)
     }
 
@@ -302,7 +301,7 @@ final class MySQLNIOTests: XCTestCase {
         let conn = try MySQLConnection.test(on: self.eventLoop).wait()
         defer { try! conn.close().wait() }
         let string = String(repeating: "a", count: 1<<17)
-        let rows = try! conn.query("SELECT ? as s", [MySQLData(string: string)]).wait()
+        let rows = try conn.query("SELECT ? as s", [MySQLData(string: string)]).wait()
         XCTAssertEqual(rows[0].column("s")?.string, string)
     }
     
@@ -379,7 +378,7 @@ final class MySQLNIOTests: XCTestCase {
         let conn = try MySQLConnection.test(on: self.eventLoop).wait()
         defer { try! conn.close().wait() }
         for _ in 0..<1_000 {
-            _ = try! conn.simpleQuery("SELECT 1").wait()
+            _ = try conn.simpleQuery("SELECT 1").wait()
         }
     }
     
@@ -390,8 +389,8 @@ final class MySQLNIOTests: XCTestCase {
         
         measure {
             for _ in 0..<100 {
-                let rows = try! conn.query("SELECT CAST('2016-01-18' AS DATETIME) as datetime").wait()
-                XCTAssertEqual(rows[0].column("datetime")?.date?.description, "2016-01-18 00:00:00 +0000")
+                let rows = try? conn.query("SELECT CAST('2016-01-18' AS DATETIME) as datetime").wait()
+                XCTAssertEqual(rows?[0].column("datetime")?.date?.description, "2016-01-18 00:00:00 +0000")
             }
         }
     }
@@ -475,14 +474,13 @@ final class MySQLNIOTests: XCTestCase {
         let conn = try MySQLConnection.test(on: self.eventLoop).wait()
         defer { try! conn.close().wait() }
 
-        _ = try! conn.simpleQuery("DROP TABLE IF EXISTS foo").wait()
+        _ = try conn.simpleQuery("DROP TABLE IF EXISTS foo").wait()
         _ = try conn.simpleQuery("CREATE TABLE foo (bar DATE)").wait()
         defer { _ = try! conn.simpleQuery("DROP TABLE IF EXISTS foo").wait() }
         _ = try conn.query("INSERT INTO foo (bar) VALUES ('2038-01-19')").wait()
         let rows = try conn.query("SELECT * FROM foo").wait()
         guard let time = rows[0].column("bar")?.time else {
-            XCTFail("Could not convert to time: \(rows[0])")
-            return
+            return XCTFail("Could not convert to time: \(rows[0])")
         }
         XCTAssertEqual(time.year, 2038)
         XCTAssertEqual(time.month, 1)
@@ -508,7 +506,7 @@ final class MySQLNIOTests: XCTestCase {
         let conn = try MySQLConnection.test(on: self.eventLoop).wait()
         defer { try! conn.close().wait() }
 
-        _ = try! conn.simpleQuery("DROP TABLE IF EXISTS foo").wait()
+        _ = try conn.simpleQuery("DROP TABLE IF EXISTS foo").wait()
         _ = try conn.simpleQuery("CREATE TABLE foo (bar DATETIME)").wait()
         defer { _ = try! conn.simpleQuery("DROP TABLE IF EXISTS foo").wait() }
         _ = try conn.query("INSERT INTO foo (bar) VALUES ('2038-01-19 03:14:07')").wait()
@@ -541,7 +539,7 @@ final class MySQLNIOTests: XCTestCase {
         let conn = try MySQLConnection.test(on: self.eventLoop).wait()
         defer { try! conn.close().wait() }
 
-        _ = try! conn.simpleQuery("DROP TABLE IF EXISTS foo").wait()
+        _ = try conn.simpleQuery("DROP TABLE IF EXISTS foo").wait()
         _ = try conn.simpleQuery("CREATE TABLE foo (bar TIME)").wait()
         defer { _ = try! conn.simpleQuery("DROP TABLE IF EXISTS foo").wait() }
         _ = try conn.query("INSERT INTO foo (bar) VALUES ('12:34:56.123')").wait()
@@ -647,7 +645,7 @@ final class MySQLNIOTests: XCTestCase {
         let conn = try await MySQLConnection.test(on: self.eventLoop).get()
         do {
             try await conn.send(PingCommand(), logger: conn.logger).get()
-            try await Task.sleep(nanoseconds: 10_000_000) // to let the reply come in without any other command queued
+            try await Task.sleep(nanoseconds: 100_000_000) // to let the reply come in without any other command queued
             do {
                 _ = try await conn.simpleQuery("SELECT 1").get()
                 XCTFail("did not throw an error")
