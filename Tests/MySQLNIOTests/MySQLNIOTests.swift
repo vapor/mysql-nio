@@ -640,13 +640,10 @@ final class MySQLNIOTests: XCTestCase {
         let conn = try MySQLConnection.test(on: self.eventLoop).wait()
         defer { try! conn.close().wait() }
         
-        // MariaDB 10.5 returns timestamp columns in text format.
+        // The text protocol returns timestamp columns in text format.
         // Ensure these can be converted to MySQLTime without error.
-        let rows = try! conn.simpleQuery("SELECT CURRENT_TIMESTAMP() AS foo").wait()
-        guard let _ = rows[0].column("foo")?.time else {
-            XCTFail("Could not convert to time: \(rows[0])")
-            return
-        }
+        let rows = try conn.simpleQuery("SELECT CURRENT_TIMESTAMP() AS foo").wait()
+        XCTAssertNotNil(rows[0].column("foo")?.time)
     }
     
     func testNull() throws {
