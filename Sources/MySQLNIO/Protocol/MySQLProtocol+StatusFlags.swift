@@ -1,5 +1,4 @@
 extension MySQLProtocol {
-    
     /// The status flags are a bit-field.
     ///
     /// https://dev.mysql.com/doc/internals/en/status-flags.html#packet-Protocol::StatusFlags
@@ -17,7 +16,7 @@ extension MySQLProtocol {
         public static let SERVER_STATUS_NO_INDEX_USED = StatusFlags(rawValue: 0x0020)
         
         /// Used by Binary Protocol Resultset to signal that
-        /// COM_STMT_FETCH must be used to fetch the row-data.
+        /// `COM_STMT_FETCH` must be used to fetch the row-data.
         public static let SERVER_STATUS_CURSOR_EXISTS = StatusFlags(rawValue: 0x0040)
         
         public static let SERVER_STATUS_LAST_ROW_SENT = StatusFlags(rawValue: 0x0080)
@@ -83,7 +82,7 @@ extension MySQLProtocol {
         /// The raw status value.
         public var rawValue: UInt16
         
-        /// Create a new `MySQLStatusFlags` from raw value.
+        /// Create a new ``MySQLStatusFlags`` from raw value.
         public init(rawValue: UInt16) {
             self.rawValue = rawValue
         }

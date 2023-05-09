@@ -1,11 +1,12 @@
 name: test
 on:
-  - pull_request
+  pull_request: { types: [opened, reopened, synchronize, ready_for_review] }
+  push: { branches: [ main ] }
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 env:
-  LOG_LEVEL: debug
+  LOG_LEVEL: into
   SWIFT_DETERMINISTIC_HASHING: 1
   MYSQL_DATABASE: 'test_database'
   MYSQL_DATABASE_A: 'test_database'
@@ -32,19 +33,8 @@ jobs:
       - name: Run API breakage check action
         uses: vapor/ci/.github/actions/ci-swift-check-api-breakage@reusable-workflows
 
-  imports-check:
-    if: ${{ !(github.event.pull_request.draft || false) }}
-    runs-on: ubuntu-latest
-    container: swift:5.8-jammy
-    steps:
-      - name: Check out code
-        uses: actions/checkout@v3
-        with: { 'fetch-depth': 0 }
-      - name: Build with re-export disabled
-        run: swift build -Xswiftc -DBUILDING_DOCC
-
   linux-all:
-    if: ${{ github.event.pull_request.draft == false }}
+    if: ${{ !(github.event.pull_request.draft || false) }}
     strategy:
       fail-fast: false
       matrix:
@@ -84,12 +74,10 @@ jobs:
       - name: Run unit tests
         run: swift test --package-path mysql-nio --enable-code-coverage --sanitize=thread
       - name: Upload code coverage
-        if: ${{ !contains(matrix.swiftver, '5.8') }}
         uses: vapor/swift-codecov-action@v0.2
-        with: {
-          package_path: 'mysql-nio', cc_flags: 'unittests', cc_verbose: true,
+        with:
+          package_path: 'mysql-nio'
           cc_env_vars: 'SWIFT_VERSION,SWIFT_PLATFORM,RUNNER_OS,RUNNER_ARCH,MYSQL_VERSION'
-        }
       - name: Check out mysql-kit dependent
         uses: actions/checkout@v3
         with: { repository: 'vapor/mysql-kit', path: 'mysql-kit' }
@@ -117,7 +105,7 @@ jobs:
         xcode:
           - latest-stable
         macos:
-          - macos-12
+          - macos-13
         include:
           - username: root
           - dbimage: mariadb
@@ -143,18 +131,16 @@ jobs:
               GRANT ALL PRIVILEGES ON $MYSQL_DATABASE.* TO $MYSQL_USERNAME@localhost;
           SQL
         timeout-minutes: 5
+      - name: Record Swift toolchain and MySQL versions
+        run: |
+          echo "SWIFT_VERSION=$(swift package tools-version --version)" >> "${GITHUB_ENV}"
+          echo 'SWIFT_PLATFORM=${{ matrix.macos }}' >> "${GITHUB_ENV}"
+          echo "MYSQL_VERSION=$(mysql --version)" >> "${GITHUB_ENV}"
       - name: Check out code
         uses: actions/checkout@v3
       - name: Run all tests
-        run: swift test
-
-  test-exports:
-    name: Test exports
-    runs-on: ubuntu-latest
-    steps:
-      - name: Check out Vapor
-        uses: actions/checkout@v3
+        run: swift test --sanitize=thread --enable-code-coverage
+      - name: Upload code coverage
+        uses: vapor/swift-codecov-action@v0.2
         with:
-          fetch-depth: 0
-      - name: Build
-        run: swift build -Xswiftc -DBUILDING_DOCC
+          cc_env_vars: 'MD_APPLE_SDK_ROOT,SWIFT_VERSION,SWIFT_PLATFORM,RUNNER_OS,RUNNER_ARCH,MYSQL_VERSION'

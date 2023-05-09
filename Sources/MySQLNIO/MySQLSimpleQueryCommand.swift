@@ -83,12 +83,12 @@ private final class MySQLSimpleQueryCommand: MySQLCommand {
             )
             self.onRow(row)
             return .noResponse
-        case .done: fatalError()
+        case .done: throw MySQLError.protocolError
         }
     }
     
     func activate(capabilities: MySQLProtocol.CapabilityFlags) throws -> MySQLCommandState {
-        return try .response([
+        try .response([
             .encode(MySQLProtocol.COM_QUERY(query: self.sql), capabilities: capabilities)
         ])
     }

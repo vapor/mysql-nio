@@ -5,11 +5,18 @@ import NIOCore
 import NIOPosix
 
 final class MySQLNIOTests: XCTestCase {
-    private var group: EventLoopGroup!
-    private var eventLoop: EventLoop {
-        return self.group.next()
+    private var eventLoopGroup: (any EventLoopGroup)!
+    private var eventLoop: any EventLoop { self.eventLoopGroup.any() }
+    
+    override func setUpWithError() throws {
+        XCTAssert(isLoggingConfigured)
+        self.eventLoopGroup = MultiThreadedEventLoopGroup(numberOfThreads: 1)
     }
     
+    override func tearDownWithError() throws {
+        try self.eventLoopGroup.syncShutdownGracefully()
+    }
+
     func testDecodingSumOfIntsWithNoRows() throws {
         let conn = try MySQLConnection.test(on: self.eventLoop).wait()
         defer { try! conn.close().wait() }
@@ -17,10 +24,10 @@ final class MySQLNIOTests: XCTestCase {
         XCTAssertEqual(dropResults.count, 0)
         let createResults = try conn.simpleQuery("CREATE TABLE foos (`item_count` int(11))").wait()
         XCTAssertEqual(createResults.count, 0)
+        defer { _ = try! conn.simpleQuery("DROP TABLE IF EXISTS foos").wait() }
         let rows = try conn.simpleQuery("SELECT sum(`item_count`) as sum from foos").wait()
         guard rows.count == 1 else {
-            XCTFail("invalid row count")
-            return
+            return XCTFail("invalid row count")
         }
         if let sqlData = rows[0].column("sum") {
             XCTAssertEqual(sqlData.string, nil)
@@ -40,11 +47,11 @@ final class MySQLNIOTests: XCTestCase {
         XCTAssertEqual(dropResults.count, 0)
         let createResults = try conn.simpleQuery("CREATE TABLE foos (`item_count` int(11))").wait()
         XCTAssertEqual(createResults.count, 0)
+        defer { _ = try! conn.simpleQuery("DROP TABLE IF EXISTS foos").wait() }
         let _ = try conn.simpleQuery("insert into foos (`item_count`) values (0)").wait()
         let rows = try conn.simpleQuery("SELECT sum(`item_count`) as sum from foos").wait()
         guard rows.count == 1 else {
-            XCTFail("invalid row count")
-            return
+            return XCTFail("invalid row count")
         }
         if let sqlData = rows[0].column("sum") {
             XCTAssertEqual(sqlData.string, "0")
@@ -58,8 +65,7 @@ final class MySQLNIOTests: XCTestCase {
         let _ = try conn.simpleQuery("insert into foos (`item_count`) values (199)").wait()
         let rows2 = try conn.simpleQuery("SELECT sum(`item_count`) as sum from foos").wait()
         guard rows2.count == 1 else {
-            XCTFail("invalid row count")
-            return
+            return XCTFail("invalid row count")
         }
         if let sqlData = rows2[0].column("sum") {
             XCTAssertEqual(sqlData.string, "199")
@@ -77,8 +83,7 @@ final class MySQLNIOTests: XCTestCase {
         defer { try! conn.close().wait() }
         let rows = try conn.simpleQuery("SELECT @@version").wait()
         guard rows.count == 1 else {
-            XCTFail("invalid row count")
-            return
+            return XCTFail("invalid row count")
         }
         XCTAssert(rows[0].column("@@version")?.string?.contains(".") == true)
     }
@@ -88,8 +93,7 @@ final class MySQLNIOTests: XCTestCase {
         defer { try! conn.close().wait() }
         let rows = try conn.simpleQuery("SELECT 'foo' as bar").wait()
         guard rows.count == 1 else {
-            XCTFail("invalid row count")
-            return
+            return XCTFail("invalid row count")
         }
         XCTAssertEqual(rows.description, #"[["bar": "foo"]]"#)
         XCTAssertEqual(rows[0].column("bar")?.string, "foo")
@@ -100,8 +104,7 @@ final class MySQLNIOTests: XCTestCase {
         defer { try! conn.close().wait() }
         let rows = try conn.simpleQuery("SELECT 1 as one, 2 as two").wait()
         guard rows.count == 1 else {
-            XCTFail("invalid row count")
-            return
+            return XCTFail("invalid row count")
         }
         XCTAssertEqual(rows[0].column("one")?.string, "1")
         XCTAssertEqual(rows[0].column("two")?.string, "2")
@@ -134,6 +137,7 @@ final class MySQLNIOTests: XCTestCase {
         XCTAssertEqual(dropResults.count, 0)
         let createResults = try conn.simpleQuery("CREATE TABLE foos (id BIGINT SIGNED unique, name VARCHAR(64))").wait()
         XCTAssertEqual(createResults.count, 0)
+        defer { _ = try! conn.simpleQuery("DROP TABLE IF EXISTS foos").wait() }
         let insertResults = try conn.simpleQuery("INSERT INTO foos VALUES (1, 'one')").wait()
         XCTAssertEqual(insertResults.count, 0)
         XCTAssertThrowsError(try conn.query("INSERT INTO foos VALUES (1, 'two')").wait()) { error in
@@ -150,6 +154,7 @@ final class MySQLNIOTests: XCTestCase {
         XCTAssertEqual(dropResults.count, 0)
         let createResults = try conn.simpleQuery("CREATE TABLE foos (id BIGINT SIGNED unique, name VARCHAR(64))").wait()
         XCTAssertEqual(createResults.count, 0)
+        defer { _ = try! conn.simpleQuery("DROP TABLE IF EXISTS foos").wait() }
         let insertResults = try conn.query("INSERT INTO foos VALUES (?, ?)", [1, "one"]).wait()
         XCTAssertEqual(insertResults.count, 0)
         XCTAssertThrowsError(try conn.query("INSERT INTO foos VALUES (?, ?)", [1, "two"]).wait()) { (inError) in
@@ -162,10 +167,9 @@ final class MySQLNIOTests: XCTestCase {
     func testQuery_selectMixed() throws {
         let conn = try MySQLConnection.test(on: self.eventLoop).wait()
         defer { try! conn.close().wait() }
-        let rows = try! conn.query("SELECT '1' as one, 2 as two").wait()
+        let rows = try conn.query("SELECT '1' as one, 2 as two").wait()
         guard rows.count == 1 else {
-            XCTFail("invalid row count")
-            return
+            return XCTFail("invalid row count")
         }
         XCTAssertEqual(rows[0].column("one")?.string, "1")
         XCTAssertEqual(rows[0].column("two")?.string, "2")
@@ -174,10 +178,9 @@ final class MySQLNIOTests: XCTestCase {
     func testQuery_selectBoundParams() throws {
         let conn = try MySQLConnection.test(on: self.eventLoop).wait()
         defer { try! conn.close().wait() }
-        let rows = try! conn.query("SELECT ? as one, ? as two", ["1", "2"]).wait()
+        let rows = try conn.query("SELECT ? as one, ? as two", ["1", "2"]).wait()
         guard rows.count == 1 else {
-            XCTFail("invalid row count")
-            return
+            return XCTFail("invalid row count")
         }
         XCTAssertEqual(rows[0].column("one")?.string, "1")
         XCTAssertEqual(rows[0].column("two")?.string, "2")
@@ -188,8 +191,7 @@ final class MySQLNIOTests: XCTestCase {
         defer { try! conn.close().wait() }
         let rows = try conn.query("SELECT CONCAT(?, ?) as test;", ["hello", "world"]).wait()
         guard rows.count == 1 else {
-            XCTFail("invalid row count")
-            return
+            return XCTFail("invalid row count")
         }
         XCTAssertEqual(rows[0].column("test")?.string, "helloworld")
     }
@@ -201,12 +203,12 @@ final class MySQLNIOTests: XCTestCase {
         XCTAssertEqual(dropResults.count, 0)
         let createResults = try conn.simpleQuery("CREATE TABLE foos (id BIGINT SIGNED, name VARCHAR(64))").wait()
         XCTAssertEqual(createResults.count, 0)
+        defer { _ = try! conn.simpleQuery("DROP TABLE IF EXISTS foos").wait() }
         let insertResults = try conn.query("INSERT INTO foos VALUES (?, ?)", [-1, "test"]).wait()
         XCTAssertEqual(insertResults.count, 0)
         let selectResults = try conn.query("SELECT * FROM foos WHERE name = ?", ["test"]).wait()
         guard selectResults.count == 1 else {
-            XCTFail("invalid row count")
-            return
+            return XCTFail("invalid row count")
         }
         XCTAssertEqual(selectResults[0].column("id")?.int, -1)
         XCTAssertEqual(selectResults[0].column("name")?.string, "test")
@@ -230,6 +232,7 @@ final class MySQLNIOTests: XCTestCase {
         XCTAssertEqual(dropResults.count, 0)
         let createResults = try conn.simpleQuery("CREATE TABLE foos (id BIGINT PRIMARY KEY AUTO_INCREMENT, name VARCHAR(64))").wait()
         XCTAssertEqual(createResults.count, 0)
+        defer { _ = try! conn.simpleQuery("DROP TABLE IF EXISTS foos").wait() }
         let insertResults = try conn.query("INSERT INTO foos (name) VALUES (?)", ["test"]) { metadata in
             XCTAssertEqual(metadata.affectedRows, 1)
             XCTAssertEqual(metadata.lastInsertID, 1)
@@ -282,7 +285,7 @@ final class MySQLNIOTests: XCTestCase {
         let conn = try MySQLConnection.test(on: self.eventLoop).wait()
         defer { try! conn.close().wait() }
         let string = String(repeating: "a", count: 128)
-        let rows = try! conn.query("SELECT ? as s", [MySQLData(string: string)]).wait()
+        let rows = try conn.query("SELECT ? as s", [MySQLData(string: string)]).wait()
         XCTAssertEqual(rows[0].column("s")?.string, string)
     }
 
@@ -290,7 +293,7 @@ final class MySQLNIOTests: XCTestCase {
         let conn = try MySQLConnection.test(on: self.eventLoop).wait()
         defer { try! conn.close().wait() }
         let string = String(repeating: "a", count: 512)
-        let rows = try! conn.query("SELECT ? as s", [MySQLData(string: string)]).wait()
+        let rows = try conn.query("SELECT ? as s", [MySQLData(string: string)]).wait()
         XCTAssertEqual(rows[0].column("s")?.string, string)
     }
 
@@ -298,7 +301,7 @@ final class MySQLNIOTests: XCTestCase {
         let conn = try MySQLConnection.test(on: self.eventLoop).wait()
         defer { try! conn.close().wait() }
         let string = String(repeating: "a", count: 1<<17)
-        let rows = try! conn.query("SELECT ? as s", [MySQLData(string: string)]).wait()
+        let rows = try conn.query("SELECT ? as s", [MySQLData(string: string)]).wait()
         XCTAssertEqual(rows[0].column("s")?.string, string)
     }
     
@@ -354,6 +357,7 @@ final class MySQLNIOTests: XCTestCase {
         XCTAssertEqual(dropResults.count, 0)
         let createResults = try conn.simpleQuery("CREATE TABLE kitchen_sink (\(columns));").wait()
         XCTAssertEqual(createResults.count, 0)
+        defer { _ = try! conn.simpleQuery("DROP TABLE IF EXISTS kitchen_sink").wait() }
         
         /// insert data
         let placeholders = tests.map { _ in "?" }.joined(separator: ", ")
@@ -374,7 +378,7 @@ final class MySQLNIOTests: XCTestCase {
         let conn = try MySQLConnection.test(on: self.eventLoop).wait()
         defer { try! conn.close().wait() }
         for _ in 0..<1_000 {
-            _ = try! conn.simpleQuery("SELECT 1").wait()
+            _ = try conn.simpleQuery("SELECT 1").wait()
         }
     }
     
@@ -385,8 +389,8 @@ final class MySQLNIOTests: XCTestCase {
         
         measure {
             for _ in 0..<100 {
-                let rows = try! conn.query("SELECT CAST('2016-01-18' AS DATETIME) as datetime").wait()
-                XCTAssertEqual(rows[0].column("datetime")?.date?.description, "2016-01-18 00:00:00 +0000")
+                let rows = try? conn.query("SELECT CAST('2016-01-18' AS DATETIME) as datetime").wait()
+                XCTAssertEqual(rows?[0].column("datetime")?.date?.description, "2016-01-18 00:00:00 +0000")
             }
         }
     }
@@ -452,16 +456,10 @@ final class MySQLNIOTests: XCTestCase {
         let conn = try MySQLConnection.test(on: self.eventLoop).wait()
         defer { try! conn.close().wait() }
 
-        _ = try conn.query("""
-        CREATE TABLE `Phrase` (id INT(11), views INT(11))
-        """).wait()
-        defer {
-            _ = try! conn.query("DROP TABLE IF EXISTS `Phrase`").wait()
-        }
+        _ = try conn.query("CREATE TABLE `Phrase` (id INT(11), views INT(11))").wait()
+        defer { _ = try! conn.query("DROP TABLE IF EXISTS `Phrase`").wait() }
 
-        _ = try conn.query("""
-        UPDATE `Phrase` SET `views` = CASE WHEN `id` = 1 THEN `views` + 6 WHEN `id` = 2 THEN `views` + 2 END WHERE `id` IN (1,2);
-        """).wait()
+        _ = try conn.query("UPDATE `Phrase` SET `views` = CASE WHEN `id` = 1 THEN `views` + 6 WHEN `id` = 2 THEN `views` + 2 END WHERE `id` IN (1,2)").wait()
     }
 
     func test4ByteMySQLTimeSerialize() throws {
@@ -476,16 +474,13 @@ final class MySQLNIOTests: XCTestCase {
         let conn = try MySQLConnection.test(on: self.eventLoop).wait()
         defer { try! conn.close().wait() }
 
-        _ = try! conn.simpleQuery("DROP TABLE IF EXISTS foo").wait()
+        _ = try conn.simpleQuery("DROP TABLE IF EXISTS foo").wait()
         _ = try conn.simpleQuery("CREATE TABLE foo (bar DATE)").wait()
-        defer {
-            _ = try! conn.simpleQuery("DROP TABLE IF EXISTS foo").wait()
-        }
+        defer { _ = try! conn.simpleQuery("DROP TABLE IF EXISTS foo").wait() }
         _ = try conn.query("INSERT INTO foo (bar) VALUES ('2038-01-19')").wait()
         let rows = try conn.query("SELECT * FROM foo").wait()
         guard let time = rows[0].column("bar")?.time else {
-            XCTFail("Could not convert to time: \(rows[0])")
-            return
+            return XCTFail("Could not convert to time: \(rows[0])")
         }
         XCTAssertEqual(time.year, 2038)
         XCTAssertEqual(time.month, 1)
@@ -511,16 +506,13 @@ final class MySQLNIOTests: XCTestCase {
         let conn = try MySQLConnection.test(on: self.eventLoop).wait()
         defer { try! conn.close().wait() }
 
-        _ = try! conn.simpleQuery("DROP TABLE IF EXISTS foo").wait()
+        _ = try conn.simpleQuery("DROP TABLE IF EXISTS foo").wait()
         _ = try conn.simpleQuery("CREATE TABLE foo (bar DATETIME)").wait()
-        defer {
-            _ = try! conn.simpleQuery("DROP TABLE IF EXISTS foo").wait()
-        }
+        defer { _ = try! conn.simpleQuery("DROP TABLE IF EXISTS foo").wait() }
         _ = try conn.query("INSERT INTO foo (bar) VALUES ('2038-01-19 03:14:07')").wait()
         let rows = try conn.query("SELECT * FROM foo").wait()
         guard let time = rows[0].column("bar")?.time else {
-            XCTFail("Could not convert to time: \(rows[0])")
-            return
+            return XCTFail("Could not convert to time: \(rows[0])")
         }
         XCTAssertEqual(time.year, 2038)
         XCTAssertEqual(time.month, 1)
@@ -547,16 +539,13 @@ final class MySQLNIOTests: XCTestCase {
         let conn = try MySQLConnection.test(on: self.eventLoop).wait()
         defer { try! conn.close().wait() }
 
-        _ = try! conn.simpleQuery("DROP TABLE IF EXISTS foo").wait()
+        _ = try conn.simpleQuery("DROP TABLE IF EXISTS foo").wait()
         _ = try conn.simpleQuery("CREATE TABLE foo (bar TIME)").wait()
-        defer {
-            _ = try! conn.simpleQuery("DROP TABLE IF EXISTS foo").wait()
-        }
+        defer { _ = try! conn.simpleQuery("DROP TABLE IF EXISTS foo").wait() }
         _ = try conn.query("INSERT INTO foo (bar) VALUES ('12:34:56.123')").wait()
         let rows = try conn.query("SELECT * FROM foo").wait()
         guard let time = rows[0].column("bar")?.time else {
-            XCTFail("Could not convert to time: \(rows[0])")
-            return
+            return XCTFail("Could not convert to time: \(rows[0])")
         }
         XCTAssertEqual(time.year, nil)
         XCTAssertEqual(time.month, nil)
@@ -582,16 +571,13 @@ final class MySQLNIOTests: XCTestCase {
         let conn = try MySQLConnection.test(on: self.eventLoop).wait()
         defer { try! conn.close().wait() }
 
-        _ = try! conn.simpleQuery("DROP TABLE IF EXISTS foo").wait()
+        _ = try conn.simpleQuery("DROP TABLE IF EXISTS foo").wait()
         _ = try conn.simpleQuery("CREATE TABLE foo (bar DATETIME(6))").wait()
-        defer {
-            _ = try! conn.simpleQuery("DROP TABLE IF EXISTS foo").wait()
-        }
+        defer { _ = try! conn.simpleQuery("DROP TABLE IF EXISTS foo").wait() }
         _ = try conn.query("INSERT INTO foo (bar) VALUES ('2038-01-19 03:14:07.123456')").wait()
         let rows = try conn.query("SELECT * FROM foo").wait()
         guard let time = rows[0].column("bar")?.time else {
-            XCTFail("Could not convert to time: \(rows[0])")
-            return
+            return XCTFail("Could not convert to time: \(rows[0])")
         }
         XCTAssertEqual(time.year, 2038)
         XCTAssertEqual(time.month, 1)
@@ -617,16 +603,13 @@ final class MySQLNIOTests: XCTestCase {
         let conn = try MySQLConnection.test(on: self.eventLoop).wait()
         defer { try! conn.close().wait() }
 
-        _ = try! conn.simpleQuery("DROP TABLE IF EXISTS foo").wait()
+        _ = try conn.simpleQuery("DROP TABLE IF EXISTS foo").wait()
         _ = try conn.simpleQuery("CREATE TABLE foo (bar TIME(6))").wait()
-        defer {
-            _ = try! conn.simpleQuery("DROP TABLE IF EXISTS foo").wait()
-        }
+        defer { _ = try! conn.simpleQuery("DROP TABLE IF EXISTS foo").wait() }
         _ = try conn.query("INSERT INTO foo (bar) VALUES ('03:14:07.123456')").wait()
         let rows = try conn.query("SELECT * FROM foo").wait()
         guard let time = rows[0].column("bar")?.time else {
-            XCTFail("Could not convert to time: \(rows[0])")
-            return
+            return XCTFail("Could not convert to time: \(rows[0])")
         }
         XCTAssertEqual(time.year, nil)
         XCTAssertEqual(time.month, nil)
@@ -642,12 +625,9 @@ final class MySQLNIOTests: XCTestCase {
         let conn = try MySQLConnection.test(on: self.eventLoop).wait()
         defer { try! conn.close().wait() }
         
-        
         _ = try conn.simpleQuery("DROP TABLE IF EXISTS foo").wait()
         _ = try conn.simpleQuery("CREATE TABLE foo (bar INT, baz INT, qux INT)").wait()
-        defer {
-            _ = try! conn.simpleQuery("DROP TABLE IF EXISTS foo").wait()
-        }
+        defer { _ = try! conn.simpleQuery("DROP TABLE IF EXISTS foo").wait() }
         
         _ = try conn.simpleQuery("INSERT INTO foo (bar, baz, qux) VALUES (1, NULL, 3)").wait()
         let rows = try conn.simpleQuery("SELECT * FROM foo").wait()
@@ -656,25 +636,61 @@ final class MySQLNIOTests: XCTestCase {
         XCTAssertEqual(rows[0].column("qux")?.int, 3)
     }
     
-    override func setUpWithError() throws {
-        self.group = MultiThreadedEventLoopGroup(numberOfThreads: 1)
-        XCTAssert(isLoggingConfigured)
+    // https://github.com/vapor/mysql-nio/issues/87
+    func testUnexpectedPacketHandling() async throws {
+        struct PingCommand: MySQLCommand {
+            func handle(packet: inout MySQLPacket, capabilities: MySQLProtocol.CapabilityFlags) throws -> MySQLCommandState { preconditionFailure("") }
+            func activate(capabilities: MySQLProtocol.CapabilityFlags) throws -> MySQLCommandState { .init(response: [.init(payload: .init(bytes: [0x0e]))], done: true) }
+        }
+        let conn = try await MySQLConnection.test(on: self.eventLoop).get()
+        do {
+            try await conn.send(PingCommand(), logger: conn.logger).get()
+            try await Task.sleep(nanoseconds: 100_000_000) // to let the reply come in without any other command queued
+            do {
+                _ = try await conn.simpleQuery("SELECT 1").get()
+                XCTFail("did not throw an error")
+            } catch MySQLError.closed {
+                // pass
+            }
+        } catch {
+            XCTFail("threw an error: \(String(reflecting: error))")
+        }
+        try? await conn.close().get()
     }
     
-    override func tearDownWithError() throws {
-        try self.group.syncShutdownGracefully()
+    // https://github.com/vapor/mysql-nio/issues/91
+    func testBeforeHandshakeErrorHandling() async throws {
+        // There's no way to force a real server to throw a pre-handshake error, fake it with a mock server and a handcrafted ERR_Packet.
+        let serverChannel = try await ServerBootstrap(group: self.eventLoopGroup)
+            .serverChannelOption(ChannelOptions.socket(SocketOptionLevel(SOL_SOCKET), SocketOptionName(SO_REUSEADDR)), value: SocketOptionValue(1))
+            .childChannelOption(ChannelOptions.socket(SocketOptionLevel(SOL_SOCKET), SocketOptionName(SO_REUSEADDR)), value: SocketOptionValue(1))
+            .childChannelInitializer { channel in
+                final class Handler: ChannelInboundHandler {
+                    typealias InboundIn = ByteBuffer; typealias OutboundOut = ByteBuffer
+                    func channelActive(context: ChannelHandlerContext) {
+                        var packet = MySQLPacket(), buf = ByteBuffer()
+                        let context = NIOLoopBound(context, eventLoop: context.eventLoop)
+                        packet.payload.writeMultipleIntegers(0xff/*flag*/, 2006/*CR_SERVER_GONE_ERROR*/, endianness: .little, as: (UInt8, UInt16).self)
+                        packet.payload.writeString("#HY000Server gone")
+                        try! MySQLPacketEncoder(sequence: .init(), logger: .init(label: "") { _ in SwiftLogNoOpLogHandler() }).encode(data: packet, out: &buf) // Never actually throws
+                        context.value.writeAndFlush(wrapOutboundOut(buf)).whenComplete { _ in context.value.close(mode: .all, promise: nil) }
+                    }
+                }
+                return channel.pipeline.addHandler(Handler())
+            }
+            .bind(host: "127.0.0.1", port: 3307).get()
+        do {
+            let connection = try await MySQLConnection.connect(to: .init(ipAddress: "127.0.0.1", port: 3307), username: "", database: "", tlsConfiguration: nil, on: self.eventLoop).get()
+            XCTFail("Should have thrown a server error.")
+            try? await connection.close().get() // connection is *only* open if we get to this point
+        } catch MySQLError.server(let err) {
+            XCTAssertEqual(err.errorCode, .SERVER_GONE_ERROR)
+            XCTAssertEqual(err.sqlStateMarker, "#")
+            XCTAssertEqual(err.sqlState, "HY000")
+            XCTAssertEqual(err.errorMessage, "Server gone")
+        } catch {
+            XCTFail("Threw something other than the expected error: \(String(reflecting: error))")
+        }
+        try? await serverChannel.close(mode: .all)
     }
-}
-
-let isLoggingConfigured: Bool = {
-    LoggingSystem.bootstrap { label in
-        var handler = StreamLogHandler.standardOutput(label: label)
-        handler.logLevel = env("LOG_LEVEL").flatMap { Logger.Level(rawValue: $0) } ?? .info
-        return handler
-    }
-    return true
-}()
-
-func env(_ name: String) -> String? {
-    ProcessInfo.processInfo.environment[name]
 }

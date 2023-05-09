@@ -1,27 +1,27 @@
 import NIOCore
 
 extension MySQLProtocol {
-    /// ProtocolText::ResultsetRow
+    /// `ProtocolText::ResultsetRow`
     ///
     /// A row with the data for each column.
-    /// - NULL is sent as 0xfb
-    /// - everything else is converted into a string and is sent as Protocol::LengthEncodedString.
+    /// - `NULL` is sent as `0xfb`
+    /// - everything else is converted into a string and is sent as `Protocol::LengthEncodedString`.
     public struct TextResultSetRow {
         /// The result set's data.
         public var values: [ByteBuffer?]
         
-        /// Creates a new `ResultSetRow`.
+        /// Creates a new ``TextResultSetRow``.
         public init(values: [ByteBuffer?]) {
             self.values = values
         }
         
-        /// `MySQLPacketDecodable` conformance.
+        /// See ``MySQLPacketDecodable/decode(from:capabilities:)``.
         public static func decode(from packet: inout MySQLPacket, columnCount: Int) throws -> TextResultSetRow {
             var values: [ByteBuffer?] = []
             values.reserveCapacity(columnCount)
             for _ in 0..<columnCount {
                 guard let header = packet.payload.getInteger(at: packet.payload.readerIndex, as: UInt8.self) else {
-                    fatalError()
+                    throw MySQLError.protocolError
                 }
                 let value: ByteBuffer?
                 switch header {
@@ -30,7 +30,7 @@ extension MySQLProtocol {
                     packet.payload.moveReaderIndex(forwardBy: 1)    // Consume the 0xFB byte
                 default:
                     guard let v = packet.payload.readLengthEncodedSlice() else {
-                        fatalError()
+                        throw MySQLError.protocolError
                     }
                     value = v
                 }

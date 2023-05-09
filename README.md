@@ -1,50 +1,44 @@
-<img src="https://user-images.githubusercontent.com/1342803/75577086-35280780-5a2f-11ea-8eb2-2044b0310f49.png" height="64" alt="MySQLNIO">
+<p align="center">
+    <img src="https://user-images.githubusercontent.com/1342803/75577086-35280780-5a2f-11ea-8eb2-2044b0310f49.png" height="64" alt="MySQLNIO">
+    <br>
+    <br>
+    <a href="https://docs.vapor.codes/4.0/">
+        <img src="http://img.shields.io/badge/read_the-docs-2196f3.svg" alt="Documentation">
+    </a>
+    <a href="https://discord.gg/vapor">
+        <img src="https://img.shields.io/discord/431917998102675485.svg" alt="Team Chat">
+    </a>
+    <a href="LICENSE">
+        <img src="http://img.shields.io/badge/license-MIT-brightgreen.svg" alt="MIT License">
+    </a>
+    <a href="https://github.com/vapor/mysql-nio/actions/workflows/test.yml">
+        <img src="https://github.com/vapor/mysql-nio/actions/workflows/test.yml/badge.svg?event=push" alt="CI">
+    </a>
+    <a href="https://swift.org">
+        <img src="http://img.shields.io/badge/swift-5.6-brightgreen.svg" alt="Swift 5.5">
+    </a>
+</p>
 
-<a href="https://docs.vapor.codes/4.0/">
-    <img src="http://img.shields.io/badge/read_the-docs-2196f3.svg" alt="Documentation">
-</a>
-<a href="https://discord.gg/vapor">
-    <img src="https://img.shields.io/discord/431917998102675485.svg" alt="Team Chat">
-</a>
-<a href="LICENSE">
-    <img src="http://img.shields.io/badge/license-MIT-brightgreen.svg" alt="MIT License">
-</a>
-<a href="https://github.com/vapor/mysql-nio/actions">
-    <img src="https://github.com/vapor/mysql-nio/workflows/test/badge.svg" alt="CI">
-</a>
-<a href="https://swift.org">
-    <img src="http://img.shields.io/badge/swift-5.2-brightgreen.svg" alt="Swift 5.2">
-</a>
-<a href="https://swift.org">
-    <img src="http://img.shields.io/badge/swift-5.5-brightgreen.svg" alt="Swift 5.5">
-</a>
-<br>
 <br>
 
 🐬 Non-blocking, event-driven Swift client for MySQL built on [SwiftNIO](https://github.com/apple/swift-nio).
 
-### Major Releases
+## Using MySQLNIO
 
-The table below shows a list of PostgresNIO major releases alongside their compatible NIO and Swift versions. 
-
-|Version|NIO|Swift|SPM|
-|---|---|---|---|
-|1.0|2.0+|5.2+|`from: "1.0.0"`|
-
-Use the SPM string to easily include the dependendency in your `Package.swift` file.
+Use standard SwiftPM syntax to include MySQLNIO as a dependency in your `Package.swift` file.
 
 ```swift
-.package(url: "https://github.com/vapor/mysql-nio.git", from: ...)
+.package(url: "https://github.com/vapor/mysql-nio.git", from: "1.0.0")
 ```
 
 ### Supported Platforms
 
 MySQLNIO supports the following platforms:
 
-- Ubuntu 16.04, 18.04, 20.04
-- macOS 10.15, 11
-- CentOS 8
-- Amazon Linux 2
+- Ubuntu 20.04+
+- macOS 10.15+
+- iOS 13+
+- tvOS 13+ and watchOS 7+ (experimental)
 
 ## Overview
 
@@ -96,14 +90,14 @@ The first step to making a query is creating a new `MySQLConnection`. The minimu
 ```swift
 import MySQLNIO
 
-let eventLoop: EventLoop = ...
-let conn = try MySQLConnection(
-    to: .makeAddressResolvingHost("my.mysql.server", port: 5432),
+let eventLoop: any EventLoop = ...
+let conn = try await MySQLConnection(
+    to: .makeAddressResolvingHost("my.mysql.server", port: 3306),
     username: "test_username",
     database: "test_database",
     password: "test_password",
     on: eventLoop
-).wait()
+).get()
 ```
 
 Note: These examples will make use of `wait()` for simplicity. This is appropriate if you are using MySQLNIO on the main thread, like for a CLI tool or in tests. However, you should never use `wait()` on an event loop.
@@ -130,7 +124,7 @@ Interaction with a server revolves around the `MySQLDatabase` protocol. This pro
 ```swift
 import MySQLNIO
 
-let db: MySQLDatabase = ...
+let db: any MySQLDatabase = ...
 // now we can use client to do queries
 ```
 
@@ -143,12 +137,12 @@ These queries are most useful for schema or transactional queries, or simple sel
 `simpleQuery` has two overloads, one that returns an array of rows, and one that accepts a closure for handling each row as it is returned.
 
 ```swift
-let rows = try db.simpleQuery("SELECT @@version").wait()
+let rows = try await db.simpleQuery("SELECT @@version").get()
 print(rows) // [["@@version": "8.x.x"]]
 
-try db.simpleQuery("SELECT @@version") { row in
+try await db.simpleQuery("SELECT @@version") { row in
     print(row) // ["@@version": "8.x.x"]
-}.wait()
+}.get()
 ```
 
 ### Parameterized Query
@@ -160,12 +154,12 @@ These queries are most useful for selecting, inserting, and updating data. Data 
 Just like `simpleQuery`, `query` also offers two overloads. One that returns an array of rows, and one that accepts a closure for handling each row as it is returned.
 
 ```swift
-let rows = try db.query("SELECT * FROM planets WHERE name = ?", ["Earth"]).wait()
+let rows = try await db.query("SELECT * FROM planets WHERE name = ?", ["Earth"]).get()
 print(rows) // [["id": 42, "name": "Earth"]]
 
-try db.query("SELECT * FROM planets WHERE name = ?", ["Earth"]) { row in
+try await db.query("SELECT * FROM planets WHERE name = ?", ["Earth"]) { row in
     print(row) // ["id": 42, "name": "Earth"]
-}.wait()
+}.get()
 ```
 
 ### Rows and Data
@@ -173,7 +167,7 @@ try db.query("SELECT * FROM planets WHERE name = ?", ["Earth"]) { row in
 Both `simpleQuery` and `query` return the same `MySQLRow` type. Columns can be fetched from the row using the `column(_:table:)` method.
 
 ```swift
-let row: MySQLRow = ...
+let row: any MySQLRow = ...
 let version = row.column("name")
 print(version) // MySQLData?
 ```

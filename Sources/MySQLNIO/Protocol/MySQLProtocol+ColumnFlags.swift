@@ -23,23 +23,18 @@ extension MySQLProtocol {
         }
         
         /// All capabilities.
-        public static var all: [ColumnFlags] {
-            return [
-                .COLUMN_UNSIGNED,
-                .PRIMARY_KEY,
-                .COLUMN_NOT_NULL
-            ]
-        }
+        public static var all: [ColumnFlags] { [
+            .COLUMN_UNSIGNED,
+            .PRIMARY_KEY,
+            .COLUMN_NOT_NULL,
+        ] }
         
-        /// `CustomStringConvertible` conformance.
+        /// See ``CustomStringConvertible/description``.
         public var description: String {
-            return ColumnFlags.all
-                .filter { self.contains($0) }
-                .map { $0.name }
-                .joined(separator: ", ")
+            ColumnFlags.all.filter(self.contains(_:)).map(\.name).joined(separator: ", ")
         }
         
-        /// Create a new `MySQLStatusFlags` from the raw value.
+        /// See ``RawRepresentable/init(rawValue:)``.
         public init(rawValue: UInt16) {
             self.rawValue = rawValue
         }

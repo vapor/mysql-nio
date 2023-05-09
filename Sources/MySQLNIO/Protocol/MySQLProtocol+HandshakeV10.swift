@@ -1,7 +1,7 @@
 import NIOCore
 
 extension MySQLProtocol {
-    /// Protocol::Handshake
+    /// `Protocol::Handshake`
     ///
     /// When the client connects to the server the server sends a handshake packet to the client.
     /// Depending on the server version and configuration options different variants of the initial packet are sent.
@@ -25,31 +25,31 @@ extension MySQLProtocol {
             case missingAuthPluginName
         }
         
-        /// protocol_version (1) -- 0x0a protocol_version
+        /// `protocol_version` (1) -- `0x0a` protocol_version
         public var protocolVersion: UInt8
         
-        /// server_version (string.NUL) -- human-readable server version
+        /// `server_version` (`string.NUL`) -- human-readable server version
         public var serverVersion: String
         
-        /// connection_id (4) -- connection id
+        /// `connection_id` (4) -- connection id
         public var connectionID: UInt32
         
-        /// auth_plugin_data_part_1 (string.fix_len) -- [len=8] first 8 bytes of the auth-plugin data
+        /// `auth_plugin_data_part_1` (`string.fix_len`) -- `[len=8]` first 8 bytes of the auth-plugin data
         public var authPluginData: ByteBuffer
         
         /// The server's capabilities.
         public var capabilities: CapabilityFlags
         
-        /// character_set (1) -- default server character-set, only the lower 8-bits Protocol::CharacterSet (optional)
+        /// `character_set` (1) -- default server character-set, only the lower 8-bits `Protocol::CharacterSet` (optional)
         public var characterSet: CharacterSet?
         
-        /// status_flags (2) -- Protocol::StatusFlags (optional)
+        /// `status_flags` (2) -- `Protocol::StatusFlags` (optional)
         public var statusFlags: StatusFlags?
         
-        /// auth_plugin_name (string.NUL) -- name of the auth_method that the auth_plugin_data belongs to
+        /// `auth_plugin_name` (`string.NUL`) -- name of the `auth_method` that the `auth_plugin_data` belongs to
         public var authPluginName: String?
         
-        /// `MySQLPacketDecodable` conformance.
+        /// See ``MySQLPacketDecodable/decode(from:capabilities:)``.
         public static func decode(from packet: inout MySQLPacket, capabilities _: MySQLProtocol.CapabilityFlags) throws -> HandshakeV10 {
             guard let protocolVersion = packet.payload.readInteger(endianness: .little, as: UInt8.self) else {
                 throw Error.missingProtocolVersion
@@ -66,12 +66,10 @@ extension MySQLProtocol {
             guard let authPluginDataPart1 = packet.payload.readSlice(length: 8) else {
                 throw Error.missingAuthPluginData
             }
-            guard let filler1 = packet.payload.readInteger(as: UInt8.self) else {
+            guard let filler1 = packet.payload.readInteger(as: UInt8.self), filler1 == 0 else {
                 throw Error.missingFiller
             }
-            // filler_1 (1) -- 0x00
-            assert(filler1 == 0x00)
-            // capability_flag_1 (2) -- lower 2 bytes of the Protocol::CapabilityFlags (optional)
+            // `capability_flag_1` (2) -- lower 2 bytes of the `Protocol::CapabilityFlags` (optional)
             guard let capabilitiesLower = packet.payload.readInteger(endianness: .little, as: UInt16.self) else {
                 throw Error.missingCapabilityFlag1
             }
@@ -90,7 +88,7 @@ extension MySQLProtocol {
                     throw Error.missingStatusFlags
                 }
                 statusFlags = status
-                // capability_flags_2 (2) -- upper 2 bytes of the Protocol::CapabilityFlags
+                // `capability_flags_2` (2) -- upper 2 bytes of the `Protocol::CapabilityFlags`
                 guard let capabilitiesUpper = packet.payload.readInteger(endianness: .little, as: UInt16.self) else {
                     throw Error.missingUpperCapabilities
                 }
@@ -99,19 +97,17 @@ extension MySQLProtocol {
                     throw Error.missingAuthPluginDataLength
                 }
                 if !capabilities.contains(.CLIENT_PLUGIN_AUTH) {
-                    assert(authPluginDataLength == 0x00, "invalid auth plugin data filler: \(authPluginDataLength)")
+                    guard authPluginDataLength == 0x00 else { throw MySQLError.protocolError }
                 }
-                /// string[6]     reserved (all [00])
-                guard let reserved1 = packet.payload.readSlice(length: 6) else {
+                /// `string[6]`     `reserved` (all `[00]`)
+                guard let reserved1 = packet.payload.readSlice(length: 6), reserved1.readableBytesView.allSatisfy({ $0 == 0 }) else {
                     throw Error.missingReserved
                 }
-                assert(reserved1.readableBytesView.allSatisfy { $0 == 0 }, "invalid reserve 1 \(reserved1)")
                 if capabilities.contains(.CLIENT_LONG_PASSWORD) {
-                    /// string[4]     reserved (all [00])
-                    guard let reserved2 = packet.payload.readSlice(length: 4) else {
+                    /// `string[4]`     `reserved` (all `[00]`)
+                    guard let reserved2 = packet.payload.readSlice(length: 4), reserved2.readableBytesView.allSatisfy({ $0 == 0 }) else {
                         throw Error.missingReserved
                     }
-                    assert(reserved2.readableBytesView.allSatisfy { $0 == 0 }, "invalid reserve 2: \(reserved2)")
                 } else {
                     /// Capabilities 3rd part. MariaDB specific flags.
                     /// MariaDB Initial Handshake Packet specific flags
@@ -135,10 +131,9 @@ extension MySQLProtocol {
                     authPluginData = authPluginDataPart1
                     authPluginData.writeBuffer(&authPluginDataPart2)
                     if !capabilities.contains(.CLIENT_PLUGIN_AUTH) {
-                        guard let filler = packet.payload.readInteger(endianness: .little, as: UInt8.self) else {
+                        guard let filler = packet.payload.readInteger(endianness: .little, as: UInt8.self), filler == 0 else {
                             throw Error.missingFiller
                         }
-                        assert(filler == 0x00)
                     }
                 } else {
                     authPluginData = authPluginDataPart1

@@ -1,13 +1,13 @@
 extension MySQLProtocol {
-    /// 14.6.4 COM_QUERY
+    /// 14.6.4 `COM_QUERY`
     ///
-    /// A COM_QUERY is used to send the server a text-based query that is executed immediately.
-    /// The server replies to a COM_QUERY packet with a COM_QUERY Response.
-    /// The length of the query-string is a taken from the packet length - 1.
+    /// A `COM_QUERY` is used to send the server a text-based query that is executed immediately.
+    /// The server replies to a `COM_QUERY` packet with a `COM_QUERY` Response.
+    /// The length of the query string is the packet length - 1.
     ///
     /// https://dev.mysql.com/doc/internals/en/com-query.html
     public struct COM_QUERY: MySQLPacketEncodable {
-        /// query (string.EOF) -- query_text
+        /// `query` (`string.EOF`) -- `query_text`
         public let query: String
         
         public init(query: String) {
