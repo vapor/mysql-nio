@@ -1,3 +1,5 @@
+import NIOCore
+
 extension ByteBuffer {
     mutating func readNullTerminatedString() -> String? {
         guard let nullIndex = readableBytesView.firstIndex(of: 0) else {

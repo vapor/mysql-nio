@@ -1,6 +1,8 @@
 import XCTest
 @testable import MySQLNIO
 import Logging
+import NIOCore
+import NIOPosix
 
 final class MySQLNIOTests: XCTestCase {
     private var group: EventLoopGroup!

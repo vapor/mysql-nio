@@ -1,4 +1,5 @@
 import Crypto
+import NIOCore
 
 func sha256(_ messages: ByteBuffer...) -> ByteBuffer {
     let digest = SHA256.hash(data: [UInt8](messages.combine().readableBytesView))

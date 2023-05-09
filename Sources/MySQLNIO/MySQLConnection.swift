@@ -1,4 +1,7 @@
-@_exported import struct NIOSSL.TLSConfiguration
+import NIOCore
+import Logging
+import NIOSSL
+import NIOPosix
 
 public final class MySQLConnection: MySQLDatabase {
     public static func connect(
