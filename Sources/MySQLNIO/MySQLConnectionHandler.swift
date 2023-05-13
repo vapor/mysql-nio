@@ -121,8 +121,7 @@ final class MySQLConnectionHandler: ChannelDuplexHandler {
                 characterSet: .utf8mb4
             )
             let promise = context.channel.eventLoop.makePromise(of: Void.self)
-            try context.write(self.wrapOutboundOut(.encode(sslRequest, capabilities: [])), promise: promise)
-            context.flush()
+            try context.writeAndFlush(self.wrapOutboundOut(.encode(sslRequest, capabilities: [])), promise: promise)
 
             let sslContext = try NIOSSLContext(configuration: tlsConfiguration)
             let handler = try NIOSSLClientHandler(context: sslContext, serverHostname: state.serverHostname)
@@ -248,8 +247,7 @@ final class MySQLConnectionHandler: ChannelDuplexHandler {
         guard let capabilities = self.serverCapabilities else {
             throw MySQLError.protocolError
         }
-        try context.write(self.wrapOutboundOut(.encode(res, capabilities: capabilities)), promise: nil)
-        context.flush()
+        try context.writeAndFlush(self.wrapOutboundOut(.encode(res, capabilities: capabilities)), promise: nil)
     }
     
     func handleSwitchPlugins(
@@ -267,8 +265,7 @@ final class MySQLConnectionHandler: ChannelDuplexHandler {
         }
         let newHash = try doInitialAuthPluginHandling(authPluginName: newPluginName, isTLS: state.isTLS, passwordInput: state.password, authPluginData: newAuthData, done: state.done)
         // Send an AuthSwitchResponse (which is just the plugin auth data by itself)
-        context.write(self.wrapOutboundOut(MySQLPacket(payload: newHash)), promise: nil)
-        context.flush()
+        context.writeAndFlush(self.wrapOutboundOut(MySQLPacket(payload: newHash)), promise: nil)
     }
 
     func handleAuthentication(
@@ -341,8 +338,7 @@ final class MySQLConnectionHandler: ChannelDuplexHandler {
                         payload.writeBytes([0x02])
                         self.state = .authenticating(AuthenticationState(authPluginName: state.authPluginName, password: state.password, isTLS: state.isTLS, savedSeedValue: state.savedSeedValue, awaitingCachingSha2PluginPublicKey: true, done: state.done))
                     }
-                    context.write(self.wrapOutboundOut(MySQLPacket(payload: payload)), promise: nil)
-                    context.flush()
+                    context.writeAndFlush(self.wrapOutboundOut(MySQLPacket(payload: payload)), promise: nil)
                 default:
                     throw MySQLError.missingOrInvalidAuthPluginInlineCommand(command: name)
                 }
@@ -448,8 +444,7 @@ final class MySQLConnectionHandler: ChannelDuplexHandler {
         // N.B.: It is possible to get here without having processed a handshake packet yet, in which case there will
         // not be any serverCapabilities. Since COM_QUIT doesn't care about any of those anyway, don't crash if they're
         // not there!
-        try context.write(self.wrapOutboundOut(.encode(quit, capabilities: self.serverCapabilities ?? .init())), promise: nil)
-        context.flush()
+        try context.writeAndFlush(self.wrapOutboundOut(.encode(quit, capabilities: self.serverCapabilities ?? .init())), promise: nil)
         
         if let promise = promise {
             // we need to do some error mapping here, so create a new promise
