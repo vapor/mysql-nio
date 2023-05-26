@@ -1,4 +1,4 @@
-// swift-tools-version:5.7
+// swift-tools-version:5.8
 import PackageDescription
 
 let package = Package(
@@ -14,7 +14,7 @@ let package = Package(
         .library(name: "MySQLNIOCore", targets: ["MySQLNIOCore"]),
     ],
     dependencies: [
-        .package(url: "https://github.com/apple/swift-crypto.git", "2.0.0" ..< "4.0.0"),
+        .package(url: "https://github.com/apple/swift-crypto.git", from: "2.5.0"),
         .package(url: "https://github.com/apple/swift-log.git", from: "1.5.2"),
         .package(url: "https://github.com/apple/swift-nio.git", from: "2.53.0"),
         .package(url: "https://github.com/apple/swift-nio-ssl.git", from: "2.24.0"),
@@ -27,6 +27,12 @@ let package = Package(
                 .product(name: "Logging", package: "swift-log"),
                 .product(name: "NIO", package: "swift-nio"),
                 .product(name: "NIOSSL", package: "swift-nio-ssl"),
+            ],
+            swiftSettings: [
+                .enableUpcomingFeature("ForwardTrailingClosures"),
+                .enableUpcomingFeature("ExistentialAny"),
+                .enableUpcomingFeature("ConciseMagicFile"),
+                .unsafeFlags(["-strict-concurrency=complete"]),
             ]
         ),
         .target(
@@ -37,6 +43,9 @@ let package = Package(
                 .product(name: "Logging", package: "swift-log"),
                 .product(name: "NIO", package: "swift-nio"),
                 .product(name: "NIOSSL", package: "swift-nio-ssl"),
+            ],
+            swiftSettings: [
+                .enableUpcomingFeature("ExistentialAny"),
             ]
         ),
         .testTarget(name: "MySQLNIOCoreTests", dependencies: [
