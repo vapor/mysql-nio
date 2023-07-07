@@ -99,33 +99,31 @@ public struct MySQLTime: Equatable, MySQLDataConvertible {
     
     /// Converts this ``MySQLTime`` to a Swift ``Date`` using the current calendar and GMT timezone.
     public var date: Date? {
-        var ctime = tm()
-        guard
-            let year = self.year,
-            let month = self.month,
-            let day = self.day
-        else {
+        var comps = DateComponents(
+            calendar:  Calendar(identifier: .gregorian),
+            timeZone: .gmt
+        )
+
+        if let year = self.year, let month = self.month, let day = self.day {
+            comps.year = numericCast(year)
+            comps.month = numericCast(month)
+            comps.day = numericCast(day)
+        }
+
+        if let hour = self.hour, let minute = self.minute, let second = self.second {
+            comps.hour = numericCast(hour)
+            comps.minute = numericCast(minute)
+            comps.second = numericCast(second)
+        }
+
+        if let microsecond = self.microsecond {
+            comps.nanosecond = numericCast(microsecond) * 1_000
+        }
+
+        guard let date = comps.date else {
             return nil
         }
-        ctime.tm_year = numericCast(year) - 1900
-        ctime.tm_mon = numericCast(month) - 1
-        ctime.tm_mday = numericCast(day)
-        if
-            let hour = self.hour,
-            let minute = self.minute,
-            let second = self.second
-        {
-            ctime.tm_hour = numericCast(hour)
-            ctime.tm_min = numericCast(minute)
-            ctime.tm_sec = numericCast(second)
-        }
-        var date = Date(
-            timeIntervalSince1970: .init(timegm(&ctime))
-        )
-        if let microsecond = self.microsecond {
-            let nanoseconds = numericCast(microsecond) * 1_000
-            date.addTimeInterval(.init(nanoseconds) / 1_000_000_000)
-        }
+
         return date
     }
     
