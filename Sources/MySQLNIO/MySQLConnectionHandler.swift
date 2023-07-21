@@ -481,7 +481,7 @@ final class MySQLConnectionHandler: ChannelDuplexHandler {
         }
     }
     
-    func errorCaught(context: ChannelHandlerContext, error: Error) {
+    func errorCaught(context: ChannelHandlerContext, error: any Error) {
         switch self.state {
         case .handshake(let state):
             state.done.fail(error)
