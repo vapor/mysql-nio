@@ -10,5 +10,5 @@ jobs:
      secrets: inherit
      with:
        package_name: mysql-nio
-       modules: MySQLNIO
-       pathsToInvalidate: /mysqlnio/*
+       modules: MySQLNIO,MySQLNIOCore
+       pathsToInvalidate: /mysqlnio/* /mysqlniocore/*

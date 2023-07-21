@@ -16,14 +16,13 @@ let package = Package(
     dependencies: [
         .package(url: "https://github.com/apple/swift-log.git", from: "1.5.2"),
         .package(url: "https://github.com/apple/swift-metrics.git", from: "2.4.0"),
-        .package(url: "https://github.com/apple/swift-crypto.git", "2.0.0" ..< "4.0.0"),
+        .package(url: "https://github.com/apple/swift-crypto.git", "2.6.0" ..< "4.0.0"),
         .package(url: "https://github.com/apple/swift-atomics.git", from: "1.1.0"),
         .package(url: "https://github.com/apple/swift-algorithms.git", from: "1.0.0"),
         .package(url: "https://github.com/apple/swift-collections.git", from: "1.0.4"),
         .package(url: "https://github.com/apple/swift-nio.git", from: "2.53.0"),
         .package(url: "https://github.com/apple/swift-nio-ssl.git", from: "2.24.0"),
         .package(url: "https://github.com/apple/swift-nio-transport-services.git", from: "1.17.0"),
-        .package(url: "https://github.com/gwynne/swift-mini-rsa-crypt.git", from: "0.0.3"),
     ],
     targets: [
         .target(
@@ -36,7 +35,6 @@ let package = Package(
                 .product(name: "_CryptoExtras", package: "swift-crypto"),
                 .product(name: "Logging", package: "swift-log"),
                 .product(name: "Metrics", package: "swift-metrics"),
-                .product(name: "MiniRSACrypt", package: "swift-mini-rsa-crypt"),
                 .product(name: "NIOCore", package: "swift-nio"),
                 .product(name: "NIOPosix", package: "swift-nio"),
                 .product(name: "NIOFoundationCompat", package: "swift-nio"),
@@ -54,11 +52,7 @@ let package = Package(
                 .product(name: "NIOSSL", package: "swift-nio-ssl"),
             ]
         ),
-        .testTarget(name: "MySQLNIOCoreTests", dependencies: [
-            .target(name: "MySQLNIOCore"),
-        ]),
-        .testTarget(name: "MySQLNIOTests", dependencies: [
-            .target(name: "MySQLNIO"),
-        ]),
+        .testTarget(name: "MySQLNIOCoreTests", dependencies: [.target(name: "MySQLNIOCore")]),
+        .testTarget(name: "MySQLNIOTests", dependencies: [.target(name: "MySQLNIO")]),
     ]
 )

@@ -1,0 +1,3 @@
+import NIOCore
+
+struct MySQLResultsetStream {}
