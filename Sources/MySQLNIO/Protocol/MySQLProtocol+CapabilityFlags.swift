@@ -138,6 +138,8 @@ extension MySQLProtocol {
             .CLIENT_PLUGIN_AUTH_LENENC_CLIENT_DATA,
             .CLIENT_LONG_PASSWORD,
             .CLIENT_TRANSACTIONS,
+            .CLIENT_MULTI_STATEMENTS,
+            .CLIENT_MULTI_RESULTS,
         ]
         
         /// All capabilities.

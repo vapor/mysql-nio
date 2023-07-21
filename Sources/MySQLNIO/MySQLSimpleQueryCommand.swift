@@ -55,27 +55,39 @@ private final class MySQLSimpleQueryCommand: MySQLCommand {
         switch self.state {
         case .ready:
             if packet.isOK {
-                self.state = .done
-                return .done
+                let okPacket = try packet.decode(MySQLProtocol.OK_Packet.self, capabilities: capabilities)
+                if okPacket.statusFlags.contains(.SERVER_MORE_RESULTS_EXISTS) {
+                    return .noResponse
+                } else {
+                    self.state = .done
+                    return .done
+                }
             } else {
                 let res = try packet.decode(MySQLProtocol.COM_QUERY_Response.self, capabilities: capabilities)
                 self.state = .columns(count: res.columnCount)
+                self.columns = []
                 return .noResponse
             }
         case .columns(let total):
             let column = try packet.decode(MySQLProtocol.ColumnDefinition41.self, capabilities: capabilities)
             self.columns.append(column)
-            if self.columns.count == numericCast(total) {
+            if self.columns.count >= numericCast(total) {
                 self.state = .rows
             }
             return .noResponse
         case .rows:
             guard !packet.isEOF else {
-                self.state = .done
-                return .done
+                let okPacket = try packet.decode(MySQLProtocol.OK_Packet.self, capabilities: capabilities)
+                if okPacket.statusFlags.contains(.SERVER_MORE_RESULTS_EXISTS) {
+                    self.state = .ready
+                    return .noResponse
+                } else {
+                    self.state = .done
+                    return .done
+                }
             }
             
-            let data = try MySQLProtocol.TextResultSetRow.decode(from: &packet, columnCount: columns.count)
+            let data = try MySQLProtocol.TextResultSetRow.decode(from: &packet, columnCount: self.columns.count)
             let row = MySQLRow(
                 format: .text,
                 columnDefinitions: self.columns,

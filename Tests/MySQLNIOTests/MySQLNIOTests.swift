@@ -717,4 +717,17 @@ final class MySQLNIOTests: XCTestCase {
         }
         try? await serverChannel.close(mode: .all)
     }
+
+    func testSimpleQuery_multiQueryResult() throws {
+        let conn = try MySQLConnection.test(on: self.eventLoop).wait()
+        defer { try! conn.close().wait() }
+        let rows = try conn.simpleQuery("SELECT 'foo' as bar; SELECT 'baz' as bar;").wait()
+        guard rows.count == 2 else {
+            return XCTFail("invalid row count")
+        }
+        XCTAssertEqual(rows.description, #"[["bar": "foo"], ["bar": "baz"]]"#)
+        XCTAssertEqual(rows[0].column("bar")?.string, "foo")
+        XCTAssertEqual(rows[1].column("bar")?.string, "baz")
+    }
+    
 }
