@@ -6,7 +6,7 @@ on:
   pull_request: { types: [opened, reopened, synchronize, ready_for_review] }
   push: { branches: [ main ] }
 env:
-  LOG_LEVEL: into
+  LOG_LEVEL: info
   SWIFT_DETERMINISTIC_HASHING: 1
   MYSQL_DATABASE: 'test_database'
   MYSQL_DATABASE_A: 'test_database'
