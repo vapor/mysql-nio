@@ -1,12 +1,12 @@
 name: test
-on:
-  pull_request: { types: [opened, reopened, synchronize, ready_for_review] }
-  push: { branches: [ main ] }
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
+on:
+  pull_request: { types: [opened, reopened, synchronize, ready_for_review] }
+  push: { branches: [ main ] }
 env:
-  LOG_LEVEL: into
+  LOG_LEVEL: info
   SWIFT_DETERMINISTIC_HASHING: 1
   MYSQL_DATABASE: 'test_database'
   MYSQL_DATABASE_A: 'test_database'
@@ -41,40 +41,39 @@ jobs:
         dbimage:
           - mysql:5.7
           - mysql:8.0
-          - mariadb:10.4
-          - mariadb:10.11
+          - mariadb:10.2
+          - mariadb:11
+          - percona:5.7
           - percona:8.0
         swiftver:
-          - swift:5.6-focal
           - swift:5.7-jammy
           - swift:5.8-jammy
           - swiftlang/swift:nightly-5.9-jammy
           - swiftlang/swift:nightly-main-jammy
-    container: ${{ matrix.swiftver }}
     runs-on: ubuntu-latest
+    container: ${{ matrix.swiftver }}
     services:
       mysql-a:
         image: ${{ matrix.dbimage }}
-        env: 
-          MYSQL_ALLOW_EMPTY_PASSWORD: "true"
-          MYSQL_USER: test_username
-          MYSQL_PASSWORD: test_password
-          MYSQL_DATABASE: test_database
+        env: { MYSQL_ALLOW_EMPTY_PASSWORD: true, MYSQL_USER: test_username, MYSQL_PASSWORD: test_password, MYSQL_DATABASE: test_database }
       mysql-b:
         image: ${{ matrix.dbimage }}
-        env: 
-          MYSQL_ALLOW_EMPTY_PASSWORD: "true"
-          MYSQL_USER: test_username
-          MYSQL_PASSWORD: test_password
-          MYSQL_DATABASE: test_database
+        env: { MYSQL_ALLOW_EMPTY_PASSWORD: true, MYSQL_USER: test_username, MYSQL_PASSWORD: test_password, MYSQL_DATABASE: test_database }
     steps:
       - name: Check out package
         uses: actions/checkout@v3
         with: { path: 'mysql-nio' }
       - name: Run unit tests
         run: swift test --package-path mysql-nio --enable-code-coverage --sanitize=thread
+      - name: Note Swift version
+        if: ${{ contains(matrix.swiftver, 'nightly') }}
+        run: |
+          echo "SWIFT_PLATFORM=$(. /etc/os-release && echo "${ID}${VERSION_ID}")" >>"${GITHUB_ENV}"
+          echo "SWIFT_VERSION=$(cat /.swift_tag)" >>"${GITHUB_ENV}"
       - name: Upload code coverage
         uses: vapor/swift-codecov-action@v0.2
+        env:
+          MYSQL_VERSION: ${{ matrix.dbimage }}
         with:
           package_path: 'mysql-nio'
           cc_env_vars: 'SWIFT_VERSION,SWIFT_PLATFORM,RUNNER_OS,RUNNER_ARCH,MYSQL_VERSION'
@@ -94,53 +93,49 @@ jobs:
         run: swift test --package-path fluent-mysql-driver
 
   macos-all:
-    if: github.event.pull_request.draft == false
+    if: ${{ !(github.event.pull_request.draft || false) }}
     strategy:
       fail-fast: false
       matrix:
-        dbimage:
-          - mysql
-          - mariadb
-          - percona-server
-        xcode:
-          - latest-stable
-        macos:
-          - macos-13
+        dbimage: [mysql, mariadb, percona-server]
+        xcode: ['latest-stable']
+        macos: ['macos-13']
         include:
-          - username: root
-          - dbimage: mariadb
-            username: runner
+          - { username: root }
+          - { dbimage: mariadb, username: runner }
     runs-on: ${{ matrix.macos }}
-    env:
-      LOG_LEVEL: debug
-      MYSQL_HOSTNAME: '127.0.0.1'
+    env: { MYSQL_HOSTNAME: '127.0.0.1' }
     steps:
       - name: Select latest available Xcode
         uses: maxim-lobanov/setup-xcode@v1
         with: 
           xcode-version: ${{ matrix.xcode }}
       - name: Install MySQL, setup DB and auth, and wait for server start
+        env:
+          FORMULA: ${{ matrix.dbimage }}
+          RUNAS_USER: ${{ matrix.username }}
         shell: bash
         run: |
-          brew install ${{ matrix.dbimage }} && brew link --force ${{ matrix.dbimage }}
-          brew services start ${{ matrix.dbimage }}
-          until echo | mysql -u${{ matrix.username }}; do sleep 1; done
-          mysql -u${{ matrix.username }} --batch <<-SQL
-              CREATE USER $MYSQL_USERNAME@localhost IDENTIFIED BY '$MYSQL_PASSWORD';
-              CREATE DATABASE $MYSQL_DATABASE;
-              GRANT ALL PRIVILEGES ON $MYSQL_DATABASE.* TO $MYSQL_USERNAME@localhost;
+          brew install "${FORMULA}" && brew link --force "${FORMULA}"
+          brew services start "${FORMULA}"
+          until echo | mysql -u"${RUNAS_USER}"; do sleep 1; done
+          mysql -u"${RUNAS_USER}" --batch <<-SQL
+              CREATE USER ${MYSQL_USERNAME}@localhost IDENTIFIED BY '${MYSQL_PASSWORD}';
+              CREATE DATABASE ${MYSQL_DATABASE};
+              GRANT ALL PRIVILEGES ON ${MYSQL_DATABASE}.* TO ${MYSQL_USERNAME}@localhost;
           SQL
         timeout-minutes: 5
-      - name: Record Swift toolchain and MySQL versions
-        run: |
-          echo "SWIFT_VERSION=$(swift package tools-version --version)" >> "${GITHUB_ENV}"
-          echo 'SWIFT_PLATFORM=${{ matrix.macos }}' >> "${GITHUB_ENV}"
-          echo "MYSQL_VERSION=$(mysql --version)" >> "${GITHUB_ENV}"
       - name: Check out code
         uses: actions/checkout@v3
       - name: Run all tests
         run: swift test --sanitize=thread --enable-code-coverage
+      - name: Record Swift and MySQL versions
+        run: |
+          echo "SWIFT_VERSION=$(swift package tools-version --version)" >>"${GITHUB_ENV}"
+          echo "MYSQL_VERSION=$(mysql --version)" >>"${GITHUB_ENV}"
       - name: Upload code coverage
+        env:
+          SWIFT_PLATFORM: ${{ matrix.macos }}
         uses: vapor/swift-codecov-action@v0.2
         with:
           cc_env_vars: 'MD_APPLE_SDK_ROOT,SWIFT_VERSION,SWIFT_PLATFORM,RUNNER_OS,RUNNER_ARCH,MYSQL_VERSION'
