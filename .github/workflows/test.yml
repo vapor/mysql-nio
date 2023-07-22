@@ -68,7 +68,7 @@ jobs:
       - name: Note Swift version
         if: ${{ contains(matrix.swiftver, 'nightly') }}
         run: |
-          echo "SWIFT_PLATFORM=$(source /etc/os-release && echo "${ID}${VERSION_ID}")" >>"${GITHUB_ENV}"
+          echo "SWIFT_PLATFORM=$(. /etc/os-release && echo "${ID}${VERSION_ID}")" >>"${GITHUB_ENV}"
           echo "SWIFT_VERSION=$(cat /.swift_tag)" >>"${GITHUB_ENV}"
       - name: Upload code coverage
         uses: vapor/swift-codecov-action@v0.2
