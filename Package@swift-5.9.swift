@@ -1,4 +1,5 @@
-// swift-tools-version:5.7
+// swift-tools-version:5.9
+import CompilerPluginSupport
 import PackageDescription
 
 let package = Package(
@@ -23,8 +24,20 @@ let package = Package(
         .package(url: "https://github.com/apple/swift-nio.git", from: "2.53.0"),
         .package(url: "https://github.com/apple/swift-nio-ssl.git", from: "2.24.0"),
         .package(url: "https://github.com/apple/swift-nio-transport-services.git", from: "1.17.0"),
+        .package(url: "https://github.com/apple/swift-syntax", branch: "release/5.9"),
     ],
     targets: [
+        .macro(
+            name: "MySQLNIOCoreMacros",
+            dependencies: [
+                .product(name: "SwiftSyntax", package: "swift-syntax"),
+                .product(name: "SwiftDiagnostics", package: "swift-syntax"),
+                .product(name: "SwiftParserDiagnostics", package: "swift-syntax"),
+                .product(name: "SwiftSyntaxBuilder", package: "swift-syntax"),
+                .product(name: "SwiftSyntaxMacros", package: "swift-syntax"),
+                .product(name: "SwiftCompilerPlugin", package: "swift-syntax"),
+            ]
+        ),
         .target(
             name: "MySQLNIOCore",
             dependencies: [
@@ -40,6 +53,14 @@ let package = Package(
                 .product(name: "NIOFoundationCompat", package: "swift-nio"),
                 .product(name: "NIOTransportServices", package: "swift-nio-transport-services"),
                 .product(name: "NIOSSL", package: "swift-nio-ssl"),
+                .target(name: "MySQLNIOCoreMacros"),
+            ],
+            swiftSettings: [
+                .enableUpcomingFeature("ForwardTrailingClosures"),
+                .enableUpcomingFeature("ExistentialAny"),
+                .enableUpcomingFeature("ConciseMagicFile"),
+                .enableExperimentalFeature("StrictConcurrency=complete"),
+                .unsafeFlags(["-strict-concurrency=complete"]),
             ]
         ),
         .target(
@@ -50,6 +71,9 @@ let package = Package(
                 .product(name: "Logging", package: "swift-log"),
                 .product(name: "NIO", package: "swift-nio"),
                 .product(name: "NIOSSL", package: "swift-nio-ssl"),
+            ],
+            swiftSettings: [
+                .enableUpcomingFeature("ExistentialAny"),
             ]
         ),
         .testTarget(name: "MySQLNIOCoreTests", dependencies: [

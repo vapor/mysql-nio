@@ -1,8 +1,8 @@
 import NIOCore
 import Logging
 
-/// This type is both an `NIOSingleStepByteToMessageDecoder` and a ``MutableMessageToByteEncoder``,
-/// and handles adding and removing the raw wire protocol framing to and from data packets.
+/// This type is both an `NIOSingleStepByteToMessageDecoder` and a `MessageToByteEncoder`, and handles adding and
+/// removing the raw wire protocol framing to and from data packets.
 ///
 /// ## Discussion
 ///
@@ -44,7 +44,7 @@ import Logging
 ///   excessive allocation when adding framing to outgoing packets. (Packets requiring fragmentation do not benefit
 ///   from this, but at the time of this writing there has never been even a single instance of needing to handle
 ///   fragmented packets; this author is thus comfortable saying that case can safely be a slow path.)
-struct MySQLRawPacketCodec: NIOSingleStepByteToMessageDecoder, MutableMessageToByteEncoder {
+final class MySQLRawPacketCodec: NIOSingleStepByteToMessageDecoder, NonThrowingMessageToByteEncoder {
     typealias InboundOut = ByteBuffer
     typealias OutboundIn = ByteBuffer
     
@@ -79,7 +79,7 @@ struct MySQLRawPacketCodec: NIOSingleStepByteToMessageDecoder, MutableMessageToB
     }
     
     /// The possible modes we can be in for handling sequence counter resets.
-    /*testableprivate*/ enum SequencingState: Equatable, CaseIterable {
+    /*testableprivate*/ enum SequencingState: Equatable {
         /// Initial state
         ///
         /// This state persists throughout the handshake, including TLS setup if any and all auth-related
@@ -103,7 +103,7 @@ struct MySQLRawPacketCodec: NIOSingleStepByteToMessageDecoder, MutableMessageToB
         /// ##### Transitions
         /// ||||
         /// -|:-:|-
-        /// ||**`INITIAL`**|||
+        /// ||_initial_|||
         /// `waitingForInitialOk`|→|``resetOnOutgoing``
         case waitingForInitialOk
         
@@ -139,7 +139,7 @@ struct MySQLRawPacketCodec: NIOSingleStepByteToMessageDecoder, MutableMessageToB
         /// ##### Transitions
         /// ||||
         /// -|:-:|-
-        /// ||**`INITIAL`**|||
+        /// ||_initial_|||
         /// `initial`|→|``partiallyReceived(buffer:)``
         case initial
         
@@ -184,13 +184,13 @@ struct MySQLRawPacketCodec: NIOSingleStepByteToMessageDecoder, MutableMessageToB
     }
     
     /// Generate a sequence ID and return it, while also incrementing the counter.
-    private mutating func nextSequenceID() -> UInt8 {
+    private func nextSequenceID() -> UInt8 {
         defer { self.sequenceCounter &+= 1 } // wrapping increment
         return self.sequenceCounter
     }
     
-    /// See ``NIOCore/MessageToByteEncoder/encode(data:out:)``.
-    mutating func encode(data: ByteBuffer, out: inout ByteBuffer) throws {
+    // See `MessageToByteEncoder.encode(data:out:)`.
+    func encode(data: ByteBuffer, out: inout ByteBuffer) {
         if self.sequencingState == .resetOnOutgoing {
             self.sequenceCounter = 0
         }
@@ -223,8 +223,8 @@ struct MySQLRawPacketCodec: NIOSingleStepByteToMessageDecoder, MutableMessageToB
         }
     }
     
-    /// See ``NIOCore/NIOSingleStepByteToMessageDecoder/decode(buffer:)``.
-    mutating func decode(buffer: inout ByteBuffer) throws -> ByteBuffer? {
+    // See `NIOSingleStepByteToMessageDecoder.decode(buffer:)`.
+    func decode(buffer: inout ByteBuffer) throws -> ByteBuffer? {
         // N.B.: Reading a 32-bit word and deconstructing it is much faster than reading a UInt24 and a UInt8, even with readMultipleIntegers()
         guard let frameWord = buffer.mysql_getInteger(at: buffer.readerIndex, as: UInt32.self),
               let frame = .some(RawPacketFrame(rawValue: frameWord)),
@@ -281,15 +281,15 @@ struct MySQLRawPacketCodec: NIOSingleStepByteToMessageDecoder, MutableMessageToB
         
         /// Update the sequencing state if needed
         if self.sequencingState == .waitingForInitialOk, frame.length > 7/*Min OK_Packet length*/, ongoingBuffer.readableBytesView.first == 0x00/*OK_Packet marker*/ {
-            self.sequencingState = .resetOnOutgoing // saw an OK packet while in the wait state, switch to outoging sequence reset
+            self.sequencingState = .resetOnOutgoing // saw an OK packet while in the wait state, switch to outgoing sequence reset
         }
         
         /// Send the packet onward
         return ongoingBuffer
     }
     
-    /// See ``NIOCore/NIOSingleStepByteToMessageDecoder/decodeLast(buffer:seenEOF:)``.
-    mutating func decodeLast(buffer: inout ByteBuffer, seenEOF: Bool) throws -> ByteBuffer? {
+    // See `NIOSingleStepByteToMessageDecoder.decodeLast(buffer:seenEOF:)`.
+    func decodeLast(buffer: inout ByteBuffer, seenEOF: Bool) throws -> ByteBuffer? {
         try self.decode(buffer: &buffer)
     }
 }

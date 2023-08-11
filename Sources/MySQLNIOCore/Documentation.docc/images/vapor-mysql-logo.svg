@@ -1,0 +1,36 @@
+<svg viewBox="0 0 128 128" xmlns="http://www.w3.org/2000/svg" id="technology">
+  <style>
+    @media (prefers-color-scheme: light) {
+      :root, body[data-color-scheme="auto"], body[data-color-scheme="light"] {
+        --color-documentation-intro-accent-outer: #333;
+        --color-documentation-intro-accent-inner: #fff;
+      }
+      body[data-color-scheme="dark"] {
+        --color-documentation-intro-accent-outer: #fff;
+        --color-documentation-intro-accent-inner: #333;
+      }
+    }
+    @media (prefers-color-scheme: dark) {
+      :root, body[data-color-scheme="auto"], body[data-color-scheme="dark"] {
+        --color-documentation-intro-accent-outer: #fff;
+        --color-documentation-intro-accent-inner: #333;
+      }
+      body[data-color-scheme="light"] {
+        --color-documentation-intro-accent-outer: #333;
+        --color-documentation-intro-accent-inner: #fff;
+      }
+    }
+  </style>
+  <path d="M7,46.84,62.66,0,121,46.84v.33L64,92,7,47.17Z" style="fill: var(--color-documentation-intro-accent-outer);"/>
+  <path d="m64.33,92.04h.33c.1,5.6,.1,9.76,0,12.46s-.18,2.7-.33,0l-57.33-45.06v-12.44z" fill="#40c4ff"/>
+  <path d="m64.66,116.2-.33.4-57.33-45.06v-12.44l57.33,45h.33z" fill="#3dc4ff"/>
+  <path d="m64.66,116.2-.33.4-57.33-45.06v-12.44l57.33,45h.33z" fill="#fff" fill-opacity=".25"/>
+  <path d="m64.66,127.7-.33.3-57.33-45.04v-11.76l57.33,45,.33-.3z" fill="#3dc4ff"/>
+  <path d="m64.66,127.7-.33.3-57.33-45.04v-11.76l57.33,45,.33-.3z" fill="#fff" fill-opacity=".5"/>
+  <path d="m64,92.04v12.46l57-45.06v-12.44z" fill="#e040fb"/>
+  <path d="m121,71.54v-12.44l-57,45v12.5z" fill="#e040fb"/>
+  <path d="m121,71.54v-12.44l-57,45v12.5z" fill="#fff" fill-opacity=".25"/>
+  <path d="m121,83.3v-12.1l-57,45v11.8z" fill="#e040fb"/>
+  <path d="m121,83.3v-12.1l-57,45v11.8z" fill="#fff" fill-opacity=".5"/>
+  <path d="m59.5,70.34h-.24l-.33.32-.1.21c-.54,1.5-1.38,3.33-2.31,4.68l-2.37-9.98-.1-.1c-3.41-6.48-5.49-17.17-2.36-26.36l.22-.62-.59-.32c-2.21-1.2-4.51-.7-5.88-.4l-.1.1c.13-.26.36-.57.65-1,.75-1.17,1.6-2.17,2.52-3.03,3.34-3.11,6.91-3.74,8.73-3.84h.29l.2-.19c.68-.64,1.44-1.21,2.2-1.74,12.68-8.73,20.4-.93,20.48-.85l.23.25h.35c4.08-.1,4.86.47,4.99.6-.1.1-.13.29-.56.69-1.91,1.79-6.94,3.95-6.98,3.98-3.24,1.44-6.19,3.27-8.8,5.45,0-.84,0-1.65-.1-2.36l-1.58.1c.1,1.25,.19,2.6,0,3.64v.35.8.25.35c0,.68-.1,1.33-.18,1.9v.24c-.27,1.87-.66,2.36-.77,2.45,0,0-.52,0-1.62-1.88l-.1-.1c-.44-.72-.97-1.7-1.6-3.05l-1.43.68c.53,1.12,1.01,2.08,1.47,2.87-6.43,8.76-7.19,17.79-7.21,18.17v.2l.1.21c1.41,3.12,4.89,4.74,6.9,5.44-1.02.73-2.52,1.67-3.93,1.86zm16.02-41.74c.61-.56.64-1.51.1-2.12-.56-.6-1.51-.64-2.12-.1-.61.56-.63,1.52-.1,2.12.56.6,1.51.64,2.12.1z" style="fill: var(--color-documentation-intro-accent-inner);"/>
+</svg>

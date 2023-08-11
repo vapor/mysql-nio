@@ -8,7 +8,7 @@ protocol MySQLBuiltinAuthHandler {
 enum MySQLBuiltinAuthHandlers {
     static func authHandler(for pluginName: String) -> (any MySQLBuiltinAuthHandler)? {
         switch pluginName {
-        case CachingSHA256.pluginName: return CachingSHA256()
+        case CachingSHA2.pluginName: return CachingSHA2()
         case MariaDBEd25519.pluginName: return MariaDBEd25519()
         case MariaDBUnixSocket.pluginName: return MariaDBUnixSocket()
         case NativePassword.pluginName: return NativePassword()

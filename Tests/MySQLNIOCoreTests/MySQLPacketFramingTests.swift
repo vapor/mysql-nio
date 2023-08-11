@@ -9,7 +9,7 @@ extension MySQLRawPacketCodec.RawPacketFrame {
     }
 }
 
-extension MutableMessageToByteEncoder {
+extension MessageToByteEncoder {
     mutating func encodeAndReturn(data: ByteBuffer) throws -> ByteBuffer where OutboundIn == ByteBuffer {
         var buffer = ByteBuffer()
         try self.encode(data: data, out: &buffer)
@@ -309,32 +309,5 @@ final class MySQLPacketFramingTests: XCTestCase {
         var buf = ByteBuffer(), codec = MySQLRawPacketCodec()
         XCTAssertNil(try codec.decodeLast(buffer: &buf, seenEOF: false))
     }
-    
-    func testCodeCoverageFalseNegativesUInt24() {
-        XCTAssertEqual(UInt24.min.nonzeroBitCount, 0)
-        XCTAssertEqual(UInt24.max.leadingZeroBitCount, 0)
-        XCTAssertEqual(UInt24.min.leadingZeroBitCount, UInt24.bitWidth)
-        XCTAssertEqual(UInt24.max.trailingZeroBitCount, 0)
-        XCTAssertEqual(UInt24.min.trailingZeroBitCount, UInt24.bitWidth)
-        XCTAssertEqual(UInt24.max.byteSwapped, UInt24.max)
-        XCTAssertEqual(UInt24.min.description, "0")
-        XCTAssertEqual(UInt24(_truncatingBits: 0), UInt24(exactly: 0))
-        XCTAssertEqual(UInt24(0.0), UInt24(clamping: 0))
-        XCTAssertEqual(UInt24(exactly: 0.0), UInt24.min + UInt24.min)
-        XCTAssertNil(UInt24(exactly: UInt32.max))
-        XCTAssertNil(UInt24(exactly: Double(UInt64.max)))
-        XCTAssert(Set([UInt24.zero]).contains(0))
-        XCTAssertEqual(UInt24.min.addingReportingOverflow(0).partialValue, 0)
-        XCTAssertEqual(UInt24.min.subtractingReportingOverflow(0).partialValue, 0)
-        XCTAssertEqual(UInt24.min.multipliedReportingOverflow(by: 0).partialValue, 0)
-        XCTAssertEqual(UInt24.min.dividedReportingOverflow(by: 1).partialValue, 0)
-        XCTAssertEqual(UInt24.min.remainderReportingOverflow(dividingBy: 1).partialValue, 0)
-        XCTAssertEqual(UInt24(1).dividingFullWidth((high: 0, low: 0)).quotient, 0)
-        XCTAssertEqual({ var i = UInt24.min; i *= 0; return i }(), UInt24.min)
-        XCTAssertEqual({ var i = UInt24.min; i /= 1; return i }(), UInt24.min)
-        XCTAssertEqual({ var i = UInt24.min; i %= 1; return i }(), UInt24.min)
-        XCTAssertEqual({ var i = UInt24.min; i &= 0; return i }(), UInt24.min)
-        XCTAssertEqual({ var i = UInt24.min; i |= 0; return i }(), UInt24.min)
-        XCTAssertEqual({ var i = UInt24.min; i ^= 0; return i }(), UInt24.min)
-    }
+
 }

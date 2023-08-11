@@ -11,7 +11,7 @@ extension MySQLBuiltinAuthHandlers {
             self.state = .done
 
             guard data.readableBytes == 20 else {
-                throw MySQLChannel.Error.protocolViolation
+                throw MySQLCoreError.protocolViolation(debugDescription: "Invalid auth nonce")
             }
             
             let passwordHash = Insecure.SHA1.hash(data: Array((configuration.password ?? "").utf8))

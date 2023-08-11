@@ -21,17 +21,21 @@
                 "dark": "rgb(20, 20, 22)",
                 "light": "rgb(255, 255, 255)"
             },
-            "dim-purple": "#392048",
-            "standard-purple-documentation-intro-fill": "var(--color-documentation-intro-fill)",
-            "documentation-intro-fill": "radial-gradient(circle at top, var(--color-dim-purple) 30%, #1f1d1f 100%)",
-            "documentation-intro-accent": "var(--color-dim-purple)"
+            "mysql-turquoise": "#02758f",
+            "documentation-intro-fill": "radial-gradient(circle at top, var(--color-documentation-intro-accent) 30%, #1f1d1f 100%)",
+            "documentation-intro-accent": "var(--color-mysql-turquoise)",
+            "documentation-intro-accent-outer": {
+                "dark": "rgb(255, 255, 255)",
+                "light": "rgb(51, 51, 51)"
+            },
+            "documentation-intro-accent-inner": {
+                "dark": "rgb(51, 51, 51)",
+                "light": "rgb(255, 255, 255)"
+            }
         },
         "icons": {
-            "technology": "/images/technology.svg",
-            "article": "/images/article.svg"
-        },
-        "typography": {
-            "html-font": ""
+            "technology": "/mysqlnio/images/vapor-mysql-logo.svg",
+            "article": "/mysqlnio/images/article.svg"
         }
     },
     "features": {

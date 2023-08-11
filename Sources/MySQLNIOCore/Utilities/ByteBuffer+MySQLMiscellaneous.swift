@@ -6,21 +6,18 @@ import NIOCore
 /// space given that integers in MySQL's wire protocol are always little-endian.
 extension ByteBuffer {
     /// `getInteger(at:endianness:as:)` but always little-endian.
-    @_transparent
     @inlinable
     func mysql_getInteger<T: FixedWidthInteger>(at index: Int, as: T.Type = T.self) -> T? {
         self.getInteger(at: index, endianness: .little, as: T.self)
     }
     
     /// `readInteger(endianness:as:)` but always little-endian.
-    @_transparent
     @inlinable
     mutating func mysql_readInteger<T: FixedWidthInteger>(as: T.Type = T.self) -> T? {
         self.readInteger(endianness: .little, as: T.self)
     }
     
     /// `setInteger(_:at:endianness:as:)` but always little-endian.
-    @_transparent
     @discardableResult
     @inlinable
     mutating func mysql_setInteger<T: FixedWidthInteger>(_ integer: T, at index: Int, as: T.Type = T.self) -> Int {
@@ -28,7 +25,6 @@ extension ByteBuffer {
     }
 
     /// `writeInteger(_:endianness:as:)` but always little-endian.
-    @_transparent
     @discardableResult
     @inlinable
     mutating func mysql_writeInteger<T: FixedWidthInteger>(_ integer: T, as: T.Type = T.self) -> Int {
@@ -41,7 +37,6 @@ extension ByteBuffer {
 extension ByteBuffer {
 
     /// Return the first byte in the buffer (counting from the reader index), if it exists.
-    @_transparent
     @inlinable
     func mysql_marker() -> UInt8? {
         self.getInteger(at: self.readerIndex)
@@ -50,44 +45,15 @@ extension ByteBuffer {
     /// Check that the first byte of the buffer (counting from the reader index) matches one of the
     /// provided values. If so, advance the reader index and return the byte. Otherwise, return `nil`.
     /// If the buffer has no more readable bytes, trigger a channel protocol violation.
-    ///
-    /// This is currently one of the only ByteBuffer utility methods which throws.
-    @_transparent
     @inlinable
-    mutating func mysql_readMarker(validatingAgainst valid1: UInt8, _ valid2: UInt8? = nil) throws -> UInt8? {
-        guard let checkByte = self.mysql_marker() else {
-            throw MySQLChannel.Error.protocolViolation
-        }
-        
-        guard checkByte == valid1 || checkByte == valid2 else {
-            return nil
+    mutating func mysql_readMarker(matching valid1: UInt8, or valid2: UInt8? = nil) -> Bool {
+        guard let checkByte = self.mysql_marker(),
+              checkByte == valid1 || checkByte == valid2 else {
+            return false
         }
         
         self.moveReaderIndex(forwardBy: MemoryLayout<UInt8>.size)
-        return checkByte
-    }
-
-    /// Check that the first byte of the buffer (counting from the reader index) matches the provided
-    /// value. If so, advance the reader index and return `true`. Otherwise, return `false`. If the
-    /// buffer has no more readable bytes, trigger a channel protocol violation.
-    ///
-    /// This is currently one of the only ByteBuffer utility methods which throws.
-    @_transparent
-    @inlinable
-    mutating func mysql_readMarker(matching value: UInt8) throws -> Bool {
-        try self.mysql_readMarker(validatingAgainst: value) != nil
-    }
-
-    /// Check that the first byte of the buffer (counting from the reader index) matches the provided
-    /// value. If so, advance the reader index. Otherwise, trigger a channel protocol violation.
-    ///
-    /// This is currently one of the only ByteBuffer utility methods which throws.
-    @_transparent
-    @inlinable
-    mutating func mysql_requireMarker(_ value: UInt8) throws {
-        guard try self.mysql_readMarker(validatingAgainst: value) != nil else {
-            throw MySQLChannel.Error.protocolViolation
-        }
+        return true
     }
 }
 

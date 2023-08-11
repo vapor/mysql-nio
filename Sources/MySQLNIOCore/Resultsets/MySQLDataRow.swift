@@ -14,11 +14,11 @@ extension MySQLDataRowValues {
     }
 }
 
-extension MySQLPacketDescriptions.TextResultsetRow: MySQLDataRowValues {
+extension MySQLPackets.TextResultsetRow: MySQLDataRowValues {
     var valuesEncoding: MySQLProtocolValue.Encoding { .text }
 }
 
-extension MySQLPacketDescriptions.BinaryResultsetRow: MySQLDataRowValues {
+extension MySQLPackets.BinaryResultsetRow: MySQLDataRowValues {
     var valuesEncoding: MySQLProtocolValue.Encoding { .binary }
 }
 

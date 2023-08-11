@@ -44,7 +44,7 @@ extension ByteBuffer {
     ///   ``mysql_setLengthEncodedInteger(_:at:)`` for callers which need to know the correct length ahead of time.
     ///
     /// See <doc:Length-Encoded-Integer-Format> for details of the encoding format.
-    @_transparent
+    @inline(__always)
     static func mysql_lengthEncodedSize<I: BitPatternRepresentableInteger>(of value: I) -> Int {
         switch value.bitPatternRepresentation {
         case ...0xfa: return 1 // encoded as the last 8 bits of the value
@@ -82,27 +82,6 @@ extension ByteBuffer {
             assert((0...0xfa).contains(value))
             return (value: .init(truncatingIfNeeded: value), sizeInBuffer: 1)
         }
-/*
-        return self.withVeryUnsafeBytes { buf -> (value: UInt64, sizeInBuffer: Int)? in let buf = buf[index ... self.writerIndex]
-            guard index < self.writerIndex else { return nil }
-            switch buf[0] {
-            case 0xfb, 0xff: // Invalid encoding
-                return nil
-            case 0xfc: // 3-byte encoding: Value between 0xfb and UInt16.max
-                guard buf.count >= 1 + MemoryLayout<UInt16>.size else { return nil }
-                return (value: .init(truncatingIfNeeded: buf.loadUnaligned(fromByteOffset: 1, as: UInt16.self)), sizeInBuffer: 1 + MemoryLayout<UInt16>.size)
-            case 0xfd: // 4-byte encoding: Value between 0x10000 and UInt24.max
-                guard buf.count >= 1 + MemoryLayout<UInt24>.size else { return nil }
-                return (value: .init(truncatingIfNeeded: buf.loadUnaligned(fromByteOffset: 1, as: UInt24.self)), sizeInBuffer: 1 + MemoryLayout<UInt24>.size)
-            case 0xfe: // 9-byte encoding: Value between 0x1000000 and UInt64.max
-                guard buf.count >= 1 + MemoryLayout<UInt64>.size else { return nil }
-                return (value: buf.loadUnaligned(fromByteOffset: 1, as: UInt64.self), sizeInBuffer: 1 + MemoryLayout<UInt64>.size)
-            case let value: // 1-byte encoding: Value between 0 and 0xfa
-                assert((0...0xfa).contains(value))
-                return (value: .init(truncatingIfNeeded: value), sizeInBuffer: 1)
-            }
-        }
-*/
     }
     
     /// Attempt to get a MySQL length-encoded integer value from the buffer at the given position.

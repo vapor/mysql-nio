@@ -196,43 +196,75 @@ public struct MySQLProtocolValue: Sendable {
     
     /// The flags for the value.
     ///
-    /// MySQL defines 30 bits worth of column flags (which is only 16 bits wide - this is not a mistake!).
-    /// Only the first 14 bits are defined as far as the protocol is concerned. Of those, three are
-    /// completely deprecated, five more do not mean what they say they do and have no useful semantics,
-    /// and five of those that _are_ well-defined are also redundant or useless. Most of them are also
-    /// mutually exclusive, with no enforcement whatsoever of those semantics. In the end, only one of
-    /// the flags ends up having any actual use!
+    /// MySQL defines 30 bits worth of column flags (even though this type's storage is only 16 bits
+    /// wide). Only the first 14 bits are defined as far as the protocol is concerned. Of those,
+    /// three are completely deprecated, five more do not mean what they say they do and have no
+    /// useful semantics, and five of those that _are_ well-defined are also redundant or useless.
+    /// Most of them are also mutually exclusive, with no enforcement whatsoever of those semantics.
+    /// In the end, only one of the flags ends up having any actual use!
+    ///
+    /// It is rather telling that of the 8 bits set aside in the protocol for _parameter_ value
+    /// flags, only one of them has a defined meaning - the same meaning as the one useful column
+    /// flag. (It is not, of course, the _same_ bit - for parameter values, bit 7 is used rather
+    /// than bit 5.)
+    ///
+    ///  > Note: `BINARY_FLAG` in particular is not useful for the purpose its name suggests:
+    ///    Distinguishing between `CHAR` and `BINARY` for the ``Format/char`` format, between
+    ///   `VARCHAR` and `VARBINARY` for the ``Format/varchar`` format, and between `*TEXT` and
+    ///   `*BLOB` values for the ``Format/blob`` formats. The correct way to make such a
+    ///   determination is to check for the use of the `binary` character set and collation (not
+    ///   to be confused with the `_bin` collation of other character sets).
     ///
     /// ### "But what about <flag>?"
     ///
-    /// - `PRI/UNIQUE/MUTLIPLE_KEY_FLAG`: These flags do not mean what they say to start with, and
-    ///   are of no use to this implementation even if they did.
-    /// - `NOT_NULL/AUTO_INCREMENT/NO_DEFAULT_VALUE_FLAG`: We don't provide client-generated table
-    ///   descriptions or query parameter validation, so these likewise are useless.
-    /// - `ZEROFILL_FLAG`: `ZEROFILL` is deprecated, and not helpful to this package in any case.
-    /// - `BLOB_FLAG`: Means "column is \*BLOB, JSON, or GEOMETRY", which the format already expresses.
-    /// - `ENUM/SET_FLAG`: Synonyms for `MYSQL_TYPE_ENUM/SET`.
-    /// - `BINARY_FLAG`: In MySQL, this means "is DATE, TIME, DATETIME, or TIMESTAMP"; in MariaDB it
-    ///   means "that, or BINARY or VARBINARY". The correct way to distinguish the latter from `CHAR`
-    ///   and `VARCHAR` is to check if the field's character set (not collation!) is `binary`.
-    /// - `TIMESTAMP/ON_UPDATE_NOW_FLAG`: These are deprecated, and aren't used by MySQL anymore.
-    ///   `TIMESTAMP_FLAG` doesn't even mean "is timestamp", to add insult to injury.
-    /// - `NUM_FLAG`: This is a client-only flag. The first-party MySQL C API library sets it for the
-    ///   supposed "convenience" of calling code; it's just another nonspecific format indicator.
-    public struct Flags: OptionSet, Hashable, CustomStringConvertible, Sendable {
-        public let rawValue: UInt16
-        public init(rawValue: UInt16) { self.rawValue = rawValue }
+    /// - `PRI_KEY_FLAG`: Inaccurate and not useful.
+    /// - `UNIQUE_KEY_FLAG`: Inaccurate and not useful.
+    /// - `MUTLIPLE_KEY_FLAG`: Ambiguous and unhelpful.
+    /// - `NOT_NULL_FLAG`: Potentially ambigous and not useful (query parameters aren't validated).
+    /// - `AUTO_INCREMENT_FLAG`: Not useful (query parameters aren't validated).
+    /// - `NO_DEFAULT_VALUE_FLAG`: Not useful (query parameters aren't validated).
+    /// - `ZEROFILL_FLAG`: Deprecated and not useful.
+    /// - `BLOB_FLAG`: Inaccurate, and redundant with respect to value format.
+    /// - `ENUM_FLAG`: Redundant with respect to value format.
+    /// - `SET_FLAG`: Redundant with respect to value format.
+    /// - `BINARY_FLAG`: Misleading to the point of uselessness. In MySQL, set only for `DATE`,
+    ///   `TIME`, `DATETIME`, and `TIMESTAMP` values. In MariaDB, set also for `BINARY` and
+    ///   `VARBINARY` values.
+    /// - `TIMESTAMP_FLAG`: Deprecated, as well as extremely misleading.
+    /// - `ON_UPDATE_NOW_FLAG`: Deprecated.
+    /// - `NUM_FLAG`: This is a client-only flag. The first-party MySQL C API library sets it for
+    ///   the supposed "convenience" of calling code; it's just another nonspecific format indicator.
+    public struct Flags: Hashable, CustomStringConvertible, Sendable {
+        /// Corresponds to MySQL's `UNSIGNED_FLAG`.
+        static private var fieldMetadataUnsignedFlag: UInt16 { 1 << 5 }
         
-        /// Value should be interpreted as an unsigned number.
+        /// Corresponds to MSB of parameter flags byte in query attributes and bound parameters.
+        static private var inputParameterUnsignedFlag: UInt8 { 1 << 7 }
+        
+        private var unsignedFlag: Bool
+        
+        /// Initialize from the flags word of a `ColumnDefinition41` packet.
+        public init(columnFlags: UInt16) { self.unsignedFlag = (columnFlags & Self.fieldMetadataUnsignedFlag) != 0 }
+        
+        /// Initialize from the flags byte of a parameter in a `COM_QUERY` or `COM_STMT_EXECUTE` packet.
+        public init(parameterFlags: UInt8) { self.unsignedFlag = (parameterFlags & Self.inputParameterUnsignedFlag) != 0 }
+        
+        /// Convert to a flags word suitable for use in a `ColumnDefinition41` packet.
+        public var columnFlagsValue: UInt16 { self.unsignedFlag ? Self.fieldMetadataUnsignedFlag : 0 }
+        
+        /// Convert to a flags byte suitable for use in a parameter in a `COM_QUERY` or `COM_STMT_EXECUTE` packet.
+        public var parameterFlagsValue: UInt8 { self.unsignedFlag ? Self.inputParameterUnsignedFlag : 0 }
+        
+        // See `CustomStringConvertible.description`.
+        public var description: String { self.unsignedFlag ? "unsigned" : "<none>" }
+        
+        /// If `true`, the associated value should be interpreted as an unsigned number.
         ///
         /// This flag is only valid for values with an integer, floating-point, or fixed-point format.
-        /// It is a protocol violation for it to be set
-        ///
-        /// - term **MySQL name**: `UNSIGNED_FLAG`
-        public static var isUnsigned: Self     { .init(rawValue: 1 << 5) }
-        
-        public var description: String {
-            ""
+        /// It is a protocol violation for it to be set otherwise.
+        public var isUnsigned: Bool {
+            get { self.unsignedFlag }
+            set { self.unsignedFlag = newValue }
         }
     }
 

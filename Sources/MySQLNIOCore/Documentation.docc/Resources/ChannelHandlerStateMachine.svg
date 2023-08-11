@@ -1,0 +1,341 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-57.5 -50 1277.4375 1349" aria-roledescription="flowchart-v2" style='font-family: "trebuchet ms", verdana, arial, sans-serif; font-size: 16px; text-align: center;' fill="#333">
+    <style>
+    .marker {
+        stroke: #333;
+    }
+
+    .node rect, .node circle, .node path {
+        fill: #ECECFF;
+        stroke: #9370DB;
+        stroke-width: 1px;
+    }
+
+    .flowchart-label text {
+        text-anchor: middle;
+    }
+
+    .edgePath .path {
+        stroke: #333;
+        stroke-width: 2.0px;
+    }
+
+    .flowchart-link {
+        stroke: #333;
+        fill: none;
+    }
+
+    .edgeLabel {
+        background-color: #e8e8e8;
+    }
+
+    .edgeLabel rect {
+        opacity: 0.5;
+        background-color: #e8e8e8;
+        fill: #e8e8e8;
+    }
+
+    .labelBkg {
+        background-color: rgba(232, 232, 232, 0.5);
+    }
+
+    .cluster rect {
+        fill: #ffffde;
+        stroke: #aa3;
+        stroke-width: 1px;
+    }
+
+    .default rect, .default circle, .default path {
+        font-family: monospace;
+        font-size: 13px;
+    }
+    </style>
+    <g>
+        <marker id="flowchart-pointEnd" class="marker flowchart" viewBox="0 0 10 10" refX="10" refY="5" markerUnits="userSpaceOnUse" markerWidth="12" markerHeight="12" orient="auto">
+            <path d="M 0 0 L 10 5 L 0 10 z" class="arrowMarkerPath" style="stroke-width: 1; stroke-dasharray: 1, 0;"></path>
+        </marker>
+        <g class="root">
+            <g>
+                <path d="M818.166015625,34C818.166015625,49.666666666666664,818.166015625,65.33333333333333,818.166015625,81C818.166015625,96.66666666666667,818.166015625,112.33333333333333,818.166015625,128" id="L-startup-auth-0" class="flowchart-link LS-startup LE-auth" style="stroke-width:1px;" marker-end="url(#flowchart-pointEnd)"></path>
+                <path d="M646.1767578125,389.78929069344196C589.97705078125,414.3595271289613,533.77734375,438.92976356448065,533.77734375,463.5C533.77734375,476,533.77734375,488.5,533.77734375,501" id="L-auth-active-0" class="flowchart-link LS-auth LE-active" style="stroke-width:1px;" marker-end="url(#flowchart-pointEnd)"></path>
+                <path d="M524.941940023292,1070C524.3596418866459,1082.5,523.77734375,1095,523.77734375,1107.5C523.77734375,1120,523.77734375,1132.5,523.77734375,1145" id="L-active-quit-0" class="flowchart-link LS-active LE-quit" style="stroke-width:1px;" marker-end="url(#flowchart-pointEnd)"></path>
+                <path d="M776.2108131550854,1070C781.5610820534638,1082.5,786.9113509518421,1095,808.166015625,1107.5C845.1798516500799,1129.2680663246501,930.4258633250399,1151.0361326493003,1015.671875,1172.8041989739504" id="L-active-error-0" class="flowchart-link LS-active LE-error" style="stroke-width:1px;" marker-end="url(#flowchart-pointEnd)"></path>
+                <path d="M990.1552734375,389.78929069344196C1046.35498046875,414.3595271289613,1102.5546875,438.92976356448065,1102.5546875,463.5C1102.5546875,570.8333333333334,1102.5546875,678.1666666666666,1102.5546875,785.5C1102.5546875,892.8333333333334,1102.5546875,1000.1666666666666,1102.5546875,1107.5C1102.5546875,1120,1100.4597154329608,1132.5,1098.3647433659219,1145" id="L-auth-error-0" class="flowchart-link LS-auth LE-error" style="stroke-width:1px;" marker-end="url(#flowchart-pointEnd)"></path>
+            </g>
+            <g>
+                <g class="edgeLabel" transform="translate(818.166015625, 81)">
+                    <g class="label" transform="translate(-52.4453125, -9.5)">
+                        <rect width="104.890625" height="19"></rect>
+                        <text>
+                            <tspan dy="1em">channel active</tspan>
+                        </text>
+                    </g>
+                </g>
+            </g>
+            <g class="nodes">
+                <g class="root" transform="translate(456.85546875, 1137)">
+                    <g>
+                        <g class="cluster default flowchart-label" id="quit">
+                            <rect x="8" y="8" width="118.84375" height="104"></rect>
+                            <g class="cluster-label" transform="translate(67.421875, 8)">
+                                <text>
+                                    <tspan dy="1em">quit</tspan>
+                                </text>
+                            </g>
+                        </g>
+                    </g>
+                    <g class="nodes">
+                        <g class="node default flowchart-label" id="flowchart-closed-84" transform="translate(67.421875, 60)">
+                            <rect rx="17" ry="17" x="-34.421875" y="-17" width="68.84375" height="34"></rect>
+                            <g class="label" transform="translate(0, -9.5)">
+                                <text>
+                                    <tspan dy="1em">closed</tspan>
+                                </text>
+                            </g>
+                        </g>
+                    </g>
+                </g>
+                <g class="root" transform="translate(1008.171875, 1137)">
+                    <g>
+                        <g class="cluster default flowchart-label" id="error">
+                            <rect x="8" y="8" width="153.765625" height="104"></rect>
+                            <g class="cluster-label" transform="translate(84.8828125, 8)">
+                                <text>
+                                    <tspan dy="1em">error</tspan>
+                                </text>
+                            </g>
+                        </g>
+                    </g>
+                    <g class="nodes">
+                        <g class="node default flowchart-label" id="flowchart-terminated-83" transform="translate(84.8828125, 60)">
+                            <rect rx="17" ry="17" x="-51.8828125" y="-17" width="103.765625" height="34"></rect>
+                            <g class="label" transform="translate(0, -9.5)">
+                                <text>
+                                    <tspan dy="1em">terminated</tspan>
+                                </text>
+                            </g>
+                        </g>
+                    </g>
+                </g>
+                <g class="root" transform="translate(-7.5, 493)">
+                    <g>
+                        <g class="cluster default flowchart-label" id="active">
+                            <rect x="8" y="8" width="1059.5546875" height="561"></rect>
+                            <g class="cluster-label" transform="translate(537.77734375, 8)">
+                                <text>
+                                    <tspan dy="1em">active</tspan>
+                                </text>
+                            </g>
+                        </g>
+                    </g>
+                    <g>
+                        <path d="M581.431640625,55.80377039602721C498.375,71.03584693068481,415.318359375,86.2679234653424,415.318359375,101.5C415.318359375,113,431.2874317354369,124.5,447.25650409587377,136" id="L-idle-awaitingOK-0" class="flowchart-link LS-idle LE-awaitingOK" style="stroke-width:1px;" marker-end="url(#flowchart-pointEnd)"></path>
+                        <path d="M603.9218939623786,67C605.3349704186893,78.5,606.748046875,90,606.748046875,101.5C606.748046875,118.66666666666667,606.748046875,135.83333333333334,606.748046875,153C606.748046875,170.16666666666666,606.748046875,187.33333333333334,606.748046875,204.5C606.748046875,216,616.7965905643205,227.5,626.8451342536408,239" id="L-idle-runningPlainQuery-0" class="flowchart-link LS-idle LE-runningPlainQuery" style="stroke-width:1px;" marker-end="url(#flowchart-pointEnd)"></path>
+                        <path d="M581.431640625,53.845270681265205C450.69921875,69.7301804541768,319.966796875,85.6150902270884,319.966796875,101.5C319.966796875,118.66666666666667,319.966796875,135.83333333333334,319.966796875,153C319.966796875,170.16666666666666,319.966796875,187.33333333333334,319.966796875,204.5C319.966796875,221.66666666666666,319.966796875,238.83333333333334,319.966796875,256C319.966796875,273.1666666666667,319.966796875,290.3333333333333,319.966796875,307.5C319.966796875,320.83818861031796,457.8818359375,334.17637722063586,595.796875,347.5145658309538" id="L-idle-preparingStatement-0" class="flowchart-link LS-idle LE-preparingStatement" style="stroke-width:1px;" marker-end="url(#flowchart-pointEnd)"></path>
+                        <path d="M581.431640625,52.86305480072464C402.23046875,69.07536986714976,223.029296875,85.28768493357488,223.029296875,101.5C223.029296875,118.66666666666667,223.029296875,135.83333333333334,223.029296875,153C223.029296875,170.16666666666666,223.029296875,187.33333333333334,223.029296875,204.5C223.029296875,221.66666666666666,223.029296875,238.83333333333334,223.029296875,256C223.029296875,273.1666666666667,223.029296875,290.3333333333333,223.029296875,307.5C223.029296875,324.6666666666667,223.029296875,341.8333333333333,223.029296875,359C223.029296875,373,223.029296875,387,223.029296875,401C223.029296875,412.8002987510972,436.833984375,424.60059750219443,650.638671875,436.40089625329165" id="L-idle-executingStatement-0" class="flowchart-link LS-idle LE-executingStatement" style="stroke-width:1px;" marker-end="url(#flowchart-pointEnd)"></path>
+                        <path d="M581.431640625,51.986101293118836C318.447265625,68.49073419541256,55.462890625,84.99536709770628,55.462890625,101.5C55.462890625,118.66666666666667,55.462890625,135.83333333333334,55.462890625,153C55.462890625,170.16666666666666,55.462890625,187.33333333333334,55.462890625,204.5C55.462890625,221.66666666666666,55.462890625,238.83333333333334,55.462890625,256C55.462890625,273.1666666666667,55.462890625,290.3333333333333,55.462890625,307.5C55.462890625,324.6666666666667,55.462890625,341.8333333333333,55.462890625,359C55.462890625,373,55.462890625,387,55.462890625,401C55.462890625,415,55.462890625,429,55.462890625,443C55.462890625,457,55.462890625,471,55.462890625,485C55.462890625,494.07712780305343,125.8828125,503.1542556061069,196.302734375,512.2313834091603" id="L-idle-fetchingCursorData-0" class="flowchart-link LS-idle LE-fetchingCursorData" style="stroke-width:1px;" marker-end="url(#flowchart-pointEnd)"></path>
+                        <path d="M483.4195426274272,136C496.39254573089426,124.5,509.36554883436133,113,524.87109375,101.5C541.7289144266713,88.99705741807298,561.5802775258356,76.49411483614597,581.431640625,63.99117225421896" id="L-awaitingOK-idle-0" class="flowchart-link LS-awaitingOK LE-idle" style="stroke-width:1px;" marker-end="url(#flowchart-pointEnd)"></path>
+                        <path d="M511.365234375,141.53196898436505C515.2541232638889,139.68797932291002,519.1430121527777,137.84398966145503,534.6985677083333,136C534.6985677083333,136,540.5319010416667,136,540.5319010416667,136C544.4207899305555,141.66666666666666,546.365234375,147.33333333333334,546.365234375,153C546.365234375,158.66666666666666,544.4207899305555,164.33333333333334,540.5319010416667,170C540.5319010416667,170,534.6985677083333,170,534.6985677083333,170C519.1430121527777,168.15601033854497,515.2541232638889,166.31202067708998,511.365234375,164.46803101563495" id="L-awaitingOK-awaitingOK-0" class="flowchart-link LS-awaitingOK LE-awaitingOK" style="stroke-width:1px;" marker-end="url(#flowchart-pointEnd)"></path>
+                        <path d="M511.365234375,168.2125307125307C566.7079371112479,180.30835380835381,622.0506398474959,192.4041769041769,626.748046875,204.5C631.2140662924758,216,632.3305711468447,227.5,633.4470760012136,239" id="L-awaitingOK-runningPlainQuery-0" class="flowchart-link LS-awaitingOK LE-runningPlainQuery" style="stroke-width:1px;" marker-end="url(#flowchart-pointEnd)"></path>
+                        <path d="M462.994140625,170C462.994140625,181.5,462.994140625,193,462.994140625,204.5C462.994140625,221.66666666666666,462.994140625,238.83333333333334,462.994140625,256C462.994140625,273.1666666666667,462.994140625,290.3333333333333,462.994140625,307.5C462.994140625,319,533.9953447360438,330.5,604.9965488470874,342" id="L-awaitingOK-preparingStatement-0" class="flowchart-link LS-awaitingOK LE-preparingStatement" style="stroke-width:1px;" marker-end="url(#flowchart-pointEnd)"></path>
+                        <path d="M414.623046875,166.02701515708625C343.1953125,178.8513434380575,271.767578125,191.67567171902874,271.767578125,204.5C271.767578125,221.66666666666666,271.767578125,238.83333333333334,271.767578125,256C271.767578125,273.1666666666667,271.767578125,290.3333333333333,271.767578125,307.5C271.767578125,324.6666666666667,271.767578125,341.8333333333333,271.767578125,359C271.767578125,373,271.767578125,387,271.767578125,401C271.767578125,412.56651362470933,461.203125,424.1330272494186,650.638671875,435.69954087412793" id="L-awaitingOK-executingStatement-0" class="flowchart-link LS-awaitingOK LE-executingStatement" style="stroke-width:1px;" marker-end="url(#flowchart-pointEnd)"></path>
+                        <path d="M414.623046875,159.75641501038268C254.45703125,174.67094334025512,94.291015625,189.58547167012756,94.291015625,204.5C94.291015625,221.66666666666666,94.291015625,238.83333333333334,94.291015625,256C94.291015625,273.1666666666667,94.291015625,290.3333333333333,94.291015625,307.5C94.291015625,324.6666666666667,94.291015625,341.8333333333333,94.291015625,359C94.291015625,373,94.291015625,387,94.291015625,401C94.291015625,415,94.291015625,429,94.291015625,443C94.291015625,457,94.291015625,471,94.291015625,485C94.291015625,493.3333333333333,147.38462611607144,501.6666666666667,200.47823660714286,510" id="L-awaitingOK-fetchingCursorData-0" class="flowchart-link LS-awaitingOK LE-fetchingCursorData" style="stroke-width:1px;" marker-end="url(#flowchart-pointEnd)"></path>
+                        <path d="M651.3245411104369,239C666.1153955552185,227.5,680.90625,216,680.90625,204.5C680.90625,191.14390836328437,596.1357421875,177.78781672656874,511.365234375,164.4317250898531" id="L-runningPlainQuery-awaitingOK-0" class="flowchart-link LS-runningPlainQuery LE-awaitingOK" style="stroke-width:1px;" marker-end="url(#flowchart-pointEnd)"></path>
+                        <path d="M710.064453125,243.10416694733723C713.9533420138889,241.7361112982248,717.8422309027778,240.36805564911242,733.3977864583334,239C733.3977864583334,239,739.2311197916666,239,739.2311197916666,239C743.1200086805555,244.66666666666666,745.064453125,250.33333333333334,745.064453125,256C745.064453125,261.6666666666667,743.1200086805555,267.3333333333333,739.2311197916666,273C739.2311197916666,273,733.3977864583334,273,733.3977864583334,273C717.8422309027778,271.6319443508876,713.9533420138889,270.2638887017752,710.064453125,268.8958330526628" id="L-runningPlainQuery-runningPlainQuery-0" class="flowchart-link LS-runningPlainQuery LE-runningPlainQuery" style="stroke-width:1px;" marker-end="url(#flowchart-pointEnd)"></path>
+                        <path d="M636.748046875,273C636.748046875,284.5,636.748046875,296,636.748046875,307.5C636.748046875,319,649.5501270479369,330.5,662.3522072208738,342" id="L-runningPlainQuery-preparingStatement-0" class="flowchart-link LS-runningPlainQuery LE-preparingStatement" style="stroke-width:1px;" marker-end="url(#flowchart-pointEnd)"></path>
+                        <path d="M563.431640625,267.0765823836453C429.6494140625,280.5510549224302,295.8671875,294.0255274612151,295.8671875,307.5C295.8671875,324.6666666666667,295.8671875,341.8333333333333,295.8671875,359C295.8671875,373,295.8671875,387,295.8671875,401C295.8671875,412.4315344676451,473.2529296875,423.8630689352903,650.638671875,435.2946034029354" id="L-runningPlainQuery-executingStatement-0" class="flowchart-link LS-runningPlainQuery LE-executingStatement" style="stroke-width:1px;" marker-end="url(#flowchart-pointEnd)"></path>
+                        <path d="M563.431640625,263.2269960896904C338.861328125,277.9846640597936,114.291015625,292.7423320298968,114.291015625,307.5C114.291015625,324.6666666666667,114.291015625,341.8333333333333,114.291015625,359C114.291015625,373,114.291015625,387,114.291015625,401C114.291015625,415,114.291015625,429,114.291015625,443C114.291015625,457,114.291015625,471,114.291015625,485C114.291015625,493.3333333333333,161.43224516369048,501.6666666666667,208.57347470238096,510" id="L-runningPlainQuery-fetchingCursorData-0" class="flowchart-link LS-runningPlainQuery LE-fetchingCursorData" style="stroke-width:1px;" marker-end="url(#flowchart-pointEnd)"></path>
+                        <path d="M657.9896655036408,239C679.5436608768205,227.5,701.09765625,216,701.09765625,204.5C701.09765625,187.33333333333334,701.09765625,170.16666666666666,701.09765625,153C701.09765625,135.83333333333334,701.09765625,118.66666666666667,701.09765625,101.5C701.09765625,88.00770140223645,662.3623046875,74.51540280447288,623.626953125,61.023104206709334" id="L-runningPlainQuery-idle-0" class="flowchart-link LS-runningPlainQuery LE-idle" style="stroke-width:1px;" marker-end="url(#flowchart-pointEnd)"></path>
+                        <path d="M704.7090791868932,342C734.8867661559466,330.5,765.064453125,319,765.064453125,307.5C765.064453125,290.3333333333333,765.064453125,273.1666666666667,765.064453125,256C765.064453125,238.83333333333334,765.064453125,221.66666666666666,765.064453125,204.5C765.064453125,190.082264321738,638.21484375,175.66452864347602,511.365234375,161.246792965214" id="L-preparingStatement-awaitingOK-0" class="flowchart-link LS-preparingStatement LE-awaitingOK" style="stroke-width:1px;" marker-end="url(#flowchart-pointEnd)"></path>
+                        <path d="M711.311020934466,342C748.187737029733,330.5,785.064453125,319,785.064453125,307.5C785.064453125,296,735.3856568567961,284.5,685.7068605885922,273" id="L-preparingStatement-runningPlainQuery-0" class="flowchart-link LS-preparingStatement LE-runningPlainQuery" style="stroke-width:1px;" marker-end="url(#flowchart-pointEnd)"></path>
+                        <path d="M754.140625,349.235979785576C763.9194878472223,346.82398652371734,773.6983506944445,344.41199326185864,812.8138020833334,342C812.8138020833334,342,827.4820963541666,342,827.4820963541666,342C837.2609592013889,347.6666666666667,842.150390625,353.3333333333333,842.150390625,359C842.150390625,364.6666666666667,837.2609592013889,370.3333333333333,827.4820963541666,376C827.4820963541666,376,812.8138020833334,376,812.8138020833334,376C773.6983506944445,373.58800673814136,763.9194878472223,371.17601347628266,754.140625,368.764020214424" id="L-preparingStatement-preparingStatement-0" class="flowchart-link LS-preparingStatement LE-preparingStatement" style="stroke-width:1px;" marker-end="url(#flowchart-pointEnd)"></path>
+                        <path d="M674.96875,376C674.96875,384.3333333333333,674.96875,392.6666666666667,674.96875,401C674.96875,409.3333333333333,691.4511486235119,417.6666666666667,707.9335472470239,426" id="L-preparingStatement-executingStatement-0" class="flowchart-link LS-preparingStatement LE-executingStatement" style="stroke-width:1px;" marker-end="url(#flowchart-pointEnd)"></path>
+                        <path d="M595.796875,365.1500937408562C365.0439453125,377.10006249390415,134.291015625,389.0500312469521,134.291015625,401C134.291015625,415,134.291015625,429,134.291015625,443C134.291015625,457,134.291015625,471,134.291015625,485C134.291015625,493.3333333333333,175.47986421130952,501.6666666666667,216.66871279761904,510" id="L-preparingStatement-fetchingCursorData-0" class="flowchart-link LS-preparingStatement LE-fetchingCursorData" style="stroke-width:1px;" marker-end="url(#flowchart-pointEnd)"></path>
+                        <path d="M717.9129626820388,342C761.4887079035194,330.5,805.064453125,319,805.064453125,307.5C805.064453125,290.3333333333333,805.064453125,273.1666666666667,805.064453125,256C805.064453125,238.83333333333334,805.064453125,221.66666666666666,805.064453125,204.5C805.064453125,187.33333333333334,805.064453125,170.16666666666666,805.064453125,153C805.064453125,135.83333333333334,805.064453125,118.66666666666667,805.064453125,101.5C805.064453125,86.12154847088019,714.345703125,70.74309694176037,623.626953125,55.364645412640556" id="L-preparingStatement-idle-0" class="flowchart-link LS-preparingStatement LE-idle" style="stroke-width:1px;" marker-end="url(#flowchart-pointEnd)"></path>
+                        <path d="M783.6975446428571,426C822.9239676339286,417.6666666666667,862.150390625,409.3333333333333,862.150390625,401C862.150390625,387,862.150390625,373,862.150390625,359C862.150390625,341.8333333333333,862.150390625,324.6666666666667,862.150390625,307.5C862.150390625,290.3333333333333,862.150390625,273.1666666666667,862.150390625,256C862.150390625,238.83333333333334,862.150390625,221.66666666666666,862.150390625,204.5C862.150390625,189.41364760301678,686.7578125,174.32729520603357,511.365234375,159.24094280905035" id="L-executingStatement-awaitingOK-0" class="flowchart-link LS-executingStatement LE-awaitingOK" style="stroke-width:1px;" marker-end="url(#flowchart-pointEnd)"></path>
+                        <path d="M791.7927827380952,426C836.9715866815476,417.6666666666667,882.150390625,409.3333333333333,882.150390625,401C882.150390625,387,882.150390625,373,882.150390625,359C882.150390625,341.8333333333333,882.150390625,324.6666666666667,882.150390625,307.5C882.150390625,295.462046808759,796.107421875,283.424093617518,710.064453125,271.386140426277" id="L-executingStatement-runningPlainQuery-0" class="flowchart-link LS-executingStatement LE-runningPlainQuery" style="stroke-width:1px;" marker-end="url(#flowchart-pointEnd)"></path>
+                        <path d="M799.8880208333334,426C851.0192057291667,417.6666666666667,902.150390625,409.3333333333333,902.150390625,401C902.150390625,391.87894288882967,828.1455078125,382.75788577765934,754.140625,373.636828666489" id="L-executingStatement-preparingStatement-0" class="flowchart-link LS-executingStatement LE-preparingStatement" style="stroke-width:1px;" marker-end="url(#flowchart-pointEnd)"></path>
+                        <path d="M810.060546875,435.1523670200733C825.5544704861111,432.1015780133822,841.0483940972222,429.0507890066911,903.0240885416666,426C903.0240885416666,426,926.2649739583334,426,926.2649739583334,426C941.7588975694445,431.6666666666667,949.505859375,437.3333333333333,949.505859375,443C949.505859375,448.6666666666667,941.7588975694445,454.3333333333333,926.2649739583334,460C926.2649739583334,460,903.0240885416666,460,903.0240885416666,460C841.0483940972222,456.9492109933089,825.5544704861111,453.8984219866178,810.060546875,450.8476329799267" id="L-executingStatement-executingStatement-0" class="flowchart-link LS-executingStatement LE-executingStatement" style="stroke-width:1px;" marker-end="url(#flowchart-pointEnd)"></path>
+                        <path d="M650.638671875,448.8116646662734C402.46484375,460.8744431108489,154.291015625,472.93722155542446,154.291015625,485C154.291015625,493.3333333333333,189.52748325892856,501.6666666666667,224.76395089285714,510" id="L-executingStatement-fetchingCursorData-0" class="flowchart-link LS-executingStatement LE-fetchingCursorData" style="stroke-width:1px;" marker-end="url(#flowchart-pointEnd)"></path>
+                        <path d="M807.9832589285714,426C865.0668247767858,417.6666666666667,922.150390625,409.3333333333333,922.150390625,401C922.150390625,387,922.150390625,373,922.150390625,359C922.150390625,341.8333333333333,922.150390625,324.6666666666667,922.150390625,307.5C922.150390625,290.3333333333333,922.150390625,273.1666666666667,922.150390625,256C922.150390625,238.83333333333334,922.150390625,221.66666666666666,922.150390625,204.5C922.150390625,187.33333333333334,922.150390625,170.16666666666666,922.150390625,153C922.150390625,135.83333333333334,922.150390625,118.66666666666667,922.150390625,101.5C922.150390625,85.46647641861091,772.888671875,69.4329528372218,623.626953125,53.399429255832715" id="L-executingStatement-idle-0" class="flowchart-link LS-executingStatement LE-idle" style="stroke-width:1px;" marker-end="url(#flowchart-pointEnd)"></path>
+                        <path d="M232.85918898809524,510C203.57510230654762,501.6666666666667,174.291015625,493.3333333333333,174.291015625,485C174.291015625,471,174.291015625,457,174.291015625,443C174.291015625,429,174.291015625,415,174.291015625,401C174.291015625,387,174.291015625,373,174.291015625,359C174.291015625,341.8333333333333,174.291015625,324.6666666666667,174.291015625,307.5C174.291015625,290.3333333333333,174.291015625,273.1666666666667,174.291015625,256C174.291015625,238.83333333333334,174.291015625,221.66666666666666,174.291015625,204.5C174.291015625,190.209542043261,294.45703125,175.919084086522,414.623046875,161.628626129783" id="L-fetchingCursorData-awaitingOK-0" class="flowchart-link LS-fetchingCursorData LE-awaitingOK" style="stroke-width:1px;" marker-end="url(#flowchart-pointEnd)"></path>
+                        <path d="M349.068359375,522.396118529481C659.287109375,509.9307456863207,969.505859375,497.4653728431603,969.505859375,485C969.505859375,471,969.505859375,457,969.505859375,443C969.505859375,429,969.505859375,415,969.505859375,401C969.505859375,387,969.505859375,373,969.505859375,359C969.505859375,341.8333333333333,969.505859375,324.6666666666667,969.505859375,307.5C969.505859375,294.1156586763083,839.78515625,280.7313173526166,710.064453125,267.3469760289249" id="L-fetchingCursorData-runningPlainQuery-0" class="flowchart-link LS-fetchingCursorData LE-runningPlainQuery" style="stroke-width:1px;" marker-end="url(#flowchart-pointEnd)"></path>
+                        <path d="M349.068359375,522.5245714036598C669.287109375,510.0163809357732,989.505859375,497.5081904678866,989.505859375,485C989.505859375,471,989.505859375,457,989.505859375,443C989.505859375,429,989.505859375,415,989.505859375,401C989.505859375,390.523928391796,871.8232421875,380.04785678359195,754.140625,369.57178517538796" id="L-fetchingCursorData-preparingStatement-0" class="flowchart-link LS-fetchingCursorData LE-preparingStatement" style="stroke-width:1px;" marker-end="url(#flowchart-pointEnd)"></path>
+                        <path d="M349.068359375,522.6460509155684C679.287109375,510.0973672770456,1009.505859375,497.5486836385228,1009.505859375,485C1009.505859375,474.9975931937759,909.783203125,464.99518638755177,810.060546875,454.9927795813277" id="L-fetchingCursorData-executingStatement-0" class="flowchart-link LS-fetchingCursorData LE-executingStatement" style="stroke-width:1px;" marker-end="url(#flowchart-pointEnd)"></path>
+                        <path d="M349.068359375,524.6044075361469C426.67795138888886,519.7362716907646,504.28754340277777,514.8681358453823,814.7259114583333,510C814.7259114583333,510,931.1402994791666,510,931.1402994791666,510C1008.7498914930555,515.6666666666666,1047.5546875,521.3333333333334,1047.5546875,527C1047.5546875,532.6666666666666,1008.7498914930555,538.3333333333334,931.1402994791666,544C931.1402994791666,544,814.7259114583333,544,814.7259114583333,544C504.28754340277777,539.1318641546177,426.67795138888886,534.2637283092354,349.068359375,529.3955924638531" id="L-fetchingCursorData-fetchingCursorData-0" class="flowchart-link LS-fetchingCursorData LE-fetchingCursorData" style="stroke-width:1px;" marker-end="url(#flowchart-pointEnd)"></path>
+                        <path d="M349.068359375,522.7611099067851C689.287109375,510.1740732711901,1029.505859375,497.58703663559504,1029.505859375,485C1029.505859375,471,1029.505859375,457,1029.505859375,443C1029.505859375,429,1029.505859375,415,1029.505859375,401C1029.505859375,387,1029.505859375,373,1029.505859375,359C1029.505859375,341.8333333333333,1029.505859375,324.6666666666667,1029.505859375,307.5C1029.505859375,290.3333333333333,1029.505859375,273.1666666666667,1029.505859375,256C1029.505859375,238.83333333333334,1029.505859375,221.66666666666666,1029.505859375,204.5C1029.505859375,187.33333333333334,1029.505859375,170.16666666666666,1029.505859375,153C1029.505859375,135.83333333333334,1029.505859375,118.66666666666667,1029.505859375,101.5C1029.505859375,85.18156825791814,826.56640625,68.86313651583627,623.626953125,52.54470477375441" id="L-fetchingCursorData-idle-0" class="flowchart-link LS-fetchingCursorData LE-idle" style="stroke-width:1px;" marker-end="url(#flowchart-pointEnd)"></path>
+                    </g>
+                    <g>
+                        <g class="edgeLabel" transform="translate(415.318359375, 101.5)">
+                            <g class="label" transform="translate(-75.3515625, -9.5)">
+                                <rect width="150.703125" height="19"></rect>
+                                <text>
+                                    <tspan dy="1em">ping, reset, db, stats</tspan>
+                                </text>
+                            </g>
+                        </g>
+                        <g class="edgeLabel" transform="translate(606.748046875, 153)">
+                            <g class="label" transform="translate(-40.3828125, -9.5)">
+                                <rect width="80.765625" height="19"></rect>
+                                <text>
+                                    <tspan dy="1em">plain query</tspan>
+                                </text>
+                            </g>
+                        </g>
+                        <g class="edgeLabel" transform="translate(319.966796875, 204.5)">
+                            <g class="label" transform="translate(-28.19921875, -9.5)">
+                                <rect width="56.3984375" height="19"></rect>
+                                <text>
+                                    <tspan dy="1em">prepare</tspan>
+                                </text>
+                            </g>
+                        </g>
+                        <g class="edgeLabel" transform="translate(223.029296875, 256)">
+                            <g class="label" transform="translate(-28.73828125, -9.5)">
+                                <rect width="57.4765625" height="19"></rect>
+                                <text>
+                                    <tspan dy="1em">execute</tspan>
+                                </text>
+                            </g>
+                        </g>
+                        <g class="edgeLabel" transform="translate(55.462890625, 307.5)">
+                            <g class="label" transform="translate(-18.828125, -9.5)">
+                                <rect width="37.65625" height="19"></rect>
+                                <text>
+                                    <tspan dy="1em">fetch</tspan>
+                                </text>
+                            </g>
+                        </g>
+                    </g>
+                    <g class="nodes">
+                        <g class="node default flowchart-label" id="flowchart-idle-12" transform="translate(602.529296875, 50)">
+                            <rect class="label-container" x="-21.09765625" y="-17" width="42.1953125" height="34"></rect>
+                            <g class="label" transform="translate(0, -9.5)">
+                                <text>
+                                    <tspan dy="1em">idle</tspan>
+                                </text>
+                            </g>
+                        </g>
+                        <g class="node default flowchart-label" id="flowchart-awaitingOK-14" transform="translate(462.994140625, 153)">
+                            <rect class="label-container" x="-48.37109375" y="-17" width="96.7421875" height="34"></rect>
+                            <g class="label" transform="translate(0, -9.5)">
+                                <text>
+                                    <tspan dy="1em">awaitingOK</tspan>
+                                </text>
+                            </g>
+                        </g>
+                        <g class="node default flowchart-label" id="flowchart-runningPlainQuery-16" transform="translate(636.748046875, 256)">
+                            <rect class="label-container" x="-73.31640625" y="-17" width="146.6328125" height="34"></rect>
+                            <g class="label" transform="translate(0, -9.5)">
+                                <text>
+                                    <tspan dy="1em">runningPlainQuery</tspan>
+                                </text>
+                            </g>
+                        </g>
+                        <g class="node default flowchart-label" id="flowchart-preparingStatement-18" transform="translate(674.96875, 359)">
+                            <rect class="label-container" x="-79.171875" y="-17" width="158.34375" height="34"></rect>
+                            <g class="label" transform="translate(0, -9.5)">
+                                <text>
+                                    <tspan dy="1em">preparingStatement</tspan>
+                                </text>
+                            </g>
+                        </g>
+                        <g class="node default flowchart-label" id="flowchart-executingStatement-20" transform="translate(730.349609375, 443)">
+                            <rect class="label-container" x="-79.7109375" y="-17" width="159.421875" height="34"></rect>
+                            <g class="label" transform="translate(0, -9.5)">
+                                <text>
+                                    <tspan dy="1em">executingStatement</tspan>
+                                </text>
+                            </g>
+                        </g>
+                        <g class="node default flowchart-label" id="flowchart-fetchingCursorData-22" transform="translate(272.685546875, 527)">
+                            <rect class="label-container" x="-76.3828125" y="-17" width="152.765625" height="34"></rect>
+                            <g class="label" transform="translate(0, -9.5)">
+                                <text>
+                                    <tspan dy="1em">fetchingCursorData</tspan>
+                                </text>
+                            </g>
+                        </g>
+                    </g>
+                </g>
+                <g class="root" transform="translate(638.6767578125, 120)">
+                    <g>
+                        <g class="cluster default flowchart-label" id="auth">
+                            <rect x="8" y="8" width="335.978515625" height="290"></rect>
+                            <g class="cluster-label" transform="translate(175.9892578125, 8)">
+                                <text>
+                                    <tspan dy="1em">auth</tspan>
+                                </text>
+                            </g>
+                        </g>
+                    </g>
+                    <g>
+                        <path d="M176.08675288228156,67C199.18204831614077,78.5,222.27734375,90,222.27734375,101.5C222.27734375,113,222.27734375,124.5,222.27734375,136" id="L-awaitingGreeting-waitingForTLSReady-0" class="flowchart-link LS-awaitingGreeting LE-waitingForTLSReady" style="stroke-width:1px;" marker-end="url(#flowchart-pointEnd)"></path>
+                        <path d="M130.56559086771844,67C107.47029543385922,78.5,84.375,90,84.375,101.5C84.375,118.66666666666667,84.375,135.83333333333334,84.375,153C84.375,170.16666666666666,84.375,187.33333333333334,84.375,204.5C84.375,216,107.47029543385922,227.5,130.56559086771844,239" id="L-awaitingGreeting-awaitingAuthReply-0" class="flowchart-link LS-awaitingGreeting LE-awaitingAuthReply" style="stroke-width:1px;" marker-end="url(#flowchart-pointEnd)"></path>
+                        <path d="M222.27734375,170C222.27734375,181.5,222.27734375,193,222.27734375,204.5C222.27734375,216,199.18204831614077,227.5,176.08675288228156,239" id="L-waitingForTLSReady-awaitingAuthReply-0" class="flowchart-link LS-waitingForTLSReady LE-awaitingAuthReply" style="stroke-width:1px;" marker-end="url(#flowchart-pointEnd)"></path>
+                        <path d="M227.451171875,246.90008462623413C238.17643229166666,244.2667230841561,248.90169270833331,241.63336154207803,291.802734375,239C291.802734375,239,307.890625,239,307.890625,239C318.6158854166667,244.66666666666666,323.978515625,250.33333333333334,323.978515625,256C323.978515625,261.6666666666667,318.6158854166667,267.3333333333333,307.890625,273C307.890625,273,291.802734375,273,291.802734375,273C248.90169270833331,270.36663845792197,238.17643229166666,267.7332769158439,227.451171875,265.09991537376584" id="L-awaitingAuthReply-awaitingAuthReply-0" class="flowchart-link LS-awaitingAuthReply LE-awaitingAuthReply" style="stroke-width:1px;" marker-end="url(#flowchart-pointEnd)"></path>
+                    </g>
+                    <g>
+                        <g class="edgeLabel" transform="translate(222.27734375, 101.5)">
+                            <g class="label" transform="translate(-43.53125, -9.5)">
+                                <rect width="87.0625" height="19"></rect>
+                                <text>
+                                    <tspan dy="1em">TLS enabled</tspan>
+                                </text>
+                            </g>
+                        </g>
+                        <g class="edgeLabel" transform="translate(84.375, 153)">
+                            <g class="label" transform="translate(-23.625, -9.5)">
+                                <rect width="47.25" height="19"></rect>
+                                <text>
+                                    <tspan dy="1em">no TLS</tspan>
+                                </text>
+                            </g>
+                        </g>
+                        <g class="edgeLabel" transform="translate(222.27734375, 204.5)">
+                            <g class="label" transform="translate(-40.671875, -9.5)">
+                                <rect width="81.34375" height="19"></rect>
+                                <text>
+                                    <tspan dy="1em">TLS started</tspan>
+                                </text>
+                            </g>
+                        </g>
+                    </g>
+                    <g class="nodes">
+                        <g class="node default flowchart-label" id="flowchart-waitingForTLSReady-3" transform="translate(222.27734375, 153)">
+                            <rect class="label-container" x="-79.27734375" y="-17" width="158.5546875" height="34"></rect>
+                            <g class="label" transform="translate(0, -9.5)">
+                                <text>
+                                    <tspan dy="1em">waitingForTLSReady</tspan>
+                                </text>
+                            </g>
+                        </g>
+                        <g class="node default flowchart-label" id="flowchart-awaitingGreeting-2" transform="translate(153.326171875, 50)">
+                            <rect class="label-container" x="-69.0703125" y="-17" width="138.140625" height="34"></rect>
+                            <g class="label" transform="translate(0, -9.5)">
+                                <text>
+                                    <tspan dy="1em">awaitingGreeting</tspan>
+                                </text>
+                            </g>
+                        </g>
+                        <g class="node default flowchart-label" id="flowchart-awaitingAuthReply-5" transform="translate(153.326171875, 256)">
+                            <rect class="label-container" x="-74.125" y="-17" width="148.25" height="34"></rect>
+                            <g class="label" transform="translate(0, -9.5)">
+                                <text>
+                                    <tspan dy="1em">awaitingAuthReply</tspan>
+                                </text>
+                            </g>
+                        </g>
+                    </g>
+                </g>
+                <g class="node default flowchart-label" id="flowchart-startup-0" transform="translate(818.166015625, 17)">
+                    <rect rx="17" ry="17" x="-37.515625" y="-17" width="75.03125" height="34"></rect>
+                    <g class="label" transform="translate(0, -9.5)">
+                        <text>
+                            <tspan dy="1em">startup</tspan>
+                        </text>
+                    </g>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>

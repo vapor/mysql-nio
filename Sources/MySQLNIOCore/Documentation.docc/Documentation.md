@@ -4,7 +4,9 @@
     @TitleHeading(Package)
 }
 
-The "new" implementation of MySQLNIO, a wire protocol driver for MySQL databases
+🐬 Non-blocking, event-driven Swift client for MySQL built on SwiftNIO.
+
+This is the _new_ implementation of MySQLNIO, a wire protocol driver for MySQL databases.
 
 ## Supported Versions
 
