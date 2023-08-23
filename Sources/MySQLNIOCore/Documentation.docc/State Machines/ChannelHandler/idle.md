@@ -8,9 +8,9 @@ multiple commands are queued.
 ### Transitions
 
 - `awaitingOK`
+- `gettingStatistics`
 - `runningPlainQuery`
 - `preparingStatement`
 - `executingStatement`
 - `fetchingCursorData`
 - `closed`
-- `terminated`

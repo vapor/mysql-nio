@@ -8,6 +8,5 @@ The auth data from the server handshake is preserved during this state, as it is
 
 ### Transitions
 
-- `terminated`
+- `closed`
 - `awaitingAuthReply`
-

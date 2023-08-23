@@ -1,19 +1,40 @@
 import Collections
 import NIOCore
 
-extension MySQLChannel.Request {
-    struct PlainQueryContext {
+enum PlainQuery {
+    struct Context {
         let attributes: OrderedDictionary<String, MySQLProtocolValue>
         let sql: String
-        let stream: EventLoopPromise<MySQLResultsetStream> // result set(s) delivery goes here
+        let promise: EventLoopPromise<MySQLResultsetStream> // result set(s) delivery goes here
     }
 
-    struct PlainQueryStateMachine {
+    struct StateMachine {
         /// The marker byte for a `LOCAL INFILE Request` packet. Defined here because we don't bother with a full
         /// packet definition for it, which is in turn because we don't implement the support yet.
         static var localInfileRequestMarkerByte: UInt8 { 0xfb }
         
-        let context: PlainQueryContext
+        // MARK: - States
+
+        /// The defined states for plain query handling
+        enum State {
+            /// A `COM_QUERY` command was sent and no response has yet been received, or a new
+            /// resultset has been signaled as incoming but not yet received.
+            case awaitingResultsetStart
+            /// Partially finished sending a `LOCAL INFILE` data response.
+            case sendingLocalInfileData
+            /// Waiting for one or more column metadata packets
+            case awaitingColumnMetadata(columnsRemaining: Int)
+            /// Reading resultset rows
+            case readingRows
+            /// All result sets received or all infile data sent
+            case done
+            /// An error occurred during any step of query handling.
+            case failed(error: any Error)
+        }
+        
+        private var state: State
+
+        let context: Context
         
         // MARK: - Incoming packet handlers
         /*
@@ -146,80 +167,13 @@ extension MySQLChannel.Request {
             
         }
         */
-        /// States and their transitions.
-        enum State {
-            /// A `COM_QUERY` command was sent and no response has yet been received, or a new resultset has
-            /// been signaled as incoming but not yet received.
-            ///
-            /// The first reply to a `COM_QUERY` may be one of an OK packet, an ERR packet, a LOCAL INFILE
-            /// request, or a result set column count. Disambiguating these four possibilities can be
-            /// unintuitive; see the ``PlainQueryHandler/packetReceived(context:_:)`` method for details.
-            ///
-            /// ##### Transitions
-            /// ||||
-            /// -|:-:|-
-            /// ||_initial_|||
-            /// `awaitingResultsetStart`|→|`awaitingResultsetStart`
-            /// `awaitingResultsetStart`|→|``sendingLocalInfileData``
-            /// `awaitingResultsetStart`|→|``awaitingColumnMetadata(columnsRemaining:)``
-            /// `awaitingResultsetStart`|→|``readingRows``
-            /// `awaitingResultsetStart`|→|``done``
-            /// `awaitingResultsetStart`|→|``failed(error:)``
-            /// |xx|||
-            case awaitingResultsetStart
-            
-            /// Partially finished sending a `LOCAL INFILE` data response, which may span an arbitrary number of packets
-            /// and is the only instance of a valid empty packet in the protocol aside from a fragment terminator.
-            ///
-            /// ##### Transitions
-            /// ||||
-            /// -|:-:|-
-            /// `sendingLocalInfileData`|→|`sendingLocalInfileData`
-            /// `sendingLocalInfileData`|→|``awaitingResultsetStart``
-            /// `sendingLocalInfileData`|→|``done``
-            /// `sendingLocalInfileData`|→|``failed(error:)``
-            //case sendingLocalInfileData
-            
-            /// Waiting for one or more column metadata packets
-            ///
-            /// ##### Transitions
-            /// ||||
-            /// -|:-:|-
-            /// `awaitingColumnMetadata`|→|``awaitingResultsetStart``
-            /// `awaitingColumnMetadata`|→|`awaitingColumnMetadata`
-            /// `awaitingColumnMetadata`|→|``readingRows``
-            /// `awaitingColumnMetadata`|→|``done``
-            /// `awaitingColumnMetadata`|→|``failed(error:)``
-            case awaitingColumnMetadata(columnsRemaining: Int)
-            
-            /// Reading resultset rows
-            ///
-            /// ##### Transitions
-            /// ||||
-            /// -|:-:|-
-            /// `readingRows`|→|``awaitingResultsetStart``
-            /// `readingRows`|→|`readingRows`
-            /// `readingRows`|→|``done``
-            /// `readingRows`|→|``failed(error:)``
-            case readingRows
-            
-            /// All result sets received or all infile data sent
-            ///
-            /// ##### Transitions
-            /// ||||
-            /// -|:-:|-
-            /// ||_terminal_|||
-            case done
-            
-            /// An error occurred during any step of query handling.
-            ///
-            /// ##### Transitions
-            /// ||||
-            /// -|:-:|-
-            /// ||_terminal_|||
-            case failed(error: any Error)
+        
+        mutating func handlePacketRead(_ packet: ByteBuffer) -> MySQLChannel.Handler.Reaction {
+            fatalError()
         }
         
-        private var state: State
+        mutating func teardownState(reason: any Swift.Error) {
+            
+        }
     }
 }

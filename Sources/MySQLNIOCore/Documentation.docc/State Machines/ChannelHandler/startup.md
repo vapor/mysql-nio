@@ -4,4 +4,4 @@
 
 - _initial_
 - `awaitingGreeting`
-- `terminated`
+- `closed`

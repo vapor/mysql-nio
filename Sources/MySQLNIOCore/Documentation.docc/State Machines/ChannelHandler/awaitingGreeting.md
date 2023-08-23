@@ -4,4 +4,4 @@
 
 - `waitingForTLSReady`
 - `awaitingAuthReply`
-- `terminated`
+- `closed`

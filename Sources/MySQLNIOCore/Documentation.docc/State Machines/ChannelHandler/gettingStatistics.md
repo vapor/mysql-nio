@@ -1,12 +1,12 @@
-# ``MySQLNIOCore/MySQLChannel/Handler/State/runningPlainQuery(stateMachine:)``
+# ``MySQLNIOCore/MySQLChannel/Handler/State/gettingStatistics(promise:)``
 
 ### Transitions
 
 - `awaitingOK`
+- `gettingStatistics`
 - `runningPlainQuery`
 - `preparingStatement`
 - `executingStatement`
 - `fetchingCursorData`
 - `idle`
 - `closed`
-- `terminated`

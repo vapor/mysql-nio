@@ -18,7 +18,7 @@ extension MySQLChannel {
     /// - [MySQL Client/Server Protocol documentation](https://dev.mysql.com/doc/dev/mysql-server/latest/PAGE_PROTOCOL.html)
     /// - [MariaDB Client/Server Protocol documentation](https://mariadb.com/kb/en/clientserver-protocol/)
     final class Handler: ChannelDuplexHandler {
-        typealias OutboundIn = Request
+        typealias OutboundIn = ClientRequest
         typealias OutboundOut = ByteBuffer
         typealias InboundIn = ByteBuffer
         
@@ -39,20 +39,20 @@ extension MySQLChannel {
             case awaitingAuthReply(handshake: MySQLPackets.HandshakeV10, authHandler: any MySQLBuiltinAuthHandler, secureConnection: Bool)
             /// Command mode with no commands running or queued
             case idle
-            /// A command that requires no additional processing has been sent, and the result is pending
-            case awaitingOK(statistics: Bool, promise: EventLoopPromise<Void>?)
+            /// A ping or reset command is in progress
+            case awaitingOK(promise: EventLoopPromise<Void>?)
+            /// A statistics request is waiting for a result
+            case gettingStatistics(promise: EventLoopPromise<String>)
             /// A plain query is in progress
-            case runningPlainQuery(stateMachine: Request.PlainQueryStateMachine)
+            case runningPlainQuery(stateMachine: PlainQuery.StateMachine)
             /// A prepared statement is being prepared
-            case preparingStatement(stateMachine: ())
+            case preparingStatement(stateMachine: PrepareStatement.StateMachine)
             /// A prepared statement is being executed
-            case executingStatement(stateMachine: ())
+            case executingStatement(stateMachine: ExecuteStatement.StateMachine)
             /// Data is being fetched from a cursor after a prepared statement was executed
-            case fetchingCursorData(stateMachine: ())
-            /// The connection was closed gracefully
-            case closed
-            /// The connection was closed due to an unrecoverable error
-            case terminated(error: any Swift.Error)
+            case fetchingCursorData(stateMachine: FetchCursorData.StateMachine)
+            /// The connection was closed, possibly due to an error
+            case closed(reason: (any Swift.Error)?)
             /// CoW-prevention pseudo-state
             case modifyingState
         }
@@ -70,7 +70,7 @@ extension MySQLChannel {
             /// Send the given auth data and wait for more.
             case singleStepAuth(data: ByteBuffer?)
             /// Signal authentication success and readiness to begin processing requests.
-            case signalSuccessfulHandshake
+            case signalSuccessfulHandshake(serverVersion: String, connectionIdentifier: UInt32)
             /// Send a ping.
             case sendPing
             /// Request server statistics.
@@ -78,17 +78,17 @@ extension MySQLChannel {
             /// Issue a connection reset command.
             case sendResetConnectionState
             /// Perform a statement prepare.
-            case sendStatementPrepare(()/*Request.PrepareStatementContext*/)
+            case sendStatementPrepare(PrepareStatement.Context)
             /// Perform a statement reset.
-            case sendStatementReset(()/*Request.ResetStatementContext*/)
+            case sendStatementReset(ResetStatement.Context)
             /// Perform a statement deallocate.
-            case sendStatementDeallocate(()/*Request.DeallocateStatementContext*/)
+            case sendStatementDeallocate(DeallocateStatement.Context)
             /// Perform a plain query.
-            case sendPlainQuery(Request.PlainQueryContext)
+            case sendPlainQuery(PlainQuery.Context)
             /// Perform a prepared statement execute.
-            case sendPreparedStatementExecute(()/*Request.ExecuteStatementContext*/)
+            case sendPreparedStatementExecute(ExecuteStatement.Context)
             /// Perform a cursor data fetch.
-            case sendCursorDataFetch(()/*Request.FetchCursorDataContext*/)
+            case sendCursorDataFetch(FetchCursorData.Context)
             /// Initiate an orderly connection teardown.
             case sendQuit
             /// Handle an error.
@@ -118,7 +118,7 @@ extension MySQLChannel {
         // private var lastReportedSessionStatus: String? { get set }
         // private var lastKnownQueryMetadata: MySQLQueryMetadata? { get set }
         
-        private var requestQueue: Deque<Request> = []
+        private var requestQueue: Deque<ClientRequest> = []
         private var state: State = .startup
         private var transcoder: NonThrowingMessageByteTranscodingProcessor<MySQLRawPacketCodec>!
         private var readyPromise: EventLoopPromise<(serverVersion: String, connectionIdentifier: UInt32)>!
@@ -145,7 +145,7 @@ extension MySQLChannel {
         }
         
         func handlerRemoved(context: ChannelHandlerContext) {
-            guard self.state.isClosed || self.state.isTerminated else {
+            guard self.state.isClosed else {
                 stateViolation("channel not closed when handler removed")
             }
             // Nothing to do here
@@ -156,7 +156,55 @@ extension MySQLChannel {
                 stateViolation("channel active but handler already started")
             }
             
-            self.updateStateSafely { state in state = .awaitingGreeting }
+            self.react(to: self.updateStateSafely { state in
+                state = .awaitingGreeting
+                return .read
+            }, context: context)
+        }
+
+        func teardownState(reason: any Swift.Error) {
+            switch self.state {
+            case .startup:
+                stateViolation("can't tear down without setting up")
+            case .awaitingGreeting, .waitingForTLSReady, .awaitingAuthReply:
+                self.readyPromise.fail(reason)
+            case .idle:
+                break
+            case .awaitingOK(let promise):
+                promise?.fail(reason)
+            case .gettingStatistics(let promise):
+                promise.fail(reason)
+            case .runningPlainQuery(var stateMachine):
+                stateMachine.teardownState(reason: reason)
+            case .preparingStatement(var stateMachine):
+                stateMachine.teardownState(reason: reason)
+            case .executingStatement(var stateMachine):
+                stateMachine.teardownState(reason: reason)
+            case .fetchingCursorData(var stateMachine):
+                stateMachine.teardownState(reason: reason)
+            case .closed:
+                stateViolation("can't tear down multiple times")
+            case .modifyingState:
+                stateViolation("broken state update")
+            }
+            while let request = self.requestQueue.popLast() {
+                switch request {
+                case .ping(let promise):                promise.fail(reason)
+                case .resetAllState(let promise):       promise.fail(reason)
+                case .getStatistics(let promise):       promise.fail(reason)
+                case .plainQuery(let context):          context.promise.fail(reason)
+                case .prepareStatement(let context):    context.promise.fail(reason)
+                case .executeStatement(let context):    context.promise.fail(reason)
+                case .fetchCursorData(let context):     context.promise.fail(reason)
+                case .resetStatement(let context):      context.promise.fail(reason)
+                case .deallocateStatement(let context): context.promise.fail(reason)
+                case .quit:                             break
+                }
+            }
+            _ = self.updateStateSafely { state in
+                state = .closed(reason: reason)
+                return .wait
+            }
         }
 
         func channelInactive(context: ChannelHandlerContext) {
@@ -177,7 +225,7 @@ extension MySQLChannel {
         }
 
         func errorCaught(context: ChannelHandlerContext, error: any Swift.Error) {
-            self.react(to: self.handleConnectionError(error), context: context)
+            self.react(to: self.handleError(MySQLCoreError.connection(underlying: error)), context: context)
         }
         
         func channelRead(context: ChannelHandlerContext, data: NIOAny) {
@@ -195,9 +243,9 @@ extension MySQLChannel {
         }
         
         func userInboundEventTriggered(context: ChannelHandlerContext, event: Any) {
-            switch event {
-                case TLSUserEvent.handshakeCompleted:
-                    self.react(to: self.handleTLSHandshakeCompleted(), context: context)
+            switch (event, self.state) {
+                case (TLSUserEvent.handshakeCompleted, .waitingForTLSReady(handshake: let handshake)):
+                    self.react(to: self.handleTLSHandshakeCompleted(handshake), context: context)
                 default:
                     context.fireUserInboundEventTriggered(event)
             }
@@ -211,9 +259,9 @@ extension MySQLChannel {
                 stateViolation("request written before handshake complete")
             case .idle:
                 break
-            case .awaitingOK, .runningPlainQuery, .preparingStatement, .executingStatement, .fetchingCursorData:
-                self.requestQueue.append(message)
-            case .closed, .terminated:
+            case .awaitingOK, .gettingStatistics, .runningPlainQuery, .preparingStatement, .executingStatement, .fetchingCursorData:
+                self.requestQueue.prepend(message)
+            case .inactivating, .closed:
                 fatalError()
             case .modifyingState:
                 stateViolation("broken state update")
@@ -224,12 +272,12 @@ extension MySQLChannel {
             guard mode == .all else {
                 return promise?.fail(ChannelError.operationUnsupported) ?? ()
             }
-            self.react(to: self.handleConnectionClose(reason: nil), context: context)
+            self.react(to: self.handleConnectionClose(reason: ChannelError.inputClosed), context: context)
         }
         
-        // MARK: - Reaction behavior
+        // MARK: - Reactions
         
-        func react(to reaction: Reaction, context: ChannelHandlerContext) {
+        private func react(to reaction: Reaction, context: ChannelHandlerContext) {
             switch reaction {
             case .wait:
                 break
@@ -237,6 +285,9 @@ extension MySQLChannel {
                 context.read()
             case .initiateTLS(request: let request):
                 do {
+                    guard self.transcoder.unprocessedBytes == 0 else {
+                        return self.react(to: .handleError(MySQLCoreError.protocolViolation(debugDescription: "Extra data received during TLS setup")), context: context)
+                    }
                     guard let sslContext = self.configuration.tls.sslContext else {
                         stateViolation("asked to initiate TLS but no context configured")
                     }
@@ -248,14 +299,16 @@ extension MySQLChannel {
                         try? contextBox.wrappedValue.channel.pipeline.syncOperations.addHandler(handlerBox.wrappedValue, position: .first)
                     }
                 } catch {
-                    self.react(to: self.handleConnectionError(error), context: context)
+                    self.react(to: self.handleError(MySQLCoreError.connection(underlying: error)), context: context)
                 }
             case .replyToHandshake(response: let response):
-                break
+                context.writeAndFlush(self.wrapOutboundOut(response.build(allocator: context.channel.allocator)), promise: nil)
             case .singleStepAuth(data: let data):
-                break
-            case .signalSuccessfulHandshake:
-                break
+                if let data {
+                    context.writeAndFlush(self.wrapOutboundOut(data), promise: nil)
+                }
+            case .signalSuccessfulHandshake(serverVersion: let serverVersion, connectionIdentifier: let connectionIdentifier):
+                self.readyPromise.succeed((serverVersion: serverVersion, connectionIdentifier: connectionIdentifier))
             case .sendPing:
                 break
             case .sendRequestStatistics:
@@ -276,12 +329,12 @@ extension MySQLChannel {
                 break
             case .sendQuit:
                 break
-            case .handleError(let _):
+            case .handleError/*(let error)*/:
                 break
             }
         }
         
-        // MARK: - Packet dispatcher
+        // MARK: - Primary event handling
         
         /// Handles an arbitrary incoming packet.
         ///
@@ -289,7 +342,7 @@ extension MySQLChannel {
         /// packet; it's the only one that is valid in every nonterminal state. However, we don't do exactly that;
         /// in states that have their own state machines, we pass such packets on to those state machines. This allows
         /// the error to include more detailed and accurate context information.
-        func handlePacketRead(_ packet: ByteBuffer) -> Reaction {
+        private func handlePacketRead(_ packet: ByteBuffer) -> Reaction {
             switch self.state {
             case .startup:
                 stateViolation("received packet before being initialized")
@@ -314,7 +367,7 @@ extension MySQLChannel {
                 case MySQLPackets.AuthSwitchPacket.markerByte:
                     return self.handleAuthSwitchRequest(packet: packet, handshake: handshake, secureConnection: secureConnection)
                 case MySQLPackets.OKPacket.markerByteOK:
-                    return .signalSuccessfulHandshake
+                    return self.handleAuthSuccess(packet: packet, handshake: handshake)
                 case MySQLPackets.ERRPacket.markerByte:
                     return .handleError { MySQLCoreError.server(errorPacket: try .init(from: packet)) }
                 default:
@@ -328,24 +381,46 @@ extension MySQLChannel {
                     return .handleError(MySQLCoreError.protocolViolation(debugDescription: "non-error packet while idle"))
                 }
             
-            case .awaitingOK(let statistics, let promise):
+            case .awaitingOK(promise: let promise):
                 if packet.mysql_marker() == MySQLPackets.ERRPacket.markerByte {
                     return .handleError { MySQLCoreError.server(errorPacket: try .init(from: packet)) }
+                } else if packet.mysql_marker() == MySQLPackets.OKPacket.markerByteOK {
+                    do {
+                        let packet = try MySQLPackets.OKPacket(from: packet, activeCapabilities: self.capabilities)
+                        self.statusFlags = packet.statusFlags
+                        promise?.succeed()
+                        return self.handleRequestComplete()
+                    } catch {
+                        return .handleError(error)
+                    }
                 }
             
-            case .runningPlainQuery(let stateMachine):
+            case .gettingStatistics(promise: let promise):
+                if packet.mysql_marker() == MySQLPackets.ERRPacket.markerByte {
+                    return .handleError { MySQLCoreError.server(errorPacket: try .init(from: packet)) }
+                } else if [9...10, 13...13, 32...126].flatMap({$0}).contains(packet.mysql_marker() ?? 0) {
+                    promise.succeed(packet.mysql_string()!)
+                    return self.handleRequestComplete()
+                } else {
+                    return .handleError(MySQLCoreError.protocolViolation(debugDescription: "invalid data in statistics reply"))
+                }
+            
+            case .runningPlainQuery(stateMachine: var stateMachine):
+                return stateMachine.handlePacketRead(packet)
+            
+            case .preparingStatement(stateMachine: let stateMachine):
                 <#code#>
             
-            case .preparingStatement(let stateMachine):
+            case .executingStatement(stateMachine: let stateMachine):
                 <#code#>
             
-            case .executingStatement(let stateMachine):
+            case .fetchingCursorData(stateMachine: let stateMachine):
                 <#code#>
             
-            case .fetchingCursorData(let stateMachine):
+            case .inactivating(reason: let reason):
                 <#code#>
             
-            case .closed, .terminated:
+            case .closed:
                 // This might happen if there's still buffered data to process after a close event, ignore
                 self.logger.debug("Ignoring packet with marker \(packet.mysql_marker().map { "\($0)" } ?? "<none>") on closed connection")
             
@@ -355,40 +430,6 @@ extension MySQLChannel {
             /*
         
             switch self.state {
-            case .awaitingGreeting:
-                
-                try context.decodeERRPacketAndReport(from: packet)
-
-                if let handshake = try MySQLPackets.HandshakeV10(from: packet) {
-                    return try self.receivedGreeting(context: context, handshake)
-                } else {
-                    throw MySQLChannel.Error.protocolViolation // we could throw incompatibleServer here, but that's hard to be sure of
-                }
-
-            case .waitingForTLSReady(_):
-                // Possible valid packets: ERR
-                try context.decodeERRPacketAndReport(from: packet)
-                throw MySQLChannel.Error.protocolViolation
-
-            case .awaitingAuthReply(let authHandler, let secureConnection):
-                // Possible valid packets: AuthSwitchRequest, AuthMoreData, AuthNextFactor, OK, ERR
-                try context.decodeERRPacketAndReport(from: packet)
-
-                if let _ = try context.decodeOKPacketAndUpdateConnection(from: packet) {
-                    self.state = .idle
-                } else if let switchRequest = try MySQLPackets.AuthSwitchPacket(from: packet) {
-                    try self.receivedAuthSwitch(context: context, switchRequest.newPluginName, data: switchRequest.newPluginData, secureConnection: secureConnection)
-                } else if let data = try MySQLPackets.AuthMoreDataPacket(from: packet) {
-                    try self.receivedMoreAuthData(context: context, authHandler, data.data, secureConnection: secureConnection)
-                } else {
-                    throw MySQLChannel.Error.protocolViolation
-                }
-            
-            case .idle:
-                // Possible valid packets: ERR
-                try context.decodeERRPacketAndReport(from: packet)
-                throw MySQLChannel.Error.protocolViolation
-
             case .awaitingOK(statistics: _, promise: let promise):
                 try context.decodeERRPacketAndReport(from: packet)
                 
@@ -414,63 +455,31 @@ extension MySQLChannel {
                 try stateMachine.packetReceived(context: context, packet)
                 self.state = .fetchingCursorData(stateMachine: stateMachine)
 
-            case .closed, .terminated(_):
+            case .closed:
                 // No packets are valid in this state. We should never get here.
                 assertionFailure("MySQL connection state machine received a packet after connection shutdown")
             }
             */
         }
-
-        // MARK: - Lifecycle notifications
         
-        /// Reports any kind of error.
-        func handleError(_ error: any Swift.Error) -> Reaction {
+        /// Some kind of error happened.
+        private func handleError(_ error: any Swift.Error) -> Reaction {
         
         }
         
-        /// Reports that a TLS establishment request is complete.
-        func handleTLSHandshakeCompleted() -> Reaction {
-            /*
-            guard case let .waitingForTLSReady(authMethod: authMethod, authData: authData) = self.state else {
-                preconditionFailure("State violation in connection state machine (unexpected TLS establishment notification). Please report a bug.")
+        /// A TLS establishment request is complete.
+        private func handleTLSHandshakeCompleted(_ handshake: MySQLPackets.HandshakeV10) -> Reaction {
+            guard self.transcoder.unprocessedBytes == 0 else {
+                return .handleError(MySQLCoreError.protocolViolation(debugDescription: "Extra data received during TLS setup"))
             }
 
-            try self.startAuthentication(context: context, plugin: authMethod, authData: authData, secureConnection: true)
-            */
+            return self.startAuthentication(handshake: handshake, secureConnection: true)
         }
         
-        func handleConnectionError(_ error: any Swift.Error) -> Reaction {
-        
-        }
-        /*
-        /// Requests that a new command handler be made active.
-        ///
-        /// It is the state machine's responsibility to invoke the new handler's `handlerActive(context:)` method and
-        /// perform other appropriate lifecycle handling.
-        func activateNewCommand(context: MySQLChannelHandlerContext, handler: any MySQLActiveCommandHandler) throws {
-            var handler = handler
-            switch self.state {
-            case .idle:
-                try handler.handlerActive(context: context)
-    //            self.state = .commandActive(handler: handler)
-    //        case .commandActive(handler: var origHandler):
-    //            self.state = .idle // if inactivating old handler or activating new one fails, don't leave the old one in the state
-    //            try origHandler.handlerInactive(context: context)
-    //            try handler.handlerActive(context: context)
-    //            self.state = .commandActive(handler: handler)
-    //            break
-            case .awaitingOK(statistics: _, promise: _), .runningPlainQuery(stateMachine: _), .preparingStatement(stateMachine: _), .executingStatement(stateMachine: _), .fetchingCursorData(stateMachine: _):
-                fatalError()
-            case .awaitingGreeting, .awaitingAuthReply(_, _), .waitingForTLSReady(_, _), .closed, .terminated(_):
-                preconditionFailure("State violation in connection state machine (unexpected command activation). Please report a bug.")
-            }
-        }
-        */
-        
-        /// Reports that the connection has shut down or wants to shut down.
+        /// The connection has shut down or wants to shut down.
         ///
         /// If the given `reason` is not `nil`, the connection was terminated due to an unrecoverable error.
-        func handleConnectionClose(reason: (any Error)?) -> Reaction {
+        private func handleConnectionClose(reason: (any Error)?) -> Reaction {
 /*            switch self.state {
             case .awaitingOK(statistics: _, promise: _), .runningPlainQuery(stateMachine: _), .preparingStatement(stateMachine: _), .executingStatement(stateMachine: _), .fetchingCursorData(stateMachine: _):
                 fatalError()
@@ -487,6 +496,11 @@ extension MySQLChannel {
  */
         }
         
+        /// The most recent request is complete. Update state accordingly.
+        private func handleRequestComplete() -> Reaction {
+            fatalError()
+        }
+        
         // MARK: - Handshake and authentication
 
         /// Handles an incoming `HandshakeV10` packet.
@@ -498,13 +512,13 @@ extension MySQLChannel {
                 self.statusFlags = handshake.statusFlags
 
                 if self.capabilities.contains(.tls) { // Client asked for TLS and server supports it
-                    self.updateStateSafely { state in
+                    return self.updateStateSafely { state in
                         state = .waitingForTLSReady(handshake: handshake)
+                        return .initiateTLS(request: .init(
+                            clientCapabilities: self.capabilities,
+                            collation: MySQLTextCollation.bestCollation(forVersion: handshake.serverVersion, capabilities: self.capabilities).idForHandshake
+                        ))
                     }
-                    return .initiateTLS(request: .init(
-                        clientCapabilities: self.capabilities,
-                        collation: MySQLTextCollation.bestCollation(forVersion: handshake.serverVersion, capabilities: self.capabilities).idForHandshake
-                    ))
                 } else { // No TLS, skip straight to auth in insecure mode
                     return self.startAuthentication(handshake: handshake, secureConnection: false)
                 }
@@ -637,24 +651,35 @@ extension MySQLChannel {
                 return .handleError(error)
             }
         }
-
-        private func stateViolation(_ message: @autoclosure () -> String, file: StaticString = #file, line: UInt = #line) -> Never {
-            preconditionFailure("State violation in connection state machine (\(message())). Please report a bug.", file: file, line: line)
+        
+        /// Handles an incoming `OKPacket` while authenticating.
+        private func handleAuthSuccess(packet: ByteBuffer, handshake: MySQLPackets.HandshakeV10) -> Reaction {
+            do {
+                let packet = try MySQLPackets.OKPacket(from: packet, activeCapabilities: self.capabilities)
+                
+                self.statusFlags = packet.statusFlags
+                return self.updateStateSafely { state in
+                    state = .idle
+                    return .signalSuccessfulHandshake(serverVersion: handshake.serverVersion, connectionIdentifier: handshake.threadId)
+                }
+            } catch {
+                return .handleError(error)
+            }
         }
     }
 }
 
+// MARK: - State management
+
 extension MySQLChannel.Handler {
+    private func stateViolation(_ message: @autoclosure () -> String, file: StaticString = #file, line: UInt = #line) -> Never {
+        preconditionFailure("State violation in connection state machine (\(message())). Please report a bug.", file: file, line: line)
+    }
+
     private func updateStateSafely(_ body: (inout State) -> Reaction) -> Reaction {
         self.state = .modifyingState
         defer { assert(!self.state.isModifyingState) }
         return body(&self.state)
-    }
-
-    private func updateStateSafely(_ body: (inout State) -> Void) {
-        self.state = .modifyingState
-        defer { assert(!self.state.isModifyingState) }
-        body(&self.state)
     }
 }
 
@@ -672,12 +697,12 @@ extension MySQLChannel.Handler.State {
     var isAwaitingAuthReply: Bool  { guard case .awaitingAuthReply  = self else { return false }; return true }
     var isIdle: Bool               { guard case .idle               = self else { return false }; return true }
     var isAwaitingOK: Bool         { guard case .awaitingOK         = self else { return false }; return true }
+    var isGettingStatistics: Bool  { guard case .gettingStatistics  = self else { return false }; return true }
     var isRunningPlainQuery: Bool  { guard case .runningPlainQuery  = self else { return false }; return true }
     var isPreparingStatement: Bool { guard case .preparingStatement = self else { return false }; return true }
     var isExecutingStatement: Bool { guard case .executingStatement = self else { return false }; return true }
     var isFetchingCursorData: Bool { guard case .fetchingCursorData = self else { return false }; return true }
     var isClosed: Bool             { guard case .closed             = self else { return false }; return true }
-    var isTerminated: Bool         { guard case .terminated         = self else { return false }; return true }
     var isModifyingState: Bool     { guard case .modifyingState     = self else { return false }; return true }
 }
 

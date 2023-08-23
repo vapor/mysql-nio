@@ -1,4 +1,4 @@
-# ``MySQLNIOCore/MySQLChannel/Handler/State/awaitingAuthReply(authHandler:secureConnection:)``
+# ``MySQLNIOCore/MySQLChannel/Handler/State/awaitingAuthReply(handshake:authHandler:secureConnection:)``
 
 This state can occur multiple times during the auth process:
 
@@ -10,5 +10,5 @@ This state can occur multiple times during the auth process:
 ### Transitions
 
 - `awaitingAuthReply`
-- `terminated`
 - `idle`
+- `closed`

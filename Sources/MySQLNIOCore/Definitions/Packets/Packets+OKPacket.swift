@@ -25,8 +25,8 @@ extension MySQLPackets {
         let newSchema: String?
         let generalStateChange: Bool
         
-        /// Returns `nil` if packet is not an OK packet at all. Throws error if it's an OK packet with invalid format.
-        init?(from origPacket: ByteBuffer, activeCapabilities capabilities: MySQLCapabilities) throws {
+        /// Throws error if packet has invalid format.
+        init(from origPacket: ByteBuffer, activeCapabilities capabilities: MySQLCapabilities) throws {
             var packet = origPacket
 
             /// In order to ensure an OK packet with EOF marker can be reliably distinguished from a text resultset
