@@ -4,4 +4,4 @@
 
 - ``awaitingColumnMetadata(columnsRemaining:)``
 - ``readingRows``
-- ``failed(error:)``
+- ``done(result:)``

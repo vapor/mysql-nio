@@ -52,11 +52,7 @@ let package = Package(
                 .product(name: "NIOSSL", package: "swift-nio-ssl"),
             ]
         ),
-        .testTarget(name: "MySQLNIOCoreTests", dependencies: [
-            .target(name: "MySQLNIOCore"),
-        ]),
-        .testTarget(name: "MySQLNIOTests", dependencies: [
-            .target(name: "MySQLNIO"),
-        ]),
+        .testTarget(name: "MySQLNIOCoreTests", dependencies: [.target(name: "MySQLNIOCore")]),
+        .testTarget(name: "MySQLNIOTests", dependencies: [.target(name: "MySQLNIO")]),
     ]
 )

@@ -4,71 +4,35 @@ This state machine is responsible for the overall operation of a MySQL connectio
 
 ## State Diagram
 
-![State diagram](https://mermaid.ink/svg/pako:eNqFllFv0zAQx7_KEdR1SOkEPOwhY0iwaTxsaLDubeHBjS-NNccOjkNXVf3unJMMOnIWD1Xs8-989_9v0nmXFFZikiWz2Q6UUT6DXW4A5qU1_krUSm_nGcxra2zbiALnaX_qK6wxHKxE-yJ2sVyG8AnKNS58pYpHg207rGAHrXf2ERcbJX2VwbvmCV6purHOC-PPYA8nhroBh4UnuFRaZ_C6LMuzfr2w1IHyW0o8G2-i49PTU8oceyi13RSVcJ6a2M0rX-sbsULd0rYUusUU5o2QUpk1Rd6_3edmD_vZLDd_EuH-c7ip9bTumuOHcfHjTW76eLdaO9FUIDpfhQCAVKFfZc2YCiA2Qnmq8cUhhi-cn8P9zRLQiJVGSduPMCJX1tHJHQq5jeca26eHtOfjT1T-Dhs9Zk1ve67Z9z_WjCRPwnEYjQyf8FNSI3ygKnnSEJbSX61Fn4aCvk3hZ4dum0LjsBGOfMcnLDpPixJ9UeXJUIN8-4X_OjsGp84-t3R7_aLD22vmcI0-7JbUjWq9KlqGcZ0xtPumhTLfQ78MMwgYb6J_cOMZaBD3H6gXTtuLzrXWXQovAjTpk5HGM6xCHmWF8iivl2d52TzLq580xqjnGVY9j7LqeZRXz7O8ep7l1U-rMfIjEKs_wrIGRFjegQjMWxCBeQ-mVzAeRCDWgwjLehBheQ8iMO9BBOY9mEYZDyIQ60GEZT2IsLwHEZj3IAJzHhzMljBYey4MmINRDGGi0Yg2BvU4IwaXxkEcfoW2Lcrjh-EbZvbf9KNhYh0dzJeDW4aMEEzSpEZXCyXpVdS_hfKkf9rkSUZLiaXotM8TejoQStXtcmuKJPOuwzTpGkkOXCpBs6xOsuHRkaBU3rqvw0urf3DtfwOJkmOl)
+![State diagram](https://mermaid.ink/svg/pako:eNqdVFGP0zAM_iuhaOxO2k7Awx46DgnudDxwEnC7t3YPWeKu0dIkJC7bNO2_42QZaDoNaURV6ny2P7uO3V0hrISiLAaDHVNGYcl2tWFs2FiDD7xTejss2bCzxgbHBQxHSYstdBAVCx5OsLvZLMI3IJcwxlaJlYEQDhLbsYDermC8VhLbkr1zG_ZKdc565AanbM9uDGXDPAgk40ZpXbLXTdNMkzy2lIHCLTlOMxOpJ5MJeeYcGm3XouUeh_k7CGux0498AToQ2HAdYJQ1jkupzJLg928jtK_Nnu0Hg9r84WHPn6Mm9Iul565lvMf24C1VTFNZk00Y42uukPi-eID4Juj2lj0_zhgYvtAg6fiRZaMH60nzBFxu_-VtbCJIK3ofrT5RHk_gdHZ-SXoMHZC-Ioc-4_wCTpHrIj7HddYdjIyv0yJRXX7BuTKt7ao6Un37Oj8JQTr2hi0D0u7dT9pdkmEjaG9Erj0ZVEvAyDBDjiqgEmF-EQWpKt8bQxTfNVfmRw9-exkFgZXz4LjPeVD_G5xfQkHHCjYgevxvChKqBlC0xHDX-2D9PUd-AUW6wXR_V1Xqlt7Nr2MH0AAYAzpf56EF6OqjKvRC0FwnTEkN7EO0t13HTW61vz7iqhLaBpDz69oUo6ID33El6Z-TJrQu0o-jLkoSJTS811gXNIlkSuHsbGtEUaLvYVT0TlKJ7hWnPuuKMg3z_jeAdYhx)
 <!--
 %%{ init: {
   'fontFamily': 'monospace',
   'theme': 'base',
   'themeCSS': '.edge-thickness-thick { stroke-width: 1px !important; } .node rect { fill: #fff; fill-opacity: 1; stroke: #666; }',
-  'flowchart': {'htmlLabels': false, 'padding': 20}
+  'flowchart': {
+    'htmlLabels': false,
+    'padding': 20
+  }
 } }%%
 flowchart TB
-  startup([startup])
-
   subgraph auth
     direction TB
-    awaitingGreeting == TLS enabled ==> waitingForTLSReady
-    awaitingGreeting == no TLS ==> awaitingAuthReply
+    awaitingGreeting   == TLS enabled ==> waitingForTLSReady
+    awaitingGreeting   == no TLS      ==> awaitingAuthReply
     waitingForTLSReady == TLS started ==> awaitingAuthReply
-    awaitingAuthReply ==> awaitingAuthReply
+    awaitingAuthReply  == " "         ==> awaitingAuthReply
   end
   
-  idle <== "ping, reset, stats, query, prepare, execute, fetch" ==> active
-
   subgraph active
-  direction TB
-  awaitingOK ==> awaitingOK
-  awaitingOK ==> gettingStatistics
-  awaitingOK ==> runningPlainQuery
-  awaitingOK ==> preparingStatement
-  awaitingOK ==> executingStatement
-  awaitingOK ==> fetchingCursorData
-  gettingStatistics ==> awaitingOK
-  gettingStatistics ==> gettingStatistics
-  gettingStatistics ==> runningPlainQuery
-  gettingStatistics ==> preparingStatement
-  gettingStatistics ==> executingStatement
-  gettingStatistics ==> fetchingCursorData
-  runningPlainQuery ==> awaitingOK
-  runningPlainQuery ==> gettingStatistics
-  runningPlainQuery ==> runningPlainQuery
-  runningPlainQuery ==> preparingStatement
-  runningPlainQuery ==> executingStatement
-  runningPlainQuery ==> fetchingCursorData
-  preparingStatement ==> awaitingOK
-  preparingStatement ==> gettingStatistics
-  preparingStatement ==> runningPlainQuery
-  preparingStatement ==> preparingStatement
-  preparingStatement ==> executingStatement
-  preparingStatement ==> fetchingCursorData
-  executingStatement ==> awaitingOK
-  executingStatement ==> gettingStatistics
-  executingStatement ==> runningPlainQuery
-  executingStatement ==> preparingStatement
-  executingStatement ==> executingStatement
-  executingStatement ==> fetchingCursorData
-  fetchingCursorData ==> awaitingOK
-  fetchingCursorData ==> gettingStatistics
-  fetchingCursorData ==> runningPlainQuery
-  fetchingCursorData ==> preparingStatement
-  fetchingCursorData ==> executingStatement
-  fetchingCursorData ==> fetchingCursorData
-
+    direction TB
+    wok[awaitingOK]         ==> wok & gst & rpq & pst & exc & fch
+    gst[gettingStatistics]  ==> wok & gst & rpq & pst & exc & fch
+    rpq[runningPlainQuery]  ==> wok & gst & rpq & pst & exc & fch
+    pst[preparingStatement] ==> wok & gst & rpq & pst & exc & fch
+    exc[executingStatement] ==> wok & gst & rpq & pst & exc & fch
+    fch[fetchingCursorData] ==> wok & gst & rpq & pst & exc & fch
   end
-  auth ==> idle
-  startup  == channel active ==> auth
-  
-  closed([closed])
-  startup & idle & active
-  active ==> closed
+
+  s([startup]) == channel active ==> auth == success ==> idle <== command ==> active ==> c([closed])
 -->

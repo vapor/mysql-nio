@@ -6,7 +6,7 @@ import SwiftSyntaxMacros
 
 @main
 struct MySQLNIOCoreMacrosPlugin: CompilerPlugin {
-    var providingMacros: [Macro.Type] = [StateMachineStateConditions.self]
+    var providingMacros: [any Macro.Type] = [StateMachineStateConditions.self]
 }
 
 public struct StateMachineStateConditions: MemberMacro {
@@ -19,18 +19,18 @@ public struct StateMachineStateConditions: MemberMacro {
             throw DiagnosticsError(diagnostics: [.declIsNotEnum(declaration, node: node)])
         }
         
-        let access = enumDecl.modifiers?.first { TokenKind.accessSpecifierKeywords.contains($0.name.tokenKind) }
+        let access = enumDecl.modifiers.first { TokenKind.accessSpecifierKeywords.contains($0.name.tokenKind) }
         
         if access?.name.tokenKind == .keyword(.public) {
             context.diagnose(.publicDecl(node: node))
         }
         
-        let plainCases = enumDecl.caseElements.map { $0.with(\.associatedValue, nil) }
+        let plainCases = enumDecl.caseElements.map { $0.with(\.parameterClause, nil) }
         
         return plainCases.map { """
-            var is\(raw: $0.identifier.withInitialUppercased): Bool {
+            var is\(raw: $0.name.withInitialUppercased): Bool {
                 switch self {
-                case .\(raw: $0.identifier): true
+                case .\(raw: $0.name): true
                 default: false
                 }
             }

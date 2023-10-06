@@ -159,8 +159,6 @@ extension ProcessInfo {
         return "s390x"
         #elseif arch(wasm32)
         return "wasm32"
-        #elseif compiler(>=5.8) && arch(riscv64)
-        return "riscv64"
         #else
         return "unknown"
         #endif

@@ -9,5 +9,4 @@ The first reply to a `COM_QUERY` may be one of an OK packet, an ERR packet, a LO
 - ``sendingLocalInfileData``
 - ``awaitingColumnMetadata(columnsRemaining:)``
 - ``readingRows``
-- ``done``
-- ``failed(error:)``
+- ``done(result:)``

@@ -41,7 +41,7 @@ extension MySQLChannel {
     func query(sql: String) -> EventLoopFuture<MySQLResultsetStream> {
         let promise = self.eventLoop.makePromise(of: MySQLResultsetStream.self)
         
-        self.channel.write(ClientRequest.plainQuery(.init(attributes: [:], sql: sql, stream: promise)), promise: nil)
+        self.channel.write(ClientRequest.plainQuery(.init(attributes: [:], sql: sql, promise: promise)), promise: nil)
         return promise.futureResult
     }
 

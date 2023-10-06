@@ -6,5 +6,4 @@ May span an arbitrary number of packets and is the only instance of a valid empt
 
 - ``sendingLocalInfileData``
 - ``awaitingResultsetStart``
-- ``done``
-- ``failed(error:)``
+- ``done(result:)``

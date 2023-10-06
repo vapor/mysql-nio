@@ -4,5 +4,4 @@
 
 - ``awaitingResultsetStart``
 - ``readingRows``
-- ``done``
-- ``failed(error:)``
+- ``done(result:)``

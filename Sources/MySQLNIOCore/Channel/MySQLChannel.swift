@@ -13,17 +13,15 @@ public final class MySQLChannel {
     public let serverVersion: String
     public let connectionIdentifier: UInt32
     public let logger: Logger
-    public let lowLevelTracingLogger: Logger?
     
     public var eventLoop: any EventLoop { self.channel.eventLoop }
     public var isClosed: Bool { !self.channel.isActive }
     
-    init(channel: any Channel, serverVersion: String, connectionIdentifier: UInt32, logger: Logger, lowLevelTracingLogger: Logger?) {
+    init(channel: any Channel, serverVersion: String, connectionIdentifier: UInt32, logger: Logger) {
         self.channel = channel
         self.serverVersion = serverVersion
         self.connectionIdentifier = connectionIdentifier
         self.logger = logger
-        self.lowLevelTracingLogger = lowLevelTracingLogger
     }
     
     deinit {
@@ -33,8 +31,8 @@ public final class MySQLChannel {
         }
     }
     
-    private static func start(channel: any Channel, configuration: Configuration, logger: Logger, lowLevelTracingLogger: Logger?) -> EventLoopFuture<MySQLChannel> {
-        let channelHandler = Handler(configuration: configuration, logger: logger, lowLevelTracingLogger: lowLevelTracingLogger)
+    private static func start(channel: any Channel, configuration: Configuration, logger: Logger) -> EventLoopFuture<MySQLChannel> {
+        let channelHandler = Handler(configuration: configuration, logger: logger)
         
         do {
             try channel.pipeline.syncOperations.addHandler(channelHandler)
@@ -45,14 +43,13 @@ public final class MySQLChannel {
         return channelHandler.readyFuture.flatMapError { error in
             channel.closeFuture.flatMapThrowing { _ in throw error }
         }.map {
-            MySQLChannel(channel: channel, serverVersion: $0, connectionIdentifier: $1, logger: logger, lowLevelTracingLogger: lowLevelTracingLogger)
+            MySQLChannel(channel: channel, serverVersion: $0, connectionIdentifier: $1, logger: logger)
         }
     }
 
     static func connect(
         configuration: Configuration,
         logger: Logger,
-        lowLevelTracingLogger: Logger?,
         on eventLoop: any EventLoop
     ) -> EventLoopFuture<MySQLChannel> {
         eventLoop.flatSubmit {
@@ -61,15 +58,15 @@ public final class MySQLChannel {
                 guard channel.isActive else {
                     return eventLoop.makeFailedFuture(MySQLCoreError.connection(underlying: ChannelError.inappropriateOperationForState))
                 }
-                return self.start(channel: channel, configuration: configuration, logger: logger, lowLevelTracingLogger: lowLevelTracingLogger)
+                return self.start(channel: channel, configuration: configuration, logger: logger)
             case .bindUnixDomainSocket(let path):
                 return self.makeBootstrap(on: eventLoop, configuration: configuration)
                     .connect(unixDomainSocketPath: path)
-                    .flatMap { self.start(channel: $0, configuration: configuration, logger: logger, lowLevelTracingLogger: lowLevelTracingLogger) }
+                    .flatMap { self.start(channel: $0, configuration: configuration, logger: logger) }
             case .connectTCP(let host, let port):
                 return self.makeBootstrap(on: eventLoop, configuration: configuration)
                     .connect(host: host, port: port)
-                    .flatMap { self.start(channel: $0, configuration: configuration, logger: logger, lowLevelTracingLogger: lowLevelTracingLogger) }
+                    .flatMap { self.start(channel: $0, configuration: configuration, logger: logger) }
             }
         }
     }

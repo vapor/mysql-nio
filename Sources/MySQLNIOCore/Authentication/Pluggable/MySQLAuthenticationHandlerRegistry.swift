@@ -111,7 +111,7 @@ import NIOCore
           factory1: @Sendable @escaping () -> some MySQLAuthenticationHandler,
         _ factory2: @Sendable @escaping () -> some MySQLAuthenticationHandler,
         _ factory3: @Sendable @escaping () -> some MySQLAuthenticationHandler,
-        _ factory4: @Sendable @escaping () -> some MySQLAuthenticationHandler,
+        _ factory4: @Sendable @escaping () -> some MySQLAuthenticationHandler
     ) {
         self.init(preregisteredHandlers: [
             type(of: factory1()).pluginName: factory1,

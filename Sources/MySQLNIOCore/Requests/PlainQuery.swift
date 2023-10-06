@@ -16,6 +16,9 @@ enum PlainQuery {
         // MARK: - States
 
         /// The defined states for plain query handling
+        #if swift(>=5.9) && $AttachedMacros
+        @StateMachineStateConditions
+        #endif
         enum State {
             /// A `COM_QUERY` command was sent and no response has yet been received, or a new
             /// resultset has been signaled as incoming but not yet received.
@@ -26,18 +29,57 @@ enum PlainQuery {
             case awaitingColumnMetadata(columnsRemaining: Int)
             /// Reading resultset rows
             case readingRows
-            /// All result sets received or all infile data sent
-            case done
-            /// An error occurred during any step of query handling.
-            case failed(error: any Error)
+            /// All result sets received, all infile data sent, or error stopped the query.
+            case done(result: (any Swift.Error)?)
         }
         
-        private var state: State
+        private var state: State = .awaitingResultsetStart
 
+        let capabilities: MySQLCapabilities
         let context: Context
         
+        init(capabilities: MySQLCapabilities, context: Context) {
+            self.capabilities = capabilities
+            self.context = context
+        }
+        
+        func start() -> MySQLPackets.PlainQueryCommand {
+            assert(self.state.isAwaitingResultsetStart)
+            
+            return .init(attributes: self.context.attributes, sql: self.context.sql)
+        }
+        
+        mutating func handlePacketRead(_ packet: ByteBuffer) -> MySQLChannel.Handler.Reaction {
+            do {
+                switch self.state {
+                case .awaitingResultsetStart:
+                    return try self.handleResultsetStartPacket(packet)
+                case .sendingLocalInfileData:
+                    stateCheckFailure("unimplemented")
+                case .awaitingColumnMetadata(columnsRemaining: let columnsRemaining):
+                    return try self.handleColumnMetadataPacket(packet, columnsRemaining: columnsRemaining)
+                case .readingRows:
+                    return try self.handleRowDataPacket(packet)
+                case .done:
+                    stateCheckFailure("shouldn't still get packets after completion")
+                }
+            } catch {
+                return .handleError(error)
+            }
+        }
+        
+        mutating func handleError(_ error: any Swift.Error) -> MySQLChannel.Handler.Reaction {
+            self.teardownState(reason: error)
+            return .startNextRequest
+        }
+        
+        mutating func teardownState(reason: any Swift.Error) {
+            self.context.promise.fail(reason)
+            self.state = .done(result: reason)
+        }
+    
         // MARK: - Incoming packet handlers
-        /*
+
         /// In the resultset start state, there are four allowed packets:
         ///
         /// - `ERR`, which always has marker byte `0xff`
@@ -50,53 +92,47 @@ enum PlainQuery {
         /// - `ResultsetFieldCount` starts with a length-encoded integer; `0xfb` and `0xff` are not valid prefixes.
         ///
         /// This means we can know reliably what packet to expect based solely on the marker byte.
-        private mutating func handleResultsetStartPacket(context: some MySQLChannelContext, _ packet: ByteBuffer) throws {
+        private mutating func handleResultsetStartPacket(_ packet: ByteBuffer) throws -> MySQLChannel.Handler.Reaction {
             switch packet.mysql_getInteger(at: packet.readerIndex, as: UInt8.self) {
             
             // OK Packet - empty resultset
             case MySQLPackets.OKPacket.markerByteOK:
-                guard try context.decodeOKPacketAndUpdateConnection(from: packet) != nil else {
-                    throw MySQLChannel.Error.protocolViolation
-                }
-                if !context.statusFlags.contains(.resultsetPending) {
+                let packet = try MySQLPackets.OKPacket(from: packet, activeCapabilities: self.capabilities)
+                
+                if !packet.statusFlags.contains(.resultsetPending) {
                     // No more resultsets pending, so we're offically *done* done.
-                    try self.signalAllResultsetsComplete(context: context)
-                    self.state = .done
+                    self.state = .done(result: nil)
+                    try self.signalAllResultsetsComplete()
+                    return .updateStatusFlags(packet.statusFlags, then: .startNextRequest)
+                } else {
+                    try self.signalStartingNewResultset()
+                    return .updateStatusFlags(packet.statusFlags, then: .read)
                 }
             
             // LOCAL INFILE Request - we don't currently implement this
             case Self.localInfileRequestMarkerByte:
-                throw MySQLChannel.Error.protocolViolation
+                throw MySQLCoreError.protocolViolation(debugDescription: "unimplemented")
             
             // ERR Packet - query failed, probably recoverably
             case MySQLPackets.ERRPacket.markerByte:
-                guard let errorPacket = try context.decodeERRPacket(from: packet) else {
-                    throw MySQLChannel.Error.protocolViolation
-                }
-                let error = MySQLChannel.Error.serverError(errorPacket: errorPacket)
-                
-                // We don't bother trying to figure out if the error is unrecoverable at this stage; if it is,
-                // the server will close the connection on us anyway.
-                try self.signalQueryFailure(context: context)
-                self.state = .failed(error: error)
-                self.context.stream.fail(error)
-                context.markCommandComplete()
-            
+                throw try MySQLCoreError.server(errorPacket: MySQLPackets.ERRPacket.init(from: packet))
+
             // ResultsetFieldCount packet - start of result set
             default:
-                let countPacket = try MySQLPackets.ResultsetFieldCount(from: packet, activeCapabilities: context.capabilities)
+                let countPacket = try MySQLPackets.ResultsetFieldCount(from: packet, activeCapabilities: self.capabilities)
                 
-                try  self.signalStartingNewResultset(context: context)
+                try self.signalStartingNewResultset()
                 if countPacket.metadataPending {
                     self.state = .awaitingColumnMetadata(columnsRemaining: countPacket.columnCount)
                 } else {
-                    try self.signalResultsetMetadataReady(context: context)
                     self.state = .readingRows
+                    try self.signalResultsetMetadataReady()
                 }
+                return .read
             }
         }
         
-        private mutating func handleColumnMetadataPacket(context: some MySQLChannelContext, _ packet: ByteBuffer, columnsRemaining: Int) throws {
+        private mutating func handleColumnMetadataPacket(_ packet: ByteBuffer, columnsRemaining: Int) throws -> MySQLChannel.Handler.Reaction {
             // Receiving OK/EOF in this state is not valid; we require `CLIENT_EOF_DEPRECATED`, so this data is not
             // terminated by an EOF packet, and an OK packet signals command completion, which cannot happen while
             // metadata is being sent. Thus, anything other than a column definition packet is invalid.
@@ -104,76 +140,65 @@ enum PlainQuery {
             // receive, meaning the value will never reach zero.
             precondition(columnsRemaining > 0, "State violation in query handler (metadata read overrun). Please report a bug.")
             
-            let columnDefinition = try MySQLPackets.ColumnDefinition41(from: packet, activeCapabilities: context.capabilities)
+            let columnDefinition = try MySQLPackets.ColumnDefinition41(from: packet, activeCapabilities: self.capabilities)
             
             if columnsRemaining > 1 {
                 self.state = .awaitingColumnMetadata(columnsRemaining: columnsRemaining - 1)
             } else {
                 self.state = .readingRows
             }
+            return .read
         }
         
-        private mutating func handleRowDataPacket(context: some MySQLChannelContext, _ packet: ByteBuffer) throws {
-        
+        private mutating func handleRowDataPacket( _ packet: ByteBuffer) throws -> MySQLChannel.Handler.Reaction {
+            let data = try MySQLPackets.TextResultsetRow(from: packet)
+            
+            try self.signalResultsetRowReceived(data)
+            return .read
         }
         
         // MARK: - Resultset data handlers
         
-        private mutating func signalStartingNewResultset(context: some MySQLChannelContext) throws {
-        
-        }
-        
-        private mutating func signalResultsetMetadataReady(context: some MySQLChannelContext) throws {
-        
-        }
-        
-        private mutating func signalResultsetRowReceived(context: some MySQLChannelContext) throws {
-        
-        }
-        
-        private mutating func signalAllResultsetsComplete(context: some MySQLChannelContext) throws {
-        
-        }
-        
-        private mutating func signalQueryFailure(context: some MySQLChannelContext) throws {
-        
-        }
-        
-        // MARK: - Active command handler
-        
-        mutating func handlerActive(context: some MySQLChannelContext) throws {
-            guard case .awaitingResultsetStart = self.state else { preconditionFailure("State violation in query handler (already active). Please report a bug.") }
-            
-            var buffer = ByteBuffer()
-            MySQLPackets.PlainQueryCommand(attributes: self.context.attributes, sql: self.context.sql)
-                .write(to: &buffer, activeCapabilities: context.capabilities)
-            context.sendPacket(buffer)
-        }
-        
-        mutating func packetReceived(context: some MySQLChannelContext, _ packet: ByteBuffer) throws {
-            switch self.state {
-            case .awaitingResultsetStart:
-                try self.handleResultsetStartPacket(context: context, packet)
-            case .awaitingColumnMetadata(columnsRemaining: let columnsRemaining):
-                try self.handleColumnMetadataPacket(context: context, packet, columnsRemaining: columnsRemaining)
-            case .readingRows:
-                try self.handleRowDataPacket(context: context, packet)
-            case .done, .failed(_):
-                break
-            }
-        }
-        
-        mutating func handlerInactive(context: some MySQLChannelContext) throws {
-            
-        }
-        */
-        
-        mutating func handlePacketRead(_ packet: ByteBuffer) -> MySQLChannel.Handler.Reaction {
+        private mutating func signalStartingNewResultset() throws {
             fatalError()
         }
         
-        mutating func teardownState(reason: any Swift.Error) {
-            
+        private mutating func signalResultsetMetadataReady() throws {
+            fatalError()
+        }
+        
+        private mutating func signalResultsetRowReceived(_ row: MySQLPackets.TextResultsetRow) throws {
+            fatalError()
+        }
+        
+        private mutating func signalAllResultsetsComplete() throws  {
+            fatalError()
+        }
+        
+        private mutating func signalQueryFailure() throws {
+            fatalError()
+        }
+        
+        private func stateCheck(_ check: @autoclosure () -> Bool, _ message: @autoclosure () -> String, file: StaticString = #file, line: UInt = #line) {
+            guard check() else {
+                stateCheckFailure(message(), file: file, line: line)
+            }
+        }
+        
+        private func stateCheckFailure(_ message: @autoclosure () -> String, file: StaticString = #file, line: UInt = #line) -> Never {
+            preconditionFailure("State violation in query state machine (\(message())). Please report a bug.", file: file, line: line)
         }
     }
 }
+
+#if compiler(<5.9) || !$AttachedMacros
+
+extension PlainQuery.StateMachine.State {
+    var isAwaitingResultsetStart: Bool { guard case .awaitingResultsetStart = self else { return false }; return true }
+    var isSendingLocalInfileData: Bool { guard case .sendingLocalInfileData = self else { return false }; return true }
+    var isAwaitingColumnMetadata: Bool { guard case .awaitingColumnMetadata = self else { return false }; return true }
+    var isReadingRows: Bool            { guard case .readingRows            = self else { return false }; return true }
+    var isDone: Bool                   { guard case .done                   = self else { return false }; return true }
+}
+
+#endif

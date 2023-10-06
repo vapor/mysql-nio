@@ -1,4 +1,4 @@
-# ``MySQLNIOCore/MySQLChannel/Request/PlainQueryStateMachine/State/done``
+# ``MySQLNIOCore/MySQLChannel/Request/PlainQueryStateMachine/State/done(result:)``
 
 ### Transitions
 
