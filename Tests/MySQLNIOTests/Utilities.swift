@@ -26,6 +26,26 @@ extension MySQLConnection {
             on: eventLoop
         )
     }
+    
+    static func connect(
+            to socketAddress: SocketAddress,
+            username: String,
+            database: String,
+            password: String? = nil,
+            tlsConfiguration: TLSConfiguration? = .makeClientConfiguration(),
+            serverHostname: String? = nil,
+            logger: Logger = .init(label: "codes.vapor.mysql")
+        ) -> EventLoopFuture<MySQLConnection> {
+            Self.connect(
+                to: socketAddress,
+                username: username,
+                database: database,
+                password: password,
+                tlsConfiguration: tlsConfiguration,
+                serverHostname: serverHostname,
+                on: MultiThreadedEventLoopGroup.singleton.any()
+            )
+        }
 }
 
 let isLoggingConfigured: Bool = {

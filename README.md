@@ -90,13 +90,11 @@ The first step to making a query is creating a new `MySQLConnection`. The minimu
 ```swift
 import MySQLNIO
 
-let eventLoop: any EventLoop = ...
 let conn = try await MySQLConnection(
     to: .makeAddressResolvingHost("my.mysql.server", port: 3306),
     username: "test_username",
     database: "test_database",
     password: "test_password",
-    on: eventLoop
 ).get()
 ```
 
