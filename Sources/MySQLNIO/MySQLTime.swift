@@ -82,11 +82,16 @@ public struct MySQLTime: Equatable, MySQLDataConvertible {
               let day = UInt16(parts[2]),
               let hour = UInt16(parts[3]),
               let minute = UInt16(parts[4]),
-              let second = UInt16(parts[5])
+              let second = Double(parts[5])
         else {
             return nil
         }
-        self.init(year: year, month: month, day: day, hour: hour, minute: minute, second: second)
+        
+        let fullSecond = UInt32((second * 1_000_000).rounded())
+        let integer = UInt16(fullSecond / 1_000_000)
+        let real = fullSecond % 1_000_000
+        
+        self.init(year: year, month: month, day: day, hour: hour, minute: minute, second: integer, microsecond: real)
     }
     
     /// See ``MySQLDataConvertible/init(mysqlData:)``.
