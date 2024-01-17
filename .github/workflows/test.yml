@@ -22,16 +22,64 @@ env:
   MYSQL_HOSTNAME_B: 'mysql-b'
 
 jobs:
+  dependency-graph:
+    if: ${{ github.event_name == 'push' }}
+    runs-on: ubuntu-latest
+    container: swift:jammy
+    permissions:
+      contents: write
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+      - name: Fix Git configuration
+        run: |
+          git config --global --add safe.directory "${GITHUB_WORKSPACE}"
+          apt-get update && apt-get install -y curl
+      - name: Submit dependency graph
+        uses: vapor-community/swift-dependency-submission@v0.1
+        with:
+          path: ${{ github.workspace }}
+
   api-breakage:
     if: ${{ !(github.event.pull_request.draft || false) }}
     runs-on: ubuntu-latest
-    container: swift:5.8-jammy
+    container: swift:jammy
     steps:
       - name: Check out code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with: { 'fetch-depth': 0 }
-      - name: Run API breakage check action
-        uses: vapor/ci/.github/actions/ci-swift-check-api-breakage@reusable-workflows
+      - name: Run API breakage check
+        run: |
+          git config --global --add safe.directory "${GITHUB_WORKSPACE}"
+          swift package diagnose-api-breaking-changes origin/main
+
+  gh-codeql:
+    if: ${{ !(github.event.pull_request.draft || false) }}
+    runs-on: ubuntu-latest
+    container:
+      image: swift:5.9-jammy
+    permissions: { actions: write, contents: read, security-events: write }
+    timeout-minutes: 60
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+      - name: Mark repo safe in non-fake global config
+        run: |
+          git config --global --add safe.directory "${GITHUB_WORKSPACE}"
+      - name: Check Swift compatibility
+        id: swift-check
+        uses: vapor/ci/.github/actions/check-compatible-swift@main
+      - name: Initialize CodeQL
+        if: ${{ steps.swift-check.outputs.swift-compatible == 'true' }}
+        uses: github/codeql-action/init@v3
+        with: { languages: swift }
+      - name: Perform build
+        if: ${{ steps.swift-check.outputs.swift-compatible == 'true' }}
+        run: |
+          swift build
+      - name: Run CodeQL analyze
+        if: ${{ steps.swift-check.outputs.swift-compatible == 'true' }}
+        uses: github/codeql-action/analyze@v3
 
   linux-all:
     if: ${{ !(github.event.pull_request.draft || false) }}
@@ -40,15 +88,16 @@ jobs:
       matrix:
         dbimage:
           - mysql:5.7
-          - mysql:8.0
+          - mysql:8.2
           - mariadb:10.2
           - mariadb:11
           - percona:5.7
-          - percona:8.0
+          - percona:8
         swiftver:
           - swift:5.7-jammy
           - swift:5.8-jammy
-          - swiftlang/swift:nightly-5.9-jammy
+          - swift:5.9-jammy
+          - swiftlang/swift:nightly-5.10-jammy
           - swiftlang/swift:nightly-main-jammy
     runs-on: ubuntu-latest
     container: ${{ matrix.swiftver }}
@@ -61,27 +110,19 @@ jobs:
         env: { MYSQL_ALLOW_EMPTY_PASSWORD: true, MYSQL_USER: test_username, MYSQL_PASSWORD: test_password, MYSQL_DATABASE: test_database }
     steps:
       - name: Check out package
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with: { path: 'mysql-nio' }
       - name: Run unit tests
         run: swift test --package-path mysql-nio --enable-code-coverage --sanitize=thread
-      - name: Note Swift version
-        if: ${{ contains(matrix.swiftver, 'nightly') }}
-        run: |
-          echo "SWIFT_PLATFORM=$(. /etc/os-release && echo "${ID}${VERSION_ID}")" >>"${GITHUB_ENV}"
-          echo "SWIFT_VERSION=$(cat /.swift_tag)" >>"${GITHUB_ENV}"
       - name: Upload code coverage
         uses: vapor/swift-codecov-action@v0.2
-        env:
-          MYSQL_VERSION: ${{ matrix.dbimage }}
         with:
           package_path: 'mysql-nio'
-          cc_env_vars: 'SWIFT_VERSION,SWIFT_PLATFORM,RUNNER_OS,RUNNER_ARCH,MYSQL_VERSION'
       - name: Check out mysql-kit dependent
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with: { repository: 'vapor/mysql-kit', path: 'mysql-kit' }
       - name: Check out fluent-mysql-driver dependent
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with: { repository: 'vapor/fluent-mysql-driver', path: 'fluent-mysql-driver' }
       - name: Use local package in dependents
         run: |
@@ -98,7 +139,7 @@ jobs:
       fail-fast: false
       matrix:
         dbimage: [mysql, mariadb, percona-server]
-        xcode: ['latest-stable']
+        xcode: ['~14.3', 'latest']
         macos: ['macos-13']
         include:
           - { username: root }
@@ -126,16 +167,8 @@ jobs:
           SQL
         timeout-minutes: 5
       - name: Check out code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Run all tests
         run: swift test --sanitize=thread --enable-code-coverage
-      - name: Record Swift and MySQL versions
-        run: |
-          echo "SWIFT_VERSION=$(swift package tools-version --version)" >>"${GITHUB_ENV}"
-          echo "MYSQL_VERSION=$(mysql --version)" >>"${GITHUB_ENV}"
       - name: Upload code coverage
-        env:
-          SWIFT_PLATFORM: ${{ matrix.macos }}
         uses: vapor/swift-codecov-action@v0.2
-        with:
-          cc_env_vars: 'MD_APPLE_SDK_ROOT,SWIFT_VERSION,SWIFT_PLATFORM,RUNNER_OS,RUNNER_ARCH,MYSQL_VERSION'
