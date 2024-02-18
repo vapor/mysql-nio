@@ -48,7 +48,29 @@ public final class MySQLConnection: MySQLDatabase {
             }
         }
     }
-    
+
+    public static func connect(
+        to socketAddress: SocketAddress,
+        username: String,
+        database: String,
+        password: String? = nil,
+        tlsConfiguration: TLSConfiguration? = .makeClientConfiguration(),
+        serverHostname: String? = nil,
+        logger: Logger = .init(label: "codes.vapor.mysql"),
+        on eventLoop: any EventLoop
+    ) async throws -> MySQLConnection {
+        try await Self.connect(
+            to: socketAddress,
+            username: username,
+            database: database,
+            password: password,
+            tlsConfiguration: tlsConfiguration,
+            serverHostname: serverHostname,
+            logger: logger,
+            on: eventLoop
+        ).get()
+    }
+
     public let channel: any Channel
     
     public var eventLoop: any EventLoop {
