@@ -3,7 +3,7 @@ import Logging
 import NIOSSL
 import NIOPosix
 
-public final class MySQLConnection: MySQLDatabase {
+public final class MySQLConnection: MySQLDatabase, @unchecked Sendable {
     public static func connect(
         to socketAddress: SocketAddress,
         username: String,
