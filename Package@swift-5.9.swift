@@ -8,7 +8,6 @@ let swiftFeatureSettings: [SwiftSetting] = [
     .enableUpcomingFeature("ConciseMagicFile"),
     .enableUpcomingFeature("DisableOutwardActorInference"),
     .enableExperimentalFeature("StrictConcurrency=complete"),
-    .enableExperimentalFeature("StaticAssert"),
 ]
 
 let package = Package(
@@ -26,14 +25,15 @@ let package = Package(
     dependencies: [
         .package(url: "https://github.com/apple/swift-log.git", from: "1.5.2"),
         .package(url: "https://github.com/apple/swift-metrics.git", from: "2.4.0"),
-        .package(url: "https://github.com/apple/swift-crypto.git", from: "2.6.0"),
+        .package(url: "https://github.com/apple/swift-crypto.git", "2.6.0" ..< "4.0.0"),
         .package(url: "https://github.com/apple/swift-atomics.git", from: "1.1.0"),
         .package(url: "https://github.com/apple/swift-algorithms.git", from: "1.0.0"),
         .package(url: "https://github.com/apple/swift-collections.git", from: "1.0.4"),
         .package(url: "https://github.com/apple/swift-nio.git", from: "2.53.0"),
         .package(url: "https://github.com/apple/swift-nio-ssl.git", from: "2.24.0"),
         .package(url: "https://github.com/apple/swift-nio-transport-services.git", from: "1.17.0"),
-        .package(url: "https://github.com/apple/swift-syntax", from: "509.0.0"),
+        .package(url: "https://github.com/apple/swift-syntax.git", from: "509.0.0"),
+		.package(url: "https://github.com/apple/swift-docc-plugin.git", from: "1.0.0"),
     ],
     targets: [
         .macro(

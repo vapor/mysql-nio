@@ -518,7 +518,7 @@ extension MySQLChannel {
                  _:
                 break
             }
-            
+            return .wait
         }
         
         /// A TLS establishment request is complete.
