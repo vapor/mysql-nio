@@ -2,14 +2,6 @@
 import CompilerPluginSupport
 import PackageDescription
 
-let swiftFeatureSettings: [SwiftSetting] = [
-    .enableUpcomingFeature("ForwardTrailingClosures"),
-    .enableUpcomingFeature("ExistentialAny"),
-    .enableUpcomingFeature("ConciseMagicFile"),
-    .enableUpcomingFeature("DisableOutwardActorInference"),
-    .enableExperimentalFeature("StrictConcurrency=complete"),
-]
-
 let package = Package(
     name: "mysql-nio",
     platforms: [
@@ -46,7 +38,7 @@ let package = Package(
                 .product(name: "SwiftSyntaxMacros", package: "swift-syntax"),
                 .product(name: "SwiftCompilerPlugin", package: "swift-syntax"),
             ],
-            swiftSettings: swiftFeatureSettings
+            swiftSettings: swiftSettings
         ),
         .target(
             name: "MySQLNIOCore",
@@ -65,7 +57,7 @@ let package = Package(
                 .product(name: "NIOSSL", package: "swift-nio-ssl"),
                 .target(name: "MySQLNIOCoreMacros"),
             ],
-            swiftSettings: swiftFeatureSettings
+            swiftSettings: swiftSettings
         ),
         .target(
             name: "MySQLNIO",
@@ -76,17 +68,25 @@ let package = Package(
                 .product(name: "NIO", package: "swift-nio"),
                 .product(name: "NIOSSL", package: "swift-nio-ssl"),
             ],
-            swiftSettings: swiftFeatureSettings
+            swiftSettings: swiftSettings
         ),
         .testTarget(
             name: "MySQLNIOCoreTests",
             dependencies: [.target(name: "MySQLNIOCore")],
-            swiftSettings: swiftFeatureSettings
+            swiftSettings: swiftSettings
         ),
         .testTarget(
             name: "MySQLNIOTests",
             dependencies: [.target(name: "MySQLNIO")],
-            swiftSettings: swiftFeatureSettings
+            swiftSettings: swiftSettings
         ),
     ]
 )
+
+var swiftSettings: [SwiftSetting] { [
+    .enableUpcomingFeature("ForwardTrailingClosures"),
+    .enableUpcomingFeature("ExistentialAny"),
+    .enableUpcomingFeature("ConciseMagicFile"),
+    .enableUpcomingFeature("DisableOutwardActorInference"),
+    .enableExperimentalFeature("StrictConcurrency=complete"),
+] }

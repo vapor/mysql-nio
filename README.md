@@ -1,22 +1,17 @@
 <p align="center">
-    <img src="https://user-images.githubusercontent.com/1342803/75577086-35280780-5a2f-11ea-8eb2-2044b0310f49.png" height="64" alt="MySQLNIO">
-    <br>
-    <br>
-    <a href="https://docs.vapor.codes/4.0/">
-        <img src="http://img.shields.io/badge/read_the-docs-2196f3.svg" alt="Documentation">
-    </a>
-    <a href="https://discord.gg/vapor">
-        <img src="https://img.shields.io/discord/431917998102675485.svg" alt="Team Chat">
-    </a>
-    <a href="LICENSE">
-        <img src="http://img.shields.io/badge/license-MIT-brightgreen.svg" alt="MIT License">
-    </a>
-    <a href="https://github.com/vapor/mysql-nio/actions/workflows/test.yml">
-        <img src="https://github.com/vapor/mysql-nio/actions/workflows/test.yml/badge.svg?event=push" alt="CI">
-    </a>
-    <a href="https://swift.org">
-        <img src="http://img.shields.io/badge/swift-5.6-brightgreen.svg" alt="Swift 5.5">
-    </a>
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="https://github.com/vapor/mysql-nio/assets/1130717/c191b98f-852d-4454-a5d6-f187e291a65c">
+  <source media="(prefers-color-scheme: light)" srcset="https://github.com/vapor/mysql-nio/assets/1130717/ca772bee-31bc-4bb5-b9c9-67fc0acd7380">
+  <img src="https://github.com/vapor/mysql-nio/assets/1130717/ca772bee-31bc-4bb5-b9c9-67fc0acd7380" height="96" alt="MySQLNIO">
+</picture> 
+<br>
+<br>
+<a href="https://docs.vapor.codes/4.0/"><img src="https://design.vapor.codes/images/readthedocs.svg" alt="Documentation"></a>
+<a href="https://discord.gg/vapor"><img src="https://design.vapor.codes/images/discordchat.svg" alt="Team Chat"></a>
+<a href="LICENSE"><img src="https://design.vapor.codes/images/mitlicense.svg" alt="MIT License"></a>
+<a href="https://github.com/vapor/mysql-nio/actions/workflows/test.yml"><img src="https://img.shields.io/github/actions/workflow/status/vapor/mysql-nio/test.yml?event=push&style=plastic&logo=github&label=tests&logoColor=%23ccc" alt="Continuous Integration"></a>
+<a href="https://codecov.io/github/vapor/mysql-nio"><img src="https://img.shields.io/codecov/c/github/vapor/sqlite-nio?style=plastic&logo=codecov&label=codecov"></a>
+<a href="https://swift.org"><img src="https://design.vapor.codes/images/swift58up.svg" alt="Swift 5.8+"></a>
 </p>
 
 <br>

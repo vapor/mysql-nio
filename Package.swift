@@ -1,4 +1,4 @@
-// swift-tools-version:5.7
+// swift-tools-version:5.8
 import PackageDescription
 
 let package = Package(
@@ -40,7 +40,8 @@ let package = Package(
                 .product(name: "NIOFoundationCompat", package: "swift-nio"),
                 .product(name: "NIOTransportServices", package: "swift-nio-transport-services"),
                 .product(name: "NIOSSL", package: "swift-nio-ssl"),
-            ]
+            ],
+            swiftSettings: swiftSettings
         ),
         .target(
             name: "MySQLNIO",
@@ -50,9 +51,26 @@ let package = Package(
                 .product(name: "Logging", package: "swift-log"),
                 .product(name: "NIO", package: "swift-nio"),
                 .product(name: "NIOSSL", package: "swift-nio-ssl"),
-            ]
+            ],
+            swiftSettings: swiftSettings
         ),
-        .testTarget(name: "MySQLNIOCoreTests", dependencies: [.target(name: "MySQLNIOCore")]),
-        .testTarget(name: "MySQLNIOTests", dependencies: [.target(name: "MySQLNIO")]),
+        .testTarget(
+            name: "MySQLNIOCoreTests",
+            dependencies: [.target(name: "MySQLNIOCore")],
+            swiftSettings: swiftSettings
+        ),
+        .testTarget(
+            name: "MySQLNIOTests",
+            dependencies: [.target(name: "MySQLNIO")],
+            swiftSettings: swiftSettings
+        ),
     ]
 )
+
+var swiftSettings: [SwiftSetting] { [
+    .enableUpcomingFeature("ForwardTrailingClosures"),
+    .enableUpcomingFeature("ExistentialAny"),
+    .enableUpcomingFeature("ConciseMagicFile"),
+    .enableUpcomingFeature("DisableOutwardActorInference"),
+    .enableExperimentalFeature("StrictConcurrency=complete"),
+] }
