@@ -11,4 +11,4 @@ jobs:
      with:
        package_name: mysql-nio
        modules: MySQLNIO
-       pathsToInvalidate: /mysqlnio
+       pathsToInvalidate: /mysqlnio/*
