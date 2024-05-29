@@ -1,5 +1,4 @@
 version: 2
-enable-beta-ecosystems: true
 updates:
   - package-ecosystem: "github-actions"
     directory: "/"
@@ -7,15 +6,5 @@ updates:
       interval: "daily"
     groups:
       dependencies:
-        patterns:
-          - "*"
-  - package-ecosystem: "swift"
-    directory: "/"
-    schedule:
-      interval: "daily"
-    allow:
-      - dependency-type: all
-    groups:
-      all-dependencies:
         patterns:
           - "*"
