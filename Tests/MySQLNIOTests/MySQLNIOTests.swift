@@ -646,6 +646,21 @@ final class MySQLNIOTests: XCTestCase {
         XCTAssertEqual(rows[0].column("qux")?.int, 3)
     }
     
+    func testTextWithMicrosecondsMySQLTimeParse() throws {
+        let dateString = "2024-04-15 22:38:12.392812"
+        
+        let time = MySQLTime(dateString)
+        
+        XCTAssertNotNil(time)
+        XCTAssertEqual(time?.year, 2024)
+        XCTAssertEqual(time?.month, 4)
+        XCTAssertEqual(time?.day, 15)
+        XCTAssertEqual(time?.hour, 22)
+        XCTAssertEqual(time?.minute, 38)
+        XCTAssertEqual(time?.second, 12)
+        XCTAssertEqual(time?.microsecond, 392812)
+    }
+    
     // https://github.com/vapor/mysql-nio/issues/87
     func testUnexpectedPacketHandling() async throws {
         struct PingCommand: MySQLCommand {
