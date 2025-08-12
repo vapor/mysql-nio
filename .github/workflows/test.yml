@@ -35,27 +35,6 @@ jobs:
           git config --global --add safe.directory "${GITHUB_WORKSPACE}"
           swift package diagnose-api-breaking-changes origin/main
 
-#   gh-codeql:
-#     if: ${{ !(github.event.pull_request.draft || false) }}
-#     runs-on: ubuntu-latest
-#     permissions: { actions: write, contents: read, security-events: write }
-#     timeout-minutes: 30
-#     steps:
-#       - name: Install latest Swift toolchain
-#         uses: vapor/swiftly-action@v0.1
-#         with: { toolchain: latest }
-#       - name: Check out code
-#         uses: actions/checkout@v5
-#       - name: Fix Git configuration
-#         run: 'git config --global --add safe.directory "${GITHUB_WORKSPACE}"'
-#       - name: Initialize CodeQL
-#         uses: github/codeql-action/init@v3
-#         with: { languages: swift }
-#       - name: Perform build
-#         run: 'swift build ${PACKAGE_ROOT} ${EXTRA_FLAGS}'
-#       - name: Run CodeQL analyze
-#         uses: github/codeql-action/analyze@v3
-
   linux-all:
     if: ${{ !(github.event.pull_request.draft || false) }}
     strategy:
@@ -63,17 +42,15 @@ jobs:
       matrix:
         dbimage:
           - mysql:5.7
-          - mysql:8.2
+          - mysql:9.4
           - mariadb:10.2
-          - mariadb:11
+          - mariadb:12
           - percona:5.7
           - percona:8
         swiftver:
-          - swift:5.8-jammy
-          - swift:5.9-jammy
           - swift:5.10-jammy
-          - swiftlang/swift:nightly-6.0-jammy
-          - swiftlang/swift:nightly-main-jammy
+          - swift:6.0-jammy
+          - swift:6.1-jammy
     runs-on: ubuntu-latest
     container: ${{ matrix.swiftver }}
     services:
@@ -119,8 +96,8 @@ jobs:
         include:
           - { username: root }
           - { dbimage: mariadb, username: runner }
-          - { macos-version: 'macos-13', xcode-version: '~15.2' }
-          - { macos-version: 'macos-14', xcode-version: 'latest' }
+          - { macos-version: 'macos-14', xcode-version: 'latest-stable' }
+          - { macos-version: 'macos-15', xcode-version: 'latest-stable' }
     runs-on: ${{ matrix.macos-version }}
     env: { MYSQL_HOSTNAME: '127.0.0.1' }
     steps:
