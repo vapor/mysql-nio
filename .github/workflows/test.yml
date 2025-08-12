@@ -28,33 +28,12 @@ jobs:
     container: swift:jammy
     steps:
       - name: Check out code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with: { 'fetch-depth': 0 }
       - name: Run API breakage check
         run: |
           git config --global --add safe.directory "${GITHUB_WORKSPACE}"
           swift package diagnose-api-breaking-changes origin/main
-
-#   gh-codeql:
-#     if: ${{ !(github.event.pull_request.draft || false) }}
-#     runs-on: ubuntu-latest
-#     permissions: { actions: write, contents: read, security-events: write }
-#     timeout-minutes: 30
-#     steps:
-#       - name: Install latest Swift toolchain
-#         uses: vapor/swiftly-action@v0.1
-#         with: { toolchain: latest }
-#       - name: Check out code
-#         uses: actions/checkout@v4
-#       - name: Fix Git configuration
-#         run: 'git config --global --add safe.directory "${GITHUB_WORKSPACE}"'
-#       - name: Initialize CodeQL
-#         uses: github/codeql-action/init@v3
-#         with: { languages: swift }
-#       - name: Perform build
-#         run: 'swift build ${PACKAGE_ROOT} ${EXTRA_FLAGS}'
-#       - name: Run CodeQL analyze
-#         uses: github/codeql-action/analyze@v3
 
   linux-all:
     if: ${{ !(github.event.pull_request.draft || false) }}
@@ -63,17 +42,15 @@ jobs:
       matrix:
         dbimage:
           - mysql:5.7
-          - mysql:8.2
-          - mariadb:10.2
+          - mysql:9.4
+          - mariadb:10.6
           - mariadb:11
           - percona:5.7
           - percona:8
         swiftver:
-          - swift:5.8-jammy
-          - swift:5.9-jammy
           - swift:5.10-jammy
-          - swiftlang/swift:nightly-6.0-jammy
-          - swiftlang/swift:nightly-main-jammy
+          - swift:6.0-jammy
+          - swift:6.1-jammy
     runs-on: ubuntu-latest
     container: ${{ matrix.swiftver }}
     services:
@@ -85,7 +62,7 @@ jobs:
         env: { MYSQL_ALLOW_EMPTY_PASSWORD: true, MYSQL_USER: test_username, MYSQL_PASSWORD: test_password, MYSQL_DATABASE: test_database }
     steps:
       - name: Check out package
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with: { path: 'mysql-nio' }
       - name: Run unit tests
         run: swift test --package-path mysql-nio --enable-code-coverage --sanitize=thread
@@ -95,10 +72,10 @@ jobs:
           codecov_token: ${{ secrets.CODECOV_TOKEN }}
           package_path: 'mysql-nio'
       - name: Check out mysql-kit dependent
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with: { repository: 'vapor/mysql-kit', path: 'mysql-kit' }
       - name: Check out fluent-mysql-driver dependent
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with: { repository: 'vapor/fluent-mysql-driver', path: 'fluent-mysql-driver' }
       - name: Use local package in dependents
         run: |
@@ -115,12 +92,12 @@ jobs:
       fail-fast: false
       matrix:
         dbimage: [mysql, mariadb, percona-server]
-        macos-version: ['macos-13', 'macos-14']
+        macos-version: ['macos-14', 'macos-15']
         include:
           - { username: root }
           - { dbimage: mariadb, username: runner }
-          - { macos-version: 'macos-13', xcode-version: '~15.2' }
-          - { macos-version: 'macos-14', xcode-version: 'latest' }
+          - { macos-version: 'macos-14', xcode-version: 'latest-stable' }
+          - { macos-version: 'macos-15', xcode-version: 'latest-stable' }
     runs-on: ${{ matrix.macos-version }}
     env: { MYSQL_HOSTNAME: '127.0.0.1' }
     steps:
@@ -144,7 +121,7 @@ jobs:
           SQL
         timeout-minutes: 5
       - name: Check out code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - name: Run all tests
         run: swift test --sanitize=thread --enable-code-coverage
       - name: Upload code coverage
