@@ -28,7 +28,7 @@ jobs:
     container: swift:jammy
     steps:
       - name: Check out code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with: { 'fetch-depth': 0 }
       - name: Run API breakage check
         run: |
@@ -45,7 +45,7 @@ jobs:
 #         uses: vapor/swiftly-action@v0.1
 #         with: { toolchain: latest }
 #       - name: Check out code
-#         uses: actions/checkout@v4
+#         uses: actions/checkout@v5
 #       - name: Fix Git configuration
 #         run: 'git config --global --add safe.directory "${GITHUB_WORKSPACE}"'
 #       - name: Initialize CodeQL
@@ -85,7 +85,7 @@ jobs:
         env: { MYSQL_ALLOW_EMPTY_PASSWORD: true, MYSQL_USER: test_username, MYSQL_PASSWORD: test_password, MYSQL_DATABASE: test_database }
     steps:
       - name: Check out package
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with: { path: 'mysql-nio' }
       - name: Run unit tests
         run: swift test --package-path mysql-nio --enable-code-coverage --sanitize=thread
@@ -95,10 +95,10 @@ jobs:
           codecov_token: ${{ secrets.CODECOV_TOKEN }}
           package_path: 'mysql-nio'
       - name: Check out mysql-kit dependent
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with: { repository: 'vapor/mysql-kit', path: 'mysql-kit' }
       - name: Check out fluent-mysql-driver dependent
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with: { repository: 'vapor/fluent-mysql-driver', path: 'fluent-mysql-driver' }
       - name: Use local package in dependents
         run: |
@@ -144,7 +144,7 @@ jobs:
           SQL
         timeout-minutes: 5
       - name: Check out code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - name: Run all tests
         run: swift test --sanitize=thread --enable-code-coverage
       - name: Upload code coverage
