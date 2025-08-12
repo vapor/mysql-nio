@@ -92,7 +92,7 @@ jobs:
       fail-fast: false
       matrix:
         dbimage: [mysql, mariadb, percona-server]
-        macos-version: ['macos-13', 'macos-14']
+        macos-version: ['macos-14', 'macos-15']
         include:
           - { username: root }
           - { dbimage: mariadb, username: runner }
