@@ -43,8 +43,8 @@ jobs:
         dbimage:
           - mysql:5.7
           - mysql:9.4
-          - mariadb:10.2
-          - mariadb:12
+          - mariadb:10.6
+          - mariadb:11
           - percona:5.7
           - percona:8
         swiftver:
