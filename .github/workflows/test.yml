@@ -44,7 +44,7 @@ jobs:
           - mysql:5.7
           - mysql:9.4
           - mariadb:10.6
-          - mariadb:11
+          - mariadb:12
           - percona:5.7
           - percona:8
         swiftver:
@@ -61,6 +61,8 @@ jobs:
         image: ${{ matrix.dbimage }}
         env: { MYSQL_ALLOW_EMPTY_PASSWORD: true, MYSQL_USER: test_username, MYSQL_PASSWORD: test_password, MYSQL_DATABASE: test_database }
     steps:
+      - name: Install curl
+        run: apt-get update -y -q && apt-get install -y curl
       - name: Check out package
         uses: actions/checkout@v5
         with: { path: 'mysql-nio' }
