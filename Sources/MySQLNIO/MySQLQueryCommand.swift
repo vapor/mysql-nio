@@ -27,7 +27,6 @@ extension MySQLDatabase {
         onRow: @escaping (MySQLRow) throws -> (),
         onMetadata: @escaping (MySQLQueryMetadata) throws -> () = { _ in }
     ) -> EventLoopFuture<Void> {
-        self.logger.debug("\(sql) \(binds)")
         let query = MySQLQueryCommand(
             sql: sql,
             binds: binds,
