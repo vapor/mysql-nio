@@ -40,7 +40,7 @@ private final class MySQLSimpleQueryCommand: MySQLCommand, @unchecked Sendable {
         guard !packet.isError else {
             self.state = .done
             let errorPacket = try packet.decode(MySQLProtocol.ERR_Packet.self, capabilities: capabilities)
-            let error: Error
+            let error: any Error
             switch errorPacket.errorCode {
             case .DUP_ENTRY:
                 error = MySQLError.duplicateEntry(errorPacket.errorMessage)

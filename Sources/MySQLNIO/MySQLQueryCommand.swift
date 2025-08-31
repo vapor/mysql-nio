@@ -61,7 +61,7 @@ private final class MySQLQueryCommand: MySQLCommand, @unchecked Sendable { // th
     private var params: [MySQLProtocol.ColumnDefinition41]
     private var ok: MySQLProtocol.COM_STMT_PREPARE_OK?
 
-    private var lastUserError: Error?
+    private var lastUserError: (any Error)?
     var statementID: UInt32?
     
     init(
@@ -90,7 +90,7 @@ private final class MySQLQueryCommand: MySQLCommand, @unchecked Sendable { // th
                 MySQLProtocol.ERR_Packet.self,
                 capabilities: capabilities
             )
-            let error: Error
+            let error: any Error
             switch errorPacket.errorCode {
             case .DUP_ENTRY:
                 error = MySQLError.duplicateEntry(errorPacket.errorMessage)
