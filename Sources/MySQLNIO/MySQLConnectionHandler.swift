@@ -319,14 +319,15 @@ final class MySQLConnectionHandler: ChannelDuplexHandler {
                 switch name {
                 case .none: // our internal sentinel for "here's the public key" for non-TLS connections
                     // data will be the PEM form of the server's RSA public key
-                    guard let _/*pemKeyRaw*/ = packet.payload.readBytes(length: packet.payload.readableBytes) else {
+                    guard let pemKey = packet.payload.readString(length: packet.payload.readableBytes) else {
                         throw MySQLError.missingAuthPluginInlineData
                     }
-                    // TODO: We currently bail out here because we don't have the RSA implementation necessary to
-                    // actually perform the encryption that MySQL wants for this type of connection. We only let
-                    // it get this far because we hope to plug an RSA implementation in at some later time.
-                    self.logger.error("Non-TLS connections can not currently authenticate with the caching SHA-2 plugin, try mysql_native_password auth instead")
-                    throw MySQLError.secureConnectionRequired
+                    self.logger.trace("caching_sha2_password sent RSA key, sending the encrypted password")
+                    let rsaKey = try _RSA.Encryption.PublicKey(pemRepresentation: pemKey)
+                    let saltedPassword = Array(zip(chain((state.password ?? "").utf8, [0]), state.savedSeedValue.cycled()).map(^))
+                    let encryptedData = ByteBuffer(bytes: try rsaKey.encrypt(saltedPassword, padding: .PKCS1_OAEP))
+
+                    context.writeAndFlush(self.wrapOutboundOut(MySQLPacket(payload: encryptedData)), promise: nil)
                 case 0x03: // fast_auth_success
                     // Next packet will be OK, wait for more data
                     self.logger.trace("caching_sha2_password sent fast_auth_success, just waiting for OK now")
