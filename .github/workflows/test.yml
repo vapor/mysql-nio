@@ -7,7 +7,6 @@ on:
   push: { branches: [ main ] }
 env:
   LOG_LEVEL: info
-  SWIFT_DETERMINISTIC_HASHING: 1
   MYSQL_DATABASE: 'test_database'
   MYSQL_DATABASE_A: 'test_database'
   MYSQL_DATABASE_B: 'test_database'
@@ -35,6 +34,38 @@ jobs:
           git config --global --add safe.directory "${GITHUB_WORKSPACE}"
           swift package diagnose-api-breaking-changes origin/main
 
+  linux-insecure-test:
+    if: ${{ !(github.event.pull_request.draft || false) }}
+    strategy:
+      fail-fast: false
+      matrix:
+        dbimage:
+          - mysql:9.4
+        swiftver:
+          - swift:6.1-noble
+    runs-on: ubuntu-latest
+    container:
+      image: ${{ matrix.swiftver }}
+      volumes: [ 'mysqlshare:/var/run/mysqld' ]
+    services:
+      mysql-a:
+        image: ${{ matrix.dbimage }}
+        volumes: [ 'mysqlshare:/var/run/mysqld' ]
+        env: { MYSQL_ALLOW_EMPTY_PASSWORD: true, MYSQL_USER: test_username, MYSQL_PASSWORD: test_password, MYSQL_DATABASE: test_database }
+    steps:
+      - name: Force MySQL server to disallow TLS
+        run: |
+          apt-get update && apt-get install -y 'mysql-client-core-*' curl
+          echo "SET PERSIST ssl_ca='',ssl_cert='',ssl_key='';ALTER INSTANCE RELOAD TLS NO ROLLBACK ON ERROR;" | mysql -BS/var/run/mysqld/mysqld.sock
+      - name: Check out package
+        uses: actions/checkout@v5
+      - name: Run unit tests
+        run: swift test --enable-code-coverage
+      - name: Upload code coverage
+        uses: vapor/swift-codecov-action@v0.3
+        with:
+          codecov_token: ${{ secrets.CODECOV_TOKEN }}
+  
   linux-all:
     if: ${{ !(github.event.pull_request.draft || false) }}
     strategy:
