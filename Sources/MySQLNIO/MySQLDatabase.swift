@@ -39,7 +39,7 @@ public struct MySQLCommandState {
     }
 }
 
-public protocol MySQLCommand: Sendable {
+public protocol MySQLCommand {
     func handle(packet: inout MySQLPacket, capabilities: MySQLProtocol.CapabilityFlags) throws -> MySQLCommandState
     func activate(capabilities: MySQLProtocol.CapabilityFlags) throws -> MySQLCommandState
 }

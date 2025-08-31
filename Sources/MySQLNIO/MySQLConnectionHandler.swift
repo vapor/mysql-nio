@@ -5,7 +5,7 @@ import NIOCore
 import Logging
 
 internal struct MySQLCommandContext: Sendable {
-    var handler: any MySQLCommand
+    nonisolated(unsafe) var handler: any MySQLCommand
     var promise: EventLoopPromise<Void>
 }
 
