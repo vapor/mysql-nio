@@ -2,7 +2,7 @@ import NIOCore
 
 extension MySQLDatabase {
     public func simpleQuery(_ sql: String) -> EventLoopFuture<[MySQLRow]> {
-        var rows = [MySQLRow]()
+        nonisolated(unsafe) var rows = [MySQLRow]()
         return self.simpleQuery(sql) { row in
             rows.append(row)
         }.map { rows }
@@ -14,7 +14,7 @@ extension MySQLDatabase {
     }
 }
 
-private final class MySQLSimpleQueryCommand: MySQLCommand {
+private final class MySQLSimpleQueryCommand: MySQLCommand, @unchecked Sendable { // this is cheating
     let sql: String
     
     enum State {

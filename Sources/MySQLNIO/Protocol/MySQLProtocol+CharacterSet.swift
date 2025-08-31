@@ -3,129 +3,129 @@ extension MySQLProtocol {
     ///
     /// MySQL has a very flexible character set support as documented in Character Sets, Collations, Unicode.
     /// https://dev.mysql.com/doc/internals/en/character-set.html#packet-Protocol::CharacterSet
-    public struct CharacterSet: RawRepresentable, Equatable, CustomStringConvertible, ExpressibleByIntegerLiteral {
+    public struct CharacterSet: RawRepresentable, Equatable, CustomStringConvertible, ExpressibleByIntegerLiteral, Sendable {
         /// `big5_chinese_ci`
-        public static let big5: CharacterSet = 1
+        public static var big5: Self { 1 }
         
         /// `dec8_swedish_ci`
-        public static let dec8: CharacterSet = 3
+        public static var dec8: Self { 3 }
         
         /// `cp850_general_ci`
-        public static let cp850: CharacterSet = 4
+        public static var cp850: Self { 4 }
         
         /// `hp8_english_ci`
-        public static let hp8: CharacterSet = 6
+        public static var hp8: Self { 6 }
         
         /// `koi8r_general_ci`
-        public static let koi8r: CharacterSet = 7
+        public static var koi8r: Self { 7 }
         
         /// `latin1_swedish_ci`
-        public static let latin1: CharacterSet = 8
+        public static var latin1: Self { 8 }
         
         /// `latin2_general_ci`
-        public static let latin2: CharacterSet = 9
+        public static var latin2: Self { 9 }
         
         /// `swe7_swedish_ci`
-        public static let swe7: CharacterSet = 10
+        public static var swe7: Self { 10 }
         
         /// `ascii_general_ci`
-        public static let ascii: CharacterSet = 11
+        public static var ascii: Self { 11 }
         
         /// `ujis_japanese_ci`
-        public static let ujis: CharacterSet = 12
+        public static var ujis: Self { 12 }
         
         /// `sjis_japanese_ci`
-        public static let sjis: CharacterSet = 13
+        public static var sjis: Self { 13 }
         
         /// `hebrew_general_ci`
-        public static let hebrew: CharacterSet = 16
+        public static var hebrew: Self { 16 }
         
         /// `tis620_thai_ci`
-        public static let tis620: CharacterSet = 18
+        public static var tis620: Self { 18 }
         
         /// `euckr_korean_ci`
-        public static let euckr: CharacterSet = 19
+        public static var euckr: Self { 19 }
         
         /// `koi8u_general_ci`
-        public static let koi8u: CharacterSet = 22
+        public static var koi8u: Self { 22 }
         
         /// `gb2312_chinese_ci`
-        public static let gb2312: CharacterSet = 24
+        public static var gb2312: Self { 24 }
         
         /// `greek_general_ci`
-        public static let greek: CharacterSet = 25
+        public static var greek: Self { 25 }
         
         /// `cp1250_general_ci`
-        public static let cp1250: CharacterSet = 26
+        public static var cp1250: Self { 26 }
         
         /// `gbk_chinese_ci`
-        public static let gbk: CharacterSet = 28
+        public static var gbk: Self { 28 }
         
         /// `latin5_turkish_ci`
-        public static let latin5: CharacterSet = 30
+        public static var latin5: Self { 30 }
         
         /// `armscii8_general_ci`
-        public static let armscii8: CharacterSet = 32
+        public static var armscii8: Self { 32 }
         
         /// `utf8_general_ci`
-        public static let utf8: CharacterSet = 33
+        public static var utf8: Self { 33 }
         
         /// `ucs2_general_ci`
-        public static let ucs2: CharacterSet = 35
+        public static var ucs2: Self { 35 }
         
         /// `cp866_general_ci`
-        public static let cp866: CharacterSet = 36
+        public static var cp866: Self { 36 }
         
         /// `keybcs2_general_ci`
-        public static let keybcs2: CharacterSet = 37
+        public static var keybcs2: Self { 37 }
         
         /// `macce_general_ci`
-        public static let macce: CharacterSet = 38
+        public static var macce: Self { 38 }
         
         /// `macroman_general_ci`
-        public static let macroman: CharacterSet = 39
+        public static var macroman: Self { 39 }
         
         /// `cp852_general_ci`
-        public static let cp852: CharacterSet = 40
+        public static var cp852: Self { 40 }
         
         /// `latin7_general_ci`
-        public static let latin7: CharacterSet = 41
+        public static var latin7: Self { 41 }
         
         /// `cp1251_general_ci`
-        public static let cp1251: CharacterSet = 51
+        public static var cp1251: Self { 51 }
         
         /// `utf16_general_ci`
-        public static let utf16: CharacterSet = 54
+        public static var utf16: Self { 54 }
         
         /// `utf16le_general_ci`
-        public static let utf16le: CharacterSet = 56
+        public static var utf16le: Self { 56 }
         
         /// `cp1256_general_ci`
-        public static let cp1256: CharacterSet = 57
+        public static var cp1256: Self { 57 }
         
         /// `cp1257_general_ci`
-        public static let cp1257: CharacterSet = 59
+        public static var cp1257: Self { 59 }
         
         /// `utf32_general_ci`
-        public static let utf32: CharacterSet = 60
+        public static var utf32: Self { 60 }
         
         /// `binary`
-        public static let binary: CharacterSet = 63
+        public static var binary: Self { 63 }
         
         /// `geostd8_general_ci`
-        public static let geostd8: CharacterSet = 92
+        public static var geostd8: Self { 92 }
         
         /// `cp932_japanese_ci`
-        public static let cp932: CharacterSet = 95
+        public static var cp932: Self { 95 }
         
         /// `eucjpms_japanese_ci`
-        public static let eucjpms: CharacterSet = 97
+        public static var eucjpms: Self { 97 }
         
         /// `gb18030_chinese_ci`
-        public static let gb18030: CharacterSet = 248
+        public static var gb18030: Self { 248 }
         
         /// `utf8mb4_0900_ai_ci`
-        public static let utf8mb4: CharacterSet = 255
+        public static var utf8mb4: Self { 255 }
         
         /// `charset_nr` (2) -- number of the character set and collation
         public var rawValue: UInt8

@@ -3,7 +3,7 @@ import Logging
 import NIOSSL
 import NIOPosix
 
-public final class MySQLConnection: MySQLDatabase {
+public final class MySQLConnection: MySQLDatabase, Sendable {
     public static func connect(
         to socketAddress: SocketAddress,
         username: String,
@@ -25,27 +25,31 @@ public final class MySQLConnection: MySQLDatabase {
             done.futureResult.whenFailure { _ in
                 channel.close(mode: .all, promise: nil)
             }
-            return channel.pipeline.addHandlers([
-                ByteToMessageHandler(MySQLPacketDecoder(
-                    sequence: sequence,
-                    logger: logger
-                )),
-                MessageToByteHandler(MySQLPacketEncoder(
-                    sequence: sequence,
-                    logger: logger
-                )),
-                MySQLConnectionHandler(logger: logger, state: .handshake(.init(
-                    username: username,
-                    database: database,
-                    password: password,
-                    tlsConfiguration: tlsConfiguration,
-                    serverHostname: serverHostname,
-                    done: done
-                )), sequence: sequence),
-                ErrorHandler()
-            ], position: .last).flatMap {
-                return done.futureResult.map { MySQLConnection(channel: channel, logger: logger) }
+            do {
+                try channel.pipeline.syncOperations.addHandlers([
+                    ByteToMessageHandler(MySQLPacketDecoder(
+                        sequence: sequence,
+                        logger: logger
+                    )),
+                    MessageToByteHandler(MySQLPacketEncoder(
+                        sequence: sequence,
+                        logger: logger
+                    )),
+                    MySQLConnectionHandler(logger: logger, state: .handshake(.init(
+                        username: username,
+                        database: database,
+                        password: password,
+                        tlsConfiguration: tlsConfiguration,
+                        serverHostname: serverHostname,
+                        done: done
+                    )), sequence: sequence),
+                    ErrorHandler()
+                ], position: .last)
+            } catch {
+                return channel.eventLoop.makeFailedFuture(error)
             }
+
+            return done.futureResult.map { MySQLConnection(channel: channel, logger: logger) }
         }
     }
     

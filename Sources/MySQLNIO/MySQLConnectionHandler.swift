@@ -1,8 +1,10 @@
+import _CryptoExtras
+import Algorithms
 import NIOSSL
 import NIOCore
 import Logging
 
-internal struct MySQLCommandContext {
+internal struct MySQLCommandContext: Sendable {
     var handler: any MySQLCommand
     var promise: EventLoopPromise<Void>
 }
@@ -124,12 +126,12 @@ final class MySQLConnectionHandler: ChannelDuplexHandler {
             try context.write(self.wrapOutboundOut(.encode(sslRequest, capabilities: [])), promise: promise)
             context.flush()
 
-            let sslContext = try NIOSSLContext(configuration: tlsConfiguration)
-            let handler = try NIOSSLClientHandler(context: sslContext, serverHostname: state.serverHostname)
-            promise.futureResult.flatMap {
-                return context.channel.pipeline.addHandler(handler, position: .first).flatMapThrowing {
-                    try self.writeHandshakeResponse(context: context, handshakeRequest: handshakeRequest, state: state, isTLS: true)
-                }
+            promise.futureResult.assumeIsolated().flatMapThrowing {
+                let sslContext = try NIOSSLContext(configuration: tlsConfiguration)
+                let handler = try NIOSSLClientHandler(context: sslContext, serverHostname: state.serverHostname)
+
+                try context.channel.pipeline.syncOperations.addHandler(handler, position: .first)
+                try self.writeHandshakeResponse(context: context, handshakeRequest: handshakeRequest, state: state, isTLS: true)
             }.whenFailure { error in
                 state.done.fail(error)
             }
@@ -341,8 +343,7 @@ final class MySQLConnectionHandler: ChannelDuplexHandler {
                         payload.writeBytes([0x02])
                         self.state = .authenticating(AuthenticationState(authPluginName: state.authPluginName, password: state.password, isTLS: state.isTLS, savedSeedValue: state.savedSeedValue, awaitingCachingSha2PluginPublicKey: true, done: state.done))
                     }
-                    context.write(self.wrapOutboundOut(MySQLPacket(payload: payload)), promise: nil)
-                    context.flush()
+                    context.writeAndFlush(self.wrapOutboundOut(MySQLPacket(payload: payload)), promise: nil)
                 default:
                     throw MySQLError.missingOrInvalidAuthPluginInlineCommand(command: name)
                 }
@@ -460,12 +461,14 @@ final class MySQLConnectionHandler: ChannelDuplexHandler {
             
             // forward close future results based on whether
             // the close was successful
+            let queueEmpty = self.queue.isEmpty
+
             p.futureResult.whenSuccess { promise.succeed(()) }
             p.futureResult.whenFailure { error in
                 if
                     let sslError = error as? NIOSSLError,
                     case .uncleanShutdown = sslError,
-                    self.queue.isEmpty
+                    queueEmpty
                 {
                     // we can ignore unclean shutdown errors
                     // since no requests are pending

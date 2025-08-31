@@ -15,7 +15,7 @@ extension MySQLDatabase {
         _ binds: [MySQLData] = [],
         onMetadata: @escaping (MySQLQueryMetadata) throws -> () = { _ in }
     ) -> EventLoopFuture<[MySQLRow]> {
-        var rows = [MySQLRow]()
+        nonisolated(unsafe) var rows = [MySQLRow]()
         return self.query(sql, binds, onRow: { row in
             rows.append(row)
         }, onMetadata: onMetadata).map { rows }
@@ -38,7 +38,7 @@ extension MySQLDatabase {
     }
 }
 
-private final class MySQLQueryCommand: MySQLCommand {
+private final class MySQLQueryCommand: MySQLCommand, @unchecked Sendable { // this is cheating
     let sql: String
     
     enum State {

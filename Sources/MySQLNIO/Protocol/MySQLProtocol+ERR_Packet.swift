@@ -4,7 +4,7 @@ extension MySQLProtocol {
     /// This packet signals that an error occurred. It contains a SQL state value if `CLIENT_PROTOCOL_41` is enabled.
     ///
     /// https://dev.mysql.com/doc/internals/en/packet-ERR_Packet.html
-    public struct ERR_Packet: MySQLPacketDecodable {
+    public struct ERR_Packet: MySQLPacketDecodable, Sendable {
         public enum DecodeError: Swift.Error {
             case missingFlag
             case invalidFlag(UInt8)

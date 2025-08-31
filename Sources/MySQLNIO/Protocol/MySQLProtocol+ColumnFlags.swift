@@ -1,15 +1,15 @@
 extension MySQLProtocol {
     /// These don't seem to be documented anywhere.
-    public struct ColumnFlags: OptionSet, CustomStringConvertible {
+    public struct ColumnFlags: OptionSet, CustomStringConvertible, Sendable {
         /// This column is unsigned.
-        public static let COLUMN_UNSIGNED = ColumnFlags(rawValue: 0b000_0000_0010_0000)
-        
+        public static var COLUMN_UNSIGNED: Self { .init(rawValue: 0b000_0000_0010_0000) }
+
         /// This column is the primary key.
-        public static let PRIMARY_KEY = ColumnFlags(rawValue: 0b000_0000_0000_0010)
-        
+        public static var PRIMARY_KEY: Self { .init(rawValue: 0b000_0000_0000_0010) }
+
         /// This column is not null.
-        public static let COLUMN_NOT_NULL = ColumnFlags(rawValue: 0b000_0000_0000_0001)
-        
+        public static var COLUMN_NOT_NULL: Self { .init(rawValue: 0b000_0000_0000_0001) }
+
         /// The raw status value.
         public var rawValue: UInt16
         

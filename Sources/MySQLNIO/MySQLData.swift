@@ -1,8 +1,8 @@
 import NIOCore
 import Foundation
 
-public struct MySQLData: CustomStringConvertible, ExpressibleByStringLiteral, ExpressibleByIntegerLiteral, ExpressibleByBooleanLiteral, MySQLDataConvertible {
-    public enum Format {
+public struct MySQLData: CustomStringConvertible, ExpressibleByStringLiteral, ExpressibleByIntegerLiteral, ExpressibleByBooleanLiteral, MySQLDataConvertible, Sendable {
+    public enum Format: Sendable {
         case binary
         case text
     }

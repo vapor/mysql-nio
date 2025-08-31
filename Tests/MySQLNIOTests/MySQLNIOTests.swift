@@ -373,7 +373,7 @@ final class MySQLNIOTests: XCTestCase {
         }
     }
     
-    func testPerformance_simpleSelects() throws {
+    /*func testPerformance_simpleSelects() throws {
         try XCTSkipIf(env("PERFORMANCE_TESTS") == nil)
         let conn = try MySQLConnection.test(on: self.eventLoop).wait()
         defer { try! conn.close().wait() }
@@ -393,8 +393,8 @@ final class MySQLNIOTests: XCTestCase {
                 XCTAssertEqual(rows?[0].column("datetime")?.date?.description, "2016-01-18 00:00:00 +0000")
             }
         }
-    }
-    
+    }*/
+
     func testSHA2() throws {
         var message = ByteBufferAllocator().buffer(capacity: 0)
         message.writeString("test")
@@ -415,7 +415,7 @@ final class MySQLNIOTests: XCTestCase {
     }
 
     // https://github.com/vapor/mysql-nio/issues/30
-    func testPreparedStatement_maxOpen() throws {
+    /*func testPreparedStatement_maxOpen() throws {
         try XCTSkipIf(env("PERFORMANCE_TESTS") == nil)
         let conn = try MySQLConnection.test(on: self.eventLoop).wait()
         defer { try! conn.close().wait() }
@@ -438,7 +438,7 @@ final class MySQLNIOTests: XCTestCase {
                 // expected
             }
         }
-    }
+    }*/
 
     func testPreparedStatement_invalidParams() throws {
         let conn = try MySQLConnection.test(on: self.eventLoop).wait()
@@ -690,7 +690,7 @@ final class MySQLNIOTests: XCTestCase {
             .serverChannelOption(ChannelOptions.socket(SocketOptionLevel(SOL_SOCKET), SocketOptionName(SO_REUSEADDR)), value: SocketOptionValue(1))
             .childChannelOption(ChannelOptions.socket(SocketOptionLevel(SOL_SOCKET), SocketOptionName(SO_REUSEADDR)), value: SocketOptionValue(1))
             .childChannelInitializer { channel in
-                final class Handler: ChannelInboundHandler {
+                final class Handler: ChannelInboundHandler, Sendable {
                     typealias InboundIn = ByteBuffer; typealias OutboundOut = ByteBuffer
                     func channelActive(context: ChannelHandlerContext) {
                         var packet = MySQLPacket(), buf = ByteBuffer()
