@@ -1,6 +1,6 @@
 import NIOCore
 
-public struct MySQLRow: CustomStringConvertible {
+public struct MySQLRow: CustomStringConvertible, Sendable {
     public let format: MySQLData.Format
     public let columnDefinitions: [MySQLProtocol.ColumnDefinition41]
     public let values: [ByteBuffer?]

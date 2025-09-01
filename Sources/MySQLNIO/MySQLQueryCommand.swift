@@ -15,7 +15,7 @@ extension MySQLDatabase {
         _ binds: [MySQLData] = [],
         onMetadata: @escaping (MySQLQueryMetadata) throws -> () = { _ in }
     ) -> EventLoopFuture<[MySQLRow]> {
-        var rows = [MySQLRow]()
+        nonisolated(unsafe) var rows = [MySQLRow]()
         return self.query(sql, binds, onRow: { row in
             rows.append(row)
         }, onMetadata: onMetadata).map { rows }
@@ -38,7 +38,7 @@ extension MySQLDatabase {
     }
 }
 
-private final class MySQLQueryCommand: MySQLCommand {
+private final class MySQLQueryCommand: MySQLCommand, @unchecked Sendable { // this is cheating
     let sql: String
     
     enum State {
@@ -61,7 +61,7 @@ private final class MySQLQueryCommand: MySQLCommand {
     private var params: [MySQLProtocol.ColumnDefinition41]
     private var ok: MySQLProtocol.COM_STMT_PREPARE_OK?
 
-    private var lastUserError: Error?
+    private var lastUserError: (any Error)?
     var statementID: UInt32?
     
     init(
@@ -90,7 +90,7 @@ private final class MySQLQueryCommand: MySQLCommand {
                 MySQLProtocol.ERR_Packet.self,
                 capabilities: capabilities
             )
-            let error: Error
+            let error: any Error
             switch errorPacket.errorCode {
             case .DUP_ENTRY:
                 error = MySQLError.duplicateEntry(errorPacket.errorMessage)

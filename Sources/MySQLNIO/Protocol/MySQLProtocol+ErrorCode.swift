@@ -1,2293 +1,2293 @@
 extension MySQLProtocol {
-    public struct ErrorCode: ExpressibleByIntegerLiteral, RawRepresentable, Equatable, CustomStringConvertible {
+    public struct ErrorCode: ExpressibleByIntegerLiteral, RawRepresentable, Equatable, CustomStringConvertible, Sendable {
         /// `SERVER_INIT`
-        public static let SERVER_INIT: ErrorCode = 1
+        public static var SERVER_INIT: Self { 1 }
         /// `ER_HASHCHK`
-        public static let HASHCHK: ErrorCode = 1000
+        public static var HASHCHK: Self { 1000 }
         /// `ER_NISAMCHK`
-        public static let NISAMCHK: ErrorCode = 1001
+        public static var NISAMCHK: Self { 1001 }
         /// `ER_NO`
-        public static let NO: ErrorCode = 1002
+        public static var NO: Self { 1002 }
         /// `ER_YES`
-        public static let YES: ErrorCode = 1003
+        public static var YES: Self { 1003 }
         /// `ER_CANT_CREATE_FILE`
-        public static let CANT_CREATE_FILE: ErrorCode = 1004
+        public static var CANT_CREATE_FILE: Self { 1004 }
         /// `ER_CANT_CREATE_TABLE`
-        public static let CANT_CREATE_TABLE: ErrorCode = 1005
+        public static var CANT_CREATE_TABLE: Self { 1005 }
         /// `ER_CANT_CREATE_DB`
-        public static let CANT_CREATE_DB: ErrorCode = 1006
+        public static var CANT_CREATE_DB: Self { 1006 }
         /// `ER_DB_CREATE_EXISTS`
-        public static let DB_CREATE_EXISTS: ErrorCode = 1007
+        public static var DB_CREATE_EXISTS: Self { 1007 }
         /// `ER_DB_DROP_EXISTS`
-        public static let DB_DROP_EXISTS: ErrorCode = 1008
+        public static var DB_DROP_EXISTS: Self { 1008 }
         /// `ER_DB_DROP_DELETE`
-        public static let DB_DROP_DELETE: ErrorCode = 1009
+        public static var DB_DROP_DELETE: Self { 1009 }
         /// `ER_DB_DROP_RMDIR`
-        public static let DB_DROP_RMDIR: ErrorCode = 1010
+        public static var DB_DROP_RMDIR: Self { 1010 }
         /// `ER_CANT_DELETE_FILE`
-        public static let CANT_DELETE_FILE: ErrorCode = 1011
+        public static var CANT_DELETE_FILE: Self { 1011 }
         /// `ER_CANT_FIND_SYSTEM_REC`
-        public static let CANT_FIND_SYSTEM_REC: ErrorCode = 1012
+        public static var CANT_FIND_SYSTEM_REC: Self { 1012 }
         /// `ER_CANT_GET_STAT`
-        public static let CANT_GET_STAT: ErrorCode = 1013
+        public static var CANT_GET_STAT: Self { 1013 }
         /// `ER_CANT_GET_WD`
-        public static let CANT_GET_WD: ErrorCode = 1014
+        public static var CANT_GET_WD: Self { 1014 }
         /// `ER_CANT_LOCK`
-        public static let CANT_LOCK: ErrorCode = 1015
+        public static var CANT_LOCK: Self { 1015 }
         /// `ER_CANT_OPEN_FILE`
-        public static let CANT_OPEN_FILE: ErrorCode = 1016
+        public static var CANT_OPEN_FILE: Self { 1016 }
         /// `ER_FILE_NOT_FOUND`
-        public static let FILE_NOT_FOUND: ErrorCode = 1017
+        public static var FILE_NOT_FOUND: Self { 1017 }
         /// `ER_CANT_READ_DIR`
-        public static let CANT_READ_DIR: ErrorCode = 1018
+        public static var CANT_READ_DIR: Self { 1018 }
         /// `ER_CANT_SET_WD`
-        public static let CANT_SET_WD: ErrorCode = 1019
+        public static var CANT_SET_WD: Self { 1019 }
         /// `ER_CHECKREAD`
-        public static let CHECKREAD: ErrorCode = 1020
+        public static var CHECKREAD: Self { 1020 }
         /// `ER_DISK_FULL`
-        public static let DISK_FULL: ErrorCode = 1021
+        public static var DISK_FULL: Self { 1021 }
         /// `ER_DUP_KEY`
-        public static let DUP_KEY: ErrorCode = 1022
+        public static var DUP_KEY: Self { 1022 }
         /// `ER_ERROR_ON_CLOSE`
-        public static let ERROR_ON_CLOSE: ErrorCode = 1023
+        public static var ERROR_ON_CLOSE: Self { 1023 }
         /// `ER_ERROR_ON_READ`
-        public static let ERROR_ON_READ: ErrorCode = 1024
+        public static var ERROR_ON_READ: Self { 1024 }
         /// `ER_ERROR_ON_RENAME`
-        public static let ERROR_ON_RENAME: ErrorCode = 1025
+        public static var ERROR_ON_RENAME: Self { 1025 }
         /// `ER_ERROR_ON_WRITE`
-        public static let ERROR_ON_WRITE: ErrorCode = 1026
+        public static var ERROR_ON_WRITE: Self { 1026 }
         /// `ER_FILE_USED`
-        public static let FILE_USED: ErrorCode = 1027
+        public static var FILE_USED: Self { 1027 }
         /// `ER_FILSORT_ABORT`
-        public static let FILSORT_ABORT: ErrorCode = 1028
+        public static var FILSORT_ABORT: Self { 1028 }
         /// `ER_FORM_NOT_FOUND`
-        public static let FORM_NOT_FOUND: ErrorCode = 1029
+        public static var FORM_NOT_FOUND: Self { 1029 }
         /// `ER_GET_ERRNO`
-        public static let GET_ERRNO: ErrorCode = 1030
+        public static var GET_ERRNO: Self { 1030 }
         /// `ER_ILLEGAL_HA`
-        public static let ILLEGAL_HA: ErrorCode = 1031
+        public static var ILLEGAL_HA: Self { 1031 }
         /// `ER_KEY_NOT_FOUND`
-        public static let KEY_NOT_FOUND: ErrorCode = 1032
+        public static var KEY_NOT_FOUND: Self { 1032 }
         /// `ER_NOT_FORM_FILE`
-        public static let NOT_FORM_FILE: ErrorCode = 1033
+        public static var NOT_FORM_FILE: Self { 1033 }
         /// `ER_NOT_KEYFILE`
-        public static let NOT_KEYFILE: ErrorCode = 1034
+        public static var NOT_KEYFILE: Self { 1034 }
         /// `ER_OLD_KEYFILE`
-        public static let OLD_KEYFILE: ErrorCode = 1035
+        public static var OLD_KEYFILE: Self { 1035 }
         /// `ER_OPEN_AS_READONLY`
-        public static let OPEN_AS_READONLY: ErrorCode = 1036
+        public static var OPEN_AS_READONLY: Self { 1036 }
         /// `ER_OUTOFMEMORY`
-        public static let OUTOFMEMORY: ErrorCode = 1037
+        public static var OUTOFMEMORY: Self { 1037 }
         /// `ER_OUT_OF_SORTMEMORY`
-        public static let OUT_OF_SORTMEMORY: ErrorCode = 1038
+        public static var OUT_OF_SORTMEMORY: Self { 1038 }
         /// `ER_UNEXPECTED_EOF`
-        public static let UNEXPECTED_EOF: ErrorCode = 1039
+        public static var UNEXPECTED_EOF: Self { 1039 }
         /// `ER_CON_COUNT_ERROR`
-        public static let CON_COUNT_ERROR: ErrorCode = 1040
+        public static var CON_COUNT_ERROR: Self { 1040 }
         /// `ER_OUT_OF_RESOURCES`
-        public static let OUT_OF_RESOURCES: ErrorCode = 1041
+        public static var OUT_OF_RESOURCES: Self { 1041 }
         /// `ER_BAD_HOST_ERROR`
-        public static let BAD_HOST_ERROR: ErrorCode = 1042
+        public static var BAD_HOST_ERROR: Self { 1042 }
         /// `ER_HANDSHAKE_ERROR`
-        public static let HANDSHAKE_ERROR: ErrorCode = 1043
+        public static var HANDSHAKE_ERROR: Self { 1043 }
         /// `ER_DBACCESS_DENIED_ERROR`
-        public static let DBACCESS_DENIED_ERROR: ErrorCode = 1044
+        public static var DBACCESS_DENIED_ERROR: Self { 1044 }
         /// `ER_ACCESS_DENIED_ERROR`
-        public static let ACCESS_DENIED_ERROR: ErrorCode = 1045
+        public static var ACCESS_DENIED_ERROR: Self { 1045 }
         /// `ER_NO_DB_ERROR`
-        public static let NO_DB_ERROR: ErrorCode = 1046
+        public static var NO_DB_ERROR: Self { 1046 }
         /// `ER_UNKNOWN_COM_ERROR`
-        public static let UNKNOWN_COM_ERROR: ErrorCode = 1047
+        public static var UNKNOWN_COM_ERROR: Self { 1047 }
         /// `ER_BAD_NULL_ERROR`
-        public static let BAD_NULL_ERROR: ErrorCode = 1048
+        public static var BAD_NULL_ERROR: Self { 1048 }
         /// `ER_BAD_DB_ERROR`
-        public static let BAD_DB_ERROR: ErrorCode = 1049
+        public static var BAD_DB_ERROR: Self { 1049 }
         /// `ER_TABLE_EXISTS_ERROR`
-        public static let TABLE_EXISTS_ERROR: ErrorCode = 1050
+        public static var TABLE_EXISTS_ERROR: Self { 1050 }
         /// `ER_BAD_TABLE_ERROR`
-        public static let BAD_TABLE_ERROR: ErrorCode = 1051
+        public static var BAD_TABLE_ERROR: Self { 1051 }
         /// `ER_NON_UNIQ_ERROR`
-        public static let NON_UNIQ_ERROR: ErrorCode = 1052
+        public static var NON_UNIQ_ERROR: Self { 1052 }
         /// `ER_SERVER_SHUTDOWN`
-        public static let SERVER_SHUTDOWN: ErrorCode = 1053
+        public static var SERVER_SHUTDOWN: Self { 1053 }
         /// `ER_BAD_FIELD_ERROR`
-        public static let BAD_FIELD_ERROR: ErrorCode = 1054
+        public static var BAD_FIELD_ERROR: Self { 1054 }
         /// `ER_WRONG_FIELD_WITH_GROUP`
-        public static let WRONG_FIELD_WITH_GROUP: ErrorCode = 1055
+        public static var WRONG_FIELD_WITH_GROUP: Self { 1055 }
         /// `ER_WRONG_GROUP_FIELD`
-        public static let WRONG_GROUP_FIELD: ErrorCode = 1056
+        public static var WRONG_GROUP_FIELD: Self { 1056 }
         /// `ER_WRONG_SUM_SELECT`
-        public static let WRONG_SUM_SELECT: ErrorCode = 1057
+        public static var WRONG_SUM_SELECT: Self { 1057 }
         /// `ER_WRONG_VALUE_COUNT`
-        public static let WRONG_VALUE_COUNT: ErrorCode = 1058
+        public static var WRONG_VALUE_COUNT: Self { 1058 }
         /// `ER_TOO_LONG_IDENT`
-        public static let TOO_LONG_IDENT: ErrorCode = 1059
+        public static var TOO_LONG_IDENT: Self { 1059 }
         /// `ER_DUP_FIELDNAME`
-        public static let DUP_FIELDNAME: ErrorCode = 1060
+        public static var DUP_FIELDNAME: Self { 1060 }
         /// `ER_DUP_KEYNAME`
-        public static let DUP_KEYNAME: ErrorCode = 1061
+        public static var DUP_KEYNAME: Self { 1061 }
         /// `ER_DUP_ENTRY`
-        public static let DUP_ENTRY: ErrorCode = 1062
+        public static var DUP_ENTRY: Self { 1062 }
         /// `ER_WRONG_FIELD_SPEC`
-        public static let WRONG_FIELD_SPEC: ErrorCode = 1063
+        public static var WRONG_FIELD_SPEC: Self { 1063 }
         /// `ER_PARSE_ERROR`
-        public static let PARSE_ERROR: ErrorCode = 1064
+        public static var PARSE_ERROR: Self { 1064 }
         /// `ER_EMPTY_QUERY`
-        public static let EMPTY_QUERY: ErrorCode = 1065
+        public static var EMPTY_QUERY: Self { 1065 }
         /// `ER_NONUNIQ_TABLE`
-        public static let NONUNIQ_TABLE: ErrorCode = 1066
+        public static var NONUNIQ_TABLE: Self { 1066 }
         /// `ER_INVALID_DEFAULT`
-        public static let INVALID_DEFAULT: ErrorCode = 1067
+        public static var INVALID_DEFAULT: Self { 1067 }
         /// `ER_MULTIPLE_PRI_KEY`
-        public static let MULTIPLE_PRI_KEY: ErrorCode = 1068
+        public static var MULTIPLE_PRI_KEY: Self { 1068 }
         /// `ER_TOO_MANY_KEYS`
-        public static let TOO_MANY_KEYS: ErrorCode = 1069
+        public static var TOO_MANY_KEYS: Self { 1069 }
         /// `ER_TOO_MANY_KEY_PARTS`
-        public static let TOO_MANY_KEY_PARTS: ErrorCode = 1070
+        public static var TOO_MANY_KEY_PARTS: Self { 1070 }
         /// `ER_TOO_LONG_KEY`
-        public static let TOO_LONG_KEY: ErrorCode = 1071
+        public static var TOO_LONG_KEY: Self { 1071 }
         /// `ER_KEY_COLUMN_DOES_NOT_EXITS`
-        public static let KEY_COLUMN_DOES_NOT_EXITS: ErrorCode = 1072
+        public static var KEY_COLUMN_DOES_NOT_EXITS: Self { 1072 }
         /// `ER_BLOB_USED_AS_KEY`
-        public static let BLOB_USED_AS_KEY: ErrorCode = 1073
+        public static var BLOB_USED_AS_KEY: Self { 1073 }
         /// `ER_TOO_BIG_FIELDLENGTH`
-        public static let TOO_BIG_FIELDLENGTH: ErrorCode = 1074
+        public static var TOO_BIG_FIELDLENGTH: Self { 1074 }
         /// `ER_WRONG_AUTO_KEY`
-        public static let WRONG_AUTO_KEY: ErrorCode = 1075
+        public static var WRONG_AUTO_KEY: Self { 1075 }
         /// `ER_READY`
-        public static let READY: ErrorCode = 1076
+        public static var READY: Self { 1076 }
         /// `ER_NORMAL_SHUTDOWN`
-        public static let NORMAL_SHUTDOWN: ErrorCode = 1077
+        public static var NORMAL_SHUTDOWN: Self { 1077 }
         /// `ER_GOT_SIGNAL`
-        public static let GOT_SIGNAL: ErrorCode = 1078
+        public static var GOT_SIGNAL: Self { 1078 }
         /// `ER_SHUTDOWN_COMPLETE`
-        public static let SHUTDOWN_COMPLETE: ErrorCode = 1079
+        public static var SHUTDOWN_COMPLETE: Self { 1079 }
         /// `ER_FORCING_CLOSE`
-        public static let FORCING_CLOSE: ErrorCode = 1080
+        public static var FORCING_CLOSE: Self { 1080 }
         /// `ER_IPSOCK_ERROR`
-        public static let IPSOCK_ERROR: ErrorCode = 1081
+        public static var IPSOCK_ERROR: Self { 1081 }
         /// `ER_NO_SUCH_INDEX`
-        public static let NO_SUCH_INDEX: ErrorCode = 1082
+        public static var NO_SUCH_INDEX: Self { 1082 }
         /// `ER_WRONG_FIELD_TERMINATORS`
-        public static let WRONG_FIELD_TERMINATORS: ErrorCode = 1083
+        public static var WRONG_FIELD_TERMINATORS: Self { 1083 }
         /// `ER_BLOBS_AND_NO_TERMINATED`
-        public static let BLOBS_AND_NO_TERMINATED: ErrorCode = 1084
+        public static var BLOBS_AND_NO_TERMINATED: Self { 1084 }
         /// `ER_TEXTFILE_NOT_READABLE`
-        public static let TEXTFILE_NOT_READABLE: ErrorCode = 1085
+        public static var TEXTFILE_NOT_READABLE: Self { 1085 }
         /// `ER_FILE_EXISTS_ERROR`
-        public static let FILE_EXISTS_ERROR: ErrorCode = 1086
+        public static var FILE_EXISTS_ERROR: Self { 1086 }
         /// `ER_LOAD_INFO`
-        public static let LOAD_INFO: ErrorCode = 1087
+        public static var LOAD_INFO: Self { 1087 }
         /// `ER_ALTER_INFO`
-        public static let ALTER_INFO: ErrorCode = 1088
+        public static var ALTER_INFO: Self { 1088 }
         /// `ER_WRONG_SUB_KEY`
-        public static let WRONG_SUB_KEY: ErrorCode = 1089
+        public static var WRONG_SUB_KEY: Self { 1089 }
         /// `ER_CANT_REMOVE_ALL_FIELDS`
-        public static let CANT_REMOVE_ALL_FIELDS: ErrorCode = 1090
+        public static var CANT_REMOVE_ALL_FIELDS: Self { 1090 }
         /// `ER_CANT_DROP_FIELD_OR_KEY`
-        public static let CANT_DROP_FIELD_OR_KEY: ErrorCode = 1091
+        public static var CANT_DROP_FIELD_OR_KEY: Self { 1091 }
         /// `ER_INSERT_INFO`
-        public static let INSERT_INFO: ErrorCode = 1092
+        public static var INSERT_INFO: Self { 1092 }
         /// `ER_UPDATE_TABLE_USED`
-        public static let UPDATE_TABLE_USED: ErrorCode = 1093
+        public static var UPDATE_TABLE_USED: Self { 1093 }
         /// `ER_NO_SUCH_THREAD`
-        public static let NO_SUCH_THREAD: ErrorCode = 1094
+        public static var NO_SUCH_THREAD: Self { 1094 }
         /// `ER_KILL_DENIED_ERROR`
-        public static let KILL_DENIED_ERROR: ErrorCode = 1095
+        public static var KILL_DENIED_ERROR: Self { 1095 }
         /// `ER_NO_TABLES_USED`
-        public static let NO_TABLES_USED: ErrorCode = 1096
+        public static var NO_TABLES_USED: Self { 1096 }
         /// `ER_TOO_BIG_SET`
-        public static let TOO_BIG_SET: ErrorCode = 1097
+        public static var TOO_BIG_SET: Self { 1097 }
         /// `ER_NO_UNIQUE_LOGFILE`
-        public static let NO_UNIQUE_LOGFILE: ErrorCode = 1098
+        public static var NO_UNIQUE_LOGFILE: Self { 1098 }
         /// `ER_TABLE_NOT_LOCKED_FOR_WRITE`
-        public static let TABLE_NOT_LOCKED_FOR_WRITE: ErrorCode = 1099
+        public static var TABLE_NOT_LOCKED_FOR_WRITE: Self { 1099 }
         /// `ER_TABLE_NOT_LOCKED`
-        public static let TABLE_NOT_LOCKED: ErrorCode = 1100
+        public static var TABLE_NOT_LOCKED: Self { 1100 }
         /// `ER_BLOB_CANT_HAVE_DEFAULT`
-        public static let BLOB_CANT_HAVE_DEFAULT: ErrorCode = 1101
+        public static var BLOB_CANT_HAVE_DEFAULT: Self { 1101 }
         /// `ER_WRONG_DB_NAME`
-        public static let WRONG_DB_NAME: ErrorCode = 1102
+        public static var WRONG_DB_NAME: Self { 1102 }
         /// `ER_WRONG_TABLE_NAME`
-        public static let WRONG_TABLE_NAME: ErrorCode = 1103
+        public static var WRONG_TABLE_NAME: Self { 1103 }
         /// `ER_TOO_BIG_SELECT`
-        public static let TOO_BIG_SELECT: ErrorCode = 1104
+        public static var TOO_BIG_SELECT: Self { 1104 }
         /// `ER_UNKNOWN_ERROR`
-        public static let UNKNOWN_ERROR: ErrorCode = 1105
+        public static var UNKNOWN_ERROR: Self { 1105 }
         /// `ER_UNKNOWN_PROCEDURE`
-        public static let UNKNOWN_PROCEDURE: ErrorCode = 1106
+        public static var UNKNOWN_PROCEDURE: Self { 1106 }
         /// `ER_WRONG_PARAMCOUNT_TO_PROCEDURE`
-        public static let WRONG_PARAMCOUNT_TO_PROCEDURE: ErrorCode = 1107
+        public static var WRONG_PARAMCOUNT_TO_PROCEDURE: Self { 1107 }
         /// `ER_WRONG_PARAMETERS_TO_PROCEDURE`
-        public static let WRONG_PARAMETERS_TO_PROCEDURE: ErrorCode = 1108
+        public static var WRONG_PARAMETERS_TO_PROCEDURE: Self { 1108 }
         /// `ER_UNKNOWN_TABLE`
-        public static let UNKNOWN_TABLE: ErrorCode = 1109
+        public static var UNKNOWN_TABLE: Self { 1109 }
         /// `ER_FIELD_SPECIFIED_TWICE`
-        public static let FIELD_SPECIFIED_TWICE: ErrorCode = 1110
+        public static var FIELD_SPECIFIED_TWICE: Self { 1110 }
         /// `ER_INVALID_GROUP_FUNC_USE`
-        public static let INVALID_GROUP_FUNC_USE: ErrorCode = 1111
+        public static var INVALID_GROUP_FUNC_USE: Self { 1111 }
         /// `ER_UNSUPPORTED_EXTENSION`
-        public static let UNSUPPORTED_EXTENSION: ErrorCode = 1112
+        public static var UNSUPPORTED_EXTENSION: Self { 1112 }
         /// `ER_TABLE_MUST_HAVE_COLUMNS`
-        public static let TABLE_MUST_HAVE_COLUMNS: ErrorCode = 1113
+        public static var TABLE_MUST_HAVE_COLUMNS: Self { 1113 }
         /// `ER_RECORD_FILE_FULL`
-        public static let RECORD_FILE_FULL: ErrorCode = 1114
+        public static var RECORD_FILE_FULL: Self { 1114 }
         /// `ER_UNKNOWN_CHARACTER_SET`
-        public static let UNKNOWN_CHARACTER_SET: ErrorCode = 1115
+        public static var UNKNOWN_CHARACTER_SET: Self { 1115 }
         /// `ER_TOO_MANY_TABLES`
-        public static let TOO_MANY_TABLES: ErrorCode = 1116
+        public static var TOO_MANY_TABLES: Self { 1116 }
         /// `ER_TOO_MANY_FIELDS`
-        public static let TOO_MANY_FIELDS: ErrorCode = 1117
+        public static var TOO_MANY_FIELDS: Self { 1117 }
         /// `ER_TOO_BIG_ROWSIZE`
-        public static let TOO_BIG_ROWSIZE: ErrorCode = 1118
+        public static var TOO_BIG_ROWSIZE: Self { 1118 }
         /// `ER_STACK_OVERRUN`
-        public static let STACK_OVERRUN: ErrorCode = 1119
+        public static var STACK_OVERRUN: Self { 1119 }
         /// `ER_WRONG_OUTER_JOIN`
-        public static let WRONG_OUTER_JOIN: ErrorCode = 1120
+        public static var WRONG_OUTER_JOIN: Self { 1120 }
         /// `ER_NULL_COLUMN_IN_INDEX`
-        public static let NULL_COLUMN_IN_INDEX: ErrorCode = 1121
+        public static var NULL_COLUMN_IN_INDEX: Self { 1121 }
         /// `ER_CANT_FIND_UDF`
-        public static let CANT_FIND_UDF: ErrorCode = 1122
+        public static var CANT_FIND_UDF: Self { 1122 }
         /// `ER_CANT_INITIALIZE_UDF`
-        public static let CANT_INITIALIZE_UDF: ErrorCode = 1123
+        public static var CANT_INITIALIZE_UDF: Self { 1123 }
         /// `ER_UDF_NO_PATHS`
-        public static let UDF_NO_PATHS: ErrorCode = 1124
+        public static var UDF_NO_PATHS: Self { 1124 }
         /// `ER_UDF_EXISTS`
-        public static let UDF_EXISTS: ErrorCode = 1125
+        public static var UDF_EXISTS: Self { 1125 }
         /// `ER_CANT_OPEN_LIBRARY`
-        public static let CANT_OPEN_LIBRARY: ErrorCode = 1126
+        public static var CANT_OPEN_LIBRARY: Self { 1126 }
         /// `ER_CANT_FIND_DL_ENTRY`
-        public static let CANT_FIND_DL_ENTRY: ErrorCode = 1127
+        public static var CANT_FIND_DL_ENTRY: Self { 1127 }
         /// `ER_FUNCTION_NOT_DEFINED`
-        public static let FUNCTION_NOT_DEFINED: ErrorCode = 1128
+        public static var FUNCTION_NOT_DEFINED: Self { 1128 }
         /// `ER_HOST_IS_BLOCKED`
-        public static let HOST_IS_BLOCKED: ErrorCode = 1129
+        public static var HOST_IS_BLOCKED: Self { 1129 }
         /// `ER_HOST_NOT_PRIVILEGED`
-        public static let HOST_NOT_PRIVILEGED: ErrorCode = 1130
+        public static var HOST_NOT_PRIVILEGED: Self { 1130 }
         /// `ER_PASSWORD_ANONYMOUS_USER`
-        public static let PASSWORD_ANONYMOUS_USER: ErrorCode = 1131
+        public static var PASSWORD_ANONYMOUS_USER: Self { 1131 }
         /// `ER_PASSWORD_NOT_ALLOWED`
-        public static let PASSWORD_NOT_ALLOWED: ErrorCode = 1132
+        public static var PASSWORD_NOT_ALLOWED: Self { 1132 }
         /// `ER_PASSWORD_NO_MATCH`
-        public static let PASSWORD_NO_MATCH: ErrorCode = 1133
+        public static var PASSWORD_NO_MATCH: Self { 1133 }
         /// `ER_UPDATE_INFO`
-        public static let UPDATE_INFO: ErrorCode = 1134
+        public static var UPDATE_INFO: Self { 1134 }
         /// `ER_CANT_CREATE_THREAD`
-        public static let CANT_CREATE_THREAD: ErrorCode = 1135
+        public static var CANT_CREATE_THREAD: Self { 1135 }
         /// `ER_WRONG_VALUE_COUNT_ON_ROW`
-        public static let WRONG_VALUE_COUNT_ON_ROW: ErrorCode = 1136
+        public static var WRONG_VALUE_COUNT_ON_ROW: Self { 1136 }
         /// `ER_CANT_REOPEN_TABLE`
-        public static let CANT_REOPEN_TABLE: ErrorCode = 1137
+        public static var CANT_REOPEN_TABLE: Self { 1137 }
         /// `ER_INVALID_USE_OF_NULL`
-        public static let INVALID_USE_OF_NULL: ErrorCode = 1138
+        public static var INVALID_USE_OF_NULL: Self { 1138 }
         /// `ER_REGEXP_ERROR`
-        public static let REGEXP_ERROR: ErrorCode = 1139
+        public static var REGEXP_ERROR: Self { 1139 }
         /// `ER_MIX_OF_GROUP_FUNC_AND_FIELDS`
-        public static let MIX_OF_GROUP_FUNC_AND_FIELDS: ErrorCode = 1140
+        public static var MIX_OF_GROUP_FUNC_AND_FIELDS: Self { 1140 }
         /// `ER_NONEXISTING_GRANT`
-        public static let NONEXISTING_GRANT: ErrorCode = 1141
+        public static var NONEXISTING_GRANT: Self { 1141 }
         /// `ER_TABLEACCESS_DENIED_ERROR`
-        public static let TABLEACCESS_DENIED_ERROR: ErrorCode = 1142
+        public static var TABLEACCESS_DENIED_ERROR: Self { 1142 }
         /// `ER_COLUMNACCESS_DENIED_ERROR`
-        public static let COLUMNACCESS_DENIED_ERROR: ErrorCode = 1143
+        public static var COLUMNACCESS_DENIED_ERROR: Self { 1143 }
         /// `ER_ILLEGAL_GRANT_FOR_TABLE`
-        public static let ILLEGAL_GRANT_FOR_TABLE: ErrorCode = 1144
+        public static var ILLEGAL_GRANT_FOR_TABLE: Self { 1144 }
         /// `ER_GRANT_WRONG_HOST_OR_USER`
-        public static let GRANT_WRONG_HOST_OR_USER: ErrorCode = 1145
+        public static var GRANT_WRONG_HOST_OR_USER: Self { 1145 }
         /// `ER_NO_SUCH_TABLE`
-        public static let NO_SUCH_TABLE: ErrorCode = 1146
+        public static var NO_SUCH_TABLE: Self { 1146 }
         /// `ER_NONEXISTING_TABLE_GRANT`
-        public static let NONEXISTING_TABLE_GRANT: ErrorCode = 1147
+        public static var NONEXISTING_TABLE_GRANT: Self { 1147 }
         /// `ER_NOT_ALLOWED_COMMAND`
-        public static let NOT_ALLOWED_COMMAND: ErrorCode = 1148
+        public static var NOT_ALLOWED_COMMAND: Self { 1148 }
         /// `ER_SYNTAX_ERROR`
-        public static let SYNTAX_ERROR: ErrorCode = 1149
+        public static var SYNTAX_ERROR: Self { 1149 }
         /// `ER_UNUSED1`
-        public static let UNUSED1: ErrorCode  = 1150
+        public static var UNUSED1: Self { 1150 }
         /// `ER_UNUSED2`
-        public static let UNUSED2: ErrorCode  = 1151
+        public static var UNUSED2: Self { 1151 }
         /// `ER_ABORTING_CONNECTION`
-        public static let ABORTING_CONNECTION: ErrorCode = 1152
+        public static var ABORTING_CONNECTION: Self { 1152 }
         /// `ER_NET_PACKET_TOO_LARGE`
-        public static let NET_PACKET_TOO_LARGE: ErrorCode = 1153
+        public static var NET_PACKET_TOO_LARGE: Self { 1153 }
         /// `ER_NET_READ_ERROR_FROM_PIPE`
-        public static let NET_READ_ERROR_FROM_PIPE: ErrorCode = 1154
+        public static var NET_READ_ERROR_FROM_PIPE: Self { 1154 }
         /// `ER_NET_FCNTL_ERROR`
-        public static let NET_FCNTL_ERROR: ErrorCode = 1155
+        public static var NET_FCNTL_ERROR: Self { 1155 }
         /// `ER_NET_PACKETS_OUT_OF_ORDER`
-        public static let NET_PACKETS_OUT_OF_ORDER: ErrorCode = 1156
+        public static var NET_PACKETS_OUT_OF_ORDER: Self { 1156 }
         /// `ER_NET_UNCOMPRESS_ERROR`
-        public static let NET_UNCOMPRESS_ERROR: ErrorCode = 1157
+        public static var NET_UNCOMPRESS_ERROR: Self { 1157 }
         /// `ER_NET_READ_ERROR`
-        public static let NET_READ_ERROR: ErrorCode = 1158
+        public static var NET_READ_ERROR: Self { 1158 }
         /// `ER_NET_READ_INTERRUPTED`
-        public static let NET_READ_INTERRUPTED: ErrorCode = 1159
+        public static var NET_READ_INTERRUPTED: Self { 1159 }
         /// `ER_NET_ERROR_ON_WRITE`
-        public static let NET_ERROR_ON_WRITE: ErrorCode = 1160
+        public static var NET_ERROR_ON_WRITE: Self { 1160 }
         /// `ER_NET_WRITE_INTERRUPTED`
-        public static let NET_WRITE_INTERRUPTED: ErrorCode = 1161
+        public static var NET_WRITE_INTERRUPTED: Self { 1161 }
         /// `ER_TOO_LONG_STRING`
-        public static let TOO_LONG_STRING: ErrorCode = 1162
+        public static var TOO_LONG_STRING: Self { 1162 }
         /// `ER_TABLE_CANT_HANDLE_BLOB`
-        public static let TABLE_CANT_HANDLE_BLOB: ErrorCode = 1163
+        public static var TABLE_CANT_HANDLE_BLOB: Self { 1163 }
         /// `ER_TABLE_CANT_HANDLE_AUTO_INCREMENT`
-        public static let TABLE_CANT_HANDLE_AUTO_INCREMENT: ErrorCode = 1164
+        public static var TABLE_CANT_HANDLE_AUTO_INCREMENT: Self { 1164 }
         /// `ER_UNUSED3`
-        public static let UNUSED3: ErrorCode  = 1165
+        public static var UNUSED3: Self { 1165 }
         /// `ER_WRONG_COLUMN_NAME`
-        public static let WRONG_COLUMN_NAME: ErrorCode = 1166
+        public static var WRONG_COLUMN_NAME: Self { 1166 }
         /// `ER_WRONG_KEY_COLUMN`
-        public static let WRONG_KEY_COLUMN: ErrorCode = 1167
+        public static var WRONG_KEY_COLUMN: Self { 1167 }
         /// `ER_WRONG_MRG_TABLE`
-        public static let WRONG_MRG_TABLE: ErrorCode = 1168
+        public static var WRONG_MRG_TABLE: Self { 1168 }
         /// `ER_DUP_UNIQUE`
-        public static let DUP_UNIQUE: ErrorCode = 1169
+        public static var DUP_UNIQUE: Self { 1169 }
         /// `ER_BLOB_KEY_WITHOUT_LENGTH`
-        public static let BLOB_KEY_WITHOUT_LENGTH: ErrorCode = 1170
+        public static var BLOB_KEY_WITHOUT_LENGTH: Self { 1170 }
         /// `ER_PRIMARY_CANT_HAVE_NULL`
-        public static let PRIMARY_CANT_HAVE_NULL: ErrorCode = 1171
+        public static var PRIMARY_CANT_HAVE_NULL: Self { 1171 }
         /// `ER_TOO_MANY_ROWS`
-        public static let TOO_MANY_ROWS: ErrorCode = 1172
+        public static var TOO_MANY_ROWS: Self { 1172 }
         /// `ER_REQUIRES_PRIMARY_KEY`
-        public static let REQUIRES_PRIMARY_KEY: ErrorCode = 1173
+        public static var REQUIRES_PRIMARY_KEY: Self { 1173 }
         /// `ER_NO_RAID_COMPILED`
-        public static let NO_RAID_COMPILED: ErrorCode = 1174
+        public static var NO_RAID_COMPILED: Self { 1174 }
         /// `ER_UPDATE_WITHOUT_KEY_IN_SAFE_MODE`
-        public static let UPDATE_WITHOUT_KEY_IN_SAFE_MODE: ErrorCode = 1175
+        public static var UPDATE_WITHOUT_KEY_IN_SAFE_MODE: Self { 1175 }
         /// `ER_KEY_DOES_NOT_EXITS`
-        public static let KEY_DOES_NOT_EXITS: ErrorCode = 1176
+        public static var KEY_DOES_NOT_EXITS: Self { 1176 }
         /// `ER_CHECK_NO_SUCH_TABLE`
-        public static let CHECK_NO_SUCH_TABLE: ErrorCode = 1177
+        public static var CHECK_NO_SUCH_TABLE: Self { 1177 }
         /// `ER_CHECK_NOT_IMPLEMENTED`
-        public static let CHECK_NOT_IMPLEMENTED: ErrorCode = 1178
+        public static var CHECK_NOT_IMPLEMENTED: Self { 1178 }
         /// `ER_CANT_DO_THIS_DURING_AN_TRANSACTION`
-        public static let CANT_DO_THIS_DURING_AN_TRANSACTION: ErrorCode = 1179
+        public static var CANT_DO_THIS_DURING_AN_TRANSACTION: Self { 1179 }
         /// `ER_ERROR_DURING_COMMIT`
-        public static let ERROR_DURING_COMMIT: ErrorCode = 1180
+        public static var ERROR_DURING_COMMIT: Self { 1180 }
         /// `ER_ERROR_DURING_ROLLBACK`
-        public static let ERROR_DURING_ROLLBACK: ErrorCode = 1181
+        public static var ERROR_DURING_ROLLBACK: Self { 1181 }
         /// `ER_ERROR_DURING_FLUSH_LOGS`
-        public static let ERROR_DURING_FLUSH_LOGS: ErrorCode = 1182
+        public static var ERROR_DURING_FLUSH_LOGS: Self { 1182 }
         /// `ER_ERROR_DURING_CHECKPOINT`
-        public static let ERROR_DURING_CHECKPOINT: ErrorCode = 1183
+        public static var ERROR_DURING_CHECKPOINT: Self { 1183 }
         /// `ER_NEW_ABORTING_CONNECTION`
-        public static let NEW_ABORTING_CONNECTION: ErrorCode = 1184
+        public static var NEW_ABORTING_CONNECTION: Self { 1184 }
         /// `ER_DUMP_NOT_IMPLEMENTED`
-        public static let DUMP_NOT_IMPLEMENTED: ErrorCode = 1185
+        public static var DUMP_NOT_IMPLEMENTED: Self { 1185 }
         /// `ER_FLUSH_MASTER_BINLOG_CLOSED`
-        public static let FLUSH_MASTER_BINLOG_CLOSED: ErrorCode = 1186
+        public static var FLUSH_MASTER_BINLOG_CLOSED: Self { 1186 }
         /// `ER_INDEX_REBUILD`
-        public static let INDEX_REBUILD: ErrorCode = 1187
+        public static var INDEX_REBUILD: Self { 1187 }
         /// `ER_MASTER`
-        public static let MASTER: ErrorCode = 1188
+        public static var MASTER: Self { 1188 }
         /// `ER_MASTER_NET_READ`
-        public static let MASTER_NET_READ: ErrorCode = 1189
+        public static var MASTER_NET_READ: Self { 1189 }
         /// `ER_MASTER_NET_WRITE`
-        public static let MASTER_NET_WRITE: ErrorCode = 1190
+        public static var MASTER_NET_WRITE: Self { 1190 }
         /// `ER_FT_MATCHING_KEY_NOT_FOUND`
-        public static let FT_MATCHING_KEY_NOT_FOUND: ErrorCode = 1191
+        public static var FT_MATCHING_KEY_NOT_FOUND: Self { 1191 }
         /// `ER_LOCK_OR_ACTIVE_TRANSACTION`
-        public static let LOCK_OR_ACTIVE_TRANSACTION: ErrorCode = 1192
+        public static var LOCK_OR_ACTIVE_TRANSACTION: Self { 1192 }
         /// `ER_UNKNOWN_SYSTEM_VARIABLE`
-        public static let UNKNOWN_SYSTEM_VARIABLE: ErrorCode = 1193
+        public static var UNKNOWN_SYSTEM_VARIABLE: Self { 1193 }
         /// `ER_CRASHED_ON_USAGE`
-        public static let CRASHED_ON_USAGE: ErrorCode = 1194
+        public static var CRASHED_ON_USAGE: Self { 1194 }
         /// `ER_CRASHED_ON_REPAIR`
-        public static let CRASHED_ON_REPAIR: ErrorCode = 1195
+        public static var CRASHED_ON_REPAIR: Self { 1195 }
         /// `ER_WARNING_NOT_COMPLETE_ROLLBACK`
-        public static let WARNING_NOT_COMPLETE_ROLLBACK: ErrorCode = 1196
+        public static var WARNING_NOT_COMPLETE_ROLLBACK: Self { 1196 }
         /// `ER_TRANS_CACHE_FULL`
-        public static let TRANS_CACHE_FULL: ErrorCode = 1197
+        public static var TRANS_CACHE_FULL: Self { 1197 }
         /// `ER_SLAVE_MUST_STOP`
-        public static let SLAVE_MUST_STOP: ErrorCode = 1198
+        public static var SLAVE_MUST_STOP: Self { 1198 }
         /// `ER_SLAVE_NOT_RUNNING`
-        public static let SLAVE_NOT_RUNNING: ErrorCode = 1199
+        public static var SLAVE_NOT_RUNNING: Self { 1199 }
         /// `ER_BAD_SLAVE`
-        public static let BAD_SLAVE: ErrorCode = 1200
+        public static var BAD_SLAVE: Self { 1200 }
         /// `ER_MASTER_INFO`
-        public static let MASTER_INFO: ErrorCode = 1201
+        public static var MASTER_INFO: Self { 1201 }
         /// `ER_SLAVE_THREAD`
-        public static let SLAVE_THREAD: ErrorCode = 1202
+        public static var SLAVE_THREAD: Self { 1202 }
         /// `ER_TOO_MANY_USER_CONNECTIONS`
-        public static let TOO_MANY_USER_CONNECTIONS: ErrorCode = 1203
+        public static var TOO_MANY_USER_CONNECTIONS: Self { 1203 }
         /// `ER_SET_CONSTANTS_ONLY`
-        public static let SET_CONSTANTS_ONLY: ErrorCode = 1204
+        public static var SET_CONSTANTS_ONLY: Self { 1204 }
         /// `ER_LOCK_WAIT_TIMEOUT`
-        public static let LOCK_WAIT_TIMEOUT: ErrorCode = 1205
+        public static var LOCK_WAIT_TIMEOUT: Self { 1205 }
         /// `ER_LOCK_TABLE_FULL`
-        public static let LOCK_TABLE_FULL: ErrorCode = 1206
+        public static var LOCK_TABLE_FULL: Self { 1206 }
         /// `ER_READ_ONLY_TRANSACTION`
-        public static let READ_ONLY_TRANSACTION: ErrorCode = 1207
+        public static var READ_ONLY_TRANSACTION: Self { 1207 }
         /// `ER_DROP_DB_WITH_READ_LOCK`
-        public static let DROP_DB_WITH_READ_LOCK: ErrorCode = 1208
+        public static var DROP_DB_WITH_READ_LOCK: Self { 1208 }
         /// `ER_CREATE_DB_WITH_READ_LOCK`
-        public static let CREATE_DB_WITH_READ_LOCK: ErrorCode = 1209
+        public static var CREATE_DB_WITH_READ_LOCK: Self { 1209 }
         /// `ER_WRONG_ARGUMENTS`
-        public static let WRONG_ARGUMENTS: ErrorCode = 1210
+        public static var WRONG_ARGUMENTS: Self { 1210 }
         /// `ER_NO_PERMISSION_TO_CREATE_USER`
-        public static let NO_PERMISSION_TO_CREATE_USER: ErrorCode = 1211
+        public static var NO_PERMISSION_TO_CREATE_USER: Self { 1211 }
         /// `ER_UNION_TABLES_IN_DIFFERENT_DIR`
-        public static let UNION_TABLES_IN_DIFFERENT_DIR: ErrorCode = 1212
+        public static var UNION_TABLES_IN_DIFFERENT_DIR: Self { 1212 }
         /// `ER_LOCK_DEADLOCK`
-        public static let LOCK_DEADLOCK: ErrorCode = 1213
+        public static var LOCK_DEADLOCK: Self { 1213 }
         /// `ER_TABLE_CANT_HANDLE_FT`
-        public static let TABLE_CANT_HANDLE_FT: ErrorCode = 1214
+        public static var TABLE_CANT_HANDLE_FT: Self { 1214 }
         /// `ER_CANNOT_ADD_FOREIGN`
-        public static let CANNOT_ADD_FOREIGN: ErrorCode = 1215
+        public static var CANNOT_ADD_FOREIGN: Self { 1215 }
         /// `ER_NO_REFERENCED_ROW`
-        public static let NO_REFERENCED_ROW: ErrorCode = 1216
+        public static var NO_REFERENCED_ROW: Self { 1216 }
         /// `ER_ROW_IS_REFERENCED`
-        public static let ROW_IS_REFERENCED: ErrorCode = 1217
+        public static var ROW_IS_REFERENCED: Self { 1217 }
         /// `ER_CONNECT_TO_MASTER`
-        public static let CONNECT_TO_MASTER: ErrorCode = 1218
+        public static var CONNECT_TO_MASTER: Self { 1218 }
         /// `ER_QUERY_ON_MASTER`
-        public static let QUERY_ON_MASTER: ErrorCode = 1219
+        public static var QUERY_ON_MASTER: Self { 1219 }
         /// `ER_ERROR_WHEN_EXECUTING_COMMAND`
-        public static let ERROR_WHEN_EXECUTING_COMMAND: ErrorCode = 1220
+        public static var ERROR_WHEN_EXECUTING_COMMAND: Self { 1220 }
         /// `ER_WRONG_USAGE`
-        public static let WRONG_USAGE: ErrorCode = 1221
+        public static var WRONG_USAGE: Self { 1221 }
         /// `ER_WRONG_NUMBER_OF_COLUMNS_IN_SELECT`
-        public static let WRONG_NUMBER_OF_COLUMNS_IN_SELECT: ErrorCode = 1222
+        public static var WRONG_NUMBER_OF_COLUMNS_IN_SELECT: Self { 1222 }
         /// `ER_CANT_UPDATE_WITH_READLOCK`
-        public static let CANT_UPDATE_WITH_READLOCK: ErrorCode = 1223
+        public static var CANT_UPDATE_WITH_READLOCK: Self { 1223 }
         /// `ER_MIXING_NOT_ALLOWED`
-        public static let MIXING_NOT_ALLOWED: ErrorCode = 1224
+        public static var MIXING_NOT_ALLOWED: Self { 1224 }
         /// `ER_DUP_ARGUMENT`
-        public static let DUP_ARGUMENT: ErrorCode = 1225
+        public static var DUP_ARGUMENT: Self { 1225 }
         /// `ER_USER_LIMIT_REACHED`
-        public static let USER_LIMIT_REACHED: ErrorCode = 1226
+        public static var USER_LIMIT_REACHED: Self { 1226 }
         /// `ER_SPECIFIC_ACCESS_DENIED_ERROR`
-        public static let SPECIFIC_ACCESS_DENIED_ERROR: ErrorCode = 1227
+        public static var SPECIFIC_ACCESS_DENIED_ERROR: Self { 1227 }
         /// `ER_LOCAL_VARIABLE`
-        public static let LOCAL_VARIABLE: ErrorCode = 1228
+        public static var LOCAL_VARIABLE: Self { 1228 }
         /// `ER_GLOBAL_VARIABLE`
-        public static let GLOBAL_VARIABLE: ErrorCode = 1229
+        public static var GLOBAL_VARIABLE: Self { 1229 }
         /// `ER_NO_DEFAULT`
-        public static let NO_DEFAULT: ErrorCode = 1230
+        public static var NO_DEFAULT: Self { 1230 }
         /// `ER_WRONG_VALUE_FOR_VAR`
-        public static let WRONG_VALUE_FOR_VAR: ErrorCode = 1231
+        public static var WRONG_VALUE_FOR_VAR: Self { 1231 }
         /// `ER_WRONG_TYPE_FOR_VAR`
-        public static let WRONG_TYPE_FOR_VAR: ErrorCode = 1232
+        public static var WRONG_TYPE_FOR_VAR: Self { 1232 }
         /// `ER_VAR_CANT_BE_READ`
-        public static let VAR_CANT_BE_READ: ErrorCode = 1233
+        public static var VAR_CANT_BE_READ: Self { 1233 }
         /// `ER_CANT_USE_OPTION_HERE`
-        public static let CANT_USE_OPTION_HERE: ErrorCode = 1234
+        public static var CANT_USE_OPTION_HERE: Self { 1234 }
         /// `ER_NOT_SUPPORTED_YET`
-        public static let NOT_SUPPORTED_YET: ErrorCode = 1235
+        public static var NOT_SUPPORTED_YET: Self { 1235 }
         /// `ER_MASTER_FATAL_ERROR_READING_BINLOG`
-        public static let MASTER_FATAL_ERROR_READING_BINLOG: ErrorCode = 1236
+        public static var MASTER_FATAL_ERROR_READING_BINLOG: Self { 1236 }
         /// `ER_SLAVE_IGNORED_TABLE`
-        public static let SLAVE_IGNORED_TABLE: ErrorCode = 1237
+        public static var SLAVE_IGNORED_TABLE: Self { 1237 }
         /// `ER_INCORRECT_GLOBAL_LOCAL_VAR`
-        public static let INCORRECT_GLOBAL_LOCAL_VAR: ErrorCode = 1238
+        public static var INCORRECT_GLOBAL_LOCAL_VAR: Self { 1238 }
         /// `ER_WRONG_FK_DEF`
-        public static let WRONG_FK_DEF: ErrorCode = 1239
+        public static var WRONG_FK_DEF: Self { 1239 }
         /// `ER_KEY_REF_DO_NOT_MATCH_TABLE_REF`
-        public static let KEY_REF_DO_NOT_MATCH_TABLE_REF: ErrorCode = 1240
+        public static var KEY_REF_DO_NOT_MATCH_TABLE_REF: Self { 1240 }
         /// `ER_OPERAND_COLUMNS`
-        public static let OPERAND_COLUMNS: ErrorCode = 1241
+        public static var OPERAND_COLUMNS: Self { 1241 }
         /// `ER_SUBQUERY_NO_1_ROW`
-        public static let SUBQUERY_NO_1_ROW: ErrorCode = 1242
+        public static var SUBQUERY_NO_1_ROW: Self { 1242 }
         /// `ER_UNKNOWN_STMT_HANDLER`
-        public static let UNKNOWN_STMT_HANDLER: ErrorCode = 1243
+        public static var UNKNOWN_STMT_HANDLER: Self { 1243 }
         /// `ER_CORRUPT_HELP_DB`
-        public static let CORRUPT_HELP_DB: ErrorCode = 1244
+        public static var CORRUPT_HELP_DB: Self { 1244 }
         /// `ER_CYCLIC_REFERENCE`
-        public static let CYCLIC_REFERENCE: ErrorCode = 1245
+        public static var CYCLIC_REFERENCE: Self { 1245 }
         /// `ER_AUTO_CONVERT`
-        public static let AUTO_CONVERT: ErrorCode = 1246
+        public static var AUTO_CONVERT: Self { 1246 }
         /// `ER_ILLEGAL_REFERENCE`
-        public static let ILLEGAL_REFERENCE: ErrorCode = 1247
+        public static var ILLEGAL_REFERENCE: Self { 1247 }
         /// `ER_DERIVED_MUST_HAVE_ALIAS`
-        public static let DERIVED_MUST_HAVE_ALIAS: ErrorCode = 1248
+        public static var DERIVED_MUST_HAVE_ALIAS: Self { 1248 }
         /// `ER_SELECT_REDUCED`
-        public static let SELECT_REDUCED: ErrorCode = 1249
+        public static var SELECT_REDUCED: Self { 1249 }
         /// `ER_TABLENAME_NOT_ALLOWED_HERE`
-        public static let TABLENAME_NOT_ALLOWED_HERE: ErrorCode = 1250
+        public static var TABLENAME_NOT_ALLOWED_HERE: Self { 1250 }
         /// `ER_NOT_SUPPORTED_AUTH_MODE`
-        public static let NOT_SUPPORTED_AUTH_MODE: ErrorCode = 1251
+        public static var NOT_SUPPORTED_AUTH_MODE: Self { 1251 }
         /// `ER_SPATIAL_CANT_HAVE_NULL`
-        public static let SPATIAL_CANT_HAVE_NULL: ErrorCode = 1252
+        public static var SPATIAL_CANT_HAVE_NULL: Self { 1252 }
         /// `ER_COLLATION_CHARSET_MISMATCH`
-        public static let COLLATION_CHARSET_MISMATCH: ErrorCode = 1253
+        public static var COLLATION_CHARSET_MISMATCH: Self { 1253 }
         /// `ER_SLAVE_WAS_RUNNING`
-        public static let SLAVE_WAS_RUNNING: ErrorCode = 1254
+        public static var SLAVE_WAS_RUNNING: Self { 1254 }
         /// `ER_SLAVE_WAS_NOT_RUNNING`
-        public static let SLAVE_WAS_NOT_RUNNING: ErrorCode = 1255
+        public static var SLAVE_WAS_NOT_RUNNING: Self { 1255 }
         /// `ER_TOO_BIG_FOR_UNCOMPRESS`
-        public static let TOO_BIG_FOR_UNCOMPRESS: ErrorCode = 1256
+        public static var TOO_BIG_FOR_UNCOMPRESS: Self { 1256 }
         /// `ER_ZLIB_Z_MEM_ERROR`
-        public static let ZLIB_Z_MEM_ERROR: ErrorCode = 1257
+        public static var ZLIB_Z_MEM_ERROR: Self { 1257 }
         /// `ER_ZLIB_Z_BUF_ERROR`
-        public static let ZLIB_Z_BUF_ERROR: ErrorCode = 1258
+        public static var ZLIB_Z_BUF_ERROR: Self { 1258 }
         /// `ER_ZLIB_Z_DATA_ERROR`
-        public static let ZLIB_Z_DATA_ERROR: ErrorCode = 1259
+        public static var ZLIB_Z_DATA_ERROR: Self { 1259 }
         /// `ER_CUT_VALUE_GROUP_CONCAT`
-        public static let CUT_VALUE_GROUP_CONCAT: ErrorCode = 1260
+        public static var CUT_VALUE_GROUP_CONCAT: Self { 1260 }
         /// `ER_WARN_TOO_FEW_RECORDS`
-        public static let WARN_TOO_FEW_RECORDS: ErrorCode = 1261
+        public static var WARN_TOO_FEW_RECORDS: Self { 1261 }
         /// `ER_WARN_TOO_MANY_RECORDS`
-        public static let WARN_TOO_MANY_RECORDS: ErrorCode = 1262
+        public static var WARN_TOO_MANY_RECORDS: Self { 1262 }
         /// `ER_WARN_NULL_TO_NOTNULL`
-        public static let WARN_NULL_TO_NOTNULL: ErrorCode = 1263
+        public static var WARN_NULL_TO_NOTNULL: Self { 1263 }
         /// `ER_WARN_DATA_OUT_OF_RANGE`
-        public static let WARN_DATA_OUT_OF_RANGE: ErrorCode = 1264
+        public static var WARN_DATA_OUT_OF_RANGE: Self { 1264 }
         /// `WARN_DATA_TRUNCATED`
-        public static let N_DATA_TRUNCATED: ErrorCode = 1265
+        public static var N_DATA_TRUNCATED: Self { 1265 }
         /// `ER_WARN_USING_OTHER_HANDLER`
-        public static let WARN_USING_OTHER_HANDLER: ErrorCode = 1266
+        public static var WARN_USING_OTHER_HANDLER: Self { 1266 }
         /// `ER_CANT_AGGREGATE_2COLLATIONS`
-        public static let CANT_AGGREGATE_2COLLATIONS: ErrorCode = 1267
+        public static var CANT_AGGREGATE_2COLLATIONS: Self { 1267 }
         /// `ER_DROP_USER`
-        public static let DROP_USER: ErrorCode = 1268
+        public static var DROP_USER: Self { 1268 }
         /// `ER_REVOKE_GRANTS`
-        public static let REVOKE_GRANTS: ErrorCode = 1269
+        public static var REVOKE_GRANTS: Self { 1269 }
         /// `ER_CANT_AGGREGATE_3COLLATIONS`
-        public static let CANT_AGGREGATE_3COLLATIONS: ErrorCode = 1270
+        public static var CANT_AGGREGATE_3COLLATIONS: Self { 1270 }
         /// `ER_CANT_AGGREGATE_NCOLLATIONS`
-        public static let CANT_AGGREGATE_NCOLLATIONS: ErrorCode = 1271
+        public static var CANT_AGGREGATE_NCOLLATIONS: Self { 1271 }
         /// `ER_VARIABLE_IS_NOT_STRUCT`
-        public static let VARIABLE_IS_NOT_STRUCT: ErrorCode = 1272
+        public static var VARIABLE_IS_NOT_STRUCT: Self { 1272 }
         /// `ER_UNKNOWN_COLLATION`
-        public static let UNKNOWN_COLLATION: ErrorCode = 1273
+        public static var UNKNOWN_COLLATION: Self { 1273 }
         /// `ER_SLAVE_IGNORED_SSL_PARAMS`
-        public static let SLAVE_IGNORED_SSL_PARAMS: ErrorCode = 1274
+        public static var SLAVE_IGNORED_SSL_PARAMS: Self { 1274 }
         /// `ER_SERVER_IS_IN_SECURE_AUTH_MODE`
-        public static let SERVER_IS_IN_SECURE_AUTH_MODE: ErrorCode = 1275
+        public static var SERVER_IS_IN_SECURE_AUTH_MODE: Self { 1275 }
         /// `ER_WARN_FIELD_RESOLVED`
-        public static let WARN_FIELD_RESOLVED: ErrorCode = 1276
+        public static var WARN_FIELD_RESOLVED: Self { 1276 }
         /// `ER_BAD_SLAVE_UNTIL_COND`
-        public static let BAD_SLAVE_UNTIL_COND: ErrorCode = 1277
+        public static var BAD_SLAVE_UNTIL_COND: Self { 1277 }
         /// `ER_MISSING_SKIP_SLAVE`
-        public static let MISSING_SKIP_SLAVE: ErrorCode = 1278
+        public static var MISSING_SKIP_SLAVE: Self { 1278 }
         /// `ER_UNTIL_COND_IGNORED`
-        public static let UNTIL_COND_IGNORED: ErrorCode = 1279
+        public static var UNTIL_COND_IGNORED: Self { 1279 }
         /// `ER_WRONG_NAME_FOR_INDEX`
-        public static let WRONG_NAME_FOR_INDEX: ErrorCode = 1280
+        public static var WRONG_NAME_FOR_INDEX: Self { 1280 }
         /// `ER_WRONG_NAME_FOR_CATALOG`
-        public static let WRONG_NAME_FOR_CATALOG: ErrorCode = 1281
+        public static var WRONG_NAME_FOR_CATALOG: Self { 1281 }
         /// `ER_WARN_QC_RESIZE`
-        public static let WARN_QC_RESIZE: ErrorCode = 1282
+        public static var WARN_QC_RESIZE: Self { 1282 }
         /// `ER_BAD_FT_COLUMN`
-        public static let BAD_FT_COLUMN: ErrorCode = 1283
+        public static var BAD_FT_COLUMN: Self { 1283 }
         /// `ER_UNKNOWN_KEY_CACHE`
-        public static let UNKNOWN_KEY_CACHE: ErrorCode = 1284
+        public static var UNKNOWN_KEY_CACHE: Self { 1284 }
         /// `ER_WARN_HOSTNAME_WONT_WORK`
-        public static let WARN_HOSTNAME_WONT_WORK: ErrorCode = 1285
+        public static var WARN_HOSTNAME_WONT_WORK: Self { 1285 }
         /// `ER_UNKNOWN_STORAGE_ENGINE`
-        public static let UNKNOWN_STORAGE_ENGINE: ErrorCode = 1286
+        public static var UNKNOWN_STORAGE_ENGINE: Self { 1286 }
         /// `ER_WARN_DEPRECATED_SYNTAX`
-        public static let WARN_DEPRECATED_SYNTAX: ErrorCode = 1287
+        public static var WARN_DEPRECATED_SYNTAX: Self { 1287 }
         /// `ER_NON_UPDATABLE_TABLE`
-        public static let NON_UPDATABLE_TABLE: ErrorCode = 1288
+        public static var NON_UPDATABLE_TABLE: Self { 1288 }
         /// `ER_FEATURE_DISABLED`
-        public static let FEATURE_DISABLED: ErrorCode = 1289
+        public static var FEATURE_DISABLED: Self { 1289 }
         /// `ER_OPTION_PREVENTS_STATEMENT`
-        public static let OPTION_PREVENTS_STATEMENT: ErrorCode = 1290
+        public static var OPTION_PREVENTS_STATEMENT: Self { 1290 }
         /// `ER_DUPLICATED_VALUE_IN_TYPE`
-        public static let DUPLICATED_VALUE_IN_TYPE: ErrorCode = 1291
+        public static var DUPLICATED_VALUE_IN_TYPE: Self { 1291 }
         /// `ER_TRUNCATED_WRONG_VALUE`
-        public static let TRUNCATED_WRONG_VALUE: ErrorCode = 1292
+        public static var TRUNCATED_WRONG_VALUE: Self { 1292 }
         /// `ER_TOO_MUCH_AUTO_TIMESTAMP_COLS`
-        public static let TOO_MUCH_AUTO_TIMESTAMP_COLS: ErrorCode = 1293
+        public static var TOO_MUCH_AUTO_TIMESTAMP_COLS: Self { 1293 }
         /// `ER_INVALID_ON_UPDATE`
-        public static let INVALID_ON_UPDATE: ErrorCode = 1294
+        public static var INVALID_ON_UPDATE: Self { 1294 }
         /// `ER_UNSUPPORTED_PS`
-        public static let UNSUPPORTED_PS: ErrorCode = 1295
+        public static var UNSUPPORTED_PS: Self { 1295 }
         /// `ER_GET_ERRMSG`
-        public static let GET_ERRMSG: ErrorCode = 1296
+        public static var GET_ERRMSG: Self { 1296 }
         /// `ER_GET_TEMPORARY_ERRMSG`
-        public static let GET_TEMPORARY_ERRMSG: ErrorCode = 1297
+        public static var GET_TEMPORARY_ERRMSG: Self { 1297 }
         /// `ER_UNKNOWN_TIME_ZONE`
-        public static let UNKNOWN_TIME_ZONE: ErrorCode = 1298
+        public static var UNKNOWN_TIME_ZONE: Self { 1298 }
         /// `ER_WARN_INVALID_TIMESTAMP`
-        public static let WARN_INVALID_TIMESTAMP: ErrorCode = 1299
+        public static var WARN_INVALID_TIMESTAMP: Self { 1299 }
         /// `ER_INVALID_CHARACTER_STRING`
-        public static let INVALID_CHARACTER_STRING: ErrorCode = 1300
+        public static var INVALID_CHARACTER_STRING: Self { 1300 }
         /// `ER_WARN_ALLOWED_PACKET_OVERFLOWED`
-        public static let WARN_ALLOWED_PACKET_OVERFLOWED: ErrorCode = 1301
+        public static var WARN_ALLOWED_PACKET_OVERFLOWED: Self { 1301 }
         /// `ER_CONFLICTING_DECLARATIONS`
-        public static let CONFLICTING_DECLARATIONS: ErrorCode = 1302
+        public static var CONFLICTING_DECLARATIONS: Self { 1302 }
         /// `ER_SP_NO_RECURSIVE_CREATE`
-        public static let SP_NO_RECURSIVE_CREATE: ErrorCode = 1303
+        public static var SP_NO_RECURSIVE_CREATE: Self { 1303 }
         /// `ER_SP_ALREADY_EXISTS`
-        public static let SP_ALREADY_EXISTS: ErrorCode = 1304
+        public static var SP_ALREADY_EXISTS: Self { 1304 }
         /// `ER_SP_DOES_NOT_EXIST`
-        public static let SP_DOES_NOT_EXIST: ErrorCode = 1305
+        public static var SP_DOES_NOT_EXIST: Self { 1305 }
         /// `ER_SP_DROP_FAILED`
-        public static let SP_DROP_FAILED: ErrorCode = 1306
+        public static var SP_DROP_FAILED: Self { 1306 }
         /// `ER_SP_STORE_FAILED`
-        public static let SP_STORE_FAILED: ErrorCode = 1307
+        public static var SP_STORE_FAILED: Self { 1307 }
         /// `ER_SP_LILABEL_MISMATCH`
-        public static let SP_LILABEL_MISMATCH: ErrorCode = 1308
+        public static var SP_LILABEL_MISMATCH: Self { 1308 }
         /// `ER_SP_LABEL_REDEFINE`
-        public static let SP_LABEL_REDEFINE: ErrorCode = 1309
+        public static var SP_LABEL_REDEFINE: Self { 1309 }
         /// `ER_SP_LABEL_MISMATCH`
-        public static let SP_LABEL_MISMATCH: ErrorCode = 1310
+        public static var SP_LABEL_MISMATCH: Self { 1310 }
         /// `ER_SP_UNINIT_VAR`
-        public static let SP_UNINIT_VAR: ErrorCode = 1311
+        public static var SP_UNINIT_VAR: Self { 1311 }
         /// `ER_SP_BADSELECT`
-        public static let SP_BADSELECT: ErrorCode = 1312
+        public static var SP_BADSELECT: Self { 1312 }
         /// `ER_SP_BADRETURN`
-        public static let SP_BADRETURN: ErrorCode = 1313
+        public static var SP_BADRETURN: Self { 1313 }
         /// `ER_SP_BADSTATEMENT`
-        public static let SP_BADSTATEMENT: ErrorCode = 1314
+        public static var SP_BADSTATEMENT: Self { 1314 }
         /// `ER_UPDATE_LOG_DEPRECATED_IGNORED`
-        public static let UPDATE_LOG_DEPRECATED_IGNORED: ErrorCode = 1315
+        public static var UPDATE_LOG_DEPRECATED_IGNORED: Self { 1315 }
         /// `ER_UPDATE_LOG_DEPRECATED_TRANSLATED`
-        public static let UPDATE_LOG_DEPRECATED_TRANSLATED: ErrorCode = 1316
+        public static var UPDATE_LOG_DEPRECATED_TRANSLATED: Self { 1316 }
         /// `ER_QUERY_INTERRUPTED`
-        public static let QUERY_INTERRUPTED: ErrorCode = 1317
+        public static var QUERY_INTERRUPTED: Self { 1317 }
         /// `ER_SP_WRONG_NO_OF_ARGS`
-        public static let SP_WRONG_NO_OF_ARGS: ErrorCode = 1318
+        public static var SP_WRONG_NO_OF_ARGS: Self { 1318 }
         /// `ER_SP_COND_MISMATCH`
-        public static let SP_COND_MISMATCH: ErrorCode = 1319
+        public static var SP_COND_MISMATCH: Self { 1319 }
         /// `ER_SP_NORETURN`
-        public static let SP_NORETURN: ErrorCode = 1320
+        public static var SP_NORETURN: Self { 1320 }
         /// `ER_SP_NORETURNEND`
-        public static let SP_NORETURNEND: ErrorCode = 1321
+        public static var SP_NORETURNEND: Self { 1321 }
         /// `ER_SP_BAD_CURSOR_QUERY`
-        public static let SP_BAD_CURSOR_QUERY: ErrorCode = 1322
+        public static var SP_BAD_CURSOR_QUERY: Self { 1322 }
         /// `ER_SP_BAD_CURSOR_SELECT`
-        public static let SP_BAD_CURSOR_SELECT: ErrorCode = 1323
+        public static var SP_BAD_CURSOR_SELECT: Self { 1323 }
         /// `ER_SP_CURSOR_MISMATCH`
-        public static let SP_CURSOR_MISMATCH: ErrorCode = 1324
+        public static var SP_CURSOR_MISMATCH: Self { 1324 }
         /// `ER_SP_CURSOR_ALREADY_OPEN`
-        public static let SP_CURSOR_ALREADY_OPEN: ErrorCode = 1325
+        public static var SP_CURSOR_ALREADY_OPEN: Self { 1325 }
         /// `ER_SP_CURSOR_NOT_OPEN`
-        public static let SP_CURSOR_NOT_OPEN: ErrorCode = 1326
+        public static var SP_CURSOR_NOT_OPEN: Self { 1326 }
         /// `ER_SP_UNDECLARED_VAR`
-        public static let SP_UNDECLARED_VAR: ErrorCode = 1327
+        public static var SP_UNDECLARED_VAR: Self { 1327 }
         /// `ER_SP_WRONG_NO_OF_FETCH_ARGS`
-        public static let SP_WRONG_NO_OF_FETCH_ARGS: ErrorCode = 1328
+        public static var SP_WRONG_NO_OF_FETCH_ARGS: Self { 1328 }
         /// `ER_SP_FETCH_NO_DATA`
-        public static let SP_FETCH_NO_DATA: ErrorCode = 1329
+        public static var SP_FETCH_NO_DATA: Self { 1329 }
         /// `ER_SP_DUP_PARAM`
-        public static let SP_DUP_PARAM: ErrorCode = 1330
+        public static var SP_DUP_PARAM: Self { 1330 }
         /// `ER_SP_DUP_VAR`
-        public static let SP_DUP_VAR: ErrorCode = 1331
+        public static var SP_DUP_VAR: Self { 1331 }
         /// `ER_SP_DUP_COND`
-        public static let SP_DUP_COND: ErrorCode = 1332
+        public static var SP_DUP_COND: Self { 1332 }
         /// `ER_SP_DUP_CURS`
-        public static let SP_DUP_CURS: ErrorCode = 1333
+        public static var SP_DUP_CURS: Self { 1333 }
         /// `ER_SP_CANT_ALTER`
-        public static let SP_CANT_ALTER: ErrorCode = 1334
+        public static var SP_CANT_ALTER: Self { 1334 }
         /// `ER_SP_SUBSELECT_NYI`
-        public static let SP_SUBSELECT_NYI: ErrorCode = 1335
+        public static var SP_SUBSELECT_NYI: Self { 1335 }
         /// `ER_STMT_NOT_ALLOWED_IN_SF_OR_TRG`
-        public static let STMT_NOT_ALLOWED_IN_SF_OR_TRG: ErrorCode = 1336
+        public static var STMT_NOT_ALLOWED_IN_SF_OR_TRG: Self { 1336 }
         /// `ER_SP_VARCOND_AFTER_CURSHNDLR`
-        public static let SP_VARCOND_AFTER_CURSHNDLR: ErrorCode = 1337
+        public static var SP_VARCOND_AFTER_CURSHNDLR: Self { 1337 }
         /// `ER_SP_CURSOR_AFTER_HANDLER`
-        public static let SP_CURSOR_AFTER_HANDLER: ErrorCode = 1338
+        public static var SP_CURSOR_AFTER_HANDLER: Self { 1338 }
         /// `NOT_FOUND`
-        public static let _FOUND: ErrorCode = 1339
+        public static var _FOUND: Self { 1339 }
         /// `ER_FPARSER_TOO_BIG_FILE`
-        public static let FPARSER_TOO_BIG_FILE: ErrorCode = 1340
+        public static var FPARSER_TOO_BIG_FILE: Self { 1340 }
         /// `ER_FPARSER_BAD_HEADER`
-        public static let FPARSER_BAD_HEADER: ErrorCode = 1341
+        public static var FPARSER_BAD_HEADER: Self { 1341 }
         /// `ER_FPARSER_EOF_IN_COMMENT`
-        public static let FPARSER_EOF_IN_COMMENT: ErrorCode = 1342
+        public static var FPARSER_EOF_IN_COMMENT: Self { 1342 }
         /// `ER_FPARSER_ERROR_IN_PARAMETER`
-        public static let FPARSER_ERROR_IN_PARAMETER: ErrorCode = 1343
+        public static var FPARSER_ERROR_IN_PARAMETER: Self { 1343 }
         /// `ER_FPARSER_EOF_IN_UNKNOWN_PARAMETER`
-        public static let FPARSER_EOF_IN_UNKNOWN_PARAMETER: ErrorCode = 1344
+        public static var FPARSER_EOF_IN_UNKNOWN_PARAMETER: Self { 1344 }
         /// `ER_VIEW_NO_EXPLAIN`
-        public static let VIEW_NO_EXPLAIN: ErrorCode = 1345
+        public static var VIEW_NO_EXPLAIN: Self { 1345 }
         /// `ER_FRM_UNKNOWN_TYPE`
-        public static let FRM_UNKNOWN_TYPE: ErrorCode = 1346
+        public static var FRM_UNKNOWN_TYPE: Self { 1346 }
         /// `ER_WRONG_OBJECT`
-        public static let WRONG_OBJECT: ErrorCode = 1347
+        public static var WRONG_OBJECT: Self { 1347 }
         /// `ER_NONUPDATEABLE_COLUMN`
-        public static let NONUPDATEABLE_COLUMN: ErrorCode = 1348
+        public static var NONUPDATEABLE_COLUMN: Self { 1348 }
         /// `ER_VIEW_SELECT_DERIVED_UNUSED`
-        public static let VIEW_SELECT_DERIVED_UNUSED: ErrorCode = 1349
+        public static var VIEW_SELECT_DERIVED_UNUSED: Self { 1349 }
         /// `ER_VIEW_SELECT_CLAUSE`
-        public static let VIEW_SELECT_CLAUSE: ErrorCode = 1350
+        public static var VIEW_SELECT_CLAUSE: Self { 1350 }
         /// `ER_VIEW_SELECT_VARIABLE`
-        public static let VIEW_SELECT_VARIABLE: ErrorCode = 1351
+        public static var VIEW_SELECT_VARIABLE: Self { 1351 }
         /// `ER_VIEW_SELECT_TMPTABLE`
-        public static let VIEW_SELECT_TMPTABLE: ErrorCode = 1352
+        public static var VIEW_SELECT_TMPTABLE: Self { 1352 }
         /// `ER_VIEW_WRONG_LIST`
-        public static let VIEW_WRONG_LIST: ErrorCode = 1353
+        public static var VIEW_WRONG_LIST: Self { 1353 }
         /// `ER_WARN_VIEW_MERGE`
-        public static let WARN_VIEW_MERGE: ErrorCode = 1354
+        public static var WARN_VIEW_MERGE: Self { 1354 }
         /// `ER_WARN_VIEW_WITHOUT_KEY`
-        public static let WARN_VIEW_WITHOUT_KEY: ErrorCode = 1355
+        public static var WARN_VIEW_WITHOUT_KEY: Self { 1355 }
         /// `ER_VIEW_INVALID`
-        public static let VIEW_INVALID: ErrorCode = 1356
+        public static var VIEW_INVALID: Self { 1356 }
         /// `ER_SP_NO_DROP_SP`
-        public static let SP_NO_DROP_SP: ErrorCode = 1357
+        public static var SP_NO_DROP_SP: Self { 1357 }
         /// `ER_SP_GOTO_IN_HNDLR`
-        public static let SP_GOTO_IN_HNDLR: ErrorCode = 1358
+        public static var SP_GOTO_IN_HNDLR: Self { 1358 }
         /// `ER_TRG_ALREADY_EXISTS`
-        public static let TRG_ALREADY_EXISTS: ErrorCode = 1359
+        public static var TRG_ALREADY_EXISTS: Self { 1359 }
         /// `ER_TRG_DOES_NOT_EXIST`
-        public static let TRG_DOES_NOT_EXIST: ErrorCode = 1360
+        public static var TRG_DOES_NOT_EXIST: Self { 1360 }
         /// `ER_TRG_ON_VIEW_OR_TEMP_TABLE`
-        public static let TRG_ON_VIEW_OR_TEMP_TABLE: ErrorCode = 1361
+        public static var TRG_ON_VIEW_OR_TEMP_TABLE: Self { 1361 }
         /// `ER_TRG_CANT_CHANGE_ROW`
-        public static let TRG_CANT_CHANGE_ROW: ErrorCode = 1362
+        public static var TRG_CANT_CHANGE_ROW: Self { 1362 }
         /// `ER_TRG_NO_SUCH_ROW_IN_TRG`
-        public static let TRG_NO_SUCH_ROW_IN_TRG: ErrorCode = 1363
+        public static var TRG_NO_SUCH_ROW_IN_TRG: Self { 1363 }
         /// `ER_NO_DEFAULT_FOR_FIELD`
-        public static let NO_DEFAULT_FOR_FIELD: ErrorCode = 1364
+        public static var NO_DEFAULT_FOR_FIELD: Self { 1364 }
         /// `ER_DIVISION_BY_ZERO`
-        public static let DIVISION_BY_ZERO: ErrorCode = 1365
+        public static var DIVISION_BY_ZERO: Self { 1365 }
         /// `ER_TRUNCATED_WRONG_VALUE_FOR_FIELD`
-        public static let TRUNCATED_WRONG_VALUE_FOR_FIELD: ErrorCode = 1366
+        public static var TRUNCATED_WRONG_VALUE_FOR_FIELD: Self { 1366 }
         /// `ER_ILLEGAL_VALUE_FOR_TYPE`
-        public static let ILLEGAL_VALUE_FOR_TYPE: ErrorCode = 1367
+        public static var ILLEGAL_VALUE_FOR_TYPE: Self { 1367 }
         /// `ER_VIEW_NONUPD_CHECK`
-        public static let VIEW_NONUPD_CHECK: ErrorCode = 1368
+        public static var VIEW_NONUPD_CHECK: Self { 1368 }
         /// `ER_VIEW_CHECK_FAILED`
-        public static let VIEW_CHECK_FAILED: ErrorCode = 1369
+        public static var VIEW_CHECK_FAILED: Self { 1369 }
         /// `ER_PROCACCESS_DENIED_ERROR`
-        public static let PROCACCESS_DENIED_ERROR: ErrorCode = 1370
+        public static var PROCACCESS_DENIED_ERROR: Self { 1370 }
         /// `ER_RELAY_LOG_FAIL`
-        public static let RELAY_LOG_FAIL: ErrorCode = 1371
+        public static var RELAY_LOG_FAIL: Self { 1371 }
         /// `ER_PASSWD_LENGTH`
-        public static let PASSWD_LENGTH: ErrorCode = 1372
+        public static var PASSWD_LENGTH: Self { 1372 }
         /// `ER_UNKNOWN_TARGET_BINLOG`
-        public static let UNKNOWN_TARGET_BINLOG: ErrorCode = 1373
+        public static var UNKNOWN_TARGET_BINLOG: Self { 1373 }
         /// `ER_IO_ERR_LOG_INDEX_READ`
-        public static let IO_ERR_LOG_INDEX_READ: ErrorCode = 1374
+        public static var IO_ERR_LOG_INDEX_READ: Self { 1374 }
         /// `ER_BINLOG_PURGE_PROHIBITED`
-        public static let BINLOG_PURGE_PROHIBITED: ErrorCode = 1375
+        public static var BINLOG_PURGE_PROHIBITED: Self { 1375 }
         /// `ER_FSEEK_FAIL`
-        public static let FSEEK_FAIL: ErrorCode = 1376
+        public static var FSEEK_FAIL: Self { 1376 }
         /// `ER_BINLOG_PURGE_FATAL_ERR`
-        public static let BINLOG_PURGE_FATAL_ERR: ErrorCode = 1377
+        public static var BINLOG_PURGE_FATAL_ERR: Self { 1377 }
         /// `ER_LOG_IN_USE`
-        public static let LOG_IN_USE: ErrorCode = 1378
+        public static var LOG_IN_USE: Self { 1378 }
         /// `ER_LOG_PURGE_UNKNOWN_ERR`
-        public static let LOG_PURGE_UNKNOWN_ERR: ErrorCode = 1379
+        public static var LOG_PURGE_UNKNOWN_ERR: Self { 1379 }
         /// `ER_RELAY_LOG_INIT`
-        public static let RELAY_LOG_INIT: ErrorCode = 1380
+        public static var RELAY_LOG_INIT: Self { 1380 }
         /// `ER_NO_BINARY_LOGGING`
-        public static let NO_BINARY_LOGGING: ErrorCode = 1381
+        public static var NO_BINARY_LOGGING: Self { 1381 }
         /// `ER_RESERVED_SYNTAX`
-        public static let RESERVED_SYNTAX: ErrorCode = 1382
+        public static var RESERVED_SYNTAX: Self { 1382 }
         /// `ER_WSAS_FAILED`
-        public static let WSAS_FAILED: ErrorCode = 1383
+        public static var WSAS_FAILED: Self { 1383 }
         /// `ER_DIFF_GROUPS_PROC`
-        public static let DIFF_GROUPS_PROC: ErrorCode = 1384
+        public static var DIFF_GROUPS_PROC: Self { 1384 }
         /// `ER_NO_GROUP_FOR_PROC`
-        public static let NO_GROUP_FOR_PROC: ErrorCode = 1385
+        public static var NO_GROUP_FOR_PROC: Self { 1385 }
         /// `ER_ORDER_WITH_PROC`
-        public static let ORDER_WITH_PROC: ErrorCode = 1386
+        public static var ORDER_WITH_PROC: Self { 1386 }
         /// `ER_LOGGING_PROHIBIT_CHANGING_OF`
-        public static let LOGGING_PROHIBIT_CHANGING_OF: ErrorCode = 1387
+        public static var LOGGING_PROHIBIT_CHANGING_OF: Self { 1387 }
         /// `ER_NO_FILE_MAPPING`
-        public static let NO_FILE_MAPPING: ErrorCode = 1388
+        public static var NO_FILE_MAPPING: Self { 1388 }
         /// `ER_WRONG_MAGIC`
-        public static let WRONG_MAGIC: ErrorCode = 1389
+        public static var WRONG_MAGIC: Self { 1389 }
         /// `ER_PS_MANY_PARAM`
-        public static let PS_MANY_PARAM: ErrorCode = 1390
+        public static var PS_MANY_PARAM: Self { 1390 }
         /// `ER_KEY_PART_0`
-        public static let KEY_PART_0: ErrorCode  = 1391
+        public static var KEY_PART_0: Self { 1391 }
         /// `ER_VIEW_CHECKSUM`
-        public static let VIEW_CHECKSUM: ErrorCode = 1392
+        public static var VIEW_CHECKSUM: Self { 1392 }
         /// `ER_VIEW_MULTIUPDATE`
-        public static let VIEW_MULTIUPDATE: ErrorCode = 1393
+        public static var VIEW_MULTIUPDATE: Self { 1393 }
         /// `ER_VIEW_NO_INSERT_FIELD_LIST`
-        public static let VIEW_NO_INSERT_FIELD_LIST: ErrorCode = 1394
+        public static var VIEW_NO_INSERT_FIELD_LIST: Self { 1394 }
         /// `ER_VIEW_DELETE_MERGE_VIEW`
-        public static let VIEW_DELETE_MERGE_VIEW: ErrorCode = 1395
+        public static var VIEW_DELETE_MERGE_VIEW: Self { 1395 }
         /// `ER_CANNOT_USER`
-        public static let CANNOT_USER: ErrorCode = 1396
+        public static var CANNOT_USER: Self { 1396 }
         /// `ER_XAER_NOTA`
-        public static let XAER_NOTA: ErrorCode = 1397
+        public static var XAER_NOTA: Self { 1397 }
         /// `ER_XAER_INVAL`
-        public static let XAER_INVAL: ErrorCode = 1398
+        public static var XAER_INVAL: Self { 1398 }
         /// `ER_XAER_RMFAIL`
-        public static let XAER_RMFAIL: ErrorCode = 1399
+        public static var XAER_RMFAIL: Self { 1399 }
         /// `ER_XAER_OUTSIDE`
-        public static let XAER_OUTSIDE: ErrorCode = 1400
+        public static var XAER_OUTSIDE: Self { 1400 }
         /// `ER_XAER_RMERR`
-        public static let XAER_RMERR: ErrorCode = 1401
+        public static var XAER_RMERR: Self { 1401 }
         /// `ER_XA_RBROLLBACK`
-        public static let XA_RBROLLBACK: ErrorCode = 1402
+        public static var XA_RBROLLBACK: Self { 1402 }
         /// `ER_NONEXISTING_PROC_GRANT`
-        public static let NONEXISTING_PROC_GRANT: ErrorCode = 1403
+        public static var NONEXISTING_PROC_GRANT: Self { 1403 }
         /// `ER_PROC_AUTO_GRANT_FAIL`
-        public static let PROC_AUTO_GRANT_FAIL: ErrorCode = 1404
+        public static var PROC_AUTO_GRANT_FAIL: Self { 1404 }
         /// `ER_PROC_AUTO_REVOKE_FAIL`
-        public static let PROC_AUTO_REVOKE_FAIL: ErrorCode = 1405
+        public static var PROC_AUTO_REVOKE_FAIL: Self { 1405 }
         /// `ER_DATA_TOO_LONG`
-        public static let DATA_TOO_LONG: ErrorCode = 1406
+        public static var DATA_TOO_LONG: Self { 1406 }
         /// `ER_SP_BAD_SQLSTATE`
-        public static let SP_BAD_SQLSTATE: ErrorCode = 1407
+        public static var SP_BAD_SQLSTATE: Self { 1407 }
         /// `ER_STARTUP`
-        public static let STARTUP: ErrorCode = 1408
+        public static var STARTUP: Self { 1408 }
         /// `ER_LOAD_FROM_FIXED_SIZE_ROWS_TO_VAR`
-        public static let LOAD_FROM_FIXED_SIZE_ROWS_TO_VAR: ErrorCode = 1409
+        public static var LOAD_FROM_FIXED_SIZE_ROWS_TO_VAR: Self { 1409 }
         /// `ER_CANT_CREATE_USER_WITH_GRANT`
-        public static let CANT_CREATE_USER_WITH_GRANT: ErrorCode = 1410
+        public static var CANT_CREATE_USER_WITH_GRANT: Self { 1410 }
         /// `ER_WRONG_VALUE_FOR_TYPE`
-        public static let WRONG_VALUE_FOR_TYPE: ErrorCode = 1411
+        public static var WRONG_VALUE_FOR_TYPE: Self { 1411 }
         /// `ER_TABLE_DEF_CHANGED`
-        public static let TABLE_DEF_CHANGED: ErrorCode = 1412
+        public static var TABLE_DEF_CHANGED: Self { 1412 }
         /// `ER_SP_DUP_HANDLER`
-        public static let SP_DUP_HANDLER: ErrorCode = 1413
+        public static var SP_DUP_HANDLER: Self { 1413 }
         /// `ER_SP_NOT_VAR_ARG`
-        public static let SP_NOT_VAR_ARG: ErrorCode = 1414
+        public static var SP_NOT_VAR_ARG: Self { 1414 }
         /// `ER_SP_NO_RETSET`
-        public static let SP_NO_RETSET: ErrorCode = 1415
+        public static var SP_NO_RETSET: Self { 1415 }
         /// `ER_CANT_CREATE_GEOMETRY_OBJECT`
-        public static let CANT_CREATE_GEOMETRY_OBJECT: ErrorCode = 1416
+        public static var CANT_CREATE_GEOMETRY_OBJECT: Self { 1416 }
         /// `ER_FAILED_ROUTINE_BREAK_BINLOG`
-        public static let FAILED_ROUTINE_BREAK_BINLOG: ErrorCode = 1417
+        public static var FAILED_ROUTINE_BREAK_BINLOG: Self { 1417 }
         /// `ER_BINLOG_UNSAFE_ROUTINE`
-        public static let BINLOG_UNSAFE_ROUTINE: ErrorCode = 1418
+        public static var BINLOG_UNSAFE_ROUTINE: Self { 1418 }
         /// `ER_BINLOG_CREATE_ROUTINE_NEED_SUPER`
-        public static let BINLOG_CREATE_ROUTINE_NEED_SUPER: ErrorCode = 1419
+        public static var BINLOG_CREATE_ROUTINE_NEED_SUPER: Self { 1419 }
         /// `ER_EXEC_STMT_WITH_OPEN_CURSOR`
-        public static let EXEC_STMT_WITH_OPEN_CURSOR: ErrorCode = 1420
+        public static var EXEC_STMT_WITH_OPEN_CURSOR: Self { 1420 }
         /// `ER_STMT_HAS_NO_OPEN_CURSOR`
-        public static let STMT_HAS_NO_OPEN_CURSOR: ErrorCode = 1421
+        public static var STMT_HAS_NO_OPEN_CURSOR: Self { 1421 }
         /// `ER_COMMIT_NOT_ALLOWED_IN_SF_OR_TRG`
-        public static let COMMIT_NOT_ALLOWED_IN_SF_OR_TRG: ErrorCode = 1422
+        public static var COMMIT_NOT_ALLOWED_IN_SF_OR_TRG: Self { 1422 }
         /// `ER_NO_DEFAULT_FOR_VIEW_FIELD`
-        public static let NO_DEFAULT_FOR_VIEW_FIELD: ErrorCode = 1423
+        public static var NO_DEFAULT_FOR_VIEW_FIELD: Self { 1423 }
         /// `ER_SP_NO_RECURSION`
-        public static let SP_NO_RECURSION: ErrorCode = 1424
+        public static var SP_NO_RECURSION: Self { 1424 }
         /// `ER_TOO_BIG_SCALE`
-        public static let TOO_BIG_SCALE: ErrorCode = 1425
+        public static var TOO_BIG_SCALE: Self { 1425 }
         /// `ER_TOO_BIG_PRECISION`
-        public static let TOO_BIG_PRECISION: ErrorCode = 1426
+        public static var TOO_BIG_PRECISION: Self { 1426 }
         /// `ER_M_BIGGER_THAN_D`
-        public static let M_BIGGER_THAN_D: ErrorCode = 1427
+        public static var M_BIGGER_THAN_D: Self { 1427 }
         /// `ER_WRONG_LOCK_OF_SYSTEM_TABLE`
-        public static let WRONG_LOCK_OF_SYSTEM_TABLE: ErrorCode = 1428
+        public static var WRONG_LOCK_OF_SYSTEM_TABLE: Self { 1428 }
         /// `ER_CONNECT_TO_FOREIGN_DATA_SOURCE`
-        public static let CONNECT_TO_FOREIGN_DATA_SOURCE: ErrorCode = 1429
+        public static var CONNECT_TO_FOREIGN_DATA_SOURCE: Self { 1429 }
         /// `ER_QUERY_ON_FOREIGN_DATA_SOURCE`
-        public static let QUERY_ON_FOREIGN_DATA_SOURCE: ErrorCode = 1430
+        public static var QUERY_ON_FOREIGN_DATA_SOURCE: Self { 1430 }
         /// `ER_FOREIGN_DATA_SOURCE_DOESNT_EXIST`
-        public static let FOREIGN_DATA_SOURCE_DOESNT_EXIST: ErrorCode = 1431
+        public static var FOREIGN_DATA_SOURCE_DOESNT_EXIST: Self { 1431 }
         /// `ER_FOREIGN_DATA_STRING_INVALID_CANT_CREATE`
-        public static let FOREIGN_DATA_STRING_INVALID_CANT_CREATE: ErrorCode = 1432
+        public static var FOREIGN_DATA_STRING_INVALID_CANT_CREATE: Self { 1432 }
         /// `ER_FOREIGN_DATA_STRING_INVALID`
-        public static let FOREIGN_DATA_STRING_INVALID: ErrorCode = 1433
+        public static var FOREIGN_DATA_STRING_INVALID: Self { 1433 }
         /// `ER_CANT_CREATE_FEDERATED_TABLE`
-        public static let CANT_CREATE_FEDERATED_TABLE: ErrorCode = 1434
+        public static var CANT_CREATE_FEDERATED_TABLE: Self { 1434 }
         /// `ER_TRG_IN_WRONG_SCHEMA`
-        public static let TRG_IN_WRONG_SCHEMA: ErrorCode = 1435
+        public static var TRG_IN_WRONG_SCHEMA: Self { 1435 }
         /// `ER_STACK_OVERRUN_NEED_MORE`
-        public static let STACK_OVERRUN_NEED_MORE: ErrorCode = 1436
+        public static var STACK_OVERRUN_NEED_MORE: Self { 1436 }
         /// `ER_TOO_LONG_BODY`
-        public static let TOO_LONG_BODY: ErrorCode = 1437
+        public static var TOO_LONG_BODY: Self { 1437 }
         /// `ER_WARN_CANT_DROP_DEFAULT_KEYCACHE`
-        public static let WARN_CANT_DROP_DEFAULT_KEYCACHE: ErrorCode = 1438
+        public static var WARN_CANT_DROP_DEFAULT_KEYCACHE: Self { 1438 }
         /// `ER_TOO_BIG_DISPLAYWIDTH`
-        public static let TOO_BIG_DISPLAYWIDTH: ErrorCode = 1439
+        public static var TOO_BIG_DISPLAYWIDTH: Self { 1439 }
         /// `ER_XAER_DUPID`
-        public static let XAER_DUPID: ErrorCode = 1440
+        public static var XAER_DUPID: Self { 1440 }
         /// `ER_DATETIME_FUNCTION_OVERFLOW`
-        public static let DATETIME_FUNCTION_OVERFLOW: ErrorCode = 1441
+        public static var DATETIME_FUNCTION_OVERFLOW: Self { 1441 }
         /// `ER_CANT_UPDATE_USED_TABLE_IN_SF_OR_TRG`
-        public static let CANT_UPDATE_USED_TABLE_IN_SF_OR_TRG: ErrorCode = 1442
+        public static var CANT_UPDATE_USED_TABLE_IN_SF_OR_TRG: Self { 1442 }
         /// `ER_VIEW_PREVENT_UPDATE`
-        public static let VIEW_PREVENT_UPDATE: ErrorCode = 1443
+        public static var VIEW_PREVENT_UPDATE: Self { 1443 }
         /// `ER_PS_NO_RECURSION`
-        public static let PS_NO_RECURSION: ErrorCode = 1444
+        public static var PS_NO_RECURSION: Self { 1444 }
         /// `ER_SP_CANT_SET_AUTOCOMMIT`
-        public static let SP_CANT_SET_AUTOCOMMIT: ErrorCode = 1445
+        public static var SP_CANT_SET_AUTOCOMMIT: Self { 1445 }
         /// `ER_MALFORMED_DEFINER`
-        public static let MALFORMED_DEFINER: ErrorCode = 1446
+        public static var MALFORMED_DEFINER: Self { 1446 }
         /// `ER_VIEW_FRM_NO_USER`
-        public static let VIEW_FRM_NO_USER: ErrorCode = 1447
+        public static var VIEW_FRM_NO_USER: Self { 1447 }
         /// `ER_VIEW_OTHER_USER`
-        public static let VIEW_OTHER_USER: ErrorCode = 1448
+        public static var VIEW_OTHER_USER: Self { 1448 }
         /// `ER_NO_SUCH_USER`
-        public static let NO_SUCH_USER: ErrorCode = 1449
+        public static var NO_SUCH_USER: Self { 1449 }
         /// `ER_FORBID_SCHEMA_CHANGE`
-        public static let FORBID_SCHEMA_CHANGE: ErrorCode = 1450
+        public static var FORBID_SCHEMA_CHANGE: Self { 1450 }
         /// `ER_ROW_IS_REFERENCED_2`
-        public static let ROW_IS_REFERENCED_2: ErrorCode  = 1451
+        public static var ROW_IS_REFERENCED_2: Self { 1451 }
         /// `ER_NO_REFERENCED_ROW_2`
-        public static let NO_REFERENCED_ROW_2: ErrorCode  = 1452
+        public static var NO_REFERENCED_ROW_2: Self { 1452 }
         /// `ER_SP_BAD_VAR_SHADOW`
-        public static let SP_BAD_VAR_SHADOW: ErrorCode = 1453
+        public static var SP_BAD_VAR_SHADOW: Self { 1453 }
         /// `ER_TRG_NO_DEFINER`
-        public static let TRG_NO_DEFINER: ErrorCode = 1454
+        public static var TRG_NO_DEFINER: Self { 1454 }
         /// `ER_OLD_FILE_FORMAT`
-        public static let OLD_FILE_FORMAT: ErrorCode = 1455
+        public static var OLD_FILE_FORMAT: Self { 1455 }
         /// `ER_SP_RECURSION_LIMIT`
-        public static let SP_RECURSION_LIMIT: ErrorCode = 1456
+        public static var SP_RECURSION_LIMIT: Self { 1456 }
         /// `ER_SP_PROC_TABLE_CORRUPT`
-        public static let SP_PROC_TABLE_CORRUPT: ErrorCode = 1457
+        public static var SP_PROC_TABLE_CORRUPT: Self { 1457 }
         /// `ER_SP_WRONG_NAME`
-        public static let SP_WRONG_NAME: ErrorCode = 1458
+        public static var SP_WRONG_NAME: Self { 1458 }
         /// `ER_TABLE_NEEDS_UPGRADE`
-        public static let TABLE_NEEDS_UPGRADE: ErrorCode = 1459
+        public static var TABLE_NEEDS_UPGRADE: Self { 1459 }
         /// `ER_SP_NO_AGGREGATE`
-        public static let SP_NO_AGGREGATE: ErrorCode = 1460
+        public static var SP_NO_AGGREGATE: Self { 1460 }
         /// `ER_MAX_PREPARED_STMT_COUNT_REACHED`
-        public static let MAX_PREPARED_STMT_COUNT_REACHED: ErrorCode = 1461
+        public static var MAX_PREPARED_STMT_COUNT_REACHED: Self { 1461 }
         /// `ER_VIEW_RECURSIVE`
-        public static let VIEW_RECURSIVE: ErrorCode = 1462
+        public static var VIEW_RECURSIVE: Self { 1462 }
         /// `ER_NON_GROUPING_FIELD_USED`
-        public static let NON_GROUPING_FIELD_USED: ErrorCode = 1463
+        public static var NON_GROUPING_FIELD_USED: Self { 1463 }
         /// `ER_TABLE_CANT_HANDLE_SPKEYS`
-        public static let TABLE_CANT_HANDLE_SPKEYS: ErrorCode = 1464
+        public static var TABLE_CANT_HANDLE_SPKEYS: Self { 1464 }
         /// `ER_NO_TRIGGERS_ON_SYSTEM_SCHEMA`
-        public static let NO_TRIGGERS_ON_SYSTEM_SCHEMA: ErrorCode = 1465
+        public static var NO_TRIGGERS_ON_SYSTEM_SCHEMA: Self { 1465 }
         /// `ER_REMOVED_SPACES`
-        public static let REMOVED_SPACES: ErrorCode = 1466
+        public static var REMOVED_SPACES: Self { 1466 }
         /// `ER_AUTOINC_READ_FAILED`
-        public static let AUTOINC_READ_FAILED: ErrorCode = 1467
+        public static var AUTOINC_READ_FAILED: Self { 1467 }
         /// `ER_USERNAME`
-        public static let USERNAME: ErrorCode = 1468
+        public static var USERNAME: Self { 1468 }
         /// `ER_HOSTNAME`
-        public static let HOSTNAME: ErrorCode = 1469
+        public static var HOSTNAME: Self { 1469 }
         /// `ER_WRONG_STRING_LENGTH`
-        public static let WRONG_STRING_LENGTH: ErrorCode = 1470
+        public static var WRONG_STRING_LENGTH: Self { 1470 }
         /// `ER_NON_INSERTABLE_TABLE`
-        public static let NON_INSERTABLE_TABLE: ErrorCode = 1471
+        public static var NON_INSERTABLE_TABLE: Self { 1471 }
         /// `ER_ADMIN_WRONG_MRG_TABLE`
-        public static let ADMIN_WRONG_MRG_TABLE: ErrorCode = 1472
+        public static var ADMIN_WRONG_MRG_TABLE: Self { 1472 }
         /// `ER_TOO_HIGH_LEVEL_OF_NESTING_FOR_SELECT`
-        public static let TOO_HIGH_LEVEL_OF_NESTING_FOR_SELECT: ErrorCode = 1473
+        public static var TOO_HIGH_LEVEL_OF_NESTING_FOR_SELECT: Self { 1473 }
         /// `ER_NAME_BECOMES_EMPTY`
-        public static let NAME_BECOMES_EMPTY: ErrorCode = 1474
+        public static var NAME_BECOMES_EMPTY: Self { 1474 }
         /// `ER_AMBIGUOUS_FIELD_TERM`
-        public static let AMBIGUOUS_FIELD_TERM: ErrorCode = 1475
+        public static var AMBIGUOUS_FIELD_TERM: Self { 1475 }
         /// `ER_FOREIGN_SERVER_EXISTS`
-        public static let FOREIGN_SERVER_EXISTS: ErrorCode = 1476
+        public static var FOREIGN_SERVER_EXISTS: Self { 1476 }
         /// `ER_FOREIGN_SERVER_DOESNT_EXIST`
-        public static let FOREIGN_SERVER_DOESNT_EXIST: ErrorCode = 1477
+        public static var FOREIGN_SERVER_DOESNT_EXIST: Self { 1477 }
         /// `ER_ILLEGAL_HA_CREATE_OPTION`
-        public static let ILLEGAL_HA_CREATE_OPTION: ErrorCode = 1478
+        public static var ILLEGAL_HA_CREATE_OPTION: Self { 1478 }
         /// `ER_PARTITION_REQUIRES_VALUES_ERROR`
-        public static let PARTITION_REQUIRES_VALUES_ERROR: ErrorCode = 1479
+        public static var PARTITION_REQUIRES_VALUES_ERROR: Self { 1479 }
         /// `ER_PARTITION_WRONG_VALUES_ERROR`
-        public static let PARTITION_WRONG_VALUES_ERROR: ErrorCode = 1480
+        public static var PARTITION_WRONG_VALUES_ERROR: Self { 1480 }
         /// `ER_PARTITION_MAXVALUE_ERROR`
-        public static let PARTITION_MAXVALUE_ERROR: ErrorCode = 1481
+        public static var PARTITION_MAXVALUE_ERROR: Self { 1481 }
         /// `ER_PARTITION_SUBPARTITION_ERROR`
-        public static let PARTITION_SUBPARTITION_ERROR: ErrorCode = 1482
+        public static var PARTITION_SUBPARTITION_ERROR: Self { 1482 }
         /// `ER_PARTITION_SUBPART_MIX_ERROR`
-        public static let PARTITION_SUBPART_MIX_ERROR: ErrorCode = 1483
+        public static var PARTITION_SUBPART_MIX_ERROR: Self { 1483 }
         /// `ER_PARTITION_WRONG_NO_PART_ERROR`
-        public static let PARTITION_WRONG_NO_PART_ERROR: ErrorCode = 1484
+        public static var PARTITION_WRONG_NO_PART_ERROR: Self { 1484 }
         /// `ER_PARTITION_WRONG_NO_SUBPART_ERROR`
-        public static let PARTITION_WRONG_NO_SUBPART_ERROR: ErrorCode = 1485
+        public static var PARTITION_WRONG_NO_SUBPART_ERROR: Self { 1485 }
         /// `ER_WRONG_EXPR_IN_PARTITION_FUNC_ERROR`
-        public static let WRONG_EXPR_IN_PARTITION_FUNC_ERROR: ErrorCode = 1486
+        public static var WRONG_EXPR_IN_PARTITION_FUNC_ERROR: Self { 1486 }
         /// `ER_NO_CONST_EXPR_IN_RANGE_OR_LIST_ERROR`
-        public static let NO_CONST_EXPR_IN_RANGE_OR_LIST_ERROR: ErrorCode = 1487
+        public static var NO_CONST_EXPR_IN_RANGE_OR_LIST_ERROR: Self { 1487 }
         /// `ER_FIELD_NOT_FOUND_PART_ERROR`
-        public static let FIELD_NOT_FOUND_PART_ERROR: ErrorCode = 1488
+        public static var FIELD_NOT_FOUND_PART_ERROR: Self { 1488 }
         /// `ER_LIST_OF_FIELDS_ONLY_IN_HASH_ERROR`
-        public static let LIST_OF_FIELDS_ONLY_IN_HASH_ERROR: ErrorCode = 1489
+        public static var LIST_OF_FIELDS_ONLY_IN_HASH_ERROR: Self { 1489 }
         /// `ER_INCONSISTENT_PARTITION_INFO_ERROR`
-        public static let INCONSISTENT_PARTITION_INFO_ERROR: ErrorCode = 1490
+        public static var INCONSISTENT_PARTITION_INFO_ERROR: Self { 1490 }
         /// `ER_PARTITION_FUNC_NOT_ALLOWED_ERROR`
-        public static let PARTITION_FUNC_NOT_ALLOWED_ERROR: ErrorCode = 1491
+        public static var PARTITION_FUNC_NOT_ALLOWED_ERROR: Self { 1491 }
         /// `ER_PARTITIONS_MUST_BE_DEFINED_ERROR`
-        public static let PARTITIONS_MUST_BE_DEFINED_ERROR: ErrorCode = 1492
+        public static var PARTITIONS_MUST_BE_DEFINED_ERROR: Self { 1492 }
         /// `ER_RANGE_NOT_INCREASING_ERROR`
-        public static let RANGE_NOT_INCREASING_ERROR: ErrorCode = 1493
+        public static var RANGE_NOT_INCREASING_ERROR: Self { 1493 }
         /// `ER_INCONSISTENT_TYPE_OF_FUNCTIONS_ERROR`
-        public static let INCONSISTENT_TYPE_OF_FUNCTIONS_ERROR: ErrorCode = 1494
+        public static var INCONSISTENT_TYPE_OF_FUNCTIONS_ERROR: Self { 1494 }
         /// `ER_MULTIPLE_DEF_CONST_IN_LIST_PART_ERROR`
-        public static let MULTIPLE_DEF_CONST_IN_LIST_PART_ERROR: ErrorCode = 1495
+        public static var MULTIPLE_DEF_CONST_IN_LIST_PART_ERROR: Self { 1495 }
         /// `ER_PARTITION_ENTRY_ERROR`
-        public static let PARTITION_ENTRY_ERROR: ErrorCode = 1496
+        public static var PARTITION_ENTRY_ERROR: Self { 1496 }
         /// `ER_MIX_HANDLER_ERROR`
-        public static let MIX_HANDLER_ERROR: ErrorCode = 1497
+        public static var MIX_HANDLER_ERROR: Self { 1497 }
         /// `ER_PARTITION_NOT_DEFINED_ERROR`
-        public static let PARTITION_NOT_DEFINED_ERROR: ErrorCode = 1498
+        public static var PARTITION_NOT_DEFINED_ERROR: Self { 1498 }
         /// `ER_TOO_MANY_PARTITIONS_ERROR`
-        public static let TOO_MANY_PARTITIONS_ERROR: ErrorCode = 1499
+        public static var TOO_MANY_PARTITIONS_ERROR: Self { 1499 }
         /// `ER_SUBPARTITION_ERROR`
-        public static let SUBPARTITION_ERROR: ErrorCode = 1500
+        public static var SUBPARTITION_ERROR: Self { 1500 }
         /// `ER_CANT_CREATE_HANDLER_FILE`
-        public static let CANT_CREATE_HANDLER_FILE: ErrorCode = 1501
+        public static var CANT_CREATE_HANDLER_FILE: Self { 1501 }
         /// `ER_BLOB_FIELD_IN_PART_FUNC_ERROR`
-        public static let BLOB_FIELD_IN_PART_FUNC_ERROR: ErrorCode = 1502
+        public static var BLOB_FIELD_IN_PART_FUNC_ERROR: Self { 1502 }
         /// `ER_UNIQUE_KEY_NEED_ALL_FIELDS_IN_PF`
-        public static let UNIQUE_KEY_NEED_ALL_FIELDS_IN_PF: ErrorCode = 1503
+        public static var UNIQUE_KEY_NEED_ALL_FIELDS_IN_PF: Self { 1503 }
         /// `ER_NO_PARTS_ERROR`
-        public static let NO_PARTS_ERROR: ErrorCode = 1504
+        public static var NO_PARTS_ERROR: Self { 1504 }
         /// `ER_PARTITION_MGMT_ON_NONPARTITIONED`
-        public static let PARTITION_MGMT_ON_NONPARTITIONED: ErrorCode = 1505
+        public static var PARTITION_MGMT_ON_NONPARTITIONED: Self { 1505 }
         /// `ER_FOREIGN_KEY_ON_PARTITIONED`
-        public static let FOREIGN_KEY_ON_PARTITIONED: ErrorCode = 1506
+        public static var FOREIGN_KEY_ON_PARTITIONED: Self { 1506 }
         /// `ER_DROP_PARTITION_NON_EXISTENT`
-        public static let DROP_PARTITION_NON_EXISTENT: ErrorCode = 1507
+        public static var DROP_PARTITION_NON_EXISTENT: Self { 1507 }
         /// `ER_DROP_LAST_PARTITION`
-        public static let DROP_LAST_PARTITION: ErrorCode = 1508
+        public static var DROP_LAST_PARTITION: Self { 1508 }
         /// `ER_COALESCE_ONLY_ON_HASH_PARTITION`
-        public static let COALESCE_ONLY_ON_HASH_PARTITION: ErrorCode = 1509
+        public static var COALESCE_ONLY_ON_HASH_PARTITION: Self { 1509 }
         /// `ER_REORG_HASH_ONLY_ON_SAME_NO`
-        public static let REORG_HASH_ONLY_ON_SAME_NO: ErrorCode = 1510
+        public static var REORG_HASH_ONLY_ON_SAME_NO: Self { 1510 }
         /// `ER_REORG_NO_PARAM_ERROR`
-        public static let REORG_NO_PARAM_ERROR: ErrorCode = 1511
+        public static var REORG_NO_PARAM_ERROR: Self { 1511 }
         /// `ER_ONLY_ON_RANGE_LIST_PARTITION`
-        public static let ONLY_ON_RANGE_LIST_PARTITION: ErrorCode = 1512
+        public static var ONLY_ON_RANGE_LIST_PARTITION: Self { 1512 }
         /// `ER_ADD_PARTITION_SUBPART_ERROR`
-        public static let ADD_PARTITION_SUBPART_ERROR: ErrorCode = 1513
+        public static var ADD_PARTITION_SUBPART_ERROR: Self { 1513 }
         /// `ER_ADD_PARTITION_NO_NEW_PARTITION`
-        public static let ADD_PARTITION_NO_NEW_PARTITION: ErrorCode = 1514
+        public static var ADD_PARTITION_NO_NEW_PARTITION: Self { 1514 }
         /// `ER_COALESCE_PARTITION_NO_PARTITION`
-        public static let COALESCE_PARTITION_NO_PARTITION: ErrorCode = 1515
+        public static var COALESCE_PARTITION_NO_PARTITION: Self { 1515 }
         /// `ER_REORG_PARTITION_NOT_EXIST`
-        public static let REORG_PARTITION_NOT_EXIST: ErrorCode = 1516
+        public static var REORG_PARTITION_NOT_EXIST: Self { 1516 }
         /// `ER_SAME_NAME_PARTITION`
-        public static let SAME_NAME_PARTITION: ErrorCode = 1517
+        public static var SAME_NAME_PARTITION: Self { 1517 }
         /// `ER_NO_BINLOG_ERROR`
-        public static let NO_BINLOG_ERROR: ErrorCode = 1518
+        public static var NO_BINLOG_ERROR: Self { 1518 }
         /// `ER_CONSECUTIVE_REORG_PARTITIONS`
-        public static let CONSECUTIVE_REORG_PARTITIONS: ErrorCode = 1519
+        public static var CONSECUTIVE_REORG_PARTITIONS: Self { 1519 }
         /// `ER_REORG_OUTSIDE_RANGE`
-        public static let REORG_OUTSIDE_RANGE: ErrorCode = 1520
+        public static var REORG_OUTSIDE_RANGE: Self { 1520 }
         /// `ER_PARTITION_FUNCTION_FAILURE`
-        public static let PARTITION_FUNCTION_FAILURE: ErrorCode = 1521
+        public static var PARTITION_FUNCTION_FAILURE: Self { 1521 }
         /// `ER_PART_STATE_ERROR`
-        public static let PART_STATE_ERROR: ErrorCode = 1522
+        public static var PART_STATE_ERROR: Self { 1522 }
         /// `ER_LIMITED_PART_RANGE`
-        public static let LIMITED_PART_RANGE: ErrorCode = 1523
+        public static var LIMITED_PART_RANGE: Self { 1523 }
         /// `ER_PLUGIN_IS_NOT_LOADED`
-        public static let PLUGIN_IS_NOT_LOADED: ErrorCode = 1524
+        public static var PLUGIN_IS_NOT_LOADED: Self { 1524 }
         /// `ER_WRONG_VALUE`
-        public static let WRONG_VALUE: ErrorCode = 1525
+        public static var WRONG_VALUE: Self { 1525 }
         /// `ER_NO_PARTITION_FOR_GIVEN_VALUE`
-        public static let NO_PARTITION_FOR_GIVEN_VALUE: ErrorCode = 1526
+        public static var NO_PARTITION_FOR_GIVEN_VALUE: Self { 1526 }
         /// `ER_FILEGROUP_OPTION_ONLY_ONCE`
-        public static let FILEGROUP_OPTION_ONLY_ONCE: ErrorCode = 1527
+        public static var FILEGROUP_OPTION_ONLY_ONCE: Self { 1527 }
         /// `ER_CREATE_FILEGROUP_FAILED`
-        public static let CREATE_FILEGROUP_FAILED: ErrorCode = 1528
+        public static var CREATE_FILEGROUP_FAILED: Self { 1528 }
         /// `ER_DROP_FILEGROUP_FAILED`
-        public static let DROP_FILEGROUP_FAILED: ErrorCode = 1529
+        public static var DROP_FILEGROUP_FAILED: Self { 1529 }
         /// `ER_TABLESPACE_AUTO_EXTEND_ERROR`
-        public static let TABLESPACE_AUTO_EXTEND_ERROR: ErrorCode = 1530
+        public static var TABLESPACE_AUTO_EXTEND_ERROR: Self { 1530 }
         /// `ER_WRONG_SIZE_NUMBER`
-        public static let WRONG_SIZE_NUMBER: ErrorCode = 1531
+        public static var WRONG_SIZE_NUMBER: Self { 1531 }
         /// `ER_SIZE_OVERFLOW_ERROR`
-        public static let SIZE_OVERFLOW_ERROR: ErrorCode = 1532
+        public static var SIZE_OVERFLOW_ERROR: Self { 1532 }
         /// `ER_ALTER_FILEGROUP_FAILED`
-        public static let ALTER_FILEGROUP_FAILED: ErrorCode = 1533
+        public static var ALTER_FILEGROUP_FAILED: Self { 1533 }
         /// `ER_BINLOG_ROW_LOGGING_FAILED`
-        public static let BINLOG_ROW_LOGGING_FAILED: ErrorCode = 1534
+        public static var BINLOG_ROW_LOGGING_FAILED: Self { 1534 }
         /// `ER_BINLOG_ROW_WRONG_TABLE_DEF`
-        public static let BINLOG_ROW_WRONG_TABLE_DEF: ErrorCode = 1535
+        public static var BINLOG_ROW_WRONG_TABLE_DEF: Self { 1535 }
         /// `ER_BINLOG_ROW_RBR_TO_SBR`
-        public static let BINLOG_ROW_RBR_TO_SBR: ErrorCode = 1536
+        public static var BINLOG_ROW_RBR_TO_SBR: Self { 1536 }
         /// `ER_EVENT_ALREADY_EXISTS`
-        public static let EVENT_ALREADY_EXISTS: ErrorCode = 1537
+        public static var EVENT_ALREADY_EXISTS: Self { 1537 }
         /// `ER_EVENT_STORE_FAILED`
-        public static let EVENT_STORE_FAILED: ErrorCode = 1538
+        public static var EVENT_STORE_FAILED: Self { 1538 }
         /// `ER_EVENT_DOES_NOT_EXIST`
-        public static let EVENT_DOES_NOT_EXIST: ErrorCode = 1539
+        public static var EVENT_DOES_NOT_EXIST: Self { 1539 }
         /// `ER_EVENT_CANT_ALTER`
-        public static let EVENT_CANT_ALTER: ErrorCode = 1540
+        public static var EVENT_CANT_ALTER: Self { 1540 }
         /// `ER_EVENT_DROP_FAILED`
-        public static let EVENT_DROP_FAILED: ErrorCode = 1541
+        public static var EVENT_DROP_FAILED: Self { 1541 }
         /// `ER_EVENT_INTERVAL_NOT_POSITIVE_OR_TOO_BIG`
-        public static let EVENT_INTERVAL_NOT_POSITIVE_OR_TOO_BIG: ErrorCode = 1542
+        public static var EVENT_INTERVAL_NOT_POSITIVE_OR_TOO_BIG: Self { 1542 }
         /// `ER_EVENT_ENDS_BEFORE_STARTS`
-        public static let EVENT_ENDS_BEFORE_STARTS: ErrorCode = 1543
+        public static var EVENT_ENDS_BEFORE_STARTS: Self { 1543 }
         /// `ER_EVENT_EXEC_TIME_IN_THE_PAST`
-        public static let EVENT_EXEC_TIME_IN_THE_PAST: ErrorCode = 1544
+        public static var EVENT_EXEC_TIME_IN_THE_PAST: Self { 1544 }
         /// `ER_EVENT_OPEN_TABLE_FAILED`
-        public static let EVENT_OPEN_TABLE_FAILED: ErrorCode = 1545
+        public static var EVENT_OPEN_TABLE_FAILED: Self { 1545 }
         /// `ER_EVENT_NEITHER_M_EXPR_NOR_M_AT`
-        public static let EVENT_NEITHER_M_EXPR_NOR_M_AT: ErrorCode = 1546
+        public static var EVENT_NEITHER_M_EXPR_NOR_M_AT: Self { 1546 }
         /// `ER_OBSOLETE_COL_COUNT_DOESNT_MATCH_CORRUPTED`
-        public static let OBSOLETE_COL_COUNT_DOESNT_MATCH_CORRUPTED: ErrorCode = 1547
+        public static var OBSOLETE_COL_COUNT_DOESNT_MATCH_CORRUPTED: Self { 1547 }
         /// `ER_OBSOLETE_CANNOT_LOAD_FROM_TABLE`
-        public static let OBSOLETE_CANNOT_LOAD_FROM_TABLE: ErrorCode = 1548
+        public static var OBSOLETE_CANNOT_LOAD_FROM_TABLE: Self { 1548 }
         /// `ER_EVENT_CANNOT_DELETE`
-        public static let EVENT_CANNOT_DELETE: ErrorCode = 1549
+        public static var EVENT_CANNOT_DELETE: Self { 1549 }
         /// `ER_EVENT_COMPILE_ERROR`
-        public static let EVENT_COMPILE_ERROR: ErrorCode = 1550
+        public static var EVENT_COMPILE_ERROR: Self { 1550 }
         /// `ER_EVENT_SAME_NAME`
-        public static let EVENT_SAME_NAME: ErrorCode = 1551
+        public static var EVENT_SAME_NAME: Self { 1551 }
         /// `ER_EVENT_DATA_TOO_LONG`
-        public static let EVENT_DATA_TOO_LONG: ErrorCode = 1552
+        public static var EVENT_DATA_TOO_LONG: Self { 1552 }
         /// `ER_DROP_INDEX_FK`
-        public static let DROP_INDEX_FK: ErrorCode = 1553
+        public static var DROP_INDEX_FK: Self { 1553 }
         /// `ER_WARN_DEPRECATED_SYNTAX_WITH_VER`
-        public static let WARN_DEPRECATED_SYNTAX_WITH_VER: ErrorCode = 1554
+        public static var WARN_DEPRECATED_SYNTAX_WITH_VER: Self { 1554 }
         /// `ER_CANT_WRITE_LOCK_LOG_TABLE`
-        public static let CANT_WRITE_LOCK_LOG_TABLE: ErrorCode = 1555
+        public static var CANT_WRITE_LOCK_LOG_TABLE: Self { 1555 }
         /// `ER_CANT_LOCK_LOG_TABLE`
-        public static let CANT_LOCK_LOG_TABLE: ErrorCode = 1556
+        public static var CANT_LOCK_LOG_TABLE: Self { 1556 }
         /// `ER_FOREIGN_DUPLICATE_KEY_OLD_UNUSED`
-        public static let FOREIGN_DUPLICATE_KEY_OLD_UNUSED: ErrorCode = 1557
+        public static var FOREIGN_DUPLICATE_KEY_OLD_UNUSED: Self { 1557 }
         /// `ER_COL_COUNT_DOESNT_MATCH_PLEASE_UPDATE`
-        public static let COL_COUNT_DOESNT_MATCH_PLEASE_UPDATE: ErrorCode = 1558
+        public static var COL_COUNT_DOESNT_MATCH_PLEASE_UPDATE: Self { 1558 }
         /// `ER_TEMP_TABLE_PREVENTS_SWITCH_OUT_OF_RBR`
-        public static let TEMP_TABLE_PREVENTS_SWITCH_OUT_OF_RBR: ErrorCode = 1559
+        public static var TEMP_TABLE_PREVENTS_SWITCH_OUT_OF_RBR: Self { 1559 }
         /// `ER_STORED_FUNCTION_PREVENTS_SWITCH_BINLOG_FORMAT`
-        public static let STORED_FUNCTION_PREVENTS_SWITCH_BINLOG_FORMAT: ErrorCode = 1560
+        public static var STORED_FUNCTION_PREVENTS_SWITCH_BINLOG_FORMAT: Self { 1560 }
         /// `ER_NDB_CANT_SWITCH_BINLOG_FORMAT`
-        public static let NDB_CANT_SWITCH_BINLOG_FORMAT: ErrorCode = 1561
+        public static var NDB_CANT_SWITCH_BINLOG_FORMAT: Self { 1561 }
         /// `ER_PARTITION_NO_TEMPORARY`
-        public static let PARTITION_NO_TEMPORARY: ErrorCode = 1562
+        public static var PARTITION_NO_TEMPORARY: Self { 1562 }
         /// `ER_PARTITION_CONST_DOMAIN_ERROR`
-        public static let PARTITION_CONST_DOMAIN_ERROR: ErrorCode = 1563
+        public static var PARTITION_CONST_DOMAIN_ERROR: Self { 1563 }
         /// `ER_PARTITION_FUNCTION_IS_NOT_ALLOWED`
-        public static let PARTITION_FUNCTION_IS_NOT_ALLOWED: ErrorCode = 1564
+        public static var PARTITION_FUNCTION_IS_NOT_ALLOWED: Self { 1564 }
         /// `ER_DDL_LOG_ERROR`
-        public static let DDL_LOG_ERROR: ErrorCode = 1565
+        public static var DDL_LOG_ERROR: Self { 1565 }
         /// `ER_NULL_IN_VALUES_LESS_THAN`
-        public static let NULL_IN_VALUES_LESS_THAN: ErrorCode = 1566
+        public static var NULL_IN_VALUES_LESS_THAN: Self { 1566 }
         /// `ER_WRONG_PARTITION_NAME`
-        public static let WRONG_PARTITION_NAME: ErrorCode = 1567
+        public static var WRONG_PARTITION_NAME: Self { 1567 }
         /// `ER_CANT_CHANGE_TX_CHARACTERISTICS`
-        public static let CANT_CHANGE_TX_CHARACTERISTICS: ErrorCode = 1568
+        public static var CANT_CHANGE_TX_CHARACTERISTICS: Self { 1568 }
         /// `DUP_ENTRY_AUTOINCREMENT_CASE`
-        public static let _ENTRY_AUTOINCREMENT_CASE: ErrorCode = 1569
+        public static var _ENTRY_AUTOINCREMENT_CASE: Self { 1569 }
         /// `ER_EVENT_MODIFY_QUEUE_ERROR`
-        public static let EVENT_MODIFY_QUEUE_ERROR: ErrorCode = 1570
+        public static var EVENT_MODIFY_QUEUE_ERROR: Self { 1570 }
         /// `ER_EVENT_SET_VAR_ERROR`
-        public static let EVENT_SET_VAR_ERROR: ErrorCode = 1571
+        public static var EVENT_SET_VAR_ERROR: Self { 1571 }
         /// `ER_PARTITION_MERGE_ERROR`
-        public static let PARTITION_MERGE_ERROR: ErrorCode = 1572
+        public static var PARTITION_MERGE_ERROR: Self { 1572 }
         /// `ER_CANT_ACTIVATE_LOG`
-        public static let CANT_ACTIVATE_LOG: ErrorCode = 1573
+        public static var CANT_ACTIVATE_LOG: Self { 1573 }
         /// `ER_RBR_NOT_AVAILABLE`
-        public static let RBR_NOT_AVAILABLE: ErrorCode = 1574
+        public static var RBR_NOT_AVAILABLE: Self { 1574 }
         /// `ER_BASE64_DECODE_ERROR`
-        public static let BASE64_DECODE_ERROR: ErrorCode = 1575
+        public static var BASE64_DECODE_ERROR: Self { 1575 }
         /// `ER_EVENT_RECURSION_FORBIDDEN`
-        public static let EVENT_RECURSION_FORBIDDEN: ErrorCode = 1576
+        public static var EVENT_RECURSION_FORBIDDEN: Self { 1576 }
         /// `ER_EVENTS_DB_ERROR`
-        public static let EVENTS_DB_ERROR: ErrorCode = 1577
+        public static var EVENTS_DB_ERROR: Self { 1577 }
         /// `ER_ONLY_INTEGERS_ALLOWED`
-        public static let ONLY_INTEGERS_ALLOWED: ErrorCode = 1578
+        public static var ONLY_INTEGERS_ALLOWED: Self { 1578 }
         /// `ER_UNSUPORTED_LOG_ENGINE`
-        public static let UNSUPORTED_LOG_ENGINE: ErrorCode = 1579
+        public static var UNSUPORTED_LOG_ENGINE: Self { 1579 }
         /// `ER_BAD_LOG_STATEMENT`
-        public static let BAD_LOG_STATEMENT: ErrorCode = 1580
+        public static var BAD_LOG_STATEMENT: Self { 1580 }
         /// `ER_CANT_RENAME_LOG_TABLE`
-        public static let CANT_RENAME_LOG_TABLE: ErrorCode = 1581
+        public static var CANT_RENAME_LOG_TABLE: Self { 1581 }
         /// `ER_WRONG_PARAMCOUNT_TO_NATIVE_FCT`
-        public static let WRONG_PARAMCOUNT_TO_NATIVE_FCT: ErrorCode = 1582
+        public static var WRONG_PARAMCOUNT_TO_NATIVE_FCT: Self { 1582 }
         /// `ER_WRONG_PARAMETERS_TO_NATIVE_FCT`
-        public static let WRONG_PARAMETERS_TO_NATIVE_FCT: ErrorCode = 1583
+        public static var WRONG_PARAMETERS_TO_NATIVE_FCT: Self { 1583 }
         /// `ER_WRONG_PARAMETERS_TO_STORED_FCT`
-        public static let WRONG_PARAMETERS_TO_STORED_FCT: ErrorCode = 1584
+        public static var WRONG_PARAMETERS_TO_STORED_FCT: Self { 1584 }
         /// `ER_NATIVE_FCT_NAME_COLLISION`
-        public static let NATIVE_FCT_NAME_COLLISION: ErrorCode = 1585
+        public static var NATIVE_FCT_NAME_COLLISION: Self { 1585 }
         /// `ER_DUP_ENTRY_WITH_KEY_NAME`
-        public static let DUP_ENTRY_WITH_KEY_NAME: ErrorCode = 1586
+        public static var DUP_ENTRY_WITH_KEY_NAME: Self { 1586 }
         /// `ER_BINLOG_PURGE_EMFILE`
-        public static let BINLOG_PURGE_EMFILE: ErrorCode = 1587
+        public static var BINLOG_PURGE_EMFILE: Self { 1587 }
         /// `ER_EVENT_CANNOT_CREATE_IN_THE_PAST`
-        public static let EVENT_CANNOT_CREATE_IN_THE_PAST: ErrorCode = 1588
+        public static var EVENT_CANNOT_CREATE_IN_THE_PAST: Self { 1588 }
         /// `ER_EVENT_CANNOT_ALTER_IN_THE_PAST`
-        public static let EVENT_CANNOT_ALTER_IN_THE_PAST: ErrorCode = 1589
+        public static var EVENT_CANNOT_ALTER_IN_THE_PAST: Self { 1589 }
         /// `ER_SLAVE_INCIDENT`
-        public static let SLAVE_INCIDENT: ErrorCode = 1590
+        public static var SLAVE_INCIDENT: Self { 1590 }
         /// `ER_NO_PARTITION_FOR_GIVEN_VALUE_SILENT`
-        public static let NO_PARTITION_FOR_GIVEN_VALUE_SILENT: ErrorCode = 1591
+        public static var NO_PARTITION_FOR_GIVEN_VALUE_SILENT: Self { 1591 }
         /// `ER_BINLOG_UNSAFE_STATEMENT`
-        public static let BINLOG_UNSAFE_STATEMENT: ErrorCode = 1592
+        public static var BINLOG_UNSAFE_STATEMENT: Self { 1592 }
         /// `ER_SLAVE_FATAL_ERROR`
-        public static let SLAVE_FATAL_ERROR: ErrorCode = 1593
+        public static var SLAVE_FATAL_ERROR: Self { 1593 }
         /// `ER_SLAVE_RELAY_LOG_READ_FAILURE`
-        public static let SLAVE_RELAY_LOG_READ_FAILURE: ErrorCode = 1594
+        public static var SLAVE_RELAY_LOG_READ_FAILURE: Self { 1594 }
         /// `ER_SLAVE_RELAY_LOG_WRITE_FAILURE`
-        public static let SLAVE_RELAY_LOG_WRITE_FAILURE: ErrorCode = 1595
+        public static var SLAVE_RELAY_LOG_WRITE_FAILURE: Self { 1595 }
         /// `ER_SLAVE_CREATE_EVENT_FAILURE`
-        public static let SLAVE_CREATE_EVENT_FAILURE: ErrorCode = 1596
+        public static var SLAVE_CREATE_EVENT_FAILURE: Self { 1596 }
         /// `ER_SLAVE_MASTER_COM_FAILURE`
-        public static let SLAVE_MASTER_COM_FAILURE: ErrorCode = 1597
+        public static var SLAVE_MASTER_COM_FAILURE: Self { 1597 }
         /// `ER_BINLOG_LOGGING_IMPOSSIBLE`
-        public static let BINLOG_LOGGING_IMPOSSIBLE: ErrorCode = 1598
+        public static var BINLOG_LOGGING_IMPOSSIBLE: Self { 1598 }
         /// `ER_VIEW_NO_CREATION_CTX`
-        public static let VIEW_NO_CREATION_CTX: ErrorCode = 1599
+        public static var VIEW_NO_CREATION_CTX: Self { 1599 }
         /// `ER_VIEW_INVALID_CREATION_CTX`
-        public static let VIEW_INVALID_CREATION_CTX: ErrorCode = 1600
+        public static var VIEW_INVALID_CREATION_CTX: Self { 1600 }
         /// `ER_SR_INVALID_CREATION_CTX`
-        public static let SR_INVALID_CREATION_CTX: ErrorCode = 1601
+        public static var SR_INVALID_CREATION_CTX: Self { 1601 }
         /// `ER_TRG_CORRUPTED_FILE`
-        public static let TRG_CORRUPTED_FILE: ErrorCode = 1602
+        public static var TRG_CORRUPTED_FILE: Self { 1602 }
         /// `ER_TRG_NO_CREATION_CTX`
-        public static let TRG_NO_CREATION_CTX: ErrorCode = 1603
+        public static var TRG_NO_CREATION_CTX: Self { 1603 }
         /// `ER_TRG_INVALID_CREATION_CTX`
-        public static let TRG_INVALID_CREATION_CTX: ErrorCode = 1604
+        public static var TRG_INVALID_CREATION_CTX: Self { 1604 }
         /// `ER_EVENT_INVALID_CREATION_CTX`
-        public static let EVENT_INVALID_CREATION_CTX: ErrorCode = 1605
+        public static var EVENT_INVALID_CREATION_CTX: Self { 1605 }
         /// `ER_TRG_CANT_OPEN_TABLE`
-        public static let TRG_CANT_OPEN_TABLE: ErrorCode = 1606
+        public static var TRG_CANT_OPEN_TABLE: Self { 1606 }
         /// `ER_CANT_CREATE_SROUTINE`
-        public static let CANT_CREATE_SROUTINE: ErrorCode = 1607
+        public static var CANT_CREATE_SROUTINE: Self { 1607 }
         /// `ER_NEVER_USED`
-        public static let NEVER_USED: ErrorCode = 1608
+        public static var NEVER_USED: Self { 1608 }
         /// `ER_NO_FORMAT_DESCRIPTION_EVENT_BEFORE_BINLOG_STATEMENT`
-        public static let NO_FORMAT_DESCRIPTION_EVENT_BEFORE_BINLOG_STATEMENT: ErrorCode = 1609
+        public static var NO_FORMAT_DESCRIPTION_EVENT_BEFORE_BINLOG_STATEMENT: Self { 1609 }
         /// `ER_SLAVE_CORRUPT_EVENT`
-        public static let SLAVE_CORRUPT_EVENT: ErrorCode = 1610
+        public static var SLAVE_CORRUPT_EVENT: Self { 1610 }
         /// `ER_LOAD_DATA_INVALID_COLUMN_UNUSED`
-        public static let LOAD_DATA_INVALID_COLUMN_UNUSED: ErrorCode = 1611
+        public static var LOAD_DATA_INVALID_COLUMN_UNUSED: Self { 1611 }
         /// `ER_LOG_PURGE_NO_FILE`
-        public static let LOG_PURGE_NO_FILE: ErrorCode = 1612
+        public static var LOG_PURGE_NO_FILE: Self { 1612 }
         /// `ER_XA_RBTIMEOUT`
-        public static let XA_RBTIMEOUT: ErrorCode = 1613
+        public static var XA_RBTIMEOUT: Self { 1613 }
         /// `ER_XA_RBDEADLOCK`
-        public static let XA_RBDEADLOCK: ErrorCode = 1614
+        public static var XA_RBDEADLOCK: Self { 1614 }
         /// `ER_NEED_REPREPARE`
-        public static let NEED_REPREPARE: ErrorCode = 1615
+        public static var NEED_REPREPARE: Self { 1615 }
         /// `ER_DELAYED_NOT_SUPPORTED`
-        public static let DELAYED_NOT_SUPPORTED: ErrorCode = 1616
+        public static var DELAYED_NOT_SUPPORTED: Self { 1616 }
         /// `WARN_NO_MASTER_INFO`
-        public static let N_NO_MASTER_INFO: ErrorCode = 1617
+        public static var N_NO_MASTER_INFO: Self { 1617 }
         /// `WARN_OPTION_IGNORED`
-        public static let N_OPTION_IGNORED: ErrorCode = 1618
+        public static var N_OPTION_IGNORED: Self { 1618 }
         /// `ER_PLUGIN_DELETE_BUILTIN`
-        public static let PLUGIN_DELETE_BUILTIN: ErrorCode = 1619
+        public static var PLUGIN_DELETE_BUILTIN: Self { 1619 }
         /// `WARN_PLUGIN_BUSY`
-        public static let N_PLUGIN_BUSY: ErrorCode = 1620
+        public static var N_PLUGIN_BUSY: Self { 1620 }
         /// `ER_VARIABLE_IS_READONLY`
-        public static let VARIABLE_IS_READONLY: ErrorCode = 1621
+        public static var VARIABLE_IS_READONLY: Self { 1621 }
         /// `ER_WARN_ENGINE_TRANSACTION_ROLLBACK`
-        public static let WARN_ENGINE_TRANSACTION_ROLLBACK: ErrorCode = 1622
+        public static var WARN_ENGINE_TRANSACTION_ROLLBACK: Self { 1622 }
         /// `ER_SLAVE_HEARTBEAT_FAILURE`
-        public static let SLAVE_HEARTBEAT_FAILURE: ErrorCode = 1623
+        public static var SLAVE_HEARTBEAT_FAILURE: Self { 1623 }
         /// `ER_SLAVE_HEARTBEAT_VALUE_OUT_OF_RANGE`
-        public static let SLAVE_HEARTBEAT_VALUE_OUT_OF_RANGE: ErrorCode = 1624
+        public static var SLAVE_HEARTBEAT_VALUE_OUT_OF_RANGE: Self { 1624 }
         /// `ER_NDB_REPLICATION_SCHEMA_ERROR`
-        public static let NDB_REPLICATION_SCHEMA_ERROR: ErrorCode = 1625
+        public static var NDB_REPLICATION_SCHEMA_ERROR: Self { 1625 }
         /// `ER_CONFLICT_FN_PARSE_ERROR`
-        public static let CONFLICT_FN_PARSE_ERROR: ErrorCode = 1626
+        public static var CONFLICT_FN_PARSE_ERROR: Self { 1626 }
         /// `ER_EXCEPTIONS_WRITE_ERROR`
-        public static let EXCEPTIONS_WRITE_ERROR: ErrorCode = 1627
+        public static var EXCEPTIONS_WRITE_ERROR: Self { 1627 }
         /// `ER_TOO_LONG_TABLE_COMMENT`
-        public static let TOO_LONG_TABLE_COMMENT: ErrorCode = 1628
+        public static var TOO_LONG_TABLE_COMMENT: Self { 1628 }
         /// `ER_TOO_LONG_FIELD_COMMENT`
-        public static let TOO_LONG_FIELD_COMMENT: ErrorCode = 1629
+        public static var TOO_LONG_FIELD_COMMENT: Self { 1629 }
         /// `ER_FUNC_INEXISTENT_NAME_COLLISION`
-        public static let FUNC_INEXISTENT_NAME_COLLISION: ErrorCode = 1630
+        public static var FUNC_INEXISTENT_NAME_COLLISION: Self { 1630 }
         /// `ER_DATABASE_NAME`
-        public static let DATABASE_NAME: ErrorCode = 1631
+        public static var DATABASE_NAME: Self { 1631 }
         /// `ER_TABLE_NAME`
-        public static let TABLE_NAME: ErrorCode = 1632
+        public static var TABLE_NAME: Self { 1632 }
         /// `ER_PARTITION_NAME`
-        public static let PARTITION_NAME: ErrorCode = 1633
+        public static var PARTITION_NAME: Self { 1633 }
         /// `ER_SUBPARTITION_NAME`
-        public static let SUBPARTITION_NAME: ErrorCode = 1634
+        public static var SUBPARTITION_NAME: Self { 1634 }
         /// `ER_TEMPORARY_NAME`
-        public static let TEMPORARY_NAME: ErrorCode = 1635
+        public static var TEMPORARY_NAME: Self { 1635 }
         /// `ER_RENAMED_NAME`
-        public static let RENAMED_NAME: ErrorCode = 1636
+        public static var RENAMED_NAME: Self { 1636 }
         /// `ER_TOO_MANY_CONCURRENT_TRXS`
-        public static let TOO_MANY_CONCURRENT_TRXS: ErrorCode = 1637
+        public static var TOO_MANY_CONCURRENT_TRXS: Self { 1637 }
         /// `WARN_NON_ASCII_SEPARATOR_NOT_IMPLEMENTED`
-        public static let N_NON_ASCII_SEPARATOR_NOT_IMPLEMENTED: ErrorCode = 1638
+        public static var N_NON_ASCII_SEPARATOR_NOT_IMPLEMENTED: Self { 1638 }
         /// `ER_DEBUG_SYNC_TIMEOUT`
-        public static let DEBUG_SYNC_TIMEOUT: ErrorCode = 1639
+        public static var DEBUG_SYNC_TIMEOUT: Self { 1639 }
         /// `ER_DEBUG_SYNC_HIT_LIMIT`
-        public static let DEBUG_SYNC_HIT_LIMIT: ErrorCode = 1640
+        public static var DEBUG_SYNC_HIT_LIMIT: Self { 1640 }
         /// `ER_DUP_SIGNAL_SET`
-        public static let DUP_SIGNAL_SET: ErrorCode = 1641
+        public static var DUP_SIGNAL_SET: Self { 1641 }
         /// `ER_SIGNAL_WARN`
-        public static let SIGNAL_WARN: ErrorCode = 1642
+        public static var SIGNAL_WARN: Self { 1642 }
         /// `ER_SIGNAL_NOT_FOUND`
-        public static let SIGNAL_NOT_FOUND: ErrorCode = 1643
+        public static var SIGNAL_NOT_FOUND: Self { 1643 }
         /// `ER_SIGNAL_EXCEPTION`
-        public static let SIGNAL_EXCEPTION: ErrorCode = 1644
+        public static var SIGNAL_EXCEPTION: Self { 1644 }
         /// `ER_RESIGNAL_WITHOUT_ACTIVE_HANDLER`
-        public static let RESIGNAL_WITHOUT_ACTIVE_HANDLER: ErrorCode = 1645
+        public static var RESIGNAL_WITHOUT_ACTIVE_HANDLER: Self { 1645 }
         /// `ER_SIGNAL_BAD_CONDITION_TYPE`
-        public static let SIGNAL_BAD_CONDITION_TYPE: ErrorCode = 1646
+        public static var SIGNAL_BAD_CONDITION_TYPE: Self { 1646 }
         /// `WARN_COND_ITEM_TRUNCATED`
-        public static let N_COND_ITEM_TRUNCATED: ErrorCode = 1647
+        public static var N_COND_ITEM_TRUNCATED: Self { 1647 }
         /// `ER_COND_ITEM_TOO_LONG`
-        public static let COND_ITEM_TOO_LONG: ErrorCode = 1648
+        public static var COND_ITEM_TOO_LONG: Self { 1648 }
         /// `ER_UNKNOWN_LOCALE`
-        public static let UNKNOWN_LOCALE: ErrorCode = 1649
+        public static var UNKNOWN_LOCALE: Self { 1649 }
         /// `ER_SLAVE_IGNORE_SERVER_IDS`
-        public static let SLAVE_IGNORE_SERVER_IDS: ErrorCode = 1650
+        public static var SLAVE_IGNORE_SERVER_IDS: Self { 1650 }
         /// `ER_QUERY_CACHE_DISABLED`
-        public static let QUERY_CACHE_DISABLED: ErrorCode = 1651
+        public static var QUERY_CACHE_DISABLED: Self { 1651 }
         /// `ER_SAME_NAME_PARTITION_FIELD`
-        public static let SAME_NAME_PARTITION_FIELD: ErrorCode = 1652
+        public static var SAME_NAME_PARTITION_FIELD: Self { 1652 }
         /// `ER_PARTITION_COLUMN_LIST_ERROR`
-        public static let PARTITION_COLUMN_LIST_ERROR: ErrorCode = 1653
+        public static var PARTITION_COLUMN_LIST_ERROR: Self { 1653 }
         /// `ER_WRONG_TYPE_COLUMN_VALUE_ERROR`
-        public static let WRONG_TYPE_COLUMN_VALUE_ERROR: ErrorCode = 1654
+        public static var WRONG_TYPE_COLUMN_VALUE_ERROR: Self { 1654 }
         /// `ER_TOO_MANY_PARTITION_FUNC_FIELDS_ERROR`
-        public static let TOO_MANY_PARTITION_FUNC_FIELDS_ERROR: ErrorCode = 1655
+        public static var TOO_MANY_PARTITION_FUNC_FIELDS_ERROR: Self { 1655 }
         /// `ER_MAXVALUE_IN_VALUES_IN`
-        public static let MAXVALUE_IN_VALUES_IN: ErrorCode = 1656
+        public static var MAXVALUE_IN_VALUES_IN: Self { 1656 }
         /// `ER_TOO_MANY_VALUES_ERROR`
-        public static let TOO_MANY_VALUES_ERROR: ErrorCode = 1657
+        public static var TOO_MANY_VALUES_ERROR: Self { 1657 }
         /// `ER_ROW_SINGLE_PARTITION_FIELD_ERROR`
-        public static let ROW_SINGLE_PARTITION_FIELD_ERROR: ErrorCode = 1658
+        public static var ROW_SINGLE_PARTITION_FIELD_ERROR: Self { 1658 }
         /// `ER_FIELD_TYPE_NOT_ALLOWED_AS_PARTITION_FIELD`
-        public static let FIELD_TYPE_NOT_ALLOWED_AS_PARTITION_FIELD: ErrorCode = 1659
+        public static var FIELD_TYPE_NOT_ALLOWED_AS_PARTITION_FIELD: Self { 1659 }
         /// `ER_PARTITION_FIELDS_TOO_LONG`
-        public static let PARTITION_FIELDS_TOO_LONG: ErrorCode = 1660
+        public static var PARTITION_FIELDS_TOO_LONG: Self { 1660 }
         /// `ER_BINLOG_ROW_ENGINE_AND_STMT_ENGINE`
-        public static let BINLOG_ROW_ENGINE_AND_STMT_ENGINE: ErrorCode = 1661
+        public static var BINLOG_ROW_ENGINE_AND_STMT_ENGINE: Self { 1661 }
         /// `ER_BINLOG_ROW_MODE_AND_STMT_ENGINE`
-        public static let BINLOG_ROW_MODE_AND_STMT_ENGINE: ErrorCode = 1662
+        public static var BINLOG_ROW_MODE_AND_STMT_ENGINE: Self { 1662 }
         /// `ER_BINLOG_UNSAFE_AND_STMT_ENGINE`
-        public static let BINLOG_UNSAFE_AND_STMT_ENGINE: ErrorCode = 1663
+        public static var BINLOG_UNSAFE_AND_STMT_ENGINE: Self { 1663 }
         /// `ER_BINLOG_ROW_INJECTION_AND_STMT_ENGINE`
-        public static let BINLOG_ROW_INJECTION_AND_STMT_ENGINE: ErrorCode = 1664
+        public static var BINLOG_ROW_INJECTION_AND_STMT_ENGINE: Self { 1664 }
         /// `ER_BINLOG_STMT_MODE_AND_ROW_ENGINE`
-        public static let BINLOG_STMT_MODE_AND_ROW_ENGINE: ErrorCode = 1665
+        public static var BINLOG_STMT_MODE_AND_ROW_ENGINE: Self { 1665 }
         /// `ER_BINLOG_ROW_INJECTION_AND_STMT_MODE`
-        public static let BINLOG_ROW_INJECTION_AND_STMT_MODE: ErrorCode = 1666
+        public static var BINLOG_ROW_INJECTION_AND_STMT_MODE: Self { 1666 }
         /// `ER_BINLOG_MULTIPLE_ENGINES_AND_SELF_LOGGING_ENGINE`
-        public static let BINLOG_MULTIPLE_ENGINES_AND_SELF_LOGGING_ENGINE: ErrorCode = 1667
+        public static var BINLOG_MULTIPLE_ENGINES_AND_SELF_LOGGING_ENGINE: Self { 1667 }
         /// `ER_BINLOG_UNSAFE_LIMIT`
-        public static let BINLOG_UNSAFE_LIMIT: ErrorCode = 1668
+        public static var BINLOG_UNSAFE_LIMIT: Self { 1668 }
         /// `ER_UNUSED4`
-        public static let UNUSED4: ErrorCode  = 1669
+        public static var UNUSED4: Self { 1669 }
         /// `ER_BINLOG_UNSAFE_SYSTEM_TABLE`
-        public static let BINLOG_UNSAFE_SYSTEM_TABLE: ErrorCode = 1670
+        public static var BINLOG_UNSAFE_SYSTEM_TABLE: Self { 1670 }
         /// `ER_BINLOG_UNSAFE_AUTOINC_COLUMNS`
-        public static let BINLOG_UNSAFE_AUTOINC_COLUMNS: ErrorCode = 1671
+        public static var BINLOG_UNSAFE_AUTOINC_COLUMNS: Self { 1671 }
         /// `ER_BINLOG_UNSAFE_UDF`
-        public static let BINLOG_UNSAFE_UDF: ErrorCode = 1672
+        public static var BINLOG_UNSAFE_UDF: Self { 1672 }
         /// `ER_BINLOG_UNSAFE_SYSTEM_VARIABLE`
-        public static let BINLOG_UNSAFE_SYSTEM_VARIABLE: ErrorCode = 1673
+        public static var BINLOG_UNSAFE_SYSTEM_VARIABLE: Self { 1673 }
         /// `ER_BINLOG_UNSAFE_SYSTEM_FUNCTION`
-        public static let BINLOG_UNSAFE_SYSTEM_FUNCTION: ErrorCode = 1674
+        public static var BINLOG_UNSAFE_SYSTEM_FUNCTION: Self { 1674 }
         /// `ER_BINLOG_UNSAFE_NONTRANS_AFTER_TRANS`
-        public static let BINLOG_UNSAFE_NONTRANS_AFTER_TRANS: ErrorCode = 1675
+        public static var BINLOG_UNSAFE_NONTRANS_AFTER_TRANS: Self { 1675 }
         /// `ER_MESSAGE_AND_STATEMENT`
-        public static let MESSAGE_AND_STATEMENT: ErrorCode = 1676
+        public static var MESSAGE_AND_STATEMENT: Self { 1676 }
         /// `ER_SLAVE_CONVERSION_FAILED`
-        public static let SLAVE_CONVERSION_FAILED: ErrorCode = 1677
+        public static var SLAVE_CONVERSION_FAILED: Self { 1677 }
         /// `ER_SLAVE_CANT_CREATE_CONVERSION`
-        public static let SLAVE_CANT_CREATE_CONVERSION: ErrorCode = 1678
+        public static var SLAVE_CANT_CREATE_CONVERSION: Self { 1678 }
         /// `ER_INSIDE_TRANSACTION_PREVENTS_SWITCH_BINLOG_FORMAT`
-        public static let INSIDE_TRANSACTION_PREVENTS_SWITCH_BINLOG_FORMAT: ErrorCode = 1679
+        public static var INSIDE_TRANSACTION_PREVENTS_SWITCH_BINLOG_FORMAT: Self { 1679 }
         /// `ER_PATH_LENGTH`
-        public static let PATH_LENGTH: ErrorCode = 1680
+        public static var PATH_LENGTH: Self { 1680 }
         /// `ER_WARN_DEPRECATED_SYNTAX_NO_REPLACEMENT`
-        public static let WARN_DEPRECATED_SYNTAX_NO_REPLACEMENT: ErrorCode = 1681
+        public static var WARN_DEPRECATED_SYNTAX_NO_REPLACEMENT: Self { 1681 }
         /// `ER_WRONG_NATIVE_TABLE_STRUCTURE`
-        public static let WRONG_NATIVE_TABLE_STRUCTURE: ErrorCode = 1682
+        public static var WRONG_NATIVE_TABLE_STRUCTURE: Self { 1682 }
         /// `ER_WRONG_PERFSCHEMA_USAGE`
-        public static let WRONG_PERFSCHEMA_USAGE: ErrorCode = 1683
+        public static var WRONG_PERFSCHEMA_USAGE: Self { 1683 }
         /// `ER_WARN_I_S_SKIPPED_TABLE`
-        public static let WARN_I_S_SKIPPED_TABLE: ErrorCode = 1684
+        public static var WARN_I_S_SKIPPED_TABLE: Self { 1684 }
         /// `ER_INSIDE_TRANSACTION_PREVENTS_SWITCH_BINLOG_DIRECT`
-        public static let INSIDE_TRANSACTION_PREVENTS_SWITCH_BINLOG_DIRECT: ErrorCode = 1685
+        public static var INSIDE_TRANSACTION_PREVENTS_SWITCH_BINLOG_DIRECT: Self { 1685 }
         /// `ER_STORED_FUNCTION_PREVENTS_SWITCH_BINLOG_DIRECT`
-        public static let STORED_FUNCTION_PREVENTS_SWITCH_BINLOG_DIRECT: ErrorCode = 1686
+        public static var STORED_FUNCTION_PREVENTS_SWITCH_BINLOG_DIRECT: Self { 1686 }
         /// `ER_SPATIAL_MUST_HAVE_GEOM_COL`
-        public static let SPATIAL_MUST_HAVE_GEOM_COL: ErrorCode = 1687
+        public static var SPATIAL_MUST_HAVE_GEOM_COL: Self { 1687 }
         /// `ER_TOO_LONG_INDEX_COMMENT`
-        public static let TOO_LONG_INDEX_COMMENT: ErrorCode = 1688
+        public static var TOO_LONG_INDEX_COMMENT: Self { 1688 }
         /// `ER_LOCK_ABORTED`
-        public static let LOCK_ABORTED: ErrorCode = 1689
+        public static var LOCK_ABORTED: Self { 1689 }
         /// `ER_DATA_OUT_OF_RANGE`
-        public static let DATA_OUT_OF_RANGE: ErrorCode = 1690
+        public static var DATA_OUT_OF_RANGE: Self { 1690 }
         /// `ER_WRONG_SPVAR_TYPE_IN_LIMIT`
-        public static let WRONG_SPVAR_TYPE_IN_LIMIT: ErrorCode = 1691
+        public static var WRONG_SPVAR_TYPE_IN_LIMIT: Self { 1691 }
         /// `ER_BINLOG_UNSAFE_MULTIPLE_ENGINES_AND_SELF_LOGGING_ENGINE`
-        public static let BINLOG_UNSAFE_MULTIPLE_ENGINES_AND_SELF_LOGGING_ENGINE: ErrorCode = 1692
+        public static var BINLOG_UNSAFE_MULTIPLE_ENGINES_AND_SELF_LOGGING_ENGINE: Self { 1692 }
         /// `ER_BINLOG_UNSAFE_MIXED_STATEMENT`
-        public static let BINLOG_UNSAFE_MIXED_STATEMENT: ErrorCode = 1693
+        public static var BINLOG_UNSAFE_MIXED_STATEMENT: Self { 1693 }
         /// `ER_INSIDE_TRANSACTION_PREVENTS_SWITCH_SQL_LOG_BIN`
-        public static let INSIDE_TRANSACTION_PREVENTS_SWITCH_SQL_LOG_BIN: ErrorCode = 1694
+        public static var INSIDE_TRANSACTION_PREVENTS_SWITCH_SQL_LOG_BIN: Self { 1694 }
         /// `ER_STORED_FUNCTION_PREVENTS_SWITCH_SQL_LOG_BIN`
-        public static let STORED_FUNCTION_PREVENTS_SWITCH_SQL_LOG_BIN: ErrorCode = 1695
+        public static var STORED_FUNCTION_PREVENTS_SWITCH_SQL_LOG_BIN: Self { 1695 }
         /// `ER_FAILED_READ_FROM_PAR_FILE`
-        public static let FAILED_READ_FROM_PAR_FILE: ErrorCode = 1696
+        public static var FAILED_READ_FROM_PAR_FILE: Self { 1696 }
         /// `ER_VALUES_IS_NOT_INT_TYPE_ERROR`
-        public static let VALUES_IS_NOT_INT_TYPE_ERROR: ErrorCode = 1697
+        public static var VALUES_IS_NOT_INT_TYPE_ERROR: Self { 1697 }
         /// `ER_ACCESS_DENIED_NO_PASSWORD_ERROR`
-        public static let ACCESS_DENIED_NO_PASSWORD_ERROR: ErrorCode = 1698
+        public static var ACCESS_DENIED_NO_PASSWORD_ERROR: Self { 1698 }
         /// `ER_SET_PASSWORD_AUTH_PLUGIN`
-        public static let SET_PASSWORD_AUTH_PLUGIN: ErrorCode = 1699
+        public static var SET_PASSWORD_AUTH_PLUGIN: Self { 1699 }
         /// `ER_GRANT_PLUGIN_USER_EXISTS`
-        public static let GRANT_PLUGIN_USER_EXISTS: ErrorCode = 1700
+        public static var GRANT_PLUGIN_USER_EXISTS: Self { 1700 }
         /// `ER_TRUNCATE_ILLEGAL_FK`
-        public static let TRUNCATE_ILLEGAL_FK: ErrorCode = 1701
+        public static var TRUNCATE_ILLEGAL_FK: Self { 1701 }
         /// `ER_PLUGIN_IS_PERMANENT`
-        public static let PLUGIN_IS_PERMANENT: ErrorCode = 1702
+        public static var PLUGIN_IS_PERMANENT: Self { 1702 }
         /// `ER_SLAVE_HEARTBEAT_VALUE_OUT_OF_RANGE_MIN`
-        public static let SLAVE_HEARTBEAT_VALUE_OUT_OF_RANGE_MIN: ErrorCode = 1703
+        public static var SLAVE_HEARTBEAT_VALUE_OUT_OF_RANGE_MIN: Self { 1703 }
         /// `ER_SLAVE_HEARTBEAT_VALUE_OUT_OF_RANGE_MAX`
-        public static let SLAVE_HEARTBEAT_VALUE_OUT_OF_RANGE_MAX: ErrorCode = 1704
+        public static var SLAVE_HEARTBEAT_VALUE_OUT_OF_RANGE_MAX: Self { 1704 }
         /// `ER_STMT_CACHE_FULL`
-        public static let STMT_CACHE_FULL: ErrorCode = 1705
+        public static var STMT_CACHE_FULL: Self { 1705 }
         /// `ER_MULTI_UPDATE_KEY_CONFLICT`
-        public static let MULTI_UPDATE_KEY_CONFLICT: ErrorCode = 1706
+        public static var MULTI_UPDATE_KEY_CONFLICT: Self { 1706 }
         /// `ER_TABLE_NEEDS_REBUILD`
-        public static let TABLE_NEEDS_REBUILD: ErrorCode = 1707
+        public static var TABLE_NEEDS_REBUILD: Self { 1707 }
         /// `WARN_OPTION_BELOW_LIMIT`
-        public static let N_OPTION_BELOW_LIMIT: ErrorCode = 1708
+        public static var N_OPTION_BELOW_LIMIT: Self { 1708 }
         /// `ER_INDEX_COLUMN_TOO_LONG`
-        public static let INDEX_COLUMN_TOO_LONG: ErrorCode = 1709
+        public static var INDEX_COLUMN_TOO_LONG: Self { 1709 }
         /// `ER_ERROR_IN_TRIGGER_BODY`
-        public static let ERROR_IN_TRIGGER_BODY: ErrorCode = 1710
+        public static var ERROR_IN_TRIGGER_BODY: Self { 1710 }
         /// `ER_ERROR_IN_UNKNOWN_TRIGGER_BODY`
-        public static let ERROR_IN_UNKNOWN_TRIGGER_BODY: ErrorCode = 1711
+        public static var ERROR_IN_UNKNOWN_TRIGGER_BODY: Self { 1711 }
         /// `ER_INDEX_CORRUPT`
-        public static let INDEX_CORRUPT: ErrorCode = 1712
+        public static var INDEX_CORRUPT: Self { 1712 }
         /// `ER_UNDO_RECORD_TOO_BIG`
-        public static let UNDO_RECORD_TOO_BIG: ErrorCode = 1713
+        public static var UNDO_RECORD_TOO_BIG: Self { 1713 }
         /// `ER_BINLOG_UNSAFE_INSERT_IGNORE_SELECT`
-        public static let BINLOG_UNSAFE_INSERT_IGNORE_SELECT: ErrorCode = 1714
+        public static var BINLOG_UNSAFE_INSERT_IGNORE_SELECT: Self { 1714 }
         /// `ER_BINLOG_UNSAFE_INSERT_SELECT_UPDATE`
-        public static let BINLOG_UNSAFE_INSERT_SELECT_UPDATE: ErrorCode = 1715
+        public static var BINLOG_UNSAFE_INSERT_SELECT_UPDATE: Self { 1715 }
         /// `ER_BINLOG_UNSAFE_REPLACE_SELECT`
-        public static let BINLOG_UNSAFE_REPLACE_SELECT: ErrorCode = 1716
+        public static var BINLOG_UNSAFE_REPLACE_SELECT: Self { 1716 }
         /// `ER_BINLOG_UNSAFE_CREATE_IGNORE_SELECT`
-        public static let BINLOG_UNSAFE_CREATE_IGNORE_SELECT: ErrorCode = 1717
+        public static var BINLOG_UNSAFE_CREATE_IGNORE_SELECT: Self { 1717 }
         /// `ER_BINLOG_UNSAFE_CREATE_REPLACE_SELECT`
-        public static let BINLOG_UNSAFE_CREATE_REPLACE_SELECT: ErrorCode = 1718
+        public static var BINLOG_UNSAFE_CREATE_REPLACE_SELECT: Self { 1718 }
         /// `ER_BINLOG_UNSAFE_UPDATE_IGNORE`
-        public static let BINLOG_UNSAFE_UPDATE_IGNORE: ErrorCode = 1719
+        public static var BINLOG_UNSAFE_UPDATE_IGNORE: Self { 1719 }
         /// `ER_PLUGIN_NO_UNINSTALL`
-        public static let PLUGIN_NO_UNINSTALL: ErrorCode = 1720
+        public static var PLUGIN_NO_UNINSTALL: Self { 1720 }
         /// `ER_PLUGIN_NO_INSTALL`
-        public static let PLUGIN_NO_INSTALL: ErrorCode = 1721
+        public static var PLUGIN_NO_INSTALL: Self { 1721 }
         /// `ER_BINLOG_UNSAFE_WRITE_AUTOINC_SELECT`
-        public static let BINLOG_UNSAFE_WRITE_AUTOINC_SELECT: ErrorCode = 1722
+        public static var BINLOG_UNSAFE_WRITE_AUTOINC_SELECT: Self { 1722 }
         /// `ER_BINLOG_UNSAFE_CREATE_SELECT_AUTOINC`
-        public static let BINLOG_UNSAFE_CREATE_SELECT_AUTOINC: ErrorCode = 1723
+        public static var BINLOG_UNSAFE_CREATE_SELECT_AUTOINC: Self { 1723 }
         /// `ER_BINLOG_UNSAFE_INSERT_TWO_KEYS`
-        public static let BINLOG_UNSAFE_INSERT_TWO_KEYS: ErrorCode = 1724
+        public static var BINLOG_UNSAFE_INSERT_TWO_KEYS: Self { 1724 }
         /// `ER_TABLE_IN_FK_CHECK`
-        public static let TABLE_IN_FK_CHECK: ErrorCode = 1725
+        public static var TABLE_IN_FK_CHECK: Self { 1725 }
         /// `ER_UNSUPPORTED_ENGINE`
-        public static let UNSUPPORTED_ENGINE: ErrorCode = 1726
+        public static var UNSUPPORTED_ENGINE: Self { 1726 }
         /// `ER_BINLOG_UNSAFE_AUTOINC_NOT_FIRST`
-        public static let BINLOG_UNSAFE_AUTOINC_NOT_FIRST: ErrorCode = 1727
+        public static var BINLOG_UNSAFE_AUTOINC_NOT_FIRST: Self { 1727 }
         /// `ER_CANNOT_LOAD_FROM_TABLE_V2`
-        public static let CANNOT_LOAD_FROM_TABLE_V2: ErrorCode  = 1728
+        public static var CANNOT_LOAD_FROM_TABLE_V2: Self { 1728 }
         /// `ER_MASTER_DELAY_VALUE_OUT_OF_RANGE`
-        public static let MASTER_DELAY_VALUE_OUT_OF_RANGE: ErrorCode = 1729
+        public static var MASTER_DELAY_VALUE_OUT_OF_RANGE: Self { 1729 }
         /// `ER_ONLY_FD_AND_RBR_EVENTS_ALLOWED_IN_BINLOG_STATEMENT`
-        public static let ONLY_FD_AND_RBR_EVENTS_ALLOWED_IN_BINLOG_STATEMENT: ErrorCode = 1730
+        public static var ONLY_FD_AND_RBR_EVENTS_ALLOWED_IN_BINLOG_STATEMENT: Self { 1730 }
         /// `ER_PARTITION_EXCHANGE_DIFFERENT_OPTION`
-        public static let PARTITION_EXCHANGE_DIFFERENT_OPTION: ErrorCode = 1731
+        public static var PARTITION_EXCHANGE_DIFFERENT_OPTION: Self { 1731 }
         /// `ER_PARTITION_EXCHANGE_PART_TABLE`
-        public static let PARTITION_EXCHANGE_PART_TABLE: ErrorCode = 1732
+        public static var PARTITION_EXCHANGE_PART_TABLE: Self { 1732 }
         /// `ER_PARTITION_EXCHANGE_TEMP_TABLE`
-        public static let PARTITION_EXCHANGE_TEMP_TABLE: ErrorCode = 1733
+        public static var PARTITION_EXCHANGE_TEMP_TABLE: Self { 1733 }
         /// `ER_PARTITION_INSTEAD_OF_SUBPARTITION`
-        public static let PARTITION_INSTEAD_OF_SUBPARTITION: ErrorCode = 1734
+        public static var PARTITION_INSTEAD_OF_SUBPARTITION: Self { 1734 }
         /// `ER_UNKNOWN_PARTITION`
-        public static let UNKNOWN_PARTITION: ErrorCode = 1735
+        public static var UNKNOWN_PARTITION: Self { 1735 }
         /// `ER_TABLES_DIFFERENT_METADATA`
-        public static let TABLES_DIFFERENT_METADATA: ErrorCode = 1736
+        public static var TABLES_DIFFERENT_METADATA: Self { 1736 }
         /// `ER_ROW_DOES_NOT_MATCH_PARTITION`
-        public static let ROW_DOES_NOT_MATCH_PARTITION: ErrorCode = 1737
+        public static var ROW_DOES_NOT_MATCH_PARTITION: Self { 1737 }
         /// `ER_BINLOG_CACHE_SIZE_GREATER_THAN_MAX`
-        public static let BINLOG_CACHE_SIZE_GREATER_THAN_MAX: ErrorCode = 1738
+        public static var BINLOG_CACHE_SIZE_GREATER_THAN_MAX: Self { 1738 }
         /// `ER_WARN_INDEX_NOT_APPLICABLE`
-        public static let WARN_INDEX_NOT_APPLICABLE: ErrorCode = 1739
+        public static var WARN_INDEX_NOT_APPLICABLE: Self { 1739 }
         /// `ER_PARTITION_EXCHANGE_FOREIGN_KEY`
-        public static let PARTITION_EXCHANGE_FOREIGN_KEY: ErrorCode = 1740
+        public static var PARTITION_EXCHANGE_FOREIGN_KEY: Self { 1740 }
         /// `ER_NO_SUCH_KEY_VALUE`
-        public static let NO_SUCH_KEY_VALUE: ErrorCode = 1741
+        public static var NO_SUCH_KEY_VALUE: Self { 1741 }
         /// `ER_RPL_INFO_DATA_TOO_LONG`
-        public static let RPL_INFO_DATA_TOO_LONG: ErrorCode = 1742
+        public static var RPL_INFO_DATA_TOO_LONG: Self { 1742 }
         /// `ER_NETWORK_READ_EVENT_CHECKSUM_FAILURE`
-        public static let NETWORK_READ_EVENT_CHECKSUM_FAILURE: ErrorCode = 1743
+        public static var NETWORK_READ_EVENT_CHECKSUM_FAILURE: Self { 1743 }
         /// `ER_BINLOG_READ_EVENT_CHECKSUM_FAILURE`
-        public static let BINLOG_READ_EVENT_CHECKSUM_FAILURE: ErrorCode = 1744
+        public static var BINLOG_READ_EVENT_CHECKSUM_FAILURE: Self { 1744 }
         /// `ER_BINLOG_STMT_CACHE_SIZE_GREATER_THAN_MAX`
-        public static let BINLOG_STMT_CACHE_SIZE_GREATER_THAN_MAX: ErrorCode = 1745
+        public static var BINLOG_STMT_CACHE_SIZE_GREATER_THAN_MAX: Self { 1745 }
         /// `ER_CANT_UPDATE_TABLE_IN_CREATE_TABLE_SELECT`
-        public static let CANT_UPDATE_TABLE_IN_CREATE_TABLE_SELECT: ErrorCode = 1746
+        public static var CANT_UPDATE_TABLE_IN_CREATE_TABLE_SELECT: Self { 1746 }
         /// `ER_PARTITION_CLAUSE_ON_NONPARTITIONED`
-        public static let PARTITION_CLAUSE_ON_NONPARTITIONED: ErrorCode = 1747
+        public static var PARTITION_CLAUSE_ON_NONPARTITIONED: Self { 1747 }
         /// `ER_ROW_DOES_NOT_MATCH_GIVEN_PARTITION_SET`
-        public static let ROW_DOES_NOT_MATCH_GIVEN_PARTITION_SET: ErrorCode = 1748
+        public static var ROW_DOES_NOT_MATCH_GIVEN_PARTITION_SET: Self { 1748 }
         /// `ER_NO_SUCH_PARTITION__UNUSED`
-        public static let NO_SUCH_PARTITION__UNUSED: ErrorCode = 1749
+        public static var NO_SUCH_PARTITION__UNUSED: Self { 1749 }
         /// `ER_CHANGE_RPL_INFO_REPOSITORY_FAILURE`
-        public static let CHANGE_RPL_INFO_REPOSITORY_FAILURE: ErrorCode = 1750
+        public static var CHANGE_RPL_INFO_REPOSITORY_FAILURE: Self { 1750 }
         /// `ER_WARNING_NOT_COMPLETE_ROLLBACK_WITH_CREATED_TEMP_TABLE`
-        public static let WARNING_NOT_COMPLETE_ROLLBACK_WITH_CREATED_TEMP_TABLE: ErrorCode = 1751
+        public static var WARNING_NOT_COMPLETE_ROLLBACK_WITH_CREATED_TEMP_TABLE: Self { 1751 }
         /// `ER_WARNING_NOT_COMPLETE_ROLLBACK_WITH_DROPPED_TEMP_TABLE`
-        public static let WARNING_NOT_COMPLETE_ROLLBACK_WITH_DROPPED_TEMP_TABLE: ErrorCode = 1752
+        public static var WARNING_NOT_COMPLETE_ROLLBACK_WITH_DROPPED_TEMP_TABLE: Self { 1752 }
         /// `ER_MTS_FEATURE_IS_NOT_SUPPORTED`
-        public static let MTS_FEATURE_IS_NOT_SUPPORTED: ErrorCode = 1753
+        public static var MTS_FEATURE_IS_NOT_SUPPORTED: Self { 1753 }
         /// `ER_MTS_UPDATED_DBS_GREATER_MAX`
-        public static let MTS_UPDATED_DBS_GREATER_MAX: ErrorCode = 1754
+        public static var MTS_UPDATED_DBS_GREATER_MAX: Self { 1754 }
         /// `ER_MTS_CANT_PARALLEL`
-        public static let MTS_CANT_PARALLEL: ErrorCode = 1755
+        public static var MTS_CANT_PARALLEL: Self { 1755 }
         /// `ER_MTS_INCONSISTENT_DATA`
-        public static let MTS_INCONSISTENT_DATA: ErrorCode = 1756
+        public static var MTS_INCONSISTENT_DATA: Self { 1756 }
         /// `ER_FULLTEXT_NOT_SUPPORTED_WITH_PARTITIONING`
-        public static let FULLTEXT_NOT_SUPPORTED_WITH_PARTITIONING: ErrorCode = 1757
+        public static var FULLTEXT_NOT_SUPPORTED_WITH_PARTITIONING: Self { 1757 }
         /// `ER_DA_INVALID_CONDITION_NUMBER`
-        public static let DA_INVALID_CONDITION_NUMBER: ErrorCode = 1758
+        public static var DA_INVALID_CONDITION_NUMBER: Self { 1758 }
         /// `ER_INSECURE_PLAIN_TEXT`
-        public static let INSECURE_PLAIN_TEXT: ErrorCode = 1759
+        public static var INSECURE_PLAIN_TEXT: Self { 1759 }
         /// `ER_INSECURE_CHANGE_MASTER`
-        public static let INSECURE_CHANGE_MASTER: ErrorCode = 1760
+        public static var INSECURE_CHANGE_MASTER: Self { 1760 }
         /// `ER_FOREIGN_DUPLICATE_KEY_WITH_CHILD_INFO`
-        public static let FOREIGN_DUPLICATE_KEY_WITH_CHILD_INFO: ErrorCode = 1761
+        public static var FOREIGN_DUPLICATE_KEY_WITH_CHILD_INFO: Self { 1761 }
         /// `ER_FOREIGN_DUPLICATE_KEY_WITHOUT_CHILD_INFO`
-        public static let FOREIGN_DUPLICATE_KEY_WITHOUT_CHILD_INFO: ErrorCode = 1762
+        public static var FOREIGN_DUPLICATE_KEY_WITHOUT_CHILD_INFO: Self { 1762 }
         /// `ER_SQLTHREAD_WITH_SECURE_SLAVE`
-        public static let SQLTHREAD_WITH_SECURE_SLAVE: ErrorCode = 1763
+        public static var SQLTHREAD_WITH_SECURE_SLAVE: Self { 1763 }
         /// `ER_TABLE_HAS_NO_FT`
-        public static let TABLE_HAS_NO_FT: ErrorCode = 1764
+        public static var TABLE_HAS_NO_FT: Self { 1764 }
         /// `ER_VARIABLE_NOT_SETTABLE_IN_SF_OR_TRIGGER`
-        public static let VARIABLE_NOT_SETTABLE_IN_SF_OR_TRIGGER: ErrorCode = 1765
+        public static var VARIABLE_NOT_SETTABLE_IN_SF_OR_TRIGGER: Self { 1765 }
         /// `ER_VARIABLE_NOT_SETTABLE_IN_TRANSACTION`
-        public static let VARIABLE_NOT_SETTABLE_IN_TRANSACTION: ErrorCode = 1766
+        public static var VARIABLE_NOT_SETTABLE_IN_TRANSACTION: Self { 1766 }
         /// `ER_GTID_NEXT_IS_NOT_IN_GTID_NEXT_LIST`
-        public static let GTID_NEXT_IS_NOT_IN_GTID_NEXT_LIST: ErrorCode = 1767
+        public static var GTID_NEXT_IS_NOT_IN_GTID_NEXT_LIST: Self { 1767 }
         /// `ER_CANT_CHANGE_GTID_NEXT_IN_TRANSACTION`
-        public static let CANT_CHANGE_GTID_NEXT_IN_TRANSACTION: ErrorCode = 1768
+        public static var CANT_CHANGE_GTID_NEXT_IN_TRANSACTION: Self { 1768 }
         /// `ER_SET_STATEMENT_CANNOT_INVOKE_FUNCTION`
-        public static let SET_STATEMENT_CANNOT_INVOKE_FUNCTION: ErrorCode = 1769
+        public static var SET_STATEMENT_CANNOT_INVOKE_FUNCTION: Self { 1769 }
         /// `ER_GTID_NEXT_CANT_BE_AUTOMATIC_IF_GTID_NEXT_LIST_IS_NON_NULL`
-        public static let GTID_NEXT_CANT_BE_AUTOMATIC_IF_GTID_NEXT_LIST_IS_NON_NULL: ErrorCode = 1770
+        public static var GTID_NEXT_CANT_BE_AUTOMATIC_IF_GTID_NEXT_LIST_IS_NON_NULL: Self { 1770 }
         /// `ER_SKIPPING_LOGGED_TRANSACTION`
-        public static let SKIPPING_LOGGED_TRANSACTION: ErrorCode = 1771
+        public static var SKIPPING_LOGGED_TRANSACTION: Self { 1771 }
         /// `ER_MALFORMED_GTID_SET_SPECIFICATION`
-        public static let MALFORMED_GTID_SET_SPECIFICATION: ErrorCode = 1772
+        public static var MALFORMED_GTID_SET_SPECIFICATION: Self { 1772 }
         /// `ER_MALFORMED_GTID_SET_ENCODING`
-        public static let MALFORMED_GTID_SET_ENCODING: ErrorCode = 1773
+        public static var MALFORMED_GTID_SET_ENCODING: Self { 1773 }
         /// `ER_MALFORMED_GTID_SPECIFICATION`
-        public static let MALFORMED_GTID_SPECIFICATION: ErrorCode = 1774
+        public static var MALFORMED_GTID_SPECIFICATION: Self { 1774 }
         /// `ER_GNO_EXHAUSTED`
-        public static let GNO_EXHAUSTED: ErrorCode = 1775
+        public static var GNO_EXHAUSTED: Self { 1775 }
         /// `ER_BAD_SLAVE_AUTO_POSITION`
-        public static let BAD_SLAVE_AUTO_POSITION: ErrorCode = 1776
+        public static var BAD_SLAVE_AUTO_POSITION: Self { 1776 }
         /// `ER_AUTO_POSITION_REQUIRES_GTID_MODE_NOT_OFF`
-        public static let AUTO_POSITION_REQUIRES_GTID_MODE_NOT_OFF: ErrorCode = 1777
+        public static var AUTO_POSITION_REQUIRES_GTID_MODE_NOT_OFF: Self { 1777 }
         /// `ER_CANT_DO_IMPLICIT_COMMIT_IN_TRX_WHEN_GTID_NEXT_IS_SET`
-        public static let CANT_DO_IMPLICIT_COMMIT_IN_TRX_WHEN_GTID_NEXT_IS_SET: ErrorCode = 1778
+        public static var CANT_DO_IMPLICIT_COMMIT_IN_TRX_WHEN_GTID_NEXT_IS_SET: Self { 1778 }
         /// `ER_GTID_MODE_ON_REQUIRES_ENFORCE_GTID_CONSISTENCY_ON`
-        public static let GTID_MODE_ON_REQUIRES_ENFORCE_GTID_CONSISTENCY_ON: ErrorCode = 1779
+        public static var GTID_MODE_ON_REQUIRES_ENFORCE_GTID_CONSISTENCY_ON: Self { 1779 }
         /// `ER_GTID_MODE_REQUIRES_BINLOG`
-        public static let GTID_MODE_REQUIRES_BINLOG: ErrorCode = 1780
+        public static var GTID_MODE_REQUIRES_BINLOG: Self { 1780 }
         /// `ER_CANT_SET_GTID_NEXT_TO_GTID_WHEN_GTID_MODE_IS_OFF`
-        public static let CANT_SET_GTID_NEXT_TO_GTID_WHEN_GTID_MODE_IS_OFF: ErrorCode = 1781
+        public static var CANT_SET_GTID_NEXT_TO_GTID_WHEN_GTID_MODE_IS_OFF: Self { 1781 }
         /// `ER_CANT_SET_GTID_NEXT_TO_ANONYMOUS_WHEN_GTID_MODE_IS_ON`
-        public static let CANT_SET_GTID_NEXT_TO_ANONYMOUS_WHEN_GTID_MODE_IS_ON: ErrorCode = 1782
+        public static var CANT_SET_GTID_NEXT_TO_ANONYMOUS_WHEN_GTID_MODE_IS_ON: Self { 1782 }
         /// `ER_CANT_SET_GTID_NEXT_LIST_TO_NON_NULL_WHEN_GTID_MODE_IS_OFF`
-        public static let CANT_SET_GTID_NEXT_LIST_TO_NON_NULL_WHEN_GTID_MODE_IS_OFF: ErrorCode = 1783
+        public static var CANT_SET_GTID_NEXT_LIST_TO_NON_NULL_WHEN_GTID_MODE_IS_OFF: Self { 1783 }
         /// `ER_FOUND_GTID_EVENT_WHEN_GTID_MODE_IS_OFF__UNUSED`
-        public static let FOUND_GTID_EVENT_WHEN_GTID_MODE_IS_OFF__UNUSED: ErrorCode = 1784
+        public static var FOUND_GTID_EVENT_WHEN_GTID_MODE_IS_OFF__UNUSED: Self { 1784 }
         /// `ER_GTID_UNSAFE_NON_TRANSACTIONAL_TABLE`
-        public static let GTID_UNSAFE_NON_TRANSACTIONAL_TABLE: ErrorCode = 1785
+        public static var GTID_UNSAFE_NON_TRANSACTIONAL_TABLE: Self { 1785 }
         /// `ER_GTID_UNSAFE_CREATE_SELECT`
-        public static let GTID_UNSAFE_CREATE_SELECT: ErrorCode = 1786
+        public static var GTID_UNSAFE_CREATE_SELECT: Self { 1786 }
         /// `ER_GTID_UNSAFE_CREATE_DROP_TEMPORARY_TABLE_IN_TRANSACTION`
-        public static let GTID_UNSAFE_CREATE_DROP_TEMPORARY_TABLE_IN_TRANSACTION: ErrorCode = 1787
+        public static var GTID_UNSAFE_CREATE_DROP_TEMPORARY_TABLE_IN_TRANSACTION: Self { 1787 }
         /// `ER_GTID_MODE_CAN_ONLY_CHANGE_ONE_STEP_AT_A_TIME`
-        public static let GTID_MODE_CAN_ONLY_CHANGE_ONE_STEP_AT_A_TIME: ErrorCode = 1788
+        public static var GTID_MODE_CAN_ONLY_CHANGE_ONE_STEP_AT_A_TIME: Self { 1788 }
         /// `ER_MASTER_HAS_PURGED_REQUIRED_GTIDS`
-        public static let MASTER_HAS_PURGED_REQUIRED_GTIDS: ErrorCode = 1789
+        public static var MASTER_HAS_PURGED_REQUIRED_GTIDS: Self { 1789 }
         /// `ER_CANT_SET_GTID_NEXT_WHEN_OWNING_GTID`
-        public static let CANT_SET_GTID_NEXT_WHEN_OWNING_GTID: ErrorCode = 1790
+        public static var CANT_SET_GTID_NEXT_WHEN_OWNING_GTID: Self { 1790 }
         /// `ER_UNKNOWN_EXPLAIN_FORMAT`
-        public static let UNKNOWN_EXPLAIN_FORMAT: ErrorCode = 1791
+        public static var UNKNOWN_EXPLAIN_FORMAT: Self { 1791 }
         /// `ER_CANT_EXECUTE_IN_READ_ONLY_TRANSACTION`
-        public static let CANT_EXECUTE_IN_READ_ONLY_TRANSACTION: ErrorCode = 1792
+        public static var CANT_EXECUTE_IN_READ_ONLY_TRANSACTION: Self { 1792 }
         /// `ER_TOO_LONG_TABLE_PARTITION_COMMENT`
-        public static let TOO_LONG_TABLE_PARTITION_COMMENT: ErrorCode = 1793
+        public static var TOO_LONG_TABLE_PARTITION_COMMENT: Self { 1793 }
         /// `ER_SLAVE_CONFIGURATION`
-        public static let SLAVE_CONFIGURATION: ErrorCode = 1794
+        public static var SLAVE_CONFIGURATION: Self { 1794 }
         /// `ER_INNODB_FT_LIMIT`
-        public static let INNODB_FT_LIMIT: ErrorCode = 1795
+        public static var INNODB_FT_LIMIT: Self { 1795 }
         /// `ER_INNODB_NO_FT_TEMP_TABLE`
-        public static let INNODB_NO_FT_TEMP_TABLE: ErrorCode = 1796
+        public static var INNODB_NO_FT_TEMP_TABLE: Self { 1796 }
         /// `ER_INNODB_FT_WRONG_DOCID_COLUMN`
-        public static let INNODB_FT_WRONG_DOCID_COLUMN: ErrorCode = 1797
+        public static var INNODB_FT_WRONG_DOCID_COLUMN: Self { 1797 }
         /// `ER_INNODB_FT_WRONG_DOCID_INDEX`
-        public static let INNODB_FT_WRONG_DOCID_INDEX: ErrorCode = 1798
+        public static var INNODB_FT_WRONG_DOCID_INDEX: Self { 1798 }
         /// `ER_INNODB_ONLINE_LOG_TOO_BIG`
-        public static let INNODB_ONLINE_LOG_TOO_BIG: ErrorCode = 1799
+        public static var INNODB_ONLINE_LOG_TOO_BIG: Self { 1799 }
         /// `ER_UNKNOWN_ALTER_ALGORITHM`
-        public static let UNKNOWN_ALTER_ALGORITHM: ErrorCode = 1800
+        public static var UNKNOWN_ALTER_ALGORITHM: Self { 1800 }
         /// `ER_UNKNOWN_ALTER_LOCK`
-        public static let UNKNOWN_ALTER_LOCK: ErrorCode = 1801
+        public static var UNKNOWN_ALTER_LOCK: Self { 1801 }
         /// `ER_MTS_CHANGE_MASTER_CANT_RUN_WITH_GAPS`
-        public static let MTS_CHANGE_MASTER_CANT_RUN_WITH_GAPS: ErrorCode = 1802
+        public static var MTS_CHANGE_MASTER_CANT_RUN_WITH_GAPS: Self { 1802 }
         /// `ER_MTS_RECOVERY_FAILURE`
-        public static let MTS_RECOVERY_FAILURE: ErrorCode = 1803
+        public static var MTS_RECOVERY_FAILURE: Self { 1803 }
         /// `ER_MTS_RESET_WORKERS`
-        public static let MTS_RESET_WORKERS: ErrorCode = 1804
+        public static var MTS_RESET_WORKERS: Self { 1804 }
         /// `ER_COL_COUNT_DOESNT_MATCH_CORRUPTED_V2`
-        public static let COL_COUNT_DOESNT_MATCH_CORRUPTED_V2: ErrorCode  = 1805
+        public static var COL_COUNT_DOESNT_MATCH_CORRUPTED_V2: Self { 1805 }
         /// `ER_SLAVE_SILENT_RETRY_TRANSACTION`
-        public static let SLAVE_SILENT_RETRY_TRANSACTION: ErrorCode = 1806
+        public static var SLAVE_SILENT_RETRY_TRANSACTION: Self { 1806 }
         /// `ER_DISCARD_FK_CHECKS_RUNNING`
-        public static let DISCARD_FK_CHECKS_RUNNING: ErrorCode = 1807
+        public static var DISCARD_FK_CHECKS_RUNNING: Self { 1807 }
         /// `ER_TABLE_SCHEMA_MISMATCH`
-        public static let TABLE_SCHEMA_MISMATCH: ErrorCode = 1808
+        public static var TABLE_SCHEMA_MISMATCH: Self { 1808 }
         /// `ER_TABLE_IN_SYSTEM_TABLESPACE`
-        public static let TABLE_IN_SYSTEM_TABLESPACE: ErrorCode = 1809
+        public static var TABLE_IN_SYSTEM_TABLESPACE: Self { 1809 }
         /// `ER_IO_READ_ERROR`
-        public static let IO_READ_ERROR: ErrorCode = 1810
+        public static var IO_READ_ERROR: Self { 1810 }
         /// `ER_IO_WRITE_ERROR`
-        public static let IO_WRITE_ERROR: ErrorCode = 1811
+        public static var IO_WRITE_ERROR: Self { 1811 }
         /// `ER_TABLESPACE_MISSING`
-        public static let TABLESPACE_MISSING: ErrorCode = 1812
+        public static var TABLESPACE_MISSING: Self { 1812 }
         /// `ER_TABLESPACE_EXISTS`
-        public static let TABLESPACE_EXISTS: ErrorCode = 1813
+        public static var TABLESPACE_EXISTS: Self { 1813 }
         /// `ER_TABLESPACE_DISCARDED`
-        public static let TABLESPACE_DISCARDED: ErrorCode = 1814
+        public static var TABLESPACE_DISCARDED: Self { 1814 }
         /// `ER_INTERNAL_ERROR`
-        public static let INTERNAL_ERROR: ErrorCode = 1815
+        public static var INTERNAL_ERROR: Self { 1815 }
         /// `ER_INNODB_IMPORT_ERROR`
-        public static let INNODB_IMPORT_ERROR: ErrorCode = 1816
+        public static var INNODB_IMPORT_ERROR: Self { 1816 }
         /// `ER_INNODB_INDEX_CORRUPT`
-        public static let INNODB_INDEX_CORRUPT: ErrorCode = 1817
+        public static var INNODB_INDEX_CORRUPT: Self { 1817 }
         /// `ER_INVALID_YEAR_COLUMN_LENGTH`
-        public static let INVALID_YEAR_COLUMN_LENGTH: ErrorCode = 1818
+        public static var INVALID_YEAR_COLUMN_LENGTH: Self { 1818 }
         /// `ER_NOT_VALID_PASSWORD`
-        public static let NOT_VALID_PASSWORD: ErrorCode = 1819
+        public static var NOT_VALID_PASSWORD: Self { 1819 }
         /// `ER_MUST_CHANGE_PASSWORD`
-        public static let MUST_CHANGE_PASSWORD: ErrorCode = 1820
+        public static var MUST_CHANGE_PASSWORD: Self { 1820 }
         /// `ER_FK_NO_INDEX_CHILD`
-        public static let FK_NO_INDEX_CHILD: ErrorCode = 1821
+        public static var FK_NO_INDEX_CHILD: Self { 1821 }
         /// `ER_FK_NO_INDEX_PARENT`
-        public static let FK_NO_INDEX_PARENT: ErrorCode = 1822
+        public static var FK_NO_INDEX_PARENT: Self { 1822 }
         /// `ER_FK_FAIL_ADD_SYSTEM`
-        public static let FK_FAIL_ADD_SYSTEM: ErrorCode = 1823
+        public static var FK_FAIL_ADD_SYSTEM: Self { 1823 }
         /// `ER_FK_CANNOT_OPEN_PARENT`
-        public static let FK_CANNOT_OPEN_PARENT: ErrorCode = 1824
+        public static var FK_CANNOT_OPEN_PARENT: Self { 1824 }
         /// `ER_FK_INCORRECT_OPTION`
-        public static let FK_INCORRECT_OPTION: ErrorCode = 1825
+        public static var FK_INCORRECT_OPTION: Self { 1825 }
         /// `ER_FK_DUP_NAME`
-        public static let FK_DUP_NAME: ErrorCode = 1826
+        public static var FK_DUP_NAME: Self { 1826 }
         /// `ER_PASSWORD_FORMAT`
-        public static let PASSWORD_FORMAT: ErrorCode = 1827
+        public static var PASSWORD_FORMAT: Self { 1827 }
         /// `ER_FK_COLUMN_CANNOT_DROP`
-        public static let FK_COLUMN_CANNOT_DROP: ErrorCode = 1828
+        public static var FK_COLUMN_CANNOT_DROP: Self { 1828 }
         /// `ER_FK_COLUMN_CANNOT_DROP_CHILD`
-        public static let FK_COLUMN_CANNOT_DROP_CHILD: ErrorCode = 1829
+        public static var FK_COLUMN_CANNOT_DROP_CHILD: Self { 1829 }
         /// `ER_FK_COLUMN_NOT_NULL`
-        public static let FK_COLUMN_NOT_NULL: ErrorCode = 1830
+        public static var FK_COLUMN_NOT_NULL: Self { 1830 }
         /// `ER_DUP_INDEX`
-        public static let DUP_INDEX: ErrorCode = 1831
+        public static var DUP_INDEX: Self { 1831 }
         /// `ER_FK_COLUMN_CANNOT_CHANGE`
-        public static let FK_COLUMN_CANNOT_CHANGE: ErrorCode = 1832
+        public static var FK_COLUMN_CANNOT_CHANGE: Self { 1832 }
         /// `ER_FK_COLUMN_CANNOT_CHANGE_CHILD`
-        public static let FK_COLUMN_CANNOT_CHANGE_CHILD: ErrorCode = 1833
+        public static var FK_COLUMN_CANNOT_CHANGE_CHILD: Self { 1833 }
         /// `ER_UNUSED5`
-        public static let UNUSED5: ErrorCode  = 1834
+        public static var UNUSED5: Self { 1834 }
         /// `ER_MALFORMED_PACKET`
-        public static let MALFORMED_PACKET: ErrorCode = 1835
+        public static var MALFORMED_PACKET: Self { 1835 }
         /// `ER_READ_ONLY_MODE`
-        public static let READ_ONLY_MODE: ErrorCode = 1836
+        public static var READ_ONLY_MODE: Self { 1836 }
         /// `ER_GTID_NEXT_TYPE_UNDEFINED_GROUP`
-        public static let GTID_NEXT_TYPE_UNDEFINED_GROUP: ErrorCode = 1837
+        public static var GTID_NEXT_TYPE_UNDEFINED_GROUP: Self { 1837 }
         /// `ER_VARIABLE_NOT_SETTABLE_IN_SP`
-        public static let VARIABLE_NOT_SETTABLE_IN_SP: ErrorCode = 1838
+        public static var VARIABLE_NOT_SETTABLE_IN_SP: Self { 1838 }
         /// `ER_CANT_SET_GTID_PURGED_WHEN_GTID_MODE_IS_OFF`
-        public static let CANT_SET_GTID_PURGED_WHEN_GTID_MODE_IS_OFF: ErrorCode = 1839
+        public static var CANT_SET_GTID_PURGED_WHEN_GTID_MODE_IS_OFF: Self { 1839 }
         /// `ER_CANT_SET_GTID_PURGED_WHEN_GTID_EXECUTED_IS_NOT_EMPTY`
-        public static let CANT_SET_GTID_PURGED_WHEN_GTID_EXECUTED_IS_NOT_EMPTY: ErrorCode = 1840
+        public static var CANT_SET_GTID_PURGED_WHEN_GTID_EXECUTED_IS_NOT_EMPTY: Self { 1840 }
         /// `ER_CANT_SET_GTID_PURGED_WHEN_OWNED_GTIDS_IS_NOT_EMPTY`
-        public static let CANT_SET_GTID_PURGED_WHEN_OWNED_GTIDS_IS_NOT_EMPTY: ErrorCode = 1841
+        public static var CANT_SET_GTID_PURGED_WHEN_OWNED_GTIDS_IS_NOT_EMPTY: Self { 1841 }
         /// `ER_GTID_PURGED_WAS_CHANGED`
-        public static let GTID_PURGED_WAS_CHANGED: ErrorCode = 1842
+        public static var GTID_PURGED_WAS_CHANGED: Self { 1842 }
         /// `ER_GTID_EXECUTED_WAS_CHANGED`
-        public static let GTID_EXECUTED_WAS_CHANGED: ErrorCode = 1843
+        public static var GTID_EXECUTED_WAS_CHANGED: Self { 1843 }
         /// `ER_BINLOG_STMT_MODE_AND_NO_REPL_TABLES`
-        public static let BINLOG_STMT_MODE_AND_NO_REPL_TABLES: ErrorCode = 1844
+        public static var BINLOG_STMT_MODE_AND_NO_REPL_TABLES: Self { 1844 }
         /// `ER_ALTER_OPERATION_NOT_SUPPORTED`
-        public static let ALTER_OPERATION_NOT_SUPPORTED: ErrorCode = 1845
+        public static var ALTER_OPERATION_NOT_SUPPORTED: Self { 1845 }
         /// `ER_ALTER_OPERATION_NOT_SUPPORTED_REASON`
-        public static let ALTER_OPERATION_NOT_SUPPORTED_REASON: ErrorCode = 1846
+        public static var ALTER_OPERATION_NOT_SUPPORTED_REASON: Self { 1846 }
         /// `ER_ALTER_OPERATION_NOT_SUPPORTED_REASON_COPY`
-        public static let ALTER_OPERATION_NOT_SUPPORTED_REASON_COPY: ErrorCode = 1847
+        public static var ALTER_OPERATION_NOT_SUPPORTED_REASON_COPY: Self { 1847 }
         /// `ER_ALTER_OPERATION_NOT_SUPPORTED_REASON_PARTITION`
-        public static let ALTER_OPERATION_NOT_SUPPORTED_REASON_PARTITION: ErrorCode = 1848
+        public static var ALTER_OPERATION_NOT_SUPPORTED_REASON_PARTITION: Self { 1848 }
         /// `ER_ALTER_OPERATION_NOT_SUPPORTED_REASON_FK_RENAME`
-        public static let ALTER_OPERATION_NOT_SUPPORTED_REASON_FK_RENAME: ErrorCode = 1849
+        public static var ALTER_OPERATION_NOT_SUPPORTED_REASON_FK_RENAME: Self { 1849 }
         /// `ER_ALTER_OPERATION_NOT_SUPPORTED_REASON_COLUMN_TYPE`
-        public static let ALTER_OPERATION_NOT_SUPPORTED_REASON_COLUMN_TYPE: ErrorCode = 1850
+        public static var ALTER_OPERATION_NOT_SUPPORTED_REASON_COLUMN_TYPE: Self { 1850 }
         /// `ER_ALTER_OPERATION_NOT_SUPPORTED_REASON_FK_CHECK`
-        public static let ALTER_OPERATION_NOT_SUPPORTED_REASON_FK_CHECK: ErrorCode = 1851
+        public static var ALTER_OPERATION_NOT_SUPPORTED_REASON_FK_CHECK: Self { 1851 }
         /// `ER_UNUSED6`
-        public static let UNUSED6: ErrorCode  = 1852
+        public static var UNUSED6: Self { 1852 }
         /// `ER_ALTER_OPERATION_NOT_SUPPORTED_REASON_NOPK`
-        public static let ALTER_OPERATION_NOT_SUPPORTED_REASON_NOPK: ErrorCode = 1853
+        public static var ALTER_OPERATION_NOT_SUPPORTED_REASON_NOPK: Self { 1853 }
         /// `ER_ALTER_OPERATION_NOT_SUPPORTED_REASON_AUTOINC`
-        public static let ALTER_OPERATION_NOT_SUPPORTED_REASON_AUTOINC: ErrorCode = 1854
+        public static var ALTER_OPERATION_NOT_SUPPORTED_REASON_AUTOINC: Self { 1854 }
         /// `ER_ALTER_OPERATION_NOT_SUPPORTED_REASON_HIDDEN_FTS`
-        public static let ALTER_OPERATION_NOT_SUPPORTED_REASON_HIDDEN_FTS: ErrorCode = 1855
+        public static var ALTER_OPERATION_NOT_SUPPORTED_REASON_HIDDEN_FTS: Self { 1855 }
         /// `ER_ALTER_OPERATION_NOT_SUPPORTED_REASON_CHANGE_FTS`
-        public static let ALTER_OPERATION_NOT_SUPPORTED_REASON_CHANGE_FTS: ErrorCode = 1856
+        public static var ALTER_OPERATION_NOT_SUPPORTED_REASON_CHANGE_FTS: Self { 1856 }
         /// `ER_ALTER_OPERATION_NOT_SUPPORTED_REASON_FTS`
-        public static let ALTER_OPERATION_NOT_SUPPORTED_REASON_FTS: ErrorCode = 1857
+        public static var ALTER_OPERATION_NOT_SUPPORTED_REASON_FTS: Self { 1857 }
         /// `ER_SQL_SLAVE_SKIP_COUNTER_NOT_SETTABLE_IN_GTID_MODE`
-        public static let SQL_SLAVE_SKIP_COUNTER_NOT_SETTABLE_IN_GTID_MODE: ErrorCode = 1858
+        public static var SQL_SLAVE_SKIP_COUNTER_NOT_SETTABLE_IN_GTID_MODE: Self { 1858 }
         /// `ER_DUP_UNKNOWN_IN_INDEX`
-        public static let DUP_UNKNOWN_IN_INDEX: ErrorCode = 1859
+        public static var DUP_UNKNOWN_IN_INDEX: Self { 1859 }
         /// `ER_IDENT_CAUSES_TOO_LONG_PATH`
-        public static let IDENT_CAUSES_TOO_LONG_PATH: ErrorCode = 1860
+        public static var IDENT_CAUSES_TOO_LONG_PATH: Self { 1860 }
         /// `ER_ALTER_OPERATION_NOT_SUPPORTED_REASON_NOT_NULL`
-        public static let ALTER_OPERATION_NOT_SUPPORTED_REASON_NOT_NULL: ErrorCode = 1861
+        public static var ALTER_OPERATION_NOT_SUPPORTED_REASON_NOT_NULL: Self { 1861 }
         /// `ER_MUST_CHANGE_PASSWORD_LOGIN`
-        public static let MUST_CHANGE_PASSWORD_LOGIN: ErrorCode = 1862
+        public static var MUST_CHANGE_PASSWORD_LOGIN: Self { 1862 }
         /// `ER_ROW_IN_WRONG_PARTITION`
-        public static let ROW_IN_WRONG_PARTITION: ErrorCode = 1863
+        public static var ROW_IN_WRONG_PARTITION: Self { 1863 }
         /// `ER_MTS_EVENT_BIGGER_PENDING_JOBS_SIZE_MAX`
-        public static let MTS_EVENT_BIGGER_PENDING_JOBS_SIZE_MAX: ErrorCode = 1864
+        public static var MTS_EVENT_BIGGER_PENDING_JOBS_SIZE_MAX: Self { 1864 }
         /// `ER_INNODB_NO_FT_USES_PARSER`
-        public static let INNODB_NO_FT_USES_PARSER: ErrorCode = 1865
+        public static var INNODB_NO_FT_USES_PARSER: Self { 1865 }
         /// `ER_BINLOG_LOGICAL_CORRUPTION`
-        public static let BINLOG_LOGICAL_CORRUPTION: ErrorCode = 1866
+        public static var BINLOG_LOGICAL_CORRUPTION: Self { 1866 }
         /// `ER_WARN_PURGE_LOG_IN_USE`
-        public static let WARN_PURGE_LOG_IN_USE: ErrorCode = 1867
+        public static var WARN_PURGE_LOG_IN_USE: Self { 1867 }
         /// `ER_WARN_PURGE_LOG_IS_ACTIVE`
-        public static let WARN_PURGE_LOG_IS_ACTIVE: ErrorCode = 1868
+        public static var WARN_PURGE_LOG_IS_ACTIVE: Self { 1868 }
         /// `ER_AUTO_INCREMENT_CONFLICT`
-        public static let AUTO_INCREMENT_CONFLICT: ErrorCode = 1869
+        public static var AUTO_INCREMENT_CONFLICT: Self { 1869 }
         /// `WARN_ON_BLOCKHOLE_IN_RBR`
-        public static let N_ON_BLOCKHOLE_IN_RBR: ErrorCode = 1870
+        public static var N_ON_BLOCKHOLE_IN_RBR: Self { 1870 }
         /// `ER_SLAVE_MI_INIT_REPOSITORY`
-        public static let SLAVE_MI_INIT_REPOSITORY: ErrorCode = 1871
+        public static var SLAVE_MI_INIT_REPOSITORY: Self { 1871 }
         /// `ER_SLAVE_RLI_INIT_REPOSITORY`
-        public static let SLAVE_RLI_INIT_REPOSITORY: ErrorCode = 1872
+        public static var SLAVE_RLI_INIT_REPOSITORY: Self { 1872 }
         /// `ER_ACCESS_DENIED_CHANGE_USER_ERROR`
-        public static let ACCESS_DENIED_CHANGE_USER_ERROR: ErrorCode = 1873
+        public static var ACCESS_DENIED_CHANGE_USER_ERROR: Self { 1873 }
         /// `ER_INNODB_READ_ONLY`
-        public static let INNODB_READ_ONLY: ErrorCode = 1874
+        public static var INNODB_READ_ONLY: Self { 1874 }
         /// `ER_STOP_SLAVE_SQL_THREAD_TIMEOUT`
-        public static let STOP_SLAVE_SQL_THREAD_TIMEOUT: ErrorCode = 1875
+        public static var STOP_SLAVE_SQL_THREAD_TIMEOUT: Self { 1875 }
         /// `ER_STOP_SLAVE_IO_THREAD_TIMEOUT`
-        public static let STOP_SLAVE_IO_THREAD_TIMEOUT: ErrorCode = 1876
+        public static var STOP_SLAVE_IO_THREAD_TIMEOUT: Self { 1876 }
         /// `ER_TABLE_CORRUPT`
-        public static let TABLE_CORRUPT: ErrorCode = 1877
+        public static var TABLE_CORRUPT: Self { 1877 }
         /// `ER_TEMP_FILE_WRITE_FAILURE`
-        public static let TEMP_FILE_WRITE_FAILURE: ErrorCode = 1878
+        public static var TEMP_FILE_WRITE_FAILURE: Self { 1878 }
         /// `ER_INNODB_FT_AUX_NOT_HEX_ID`
-        public static let INNODB_FT_AUX_NOT_HEX_ID: ErrorCode = 1879
+        public static var INNODB_FT_AUX_NOT_HEX_ID: Self { 1879 }
         /// `ER_OLD_TEMPORALS_UPGRADED`
-        public static let OLD_TEMPORALS_UPGRADED: ErrorCode = 1880
+        public static var OLD_TEMPORALS_UPGRADED: Self { 1880 }
         /// `ER_INNODB_FORCED_RECOVERY`
-        public static let INNODB_FORCED_RECOVERY: ErrorCode = 1881
+        public static var INNODB_FORCED_RECOVERY: Self { 1881 }
         /// `ER_AES_INVALID_IV`
-        public static let AES_INVALID_IV: ErrorCode = 1882
+        public static var AES_INVALID_IV: Self { 1882 }
         /// `ER_PLUGIN_CANNOT_BE_UNINSTALLED`
-        public static let PLUGIN_CANNOT_BE_UNINSTALLED: ErrorCode = 1883
+        public static var PLUGIN_CANNOT_BE_UNINSTALLED: Self { 1883 }
         /// `ER_GTID_UNSAFE_BINLOG_SPLITTABLE_STATEMENT_AND_GTID_GROUP`
-        public static let GTID_UNSAFE_BINLOG_SPLITTABLE_STATEMENT_AND_GTID_GROUP: ErrorCode = 1884
+        public static var GTID_UNSAFE_BINLOG_SPLITTABLE_STATEMENT_AND_GTID_GROUP: Self { 1884 }
         /// `ER_SLAVE_HAS_MORE_GTIDS_THAN_MASTER`
-        public static let SLAVE_HAS_MORE_GTIDS_THAN_MASTER: ErrorCode = 1885
+        public static var SLAVE_HAS_MORE_GTIDS_THAN_MASTER: Self { 1885 }
         /// `CR_UNKNOWN_ERROR`
-        public static let UNKNOWN_ERROR_CLIENT: ErrorCode = 2000
+        public static var UNKNOWN_ERROR_CLIENT: Self { 2000 }
         /// `CR_SOCKET_CREATE_ERROR`
-        public static let SOCKET_CREATE_ERROR: ErrorCode = 2001
+        public static var SOCKET_CREATE_ERROR: Self { 2001 }
         /// `CR_CONNECTION_ERROR`
-        public static let CONNECTION_ERROR: ErrorCode = 2002
+        public static var CONNECTION_ERROR: Self { 2002 }
         /// `CR_CONN_HOST_ERROR`
-        public static let CONN_HOST_ERROR: ErrorCode = 2003
+        public static var CONN_HOST_ERROR: Self { 2003 }
         /// `CR_IPSOCK_ERROR`
-        public static let IPSOCK_ERROR_CLIENT: ErrorCode = 2004
+        public static var IPSOCK_ERROR_CLIENT: Self { 2004 }
         /// `CR_UNKNOWN_HOST`
-        public static let UNKNOWN_HOST: ErrorCode = 2005
+        public static var UNKNOWN_HOST: Self { 2005 }
         /// `CR_SERVER_GONE_ERROR`
-        public static let SERVER_GONE_ERROR: ErrorCode = 2006
+        public static var SERVER_GONE_ERROR: Self { 2006 }
         /// `CR_VERSION_ERROR`
-        public static let VERSION_ERROR: ErrorCode = 2007
+        public static var VERSION_ERROR: Self { 2007 }
         /// `CR_OUT_OF_MEMORY`
-        public static let OUT_OF_MEMORY: ErrorCode = 2008
+        public static var OUT_OF_MEMORY: Self { 2008 }
         /// `CR_WRONG_HOST_INFO`
-        public static let WRONG_HOST_INFO: ErrorCode = 2009
+        public static var WRONG_HOST_INFO: Self { 2009 }
         /// `CR_LOCALHOST_CONNECTION`
-        public static let LOCALHOST_CONNECTION: ErrorCode = 2010
+        public static var LOCALHOST_CONNECTION: Self { 2010 }
         /// `CR_TCP_CONNECTION`
-        public static let TCP_CONNECTION: ErrorCode = 2011
+        public static var TCP_CONNECTION: Self { 2011 }
         /// `CR_SERVER_HANDSHAKE_ERR`
-        public static let SERVER_HANDSHAKE_ERR: ErrorCode = 2012
+        public static var SERVER_HANDSHAKE_ERR: Self { 2012 }
         /// `CR_SERVER_LOST`
-        public static let SERVER_LOST: ErrorCode = 2013
+        public static var SERVER_LOST: Self { 2013 }
         /// `CR_COMMANDS_OUT_OF_SYNC`
-        public static let COMMANDS_OUT_OF_SYNC: ErrorCode = 2014
+        public static var COMMANDS_OUT_OF_SYNC: Self { 2014 }
         /// `CR_NAMEDPIPE_CONNECTION`
-        public static let NAMEDPIPE_CONNECTION: ErrorCode = 2015
+        public static var NAMEDPIPE_CONNECTION: Self { 2015 }
         /// `CR_NAMEDPIPEWAIT_ERROR`
-        public static let NAMEDPIPEWAIT_ERROR: ErrorCode = 2016
+        public static var NAMEDPIPEWAIT_ERROR: Self { 2016 }
         /// `CR_NAMEDPIPEOPEN_ERROR`
-        public static let NAMEDPIPEOPEN_ERROR: ErrorCode = 2017
+        public static var NAMEDPIPEOPEN_ERROR: Self { 2017 }
         /// `CR_NAMEDPIPESETSTATE_ERROR`
-        public static let NAMEDPIPESETSTATE_ERROR: ErrorCode = 2018
+        public static var NAMEDPIPESETSTATE_ERROR: Self { 2018 }
         /// `CR_CANT_READ_CHARSET`
-        public static let CANT_READ_CHARSET: ErrorCode = 2019
+        public static var CANT_READ_CHARSET: Self { 2019 }
         /// `CR_NET_PACKET_TOO_LARGE`
-        public static let NET_PACKET_TOO_LARGE_CLIENT: ErrorCode = 2020
+        public static var NET_PACKET_TOO_LARGE_CLIENT: Self { 2020 }
         /// `CR_EMBEDDED_CONNECTION`
-        public static let EMBEDDED_CONNECTION: ErrorCode = 2021
+        public static var EMBEDDED_CONNECTION: Self { 2021 }
         /// `CR_PROBE_SLAVE_STATUS`
-        public static let PROBE_SLAVE_STATUS: ErrorCode = 2022
+        public static var PROBE_SLAVE_STATUS: Self { 2022 }
         /// `CR_PROBE_SLAVE_HOSTS`
-        public static let PROBE_SLAVE_HOSTS: ErrorCode = 2023
+        public static var PROBE_SLAVE_HOSTS: Self { 2023 }
         /// `CR_PROBE_SLAVE_CONNECT`
-        public static let PROBE_SLAVE_CONNECT: ErrorCode = 2024
+        public static var PROBE_SLAVE_CONNECT: Self { 2024 }
         /// `CR_PROBE_MASTER_CONNECT`
-        public static let PROBE_MASTER_CONNECT: ErrorCode = 2025
+        public static var PROBE_MASTER_CONNECT: Self { 2025 }
         /// `CR_SSL_CONNECTION_ERROR`
-        public static let SSL_CONNECTION_ERROR: ErrorCode = 2026
+        public static var SSL_CONNECTION_ERROR: Self { 2026 }
         /// `CR_MALFORMED_PACKET`
-        public static let MALFORMED_PACKET_CLIENT: ErrorCode = 2027
+        public static var MALFORMED_PACKET_CLIENT: Self { 2027 }
         /// `CR_WRONG_LICENSE`
-        public static let WRONG_LICENSE: ErrorCode = 2028
+        public static var WRONG_LICENSE: Self { 2028 }
         /// `CR_NULL_POINTER`
-        public static let NULL_POINTER: ErrorCode = 2029
+        public static var NULL_POINTER: Self { 2029 }
         /// `CR_NO_PREPARE_STMT`
-        public static let NO_PREPARE_STMT: ErrorCode = 2030
+        public static var NO_PREPARE_STMT: Self { 2030 }
         /// `CR_PARAMS_NOT_BOUND`
-        public static let PARAMS_NOT_BOUND: ErrorCode = 2031
+        public static var PARAMS_NOT_BOUND: Self { 2031 }
         /// `CR_DATA_TRUNCATED`
-        public static let DATA_TRUNCATED: ErrorCode = 2032
+        public static var DATA_TRUNCATED: Self { 2032 }
         /// `CR_NO_PARAMETERS_EXISTS`
-        public static let NO_PARAMETERS_EXISTS: ErrorCode = 2033
+        public static var NO_PARAMETERS_EXISTS: Self { 2033 }
         /// `CR_INVALID_PARAMETER_NO`
-        public static let INVALID_PARAMETER_NO: ErrorCode = 2034
+        public static var INVALID_PARAMETER_NO: Self { 2034 }
         /// `CR_INVALID_BUFFER_USE`
-        public static let INVALID_BUFFER_USE: ErrorCode = 2035
+        public static var INVALID_BUFFER_USE: Self { 2035 }
         /// `CR_UNSUPPORTED_PARAM_TYPE`
-        public static let UNSUPPORTED_PARAM_TYPE: ErrorCode = 2036
+        public static var UNSUPPORTED_PARAM_TYPE: Self { 2036 }
         /// `CR_SHARED_MEMORY_CONNECTION`
-        public static let SHARED_MEMORY_CONNECTION: ErrorCode = 2037
+        public static var SHARED_MEMORY_CONNECTION: Self { 2037 }
         /// `CR_SHARED_MEMORY_CONNECT_REQUEST_ERROR`
-        public static let SHARED_MEMORY_CONNECT_REQUEST_ERROR: ErrorCode = 2038
+        public static var SHARED_MEMORY_CONNECT_REQUEST_ERROR: Self { 2038 }
         /// `CR_SHARED_MEMORY_CONNECT_ANSWER_ERROR`
-        public static let SHARED_MEMORY_CONNECT_ANSWER_ERROR: ErrorCode = 2039
+        public static var SHARED_MEMORY_CONNECT_ANSWER_ERROR: Self { 2039 }
         /// `CR_SHARED_MEMORY_CONNECT_FILE_MAP_ERROR`
-        public static let SHARED_MEMORY_CONNECT_FILE_MAP_ERROR: ErrorCode = 2040
+        public static var SHARED_MEMORY_CONNECT_FILE_MAP_ERROR: Self { 2040 }
         /// `CR_SHARED_MEMORY_CONNECT_MAP_ERROR`
-        public static let SHARED_MEMORY_CONNECT_MAP_ERROR: ErrorCode = 2041
+        public static var SHARED_MEMORY_CONNECT_MAP_ERROR: Self { 2041 }
         /// `CR_SHARED_MEMORY_FILE_MAP_ERROR`
-        public static let SHARED_MEMORY_FILE_MAP_ERROR: ErrorCode = 2042
+        public static var SHARED_MEMORY_FILE_MAP_ERROR: Self { 2042 }
         /// `CR_SHARED_MEMORY_MAP_ERROR`
-        public static let SHARED_MEMORY_MAP_ERROR: ErrorCode = 2043
+        public static var SHARED_MEMORY_MAP_ERROR: Self { 2043 }
         /// `CR_SHARED_MEMORY_EVENT_ERROR`
-        public static let SHARED_MEMORY_EVENT_ERROR: ErrorCode = 2044
+        public static var SHARED_MEMORY_EVENT_ERROR: Self { 2044 }
         /// `CR_SHARED_MEMORY_CONNECT_ABANDONED_ERROR`
-        public static let SHARED_MEMORY_CONNECT_ABANDONED_ERROR: ErrorCode = 2045
+        public static var SHARED_MEMORY_CONNECT_ABANDONED_ERROR: Self { 2045 }
         /// `CR_SHARED_MEMORY_CONNECT_SET_ERROR`
-        public static let SHARED_MEMORY_CONNECT_SET_ERROR: ErrorCode = 2046
+        public static var SHARED_MEMORY_CONNECT_SET_ERROR: Self { 2046 }
         /// `CR_CONN_UNKNOW_PROTOCOL`
-        public static let CONN_UNKNOW_PROTOCOL: ErrorCode = 2047
+        public static var CONN_UNKNOW_PROTOCOL: Self { 2047 }
         /// `CR_INVALID_CONN_HANDLE`
-        public static let INVALID_CONN_HANDLE: ErrorCode = 2048
+        public static var INVALID_CONN_HANDLE: Self { 2048 }
         /// `CR_SECURE_AUTH`
-        public static let SECURE_AUTH: ErrorCode = 2049
+        public static var SECURE_AUTH: Self { 2049 }
         /// `CR_FETCH_CANCELED`
-        public static let FETCH_CANCELED: ErrorCode = 2050
+        public static var FETCH_CANCELED: Self { 2050 }
         /// `CR_NO_DATA`
-        public static let NO_DATA: ErrorCode = 2051
+        public static var NO_DATA: Self { 2051 }
         /// `CR_NO_STMT_METADATA`
-        public static let NO_STMT_METADATA: ErrorCode = 2052
+        public static var NO_STMT_METADATA: Self { 2052 }
         /// `CR_NO_RESULT_SET`
-        public static let NO_RESULT_SET: ErrorCode = 2053
+        public static var NO_RESULT_SET: Self { 2053 }
         /// `CR_NOT_IMPLEMENTED`
-        public static let NOT_IMPLEMENTED: ErrorCode = 2054
+        public static var NOT_IMPLEMENTED: Self { 2054 }
         /// `CR_SERVER_LOST_EXTENDED`
-        public static let SERVER_LOST_EXTENDED: ErrorCode = 2055
+        public static var SERVER_LOST_EXTENDED: Self { 2055 }
         /// `CR_STMT_CLOSED`
-        public static let STMT_CLOSED: ErrorCode = 2056
+        public static var STMT_CLOSED: Self { 2056 }
         /// `CR_NEW_STMT_METADATA`
-        public static let NEW_STMT_METADATA: ErrorCode = 2057
+        public static var NEW_STMT_METADATA: Self { 2057 }
         /// `CR_ALREADY_CONNECTED`
-        public static let ALREADY_CONNECTED: ErrorCode = 2058
+        public static var ALREADY_CONNECTED: Self { 2058 }
         /// `CR_AUTH_PLUGIN_CANNOT_LOAD`
-        public static let AUTH_PLUGIN_CANNOT_LOAD: ErrorCode = 2059
+        public static var AUTH_PLUGIN_CANNOT_LOAD: Self { 2059 }
         /// `CR_DUPLICATE_CONNECTION_ATTR`
-        public static let DUPLICATE_CONNECTION_ATTR: ErrorCode = 2060
+        public static var DUPLICATE_CONNECTION_ATTR: Self { 2060 }
         /// `CR_AUTH_PLUGIN_ERR`
-        public static let AUTH_PLUGIN_ERR: ErrorCode = 2061
+        public static var AUTH_PLUGIN_ERR: Self { 2061 }
         /// `CR_INSECURE_API_ERR`
-        public static let INSECURE_API_ERR: ErrorCode = 2062
+        public static var INSECURE_API_ERR: Self { 2062 }
         /// `ER_FILE_CORRUPT`
-        public static let FILE_CORRUPT: ErrorCode = 3000
+        public static var FILE_CORRUPT: Self { 3000 }
         /// `ER_ERROR_ON_MASTER`
-        public static let ERROR_ON_MASTER: ErrorCode = 3001
+        public static var ERROR_ON_MASTER: Self { 3001 }
         /// `ER_INCONSISTENT_ERROR`
-        public static let INCONSISTENT_ERROR: ErrorCode = 3002
+        public static var INCONSISTENT_ERROR: Self { 3002 }
         /// `ER_STORAGE_ENGINE_NOT_LOADED`
-        public static let STORAGE_ENGINE_NOT_LOADED: ErrorCode = 3003
+        public static var STORAGE_ENGINE_NOT_LOADED: Self { 3003 }
         /// `ER_GET_STACKED_DA_WITHOUT_ACTIVE_HANDLER`
-        public static let GET_STACKED_DA_WITHOUT_ACTIVE_HANDLER: ErrorCode = 3004
+        public static var GET_STACKED_DA_WITHOUT_ACTIVE_HANDLER: Self { 3004 }
         /// `ER_WARN_LEGACY_SYNTAX_CONVERTED`
-        public static let WARN_LEGACY_SYNTAX_CONVERTED: ErrorCode = 3005
+        public static var WARN_LEGACY_SYNTAX_CONVERTED: Self { 3005 }
         /// `ER_BINLOG_UNSAFE_FULLTEXT_PLUGIN`
-        public static let BINLOG_UNSAFE_FULLTEXT_PLUGIN: ErrorCode = 3006
+        public static var BINLOG_UNSAFE_FULLTEXT_PLUGIN: Self { 3006 }
         /// `ER_CANNOT_DISCARD_TEMPORARY_TABLE`
-        public static let CANNOT_DISCARD_TEMPORARY_TABLE: ErrorCode = 3007
+        public static var CANNOT_DISCARD_TEMPORARY_TABLE: Self { 3007 }
         /// `ER_FK_DEPTH_EXCEEDED`
-        public static let FK_DEPTH_EXCEEDED: ErrorCode = 3008
+        public static var FK_DEPTH_EXCEEDED: Self { 3008 }
         /// `ER_COL_COUNT_DOESNT_MATCH_PLEASE_UPDATE_V2`
-        public static let COL_COUNT_DOESNT_MATCH_PLEASE_UPDATE_V2: ErrorCode  = 3009
+        public static var COL_COUNT_DOESNT_MATCH_PLEASE_UPDATE_V2: Self { 3009 }
         /// `ER_WARN_TRIGGER_DOESNT_HAVE_CREATED`
-        public static let WARN_TRIGGER_DOESNT_HAVE_CREATED: ErrorCode = 3010
+        public static var WARN_TRIGGER_DOESNT_HAVE_CREATED: Self { 3010 }
         /// `ER_REFERENCED_TRG_DOES_NOT_EXIST`
-        public static let REFERENCED_TRG_DOES_NOT_EXIST: ErrorCode = 3011
+        public static var REFERENCED_TRG_DOES_NOT_EXIST: Self { 3011 }
         /// `ER_EXPLAIN_NOT_SUPPORTED`
-        public static let EXPLAIN_NOT_SUPPORTED: ErrorCode = 3012
+        public static var EXPLAIN_NOT_SUPPORTED: Self { 3012 }
         /// `ER_INVALID_FIELD_SIZE`
-        public static let INVALID_FIELD_SIZE: ErrorCode = 3013
+        public static var INVALID_FIELD_SIZE: Self { 3013 }
         /// `ER_MISSING_HA_CREATE_OPTION`
-        public static let MISSING_HA_CREATE_OPTION: ErrorCode = 3014
+        public static var MISSING_HA_CREATE_OPTION: Self { 3014 }
         /// `ER_ENGINE_OUT_OF_MEMORY`
-        public static let ENGINE_OUT_OF_MEMORY: ErrorCode = 3015
+        public static var ENGINE_OUT_OF_MEMORY: Self { 3015 }
         /// `ER_PASSWORD_EXPIRE_ANONYMOUS_USER`
-        public static let PASSWORD_EXPIRE_ANONYMOUS_USER: ErrorCode = 3016
+        public static var PASSWORD_EXPIRE_ANONYMOUS_USER: Self { 3016 }
         /// `ER_SLAVE_SQL_THREAD_MUST_STOP`
-        public static let SLAVE_SQL_THREAD_MUST_STOP: ErrorCode = 3017
+        public static var SLAVE_SQL_THREAD_MUST_STOP: Self { 3017 }
         /// `ER_NO_FT_MATERIALIZED_SUBQUERY`
-        public static let NO_FT_MATERIALIZED_SUBQUERY: ErrorCode = 3018
+        public static var NO_FT_MATERIALIZED_SUBQUERY: Self { 3018 }
         /// `ER_INNODB_UNDO_LOG_FULL`
-        public static let INNODB_UNDO_LOG_FULL: ErrorCode = 3019
+        public static var INNODB_UNDO_LOG_FULL: Self { 3019 }
         /// `ER_INVALID_ARGUMENT_FOR_LOGARITHM`
-        public static let INVALID_ARGUMENT_FOR_LOGARITHM: ErrorCode = 3020
+        public static var INVALID_ARGUMENT_FOR_LOGARITHM: Self { 3020 }
         /// `ER_SLAVE_CHANNEL_IO_THREAD_MUST_STOP`
-        public static let SLAVE_CHANNEL_IO_THREAD_MUST_STOP: ErrorCode = 3021
+        public static var SLAVE_CHANNEL_IO_THREAD_MUST_STOP: Self { 3021 }
         /// `ER_WARN_OPEN_TEMP_TABLES_MUST_BE_ZERO`
-        public static let WARN_OPEN_TEMP_TABLES_MUST_BE_ZERO: ErrorCode = 3022
+        public static var WARN_OPEN_TEMP_TABLES_MUST_BE_ZERO: Self { 3022 }
         /// `ER_WARN_ONLY_MASTER_LOG_FILE_NO_POS`
-        public static let WARN_ONLY_MASTER_LOG_FILE_NO_POS: ErrorCode = 3023
+        public static var WARN_ONLY_MASTER_LOG_FILE_NO_POS: Self { 3023 }
         /// `ER_QUERY_TIMEOUT`
-        public static let QUERY_TIMEOUT: ErrorCode = 3024
+        public static var QUERY_TIMEOUT: Self { 3024 }
         /// `ER_NON_RO_SELECT_DISABLE_TIMER`
-        public static let NON_RO_SELECT_DISABLE_TIMER: ErrorCode = 3025
+        public static var NON_RO_SELECT_DISABLE_TIMER: Self { 3025 }
         /// `ER_DUP_LIST_ENTRY`
-        public static let DUP_LIST_ENTRY: ErrorCode = 3026
+        public static var DUP_LIST_ENTRY: Self { 3026 }
         /// `ER_SQL_MODE_NO_EFFECT`
-        public static let SQL_MODE_NO_EFFECT: ErrorCode = 3027
+        public static var SQL_MODE_NO_EFFECT: Self { 3027 }
         /// `ER_AGGREGATE_ORDER_FOR_UNION`
-        public static let AGGREGATE_ORDER_FOR_UNION: ErrorCode = 3028
+        public static var AGGREGATE_ORDER_FOR_UNION: Self { 3028 }
         /// `ER_AGGREGATE_ORDER_NON_AGG_QUERY`
-        public static let AGGREGATE_ORDER_NON_AGG_QUERY: ErrorCode = 3029
+        public static var AGGREGATE_ORDER_NON_AGG_QUERY: Self { 3029 }
         /// `ER_SLAVE_WORKER_STOPPED_PREVIOUS_THD_ERROR`
-        public static let SLAVE_WORKER_STOPPED_PREVIOUS_THD_ERROR: ErrorCode = 3030
+        public static var SLAVE_WORKER_STOPPED_PREVIOUS_THD_ERROR: Self { 3030 }
         /// `ER_DONT_SUPPORT_SLAVE_PRESERVE_COMMIT_ORDER`
-        public static let DONT_SUPPORT_SLAVE_PRESERVE_COMMIT_ORDER: ErrorCode = 3031
+        public static var DONT_SUPPORT_SLAVE_PRESERVE_COMMIT_ORDER: Self { 3031 }
         /// `ER_SERVER_OFFLINE_MODE`
-        public static let SERVER_OFFLINE_MODE: ErrorCode = 3032
+        public static var SERVER_OFFLINE_MODE: Self { 3032 }
         /// `ER_GIS_DIFFERENT_SRIDS`
-        public static let GIS_DIFFERENT_SRIDS: ErrorCode = 3033
+        public static var GIS_DIFFERENT_SRIDS: Self { 3033 }
         /// `ER_GIS_UNSUPPORTED_ARGUMENT`
-        public static let GIS_UNSUPPORTED_ARGUMENT: ErrorCode = 3034
+        public static var GIS_UNSUPPORTED_ARGUMENT: Self { 3034 }
         /// `ER_GIS_UNKNOWN_ERROR`
-        public static let GIS_UNKNOWN_ERROR: ErrorCode = 3035
+        public static var GIS_UNKNOWN_ERROR: Self { 3035 }
         /// `ER_GIS_UNKNOWN_EXCEPTION`
-        public static let GIS_UNKNOWN_EXCEPTION: ErrorCode = 3036
+        public static var GIS_UNKNOWN_EXCEPTION: Self { 3036 }
         /// `ER_GIS_INVALID_DATA`
-        public static let GIS_INVALID_DATA: ErrorCode = 3037
+        public static var GIS_INVALID_DATA: Self { 3037 }
         /// `ER_BOOST_GEOMETRY_EMPTY_INPUT_EXCEPTION`
-        public static let BOOST_GEOMETRY_EMPTY_INPUT_EXCEPTION: ErrorCode = 3038
+        public static var BOOST_GEOMETRY_EMPTY_INPUT_EXCEPTION: Self { 3038 }
         /// `ER_BOOST_GEOMETRY_CENTROID_EXCEPTION`
-        public static let BOOST_GEOMETRY_CENTROID_EXCEPTION: ErrorCode = 3039
+        public static var BOOST_GEOMETRY_CENTROID_EXCEPTION: Self { 3039 }
         /// `ER_BOOST_GEOMETRY_OVERLAY_INVALID_INPUT_EXCEPTION`
-        public static let BOOST_GEOMETRY_OVERLAY_INVALID_INPUT_EXCEPTION: ErrorCode = 3040
+        public static var BOOST_GEOMETRY_OVERLAY_INVALID_INPUT_EXCEPTION: Self { 3040 }
         /// `ER_BOOST_GEOMETRY_TURN_INFO_EXCEPTION`
-        public static let BOOST_GEOMETRY_TURN_INFO_EXCEPTION: ErrorCode = 3041
+        public static var BOOST_GEOMETRY_TURN_INFO_EXCEPTION: Self { 3041 }
         /// `ER_BOOST_GEOMETRY_SELF_INTERSECTION_POINT_EXCEPTION`
-        public static let BOOST_GEOMETRY_SELF_INTERSECTION_POINT_EXCEPTION: ErrorCode = 3042
+        public static var BOOST_GEOMETRY_SELF_INTERSECTION_POINT_EXCEPTION: Self { 3042 }
         /// `ER_BOOST_GEOMETRY_UNKNOWN_EXCEPTION`
-        public static let BOOST_GEOMETRY_UNKNOWN_EXCEPTION: ErrorCode = 3043
+        public static var BOOST_GEOMETRY_UNKNOWN_EXCEPTION: Self { 3043 }
         /// `ER_STD_BAD_ALLOC_ERROR`
-        public static let STD_BAD_ALLOC_ERROR: ErrorCode = 3044
+        public static var STD_BAD_ALLOC_ERROR: Self { 3044 }
         /// `ER_STD_DOMAIN_ERROR`
-        public static let STD_DOMAIN_ERROR: ErrorCode = 3045
+        public static var STD_DOMAIN_ERROR: Self { 3045 }
         /// `ER_STD_LENGTH_ERROR`
-        public static let STD_LENGTH_ERROR: ErrorCode = 3046
+        public static var STD_LENGTH_ERROR: Self { 3046 }
         /// `ER_STD_INVALID_ARGUMENT`
-        public static let STD_INVALID_ARGUMENT: ErrorCode = 3047
+        public static var STD_INVALID_ARGUMENT: Self { 3047 }
         /// `ER_STD_OUT_OF_RANGE_ERROR`
-        public static let STD_OUT_OF_RANGE_ERROR: ErrorCode = 3048
+        public static var STD_OUT_OF_RANGE_ERROR: Self { 3048 }
         /// `ER_STD_OVERFLOW_ERROR`
-        public static let STD_OVERFLOW_ERROR: ErrorCode = 3049
+        public static var STD_OVERFLOW_ERROR: Self { 3049 }
         /// `ER_STD_RANGE_ERROR`
-        public static let STD_RANGE_ERROR: ErrorCode = 3050
+        public static var STD_RANGE_ERROR: Self { 3050 }
         /// `ER_STD_UNDERFLOW_ERROR`
-        public static let STD_UNDERFLOW_ERROR: ErrorCode = 3051
+        public static var STD_UNDERFLOW_ERROR: Self { 3051 }
         /// `ER_STD_LOGIC_ERROR`
-        public static let STD_LOGIC_ERROR: ErrorCode = 3052
+        public static var STD_LOGIC_ERROR: Self { 3052 }
         /// `ER_STD_RUNTIME_ERROR`
-        public static let STD_RUNTIME_ERROR: ErrorCode = 3053
+        public static var STD_RUNTIME_ERROR: Self { 3053 }
         /// `ER_STD_UNKNOWN_EXCEPTION`
-        public static let STD_UNKNOWN_EXCEPTION: ErrorCode = 3054
+        public static var STD_UNKNOWN_EXCEPTION: Self { 3054 }
         /// `ER_GIS_DATA_WRONG_ENDIANESS`
-        public static let GIS_DATA_WRONG_ENDIANESS: ErrorCode = 3055
+        public static var GIS_DATA_WRONG_ENDIANESS: Self { 3055 }
         /// `ER_CHANGE_MASTER_PASSWORD_LENGTH`
-        public static let CHANGE_MASTER_PASSWORD_LENGTH: ErrorCode = 3056
+        public static var CHANGE_MASTER_PASSWORD_LENGTH: Self { 3056 }
         /// `ER_USER_LOCK_WRONG_NAME`
-        public static let USER_LOCK_WRONG_NAME: ErrorCode = 3057
+        public static var USER_LOCK_WRONG_NAME: Self { 3057 }
         /// `ER_USER_LOCK_DEADLOCK`
-        public static let USER_LOCK_DEADLOCK: ErrorCode = 3058
+        public static var USER_LOCK_DEADLOCK: Self { 3058 }
         /// `ER_REPLACE_INACCESSIBLE_ROWS`
-        public static let REPLACE_INACCESSIBLE_ROWS: ErrorCode = 3059
+        public static var REPLACE_INACCESSIBLE_ROWS: Self { 3059 }
         /// `ER_ALTER_OPERATION_NOT_SUPPORTED_REASON_GIS`
-        public static let ALTER_OPERATION_NOT_SUPPORTED_REASON_GIS: ErrorCode = 3060
+        public static var ALTER_OPERATION_NOT_SUPPORTED_REASON_GIS: Self { 3060 }
         /// `ER_ILLEGAL_USER_VAR`
-        public static let ILLEGAL_USER_VAR: ErrorCode = 3061
+        public static var ILLEGAL_USER_VAR: Self { 3061 }
         /// `ER_GTID_MODE_OFF`
-        public static let GTID_MODE_OFF: ErrorCode = 3062
+        public static var GTID_MODE_OFF: Self { 3062 }
         /// `ER_UNSUPPORTED_BY_REPLICATION_THREAD`
-        public static let UNSUPPORTED_BY_REPLICATION_THREAD: ErrorCode = 3063
+        public static var UNSUPPORTED_BY_REPLICATION_THREAD: Self { 3063 }
         /// `ER_INCORRECT_TYPE`
-        public static let INCORRECT_TYPE: ErrorCode = 3064
+        public static var INCORRECT_TYPE: Self { 3064 }
         /// `ER_FIELD_IN_ORDER_NOT_SELECT`
-        public static let FIELD_IN_ORDER_NOT_SELECT: ErrorCode = 3065
+        public static var FIELD_IN_ORDER_NOT_SELECT: Self { 3065 }
         /// `ER_AGGREGATE_IN_ORDER_NOT_SELECT`
-        public static let AGGREGATE_IN_ORDER_NOT_SELECT: ErrorCode = 3066
+        public static var AGGREGATE_IN_ORDER_NOT_SELECT: Self { 3066 }
         /// `ER_INVALID_RPL_WILD_TABLE_FILTER_PATTERN`
-        public static let INVALID_RPL_WILD_TABLE_FILTER_PATTERN: ErrorCode = 3067
+        public static var INVALID_RPL_WILD_TABLE_FILTER_PATTERN: Self { 3067 }
         /// `ER_NET_OK_PACKET_TOO_LARGE`
-        public static let NET_OK_PACKET_TOO_LARGE: ErrorCode = 3068
+        public static var NET_OK_PACKET_TOO_LARGE: Self { 3068 }
         /// `ER_INVALID_JSON_DATA`
-        public static let INVALID_JSON_DATA: ErrorCode = 3069
+        public static var INVALID_JSON_DATA: Self { 3069 }
         /// `ER_INVALID_GEOJSON_MISSING_MEMBER`
-        public static let INVALID_GEOJSON_MISSING_MEMBER: ErrorCode = 3070
+        public static var INVALID_GEOJSON_MISSING_MEMBER: Self { 3070 }
         /// `ER_INVALID_GEOJSON_WRONG_TYPE`
-        public static let INVALID_GEOJSON_WRONG_TYPE: ErrorCode = 3071
+        public static var INVALID_GEOJSON_WRONG_TYPE: Self { 3071 }
         /// `ER_INVALID_GEOJSON_UNSPECIFIED`
-        public static let INVALID_GEOJSON_UNSPECIFIED: ErrorCode = 3072
+        public static var INVALID_GEOJSON_UNSPECIFIED: Self { 3072 }
         /// `ER_DIMENSION_UNSUPPORTED`
-        public static let DIMENSION_UNSUPPORTED: ErrorCode = 3073
+        public static var DIMENSION_UNSUPPORTED: Self { 3073 }
         /// `ER_SLAVE_CHANNEL_DOES_NOT_EXIST`
-        public static let SLAVE_CHANNEL_DOES_NOT_EXIST: ErrorCode = 3074
+        public static var SLAVE_CHANNEL_DOES_NOT_EXIST: Self { 3074 }
         /// `ER_SLAVE_MULTIPLE_CHANNELS_HOST_PORT`
-        public static let SLAVE_MULTIPLE_CHANNELS_HOST_PORT: ErrorCode = 3075
+        public static var SLAVE_MULTIPLE_CHANNELS_HOST_PORT: Self { 3075 }
         /// `ER_SLAVE_CHANNEL_NAME_INVALID_OR_TOO_LONG`
-        public static let SLAVE_CHANNEL_NAME_INVALID_OR_TOO_LONG: ErrorCode = 3076
+        public static var SLAVE_CHANNEL_NAME_INVALID_OR_TOO_LONG: Self { 3076 }
         /// `ER_SLAVE_NEW_CHANNEL_WRONG_REPOSITORY`
-        public static let SLAVE_NEW_CHANNEL_WRONG_REPOSITORY: ErrorCode = 3077
+        public static var SLAVE_NEW_CHANNEL_WRONG_REPOSITORY: Self { 3077 }
         /// `ER_SLAVE_CHANNEL_DELETE`
-        public static let SLAVE_CHANNEL_DELETE: ErrorCode = 3078
+        public static var SLAVE_CHANNEL_DELETE: Self { 3078 }
         /// `ER_SLAVE_MULTIPLE_CHANNELS_CMD`
-        public static let SLAVE_MULTIPLE_CHANNELS_CMD: ErrorCode = 3079
+        public static var SLAVE_MULTIPLE_CHANNELS_CMD: Self { 3079 }
         /// `ER_SLAVE_MAX_CHANNELS_EXCEEDED`
-        public static let SLAVE_MAX_CHANNELS_EXCEEDED: ErrorCode = 3080
+        public static var SLAVE_MAX_CHANNELS_EXCEEDED: Self { 3080 }
         /// `ER_SLAVE_CHANNEL_MUST_STOP`
-        public static let SLAVE_CHANNEL_MUST_STOP: ErrorCode = 3081
+        public static var SLAVE_CHANNEL_MUST_STOP: Self { 3081 }
         /// `ER_SLAVE_CHANNEL_NOT_RUNNING`
-        public static let SLAVE_CHANNEL_NOT_RUNNING: ErrorCode = 3082
+        public static var SLAVE_CHANNEL_NOT_RUNNING: Self { 3082 }
         /// `ER_SLAVE_CHANNEL_WAS_RUNNING`
-        public static let SLAVE_CHANNEL_WAS_RUNNING: ErrorCode = 3083
+        public static var SLAVE_CHANNEL_WAS_RUNNING: Self { 3083 }
         /// `ER_SLAVE_CHANNEL_WAS_NOT_RUNNING`
-        public static let SLAVE_CHANNEL_WAS_NOT_RUNNING: ErrorCode = 3084
+        public static var SLAVE_CHANNEL_WAS_NOT_RUNNING: Self { 3084 }
         /// `ER_SLAVE_CHANNEL_SQL_THREAD_MUST_STOP`
-        public static let SLAVE_CHANNEL_SQL_THREAD_MUST_STOP: ErrorCode = 3085
+        public static var SLAVE_CHANNEL_SQL_THREAD_MUST_STOP: Self { 3085 }
         /// `ER_SLAVE_CHANNEL_SQL_SKIP_COUNTER`
-        public static let SLAVE_CHANNEL_SQL_SKIP_COUNTER: ErrorCode = 3086
+        public static var SLAVE_CHANNEL_SQL_SKIP_COUNTER: Self { 3086 }
         /// `ER_WRONG_FIELD_WITH_GROUP_V2`
-        public static let WRONG_FIELD_WITH_GROUP_V2: ErrorCode  = 3087
+        public static var WRONG_FIELD_WITH_GROUP_V2: Self { 3087 }
         /// `ER_MIX_OF_GROUP_FUNC_AND_FIELDS_V2`
-        public static let MIX_OF_GROUP_FUNC_AND_FIELDS_V2: ErrorCode  = 3088
+        public static var MIX_OF_GROUP_FUNC_AND_FIELDS_V2: Self { 3088 }
         /// `ER_WARN_DEPRECATED_SYSVAR_UPDATE`
-        public static let WARN_DEPRECATED_SYSVAR_UPDATE: ErrorCode = 3089
+        public static var WARN_DEPRECATED_SYSVAR_UPDATE: Self { 3089 }
         /// `ER_WARN_DEPRECATED_SQLMODE`
-        public static let WARN_DEPRECATED_SQLMODE: ErrorCode = 3090
+        public static var WARN_DEPRECATED_SQLMODE: Self { 3090 }
         /// `ER_CANNOT_LOG_PARTIAL_DROP_DATABASE_WITH_GTID`
-        public static let CANNOT_LOG_PARTIAL_DROP_DATABASE_WITH_GTID: ErrorCode = 3091
+        public static var CANNOT_LOG_PARTIAL_DROP_DATABASE_WITH_GTID: Self { 3091 }
         /// `ER_GROUP_REPLICATION_CONFIGURATION`
-        public static let GROUP_REPLICATION_CONFIGURATION: ErrorCode = 3092
+        public static var GROUP_REPLICATION_CONFIGURATION: Self { 3092 }
         /// `ER_GROUP_REPLICATION_RUNNING`
-        public static let GROUP_REPLICATION_RUNNING: ErrorCode = 3093
+        public static var GROUP_REPLICATION_RUNNING: Self { 3093 }
         /// `ER_GROUP_REPLICATION_APPLIER_INIT_ERROR`
-        public static let GROUP_REPLICATION_APPLIER_INIT_ERROR: ErrorCode = 3094
+        public static var GROUP_REPLICATION_APPLIER_INIT_ERROR: Self { 3094 }
         /// `ER_GROUP_REPLICATION_STOP_APPLIER_THREAD_TIMEOUT`
-        public static let GROUP_REPLICATION_STOP_APPLIER_THREAD_TIMEOUT: ErrorCode = 3095
+        public static var GROUP_REPLICATION_STOP_APPLIER_THREAD_TIMEOUT: Self { 3095 }
         /// `ER_GROUP_REPLICATION_COMMUNICATION_LAYER_SESSION_ERROR`
-        public static let GROUP_REPLICATION_COMMUNICATION_LAYER_SESSION_ERROR: ErrorCode = 3096
+        public static var GROUP_REPLICATION_COMMUNICATION_LAYER_SESSION_ERROR: Self { 3096 }
         /// `ER_GROUP_REPLICATION_COMMUNICATION_LAYER_JOIN_ERROR`
-        public static let GROUP_REPLICATION_COMMUNICATION_LAYER_JOIN_ERROR: ErrorCode = 3097
+        public static var GROUP_REPLICATION_COMMUNICATION_LAYER_JOIN_ERROR: Self { 3097 }
         /// `ER_BEFORE_DML_VALIDATION_ERROR`
-        public static let BEFORE_DML_VALIDATION_ERROR: ErrorCode = 3098
+        public static var BEFORE_DML_VALIDATION_ERROR: Self { 3098 }
         /// `ER_PREVENTS_VARIABLE_WITHOUT_RBR`
-        public static let PREVENTS_VARIABLE_WITHOUT_RBR: ErrorCode = 3099
+        public static var PREVENTS_VARIABLE_WITHOUT_RBR: Self { 3099 }
         /// `ER_RUN_HOOK_ERROR`
-        public static let RUN_HOOK_ERROR: ErrorCode = 3100
+        public static var RUN_HOOK_ERROR: Self { 3100 }
         /// `ER_TRANSACTION_ROLLBACK_DURING_COMMIT`
-        public static let TRANSACTION_ROLLBACK_DURING_COMMIT: ErrorCode = 3101
+        public static var TRANSACTION_ROLLBACK_DURING_COMMIT: Self { 3101 }
         /// `ER_GENERATED_COLUMN_FUNCTION_IS_NOT_ALLOWED`
-        public static let GENERATED_COLUMN_FUNCTION_IS_NOT_ALLOWED: ErrorCode = 3102
+        public static var GENERATED_COLUMN_FUNCTION_IS_NOT_ALLOWED: Self { 3102 }
         /// `ER_UNSUPPORTED_ALTER_INPLACE_ON_VIRTUAL_COLUMN`
-        public static let UNSUPPORTED_ALTER_INPLACE_ON_VIRTUAL_COLUMN: ErrorCode = 3103
+        public static var UNSUPPORTED_ALTER_INPLACE_ON_VIRTUAL_COLUMN: Self { 3103 }
         /// `ER_WRONG_FK_OPTION_FOR_GENERATED_COLUMN`
-        public static let WRONG_FK_OPTION_FOR_GENERATED_COLUMN: ErrorCode = 3104
+        public static var WRONG_FK_OPTION_FOR_GENERATED_COLUMN: Self { 3104 }
         /// `ER_NON_DEFAULT_VALUE_FOR_GENERATED_COLUMN`
-        public static let NON_DEFAULT_VALUE_FOR_GENERATED_COLUMN: ErrorCode = 3105
+        public static var NON_DEFAULT_VALUE_FOR_GENERATED_COLUMN: Self { 3105 }
         /// `ER_UNSUPPORTED_ACTION_ON_GENERATED_COLUMN`
-        public static let UNSUPPORTED_ACTION_ON_GENERATED_COLUMN: ErrorCode = 3106
+        public static var UNSUPPORTED_ACTION_ON_GENERATED_COLUMN: Self { 3106 }
         /// `ER_GENERATED_COLUMN_NON_PRIOR`
-        public static let GENERATED_COLUMN_NON_PRIOR: ErrorCode = 3107
+        public static var GENERATED_COLUMN_NON_PRIOR: Self { 3107 }
         /// `ER_DEPENDENT_BY_GENERATED_COLUMN`
-        public static let DEPENDENT_BY_GENERATED_COLUMN: ErrorCode = 3108
+        public static var DEPENDENT_BY_GENERATED_COLUMN: Self { 3108 }
         /// `ER_GENERATED_COLUMN_REF_AUTO_INC`
-        public static let GENERATED_COLUMN_REF_AUTO_INC: ErrorCode = 3109
+        public static var GENERATED_COLUMN_REF_AUTO_INC: Self { 3109 }
         /// `ER_FEATURE_NOT_AVAILABLE`
-        public static let FEATURE_NOT_AVAILABLE: ErrorCode = 3110
+        public static var FEATURE_NOT_AVAILABLE: Self { 3110 }
         /// `ER_CANT_SET_GTID_MODE`
-        public static let CANT_SET_GTID_MODE: ErrorCode = 3111
+        public static var CANT_SET_GTID_MODE: Self { 3111 }
         /// `ER_CANT_USE_AUTO_POSITION_WITH_GTID_MODE_OFF`
-        public static let CANT_USE_AUTO_POSITION_WITH_GTID_MODE_OFF: ErrorCode = 3112
+        public static var CANT_USE_AUTO_POSITION_WITH_GTID_MODE_OFF: Self { 3112 }
         /// `ER_CANT_REPLICATE_ANONYMOUS_WITH_AUTO_POSITION`
-        public static let CANT_REPLICATE_ANONYMOUS_WITH_AUTO_POSITION: ErrorCode = 3113
+        public static var CANT_REPLICATE_ANONYMOUS_WITH_AUTO_POSITION: Self { 3113 }
         /// `ER_CANT_REPLICATE_ANONYMOUS_WITH_GTID_MODE_ON`
-        public static let CANT_REPLICATE_ANONYMOUS_WITH_GTID_MODE_ON: ErrorCode = 3114
+        public static var CANT_REPLICATE_ANONYMOUS_WITH_GTID_MODE_ON: Self { 3114 }
         /// `ER_CANT_REPLICATE_GTID_WITH_GTID_MODE_OFF`
-        public static let CANT_REPLICATE_GTID_WITH_GTID_MODE_OFF: ErrorCode = 3115
+        public static var CANT_REPLICATE_GTID_WITH_GTID_MODE_OFF: Self { 3115 }
         /// `ER_CANT_SET_ENFORCE_GTID_CONSISTENCY_ON_WITH_ONGOING_GTID_VIOLATING_TRANSACTIONS`
-        public static let CANT_SET_ENFORCE_GTID_CONSISTENCY_ON_WITH_ONGOING_GTID_VIOLATING_TRANSACTIONS: ErrorCode = 3116
+        public static var CANT_SET_ENFORCE_GTID_CONSISTENCY_ON_WITH_ONGOING_GTID_VIOLATING_TRANSACTIONS: Self { 3116 }
         /// `ER_SET_ENFORCE_GTID_CONSISTENCY_WARN_WITH_ONGOING_GTID_VIOLATING_TRANSACTIONS`
-        public static let SET_ENFORCE_GTID_CONSISTENCY_WARN_WITH_ONGOING_GTID_VIOLATING_TRANSACTIONS: ErrorCode = 3117
+        public static var SET_ENFORCE_GTID_CONSISTENCY_WARN_WITH_ONGOING_GTID_VIOLATING_TRANSACTIONS: Self { 3117 }
         /// `ER_ACCOUNT_HAS_BEEN_LOCKED`
-        public static let ACCOUNT_HAS_BEEN_LOCKED: ErrorCode = 3118
+        public static var ACCOUNT_HAS_BEEN_LOCKED: Self { 3118 }
         /// `ER_WRONG_TABLESPACE_NAME`
-        public static let WRONG_TABLESPACE_NAME: ErrorCode = 3119
+        public static var WRONG_TABLESPACE_NAME: Self { 3119 }
         /// `ER_TABLESPACE_IS_NOT_EMPTY`
-        public static let TABLESPACE_IS_NOT_EMPTY: ErrorCode = 3120
+        public static var TABLESPACE_IS_NOT_EMPTY: Self { 3120 }
         /// `ER_WRONG_FILE_NAME`
-        public static let WRONG_FILE_NAME: ErrorCode = 3121
+        public static var WRONG_FILE_NAME: Self { 3121 }
         /// `ER_BOOST_GEOMETRY_INCONSISTENT_TURNS_EXCEPTION`
-        public static let BOOST_GEOMETRY_INCONSISTENT_TURNS_EXCEPTION: ErrorCode = 3122
+        public static var BOOST_GEOMETRY_INCONSISTENT_TURNS_EXCEPTION: Self { 3122 }
         /// `ER_WARN_OPTIMIZER_HINT_SYNTAX_ERROR`
-        public static let WARN_OPTIMIZER_HINT_SYNTAX_ERROR: ErrorCode = 3123
+        public static var WARN_OPTIMIZER_HINT_SYNTAX_ERROR: Self { 3123 }
         /// `ER_WARN_BAD_MAX_EXECUTION_TIME`
-        public static let WARN_BAD_MAX_EXECUTION_TIME: ErrorCode = 3124
+        public static var WARN_BAD_MAX_EXECUTION_TIME: Self { 3124 }
         /// `ER_WARN_UNSUPPORTED_MAX_EXECUTION_TIME`
-        public static let WARN_UNSUPPORTED_MAX_EXECUTION_TIME: ErrorCode = 3125
+        public static var WARN_UNSUPPORTED_MAX_EXECUTION_TIME: Self { 3125 }
         /// `ER_WARN_CONFLICTING_HINT`
-        public static let WARN_CONFLICTING_HINT: ErrorCode = 3126
+        public static var WARN_CONFLICTING_HINT: Self { 3126 }
         /// `ER_WARN_UNKNOWN_QB_NAME`
-        public static let WARN_UNKNOWN_QB_NAME: ErrorCode = 3127
+        public static var WARN_UNKNOWN_QB_NAME: Self { 3127 }
         /// `ER_UNRESOLVED_HINT_NAME`
-        public static let UNRESOLVED_HINT_NAME: ErrorCode = 3128
+        public static var UNRESOLVED_HINT_NAME: Self { 3128 }
         /// `ER_WARN_ON_MODIFYING_GTID_EXECUTED_TABLE`
-        public static let WARN_ON_MODIFYING_GTID_EXECUTED_TABLE: ErrorCode = 3129
+        public static var WARN_ON_MODIFYING_GTID_EXECUTED_TABLE: Self { 3129 }
         /// `ER_PLUGGABLE_PROTOCOL_COMMAND_NOT_SUPPORTED`
-        public static let PLUGGABLE_PROTOCOL_COMMAND_NOT_SUPPORTED: ErrorCode = 3130
+        public static var PLUGGABLE_PROTOCOL_COMMAND_NOT_SUPPORTED: Self { 3130 }
         /// `ER_LOCKING_SERVICE_WRONG_NAME`
-        public static let LOCKING_SERVICE_WRONG_NAME: ErrorCode = 3131
+        public static var LOCKING_SERVICE_WRONG_NAME: Self { 3131 }
         /// `ER_LOCKING_SERVICE_DEADLOCK`
-        public static let LOCKING_SERVICE_DEADLOCK: ErrorCode = 3132
+        public static var LOCKING_SERVICE_DEADLOCK: Self { 3132 }
         /// `ER_LOCKING_SERVICE_TIMEOUT`
-        public static let LOCKING_SERVICE_TIMEOUT: ErrorCode = 3133
+        public static var LOCKING_SERVICE_TIMEOUT: Self { 3133 }
         /// `ER_GIS_MAX_POINTS_IN_GEOMETRY_OVERFLOWED`
-        public static let GIS_MAX_POINTS_IN_GEOMETRY_OVERFLOWED: ErrorCode = 3134
+        public static var GIS_MAX_POINTS_IN_GEOMETRY_OVERFLOWED: Self { 3134 }
         /// `ER_SQL_MODE_MERGED`
-        public static let SQL_MODE_MERGED: ErrorCode = 3135
+        public static var SQL_MODE_MERGED: Self { 3135 }
         /// `ER_VTOKEN_PLUGIN_TOKEN_MISMATCH`
-        public static let VTOKEN_PLUGIN_TOKEN_MISMATCH: ErrorCode = 3136
+        public static var VTOKEN_PLUGIN_TOKEN_MISMATCH: Self { 3136 }
         /// `ER_VTOKEN_PLUGIN_TOKEN_NOT_FOUND`
-        public static let VTOKEN_PLUGIN_TOKEN_NOT_FOUND: ErrorCode = 3137
+        public static var VTOKEN_PLUGIN_TOKEN_NOT_FOUND: Self { 3137 }
         /// `ER_CANT_SET_VARIABLE_WHEN_OWNING_GTID`
-        public static let CANT_SET_VARIABLE_WHEN_OWNING_GTID: ErrorCode = 3138
+        public static var CANT_SET_VARIABLE_WHEN_OWNING_GTID: Self { 3138 }
         /// `ER_SLAVE_CHANNEL_OPERATION_NOT_ALLOWED`
-        public static let SLAVE_CHANNEL_OPERATION_NOT_ALLOWED: ErrorCode = 3139
+        public static var SLAVE_CHANNEL_OPERATION_NOT_ALLOWED: Self { 3139 }
         /// `ER_INVALID_JSON_TEXT`
-        public static let INVALID_JSON_TEXT: ErrorCode = 3140
+        public static var INVALID_JSON_TEXT: Self { 3140 }
         /// `ER_INVALID_JSON_TEXT_IN_PARAM`
-        public static let INVALID_JSON_TEXT_IN_PARAM: ErrorCode = 3141
+        public static var INVALID_JSON_TEXT_IN_PARAM: Self { 3141 }
         /// `ER_INVALID_JSON_BINARY_DATA`
-        public static let INVALID_JSON_BINARY_DATA: ErrorCode = 3142
+        public static var INVALID_JSON_BINARY_DATA: Self { 3142 }
         /// `ER_INVALID_JSON_PATH`
-        public static let INVALID_JSON_PATH: ErrorCode = 3143
+        public static var INVALID_JSON_PATH: Self { 3143 }
         /// `ER_INVALID_JSON_CHARSET`
-        public static let INVALID_JSON_CHARSET: ErrorCode = 3144
+        public static var INVALID_JSON_CHARSET: Self { 3144 }
         /// `ER_INVALID_JSON_CHARSET_IN_FUNCTION`
-        public static let INVALID_JSON_CHARSET_IN_FUNCTION: ErrorCode = 3145
+        public static var INVALID_JSON_CHARSET_IN_FUNCTION: Self { 3145 }
         /// `ER_INVALID_TYPE_FOR_JSON`
-        public static let INVALID_TYPE_FOR_JSON: ErrorCode = 3146
+        public static var INVALID_TYPE_FOR_JSON: Self { 3146 }
         /// `ER_INVALID_CAST_TO_JSON`
-        public static let INVALID_CAST_TO_JSON: ErrorCode = 3147
+        public static var INVALID_CAST_TO_JSON: Self { 3147 }
         /// `ER_INVALID_JSON_PATH_CHARSET`
-        public static let INVALID_JSON_PATH_CHARSET: ErrorCode = 3148
+        public static var INVALID_JSON_PATH_CHARSET: Self { 3148 }
         /// `ER_INVALID_JSON_PATH_WILDCARD`
-        public static let INVALID_JSON_PATH_WILDCARD: ErrorCode = 3149
+        public static var INVALID_JSON_PATH_WILDCARD: Self { 3149 }
         /// `ER_JSON_VALUE_TOO_BIG`
-        public static let JSON_VALUE_TOO_BIG: ErrorCode = 3150
+        public static var JSON_VALUE_TOO_BIG: Self { 3150 }
         /// `ER_JSON_KEY_TOO_BIG`
-        public static let JSON_KEY_TOO_BIG: ErrorCode = 3151
+        public static var JSON_KEY_TOO_BIG: Self { 3151 }
         /// `ER_JSON_USED_AS_KEY`
-        public static let JSON_USED_AS_KEY: ErrorCode = 3152
+        public static var JSON_USED_AS_KEY: Self { 3152 }
         /// `ER_JSON_VACUOUS_PATH`
-        public static let JSON_VACUOUS_PATH: ErrorCode = 3153
+        public static var JSON_VACUOUS_PATH: Self { 3153 }
         /// `ER_JSON_BAD_ONE_OR_ALL_ARG`
-        public static let JSON_BAD_ONE_OR_ALL_ARG: ErrorCode = 3154
+        public static var JSON_BAD_ONE_OR_ALL_ARG: Self { 3154 }
         /// `ER_NUMERIC_JSON_VALUE_OUT_OF_RANGE`
-        public static let NUMERIC_JSON_VALUE_OUT_OF_RANGE: ErrorCode = 3155
+        public static var NUMERIC_JSON_VALUE_OUT_OF_RANGE: Self { 3155 }
         /// `ER_INVALID_JSON_VALUE_FOR_CAST`
-        public static let INVALID_JSON_VALUE_FOR_CAST: ErrorCode = 3156
+        public static var INVALID_JSON_VALUE_FOR_CAST: Self { 3156 }
         /// `ER_JSON_DOCUMENT_TOO_DEEP`
-        public static let JSON_DOCUMENT_TOO_DEEP: ErrorCode = 3157
+        public static var JSON_DOCUMENT_TOO_DEEP: Self { 3157 }
         /// `ER_JSON_DOCUMENT_NULL_KEY`
-        public static let JSON_DOCUMENT_NULL_KEY: ErrorCode = 3158
+        public static var JSON_DOCUMENT_NULL_KEY: Self { 3158 }
         /// `ER_SECURE_TRANSPORT_REQUIRED`
-        public static let SECURE_TRANSPORT_REQUIRED: ErrorCode = 3159
+        public static var SECURE_TRANSPORT_REQUIRED: Self { 3159 }
         /// `ER_NO_SECURE_TRANSPORTS_CONFIGURED`
-        public static let NO_SECURE_TRANSPORTS_CONFIGURED: ErrorCode = 3160
+        public static var NO_SECURE_TRANSPORTS_CONFIGURED: Self { 3160 }
         /// `ER_DISABLED_STORAGE_ENGINE`
-        public static let DISABLED_STORAGE_ENGINE: ErrorCode = 3161
+        public static var DISABLED_STORAGE_ENGINE: Self { 3161 }
         /// `ER_USER_DOES_NOT_EXIST`
-        public static let USER_DOES_NOT_EXIST: ErrorCode = 3162
+        public static var USER_DOES_NOT_EXIST: Self { 3162 }
         /// `ER_USER_ALREADY_EXISTS`
-        public static let USER_ALREADY_EXISTS: ErrorCode = 3163
+        public static var USER_ALREADY_EXISTS: Self { 3163 }
         /// `ER_AUDIT_API_ABORT`
-        public static let AUDIT_API_ABORT: ErrorCode = 3164
+        public static var AUDIT_API_ABORT: Self { 3164 }
         /// `ER_INVALID_JSON_PATH_ARRAY_CELL`
-        public static let INVALID_JSON_PATH_ARRAY_CELL: ErrorCode = 3165
+        public static var INVALID_JSON_PATH_ARRAY_CELL: Self { 3165 }
         /// `ER_BUFPOOL_RESIZE_INPROGRESS`
-        public static let BUFPOOL_RESIZE_INPROGRESS: ErrorCode = 3166
+        public static var BUFPOOL_RESIZE_INPROGRESS: Self { 3166 }
         /// `ER_FEATURE_DISABLED_SEE_DOC`
-        public static let FEATURE_DISABLED_SEE_DOC: ErrorCode = 3167
+        public static var FEATURE_DISABLED_SEE_DOC: Self { 3167 }
         /// `ER_SERVER_ISNT_AVAILABLE`
-        public static let SERVER_ISNT_AVAILABLE: ErrorCode = 3168
+        public static var SERVER_ISNT_AVAILABLE: Self { 3168 }
         /// `ER_SESSION_WAS_KILLED`
-        public static let SESSION_WAS_KILLED: ErrorCode = 3169
+        public static var SESSION_WAS_KILLED: Self { 3169 }
         /// `ER_CAPACITY_EXCEEDED`
-        public static let CAPACITY_EXCEEDED: ErrorCode = 3170
+        public static var CAPACITY_EXCEEDED: Self { 3170 }
         /// `ER_CAPACITY_EXCEEDED_IN_RANGE_OPTIMIZER`
-        public static let CAPACITY_EXCEEDED_IN_RANGE_OPTIMIZER: ErrorCode = 3171
+        public static var CAPACITY_EXCEEDED_IN_RANGE_OPTIMIZER: Self { 3171 }
         /// `ER_TABLE_NEEDS_UPG_PART`
-        public static let TABLE_NEEDS_UPG_PART: ErrorCode = 3172
+        public static var TABLE_NEEDS_UPG_PART: Self { 3172 }
         /// `ER_CANT_WAIT_FOR_EXECUTED_GTID_SET_WHILE_OWNING_A_GTID`
-        public static let CANT_WAIT_FOR_EXECUTED_GTID_SET_WHILE_OWNING_A_GTID: ErrorCode = 3173
+        public static var CANT_WAIT_FOR_EXECUTED_GTID_SET_WHILE_OWNING_A_GTID: Self { 3173 }
         /// `ER_CANNOT_ADD_FOREIGN_BASE_COL_VIRTUAL`
-        public static let CANNOT_ADD_FOREIGN_BASE_COL_VIRTUAL: ErrorCode = 3174
+        public static var CANNOT_ADD_FOREIGN_BASE_COL_VIRTUAL: Self { 3174 }
         /// `ER_CANNOT_CREATE_VIRTUAL_INDEX_CONSTRAINT`
-        public static let CANNOT_CREATE_VIRTUAL_INDEX_CONSTRAINT: ErrorCode = 3175
+        public static var CANNOT_CREATE_VIRTUAL_INDEX_CONSTRAINT: Self { 3175 }
         /// `ER_ERROR_ON_MODIFYING_GTID_EXECUTED_TABLE`
-        public static let ERROR_ON_MODIFYING_GTID_EXECUTED_TABLE: ErrorCode = 3176
+        public static var ERROR_ON_MODIFYING_GTID_EXECUTED_TABLE: Self { 3176 }
         /// `ER_LOCK_REFUSED_BY_ENGINE`
-        public static let LOCK_REFUSED_BY_ENGINE: ErrorCode = 3177
+        public static var LOCK_REFUSED_BY_ENGINE: Self { 3177 }
         /// `ER_UNSUPPORTED_ALTER_ONLINE_ON_VIRTUAL_COLUMN`
-        public static let UNSUPPORTED_ALTER_ONLINE_ON_VIRTUAL_COLUMN: ErrorCode = 3178
+        public static var UNSUPPORTED_ALTER_ONLINE_ON_VIRTUAL_COLUMN: Self { 3178 }
         /// `ER_MASTER_KEY_ROTATION_NOT_SUPPORTED_BY_SE`
-        public static let MASTER_KEY_ROTATION_NOT_SUPPORTED_BY_SE: ErrorCode = 3179
+        public static var MASTER_KEY_ROTATION_NOT_SUPPORTED_BY_SE: Self { 3179 }
         /// `ER_MASTER_KEY_ROTATION_ERROR_BY_SE`
-        public static let MASTER_KEY_ROTATION_ERROR_BY_SE: ErrorCode = 3180
+        public static var MASTER_KEY_ROTATION_ERROR_BY_SE: Self { 3180 }
         /// `ER_MASTER_KEY_ROTATION_BINLOG_FAILED`
-        public static let MASTER_KEY_ROTATION_BINLOG_FAILED: ErrorCode = 3181
+        public static var MASTER_KEY_ROTATION_BINLOG_FAILED: Self { 3181 }
         /// `ER_MASTER_KEY_ROTATION_SE_UNAVAILABLE`
-        public static let MASTER_KEY_ROTATION_SE_UNAVAILABLE: ErrorCode = 3182
+        public static var MASTER_KEY_ROTATION_SE_UNAVAILABLE: Self { 3182 }
         /// `ER_TABLESPACE_CANNOT_ENCRYPT`
-        public static let TABLESPACE_CANNOT_ENCRYPT: ErrorCode = 3183
+        public static var TABLESPACE_CANNOT_ENCRYPT: Self { 3183 }
         /// `ER_INVALID_ENCRYPTION_OPTION`
-        public static let INVALID_ENCRYPTION_OPTION: ErrorCode = 3184
+        public static var INVALID_ENCRYPTION_OPTION: Self { 3184 }
         /// `ER_CANNOT_FIND_KEY_IN_KEYRING`
-        public static let CANNOT_FIND_KEY_IN_KEYRING: ErrorCode = 3185
+        public static var CANNOT_FIND_KEY_IN_KEYRING: Self { 3185 }
         /// `ER_CAPACITY_EXCEEDED_IN_PARSER`
-        public static let CAPACITY_EXCEEDED_IN_PARSER: ErrorCode = 3186
+        public static var CAPACITY_EXCEEDED_IN_PARSER: Self { 3186 }
         /// `ER_UNSUPPORTED_ALTER_ENCRYPTION_INPLACE`
-        public static let UNSUPPORTED_ALTER_ENCRYPTION_INPLACE: ErrorCode = 3187
+        public static var UNSUPPORTED_ALTER_ENCRYPTION_INPLACE: Self { 3187 }
         /// `ER_KEYRING_UDF_KEYRING_SERVICE_ERROR`
-        public static let KEYRING_UDF_KEYRING_SERVICE_ERROR: ErrorCode = 3188
+        public static var KEYRING_UDF_KEYRING_SERVICE_ERROR: Self { 3188 }
         /// `ER_USER_COLUMN_OLD_LENGTH`
-        public static let USER_COLUMN_OLD_LENGTH: ErrorCode = 3189
+        public static var USER_COLUMN_OLD_LENGTH: Self { 3189 }
         /// `ER_CANT_RESET_MASTER`
-        public static let CANT_RESET_MASTER: ErrorCode = 3190
+        public static var CANT_RESET_MASTER: Self { 3190 }
         /// `ER_GROUP_REPLICATION_MAX_GROUP_SIZE`
-        public static let GROUP_REPLICATION_MAX_GROUP_SIZE: ErrorCode = 3191
+        public static var GROUP_REPLICATION_MAX_GROUP_SIZE: Self { 3191 }
         /// `ER_CANNOT_ADD_FOREIGN_BASE_COL_STORED`
-        public static let CANNOT_ADD_FOREIGN_BASE_COL_STORED: ErrorCode = 3192
+        public static var CANNOT_ADD_FOREIGN_BASE_COL_STORED: Self { 3192 }
         /// `ER_TABLE_REFERENCED`
-        public static let TABLE_REFERENCED: ErrorCode = 3193
+        public static var TABLE_REFERENCED: Self { 3193 }
         
         public var rawValue: UInt16
         

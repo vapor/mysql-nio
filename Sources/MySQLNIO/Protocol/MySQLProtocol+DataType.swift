@@ -1,98 +1,98 @@
 extension MySQLProtocol {
     /// Table 14.4 Column Types
-    public struct DataType: RawRepresentable, Equatable, CustomStringConvertible {
+    public struct DataType: RawRepresentable, Equatable, CustomStringConvertible, Sendable {
         /// Implemented by `ProtocolBinary::MYSQL_TYPE_DECIMAL`
-        public static let decimal = DataType(rawValue: 0x00)
+        public static var decimal: Self { .init(rawValue: 0x00) }
         
         /// Implemented by `ProtocolBinary::MYSQL_TYPE_TINY`
-        public static let tiny = DataType(rawValue: 0x01)
+        public static var tiny: Self { .init(rawValue: 0x01) }
         
         /// Implemented by `ProtocolBinary::MYSQL_TYPE_SHORT`
-        public static let short = DataType(rawValue: 0x02)
+        public static var short: Self { .init(rawValue: 0x02) }
         
         /// Implemented by `ProtocolBinary::MYSQL_TYPE_LONG`
-        public static let long = DataType(rawValue: 0x03)
+        public static var long: Self { .init(rawValue: 0x03) }
         
         /// Implemented by `ProtocolBinary::MYSQL_TYPE_FLOAT`
-        public static let float = DataType(rawValue: 0x04)
+        public static var float: Self { .init(rawValue: 0x04) }
         
         /// Implemented by `ProtocolBinary::MYSQL_TYPE_DOUBLE`
-        public static let double = DataType(rawValue: 0x05)
+        public static var double: Self { .init(rawValue: 0x05) }
         
         /// Implemented by `ProtocolBinary::MYSQL_TYPE_NULL`
-        public static let null = DataType(rawValue: 0x06)
+        public static var null: Self { .init(rawValue: 0x06) }
         
         /// Implemented by `ProtocolBinary::MYSQL_TYPE_TIMESTAMP`
-        public static let timestamp = DataType(rawValue: 0x07)
+        public static var timestamp: Self { .init(rawValue: 0x07) }
         
         /// Implemented by `ProtocolBinary::MYSQL_TYPE_LONGLONG`
-        public static let longlong = DataType(rawValue: 0x08)
+        public static var longlong: Self { .init(rawValue: 0x08) }
         
         /// Implemented by `ProtocolBinary::MYSQL_TYPE_INT24`
-        public static let int24 = DataType(rawValue: 0x09)
+        public static var int24: Self { .init(rawValue: 0x09) }
         
         /// Implemented by `ProtocolBinary::MYSQL_TYPE_DATE`
-        public static let date = DataType(rawValue: 0x0a)
+        public static var date: Self { .init(rawValue: 0x0a) }
         
         /// Implemented by `ProtocolBinary::MYSQL_TYPE_TIME`
-        public static let time = DataType(rawValue: 0x0b)
+        public static var time: Self { .init(rawValue: 0x0b) }
         
         /// Implemented by `ProtocolBinary::MYSQL_TYPE_DATETIME`
-        public static let datetime = DataType(rawValue: 0x0c)
+        public static var datetime: Self { .init(rawValue: 0x0c) }
         
         /// Implemented by `ProtocolBinary::MYSQL_TYPE_YEAR`
-        public static let year = DataType(rawValue: 0x0d)
+        public static var year: Self { .init(rawValue: 0x0d) }
         
         /// see `Protocol::MYSQL_TYPE_DATE`
-        public static let newdate = DataType(rawValue: 0x0e)
+        public static var newdate: Self { .init(rawValue: 0x0e) }
         
         /// Implemented by `ProtocolBinary::MYSQL_TYPE_VARCHAR`
-        public static let varchar = DataType(rawValue: 0x0f)
+        public static var varchar: Self { .init(rawValue: 0x0f) }
         
         /// Implemented by `ProtocolBinary::MYSQL_TYPE_BIT`
-        public static let bit = DataType(rawValue: 0x10)
+        public static var bit: Self { .init(rawValue: 0x10) }
         
         /// see `Protocol::MYSQL_TYPE_TIMESTAMP2`
-        public static let timestamp2 = DataType(rawValue: 0x11)
+        public static var timestamp2: Self { .init(rawValue: 0x11) }
         
         /// see `Protocol::MYSQL_TYPE_DATETIME2`
-        public static let datetime2 = DataType(rawValue: 0x12)
+        public static var datetime2: Self { .init(rawValue: 0x12) }
         
         /// see `Protocol::MYSQL_TYPE_TIME2`
-        public static let time2 = DataType(rawValue: 0x13)
+        public static var time2: Self { .init(rawValue: 0x13) }
         
         /// Implemented by `ProtocolBinary::MYSQL_TYPE_JSON`
-        public static let json = DataType(rawValue: 0xf5)
+        public static var json: Self { .init(rawValue: 0xf5) }
         
         /// Implemented by `ProtocolBinary::MYSQL_TYPE_NEWDECIMAL`
-        public static let newdecimal = DataType(rawValue: 0xf6)
+        public static var newdecimal: Self { .init(rawValue: 0xf6) }
         
         /// Implemented by `ProtocolBinary::MYSQL_TYPE_ENUM`
-        public static let `enum` = DataType(rawValue: 0xf7)
+        public static var `enum`: Self { .init(rawValue: 0xf7) }
         
         /// Implemented by `ProtocolBinary::MYSQL_TYPE_SET`
-        public static let set = DataType(rawValue: 0xf8)
+        public static var set: Self { .init(rawValue: 0xf8) }
         
         /// Implemented by `ProtocolBinary::MYSQL_TYPE_TINY_BLOB`
-        public static let tinyBlob = DataType(rawValue: 0xf9)
+        public static var tinyBlob: Self { .init(rawValue: 0xf9) }
         
         /// Implemented by `ProtocolBinary::MYSQL_TYPE_MEDIUM_BLOB`
-        public static let mediumBlob = DataType(rawValue: 0xfa)
+        public static var mediumBlob: Self { .init(rawValue: 0xfa) }
         
         /// Implemented by `ProtocolBinary::MYSQL_TYPE_LONG_BLOB`
-        public static let longBlob = DataType(rawValue: 0xfb)
+        public static var longBlob: Self { .init(rawValue: 0xfb) }
         
         /// Implemented by `ProtocolBinary::MYSQL_TYPE_BLOB`
-        public static let blob = DataType(rawValue: 0xfc)
+        public static var blob: Self { .init(rawValue: 0xfc) }
         
         /// Implemented by `ProtocolBinary::MYSQL_TYPE_VAR_STRING`
-        public static let varString = DataType(rawValue: 0xfd)
+        public static var varString: Self { .init(rawValue: 0xfd) }
         
         /// Implemented by `ProtocolBinary::MYSQL_TYPE_STRING`
-        public static let string = DataType(rawValue: 0xfe)
+        public static var string: Self { .init(rawValue: 0xfe) }
         
         /// Implemented by `ProtocolBinary::MYSQL_TYPE_GEOMETRY`
-        public static let geometry = DataType(rawValue: 0xff)
+        public static var geometry: Self { .init(rawValue: 0xff) }
         
         /// Length that this type encodes to. If `nil`, the encoded
         /// value is prefixed by a length-encoded integer.

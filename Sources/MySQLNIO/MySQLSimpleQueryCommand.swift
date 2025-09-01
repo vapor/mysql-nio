@@ -2,7 +2,7 @@ import NIOCore
 
 extension MySQLDatabase {
     public func simpleQuery(_ sql: String) -> EventLoopFuture<[MySQLRow]> {
-        var rows = [MySQLRow]()
+        nonisolated(unsafe) var rows = [MySQLRow]()
         return self.simpleQuery(sql) { row in
             rows.append(row)
         }.map { rows }
@@ -14,7 +14,7 @@ extension MySQLDatabase {
     }
 }
 
-private final class MySQLSimpleQueryCommand: MySQLCommand {
+private final class MySQLSimpleQueryCommand: MySQLCommand, @unchecked Sendable { // this is cheating
     let sql: String
     
     enum State {
@@ -40,7 +40,7 @@ private final class MySQLSimpleQueryCommand: MySQLCommand {
         guard !packet.isError else {
             self.state = .done
             let errorPacket = try packet.decode(MySQLProtocol.ERR_Packet.self, capabilities: capabilities)
-            let error: Error
+            let error: any Error
             switch errorPacket.errorCode {
             case .DUP_ENTRY:
                 error = MySQLError.duplicateEntry(errorPacket.errorMessage)

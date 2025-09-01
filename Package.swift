@@ -1,4 +1,4 @@
-// swift-tools-version:5.7
+// swift-tools-version:5.10
 import PackageDescription
 
 let package = Package(
@@ -13,20 +13,40 @@ let package = Package(
         .library(name: "MySQLNIO", targets: ["MySQLNIO"]),
     ],
     dependencies: [
+        .package(url: "https://github.com/apple/swift-algorithms.git", from: "1.0.0"),
         .package(url: "https://github.com/apple/swift-crypto.git", "1.0.0" ..< "4.0.0"),
         .package(url: "https://github.com/apple/swift-log.git", from: "1.0.0"),
         .package(url: "https://github.com/apple/swift-nio.git", from: "2.0.0"),
         .package(url: "https://github.com/apple/swift-nio-ssl.git", from: "2.14.0"),
     ],
     targets: [
-        .target(name: "MySQLNIO", dependencies: [
-            .product(name: "Crypto", package: "swift-crypto"),
-            .product(name: "Logging", package: "swift-log"),
-            .product(name: "NIO", package: "swift-nio"),
-            .product(name: "NIOSSL", package: "swift-nio-ssl"),
-        ]),
-        .testTarget(name: "MySQLNIOTests", dependencies: [
-            .target(name: "MySQLNIO"),
-        ]),
+        .target(
+            name: "MySQLNIO",
+            dependencies: [
+                .product(name: "Algorithms", package: "swift-algorithms"),
+                .product(name: "_CryptoExtras", package: "swift-crypto"),
+                .product(name: "Crypto", package: "swift-crypto"),
+                .product(name: "Logging", package: "swift-log"),
+                .product(name: "NIO", package: "swift-nio"),
+                .product(name: "NIOSSL", package: "swift-nio-ssl"),
+            ],
+            swiftSettings: swiftSettings
+        ),
+        .testTarget(
+            name: "MySQLNIOTests",
+            dependencies: [
+                .target(name: "MySQLNIO"),
+            ],
+            swiftSettings: swiftSettings
+        ),
     ]
 )
+
+var swiftSettings: [SwiftSetting] { [
+    .enableUpcomingFeature("ExistentialAny"),
+    .enableUpcomingFeature("ConciseMagicFile"),
+    .enableUpcomingFeature("ForwardTrailingClosures"),
+    .enableUpcomingFeature("DisableOutwardActorInference"),
+    .enableUpcomingFeature("MemberImportVisibility"),
+    .enableExperimentalFeature("StrictConcurrency=complete"),
+] }

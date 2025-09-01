@@ -2,7 +2,7 @@ extension MySQLProtocol {
     /// `Protocol::ColumnDefinition41`
     ///
     /// https://dev.mysql.com/doc/internals/en/com-query-response.html#packet-Protocol::ColumnDefinition
-    public struct ColumnDefinition41: MySQLPacketDecodable {
+    public struct ColumnDefinition41: MySQLPacketDecodable, Sendable {
         /// `catalog` (`lenenc_str`) -- catalog (always "def")
         public var catalog: String
         

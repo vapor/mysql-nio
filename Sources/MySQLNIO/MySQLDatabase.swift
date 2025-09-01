@@ -24,13 +24,13 @@ public struct MySQLCommandState {
     let response: [MySQLPacket]
     let done: Bool
     let resetSequence: Bool
-    var error: Error?
-    
+    var error: (any Error)?
+
     public init(
         response: [MySQLPacket] = [],
         done: Bool = false,
         resetSequence: Bool = false,
-        error: Error? = nil
+        error: (any Error)? = nil
     ) {
         self.response = response
         self.done = done

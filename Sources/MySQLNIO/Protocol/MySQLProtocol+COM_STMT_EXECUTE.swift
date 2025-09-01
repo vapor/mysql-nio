@@ -1,9 +1,9 @@
 extension MySQLProtocol {
     public struct ExecuteFlags: OptionSet, ExpressibleByIntegerLiteral {
-        public static let CURSOR_TYPE_NO_CURSOR: ExecuteFlags = 0b0000_0000
-        public static let CURSOR_TYPE_READ_ONLY: ExecuteFlags = 0b0000_0001
-        public static let CURSOR_TYPE_FOR_UPDATE: ExecuteFlags = 0b0000_0010
-        public static let CURSOR_TYPE_SCROLLABLE: ExecuteFlags = 0b0000_0100
+        public static var CURSOR_TYPE_NO_CURSOR: Self { 0b0000_0000 }
+        public static var CURSOR_TYPE_READ_ONLY: Self { 0b0000_0001 }
+        public static var CURSOR_TYPE_FOR_UPDATE: Self { 0b0000_0010 }
+        public static var CURSOR_TYPE_SCROLLABLE: Self { 0b0000_0100 }
         
         public var rawValue: UInt8
         

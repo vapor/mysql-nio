@@ -7,7 +7,7 @@ extension MySQLProtocol {
     /// Depending on the server version and configuration options different variants of the initial packet are sent.
     ///
     /// https://dev.mysql.com/doc/internals/en/connection-phase-packets.html#packet-Protocol::Handshake
-    public struct HandshakeV10: MySQLPacketDecodable {
+    public struct HandshakeV10: MySQLPacketDecodable, Sendable {
         public enum Error: Swift.Error {
             case missingProtocolVersion
             case invalidProtocolVersion(UInt8)

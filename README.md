@@ -1,9 +1,5 @@
 <p align="center">
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="https://github.com/vapor/mysql-nio/assets/1130717/8ef2ef8b-070d-4026-a425-8e25159ca398">
-  <source media="(prefers-color-scheme: light)" srcset="https://github.com/vapor/mysql-nio/assets/1130717/595fbebd-8762-4a32-b990-3abde04a411c">
-  <img src="https://github.com/vapor/mysql-nio/assets/1130717/595fbebd-8762-4a32-b990-3abde04a411c" height="96" alt="MySQLNIO">
-</picture> 
+<img src="https://design.vapor.codes/images/vapor-mysqlnio.svg" height="96" alt="MySQLNIO">
 <br>
 <br>
 <a href="https://docs.vapor.codes/4.0/"><img src="https://design.vapor.codes/images/readthedocs.svg" alt="Documentation"></a>
@@ -11,7 +7,7 @@
 <a href="LICENSE"><img src="https://design.vapor.codes/images/mitlicense.svg" alt="MIT License"></a>
 <a href="https://github.com/vapor/mysql-nio/actions/workflows/test.yml"><img src="https://img.shields.io/github/actions/workflow/status/vapor/mysql-nio/test.yml?event=push&style=plastic&logo=github&label=test&logoColor=%23ccc" alt="Continuous Integration"></a>
 <a href="https://codecov.io/github/vapor/mysql-nio"><img src="https://img.shields.io/codecov/c/github/vapor/mysql-nio?style=plastic&logo=codecov&label=Codecov"></a>
-<a href="https://swift.org"><img src="https://design.vapor.codes/images/swift57up.svg" alt="Swift 5.7+"></a>
+<a href="https://swift.org"><img src="https://design.vapor.codes/images/swift510up.svg" alt="Swift 5.10+"></a>
 </p>
 
 <br>
@@ -95,8 +91,6 @@ let conn = try await MySQLConnection(
 ).get()
 ```
 
-Note: These examples will make use of `wait()` for simplicity. This is appropriate if you are using MySQLNIO on the main thread, like for a CLI tool or in tests. However, you should never use `wait()` on an event loop.
-
 There are a few ways to create a `SocketAddress`:
 
 - `init(ipAddress: String, port: Int)`
@@ -108,7 +102,7 @@ There are also some additional arguments you can supply to `connect`.
 - `tlsConfiguration` An optional `TLSConfiguration` struct. This will be used if the MySQL server supports TLS. Pass `nil` to opt-out of TLS.
 - `serverHostname` An optional `String` to use in conjunction with `tlsConfiguration` to specify the server's hostname. 
 
-`connect` will return a future `MySQLConnection`, or an error if it could not connect.
+`connect` will return a `MySQLConnection`, or an error if it could not connect.
 
 ### Database Protocol
 

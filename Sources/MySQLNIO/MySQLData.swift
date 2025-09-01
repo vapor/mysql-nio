@@ -1,8 +1,8 @@
 import NIOCore
 import Foundation
 
-public struct MySQLData: CustomStringConvertible, ExpressibleByStringLiteral, ExpressibleByIntegerLiteral, ExpressibleByBooleanLiteral, MySQLDataConvertible {
-    public enum Format {
+public struct MySQLData: CustomStringConvertible, ExpressibleByStringLiteral, ExpressibleByIntegerLiteral, ExpressibleByBooleanLiteral, MySQLDataConvertible, Sendable {
+    public enum Format: Sendable {
         case binary
         case text
     }
@@ -118,16 +118,16 @@ public struct MySQLData: CustomStringConvertible, ExpressibleByStringLiteral, Ex
     }
 
     private struct Wrapper: Encodable {
-        let encodable: Encodable
-        init(_ encodable: Encodable) {
+        let encodable: any Encodable
+        init(_ encodable: any Encodable) {
             self.encodable = encodable
         }
-        func encode(to encoder: Encoder) throws {
+        func encode(to encoder: any Encoder) throws {
             try self.encodable.encode(to: encoder)
         }
     }
 
-    public init(json value: Encodable) throws {
+    public init(json value: any Encodable) throws {
         let json = JSONEncoder()
         let data = try json.encode(Wrapper(value))
         var buffer = ByteBufferAllocator().buffer(capacity: data.count)
