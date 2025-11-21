@@ -27,7 +27,7 @@ jobs:
     container: swift:noble
     steps:
       - name: Check out code
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with: { 'fetch-depth': 0 }
       - name: Run API breakage check
         run: |
@@ -64,7 +64,7 @@ jobs:
           done
           ((i<10))
       - name: Check out package
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
       - name: Run unit tests
         run: swift test --enable-code-coverage
       - name: Upload code coverage
@@ -103,7 +103,7 @@ jobs:
       - name: Install curl
         run: apt-get update -y -q && apt-get install -y curl
       - name: Check out package
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with: { path: 'mysql-nio' }
       - name: Run unit tests
         run: swift test --package-path mysql-nio --enable-code-coverage
@@ -113,10 +113,10 @@ jobs:
           codecov_token: ${{ secrets.CODECOV_TOKEN }}
           package_path: 'mysql-nio'
       - name: Check out mysql-kit dependent
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with: { repository: 'vapor/mysql-kit', path: 'mysql-kit' }
       - name: Check out fluent-mysql-driver dependent
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with: { repository: 'vapor/fluent-mysql-driver', path: 'fluent-mysql-driver' }
       - name: Use local package in dependents
         run: |
@@ -162,7 +162,7 @@ jobs:
           SQL
         timeout-minutes: 5
       - name: Check out code
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
       - name: Run all tests
         run: swift test --enable-code-coverage
       - name: Upload code coverage
