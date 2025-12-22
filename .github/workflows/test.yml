@@ -19,6 +19,8 @@ env:
   MYSQL_HOSTNAME: 'mysql-a'
   MYSQL_HOSTNAME_A: 'mysql-a'
   MYSQL_HOSTNAME_B: 'mysql-b'
+permissions:
+  contents: read
 
 jobs:
   api-breakage:
@@ -42,7 +44,7 @@ jobs:
         dbimage:
           - mysql:9.4
         swiftver:
-          - swift:6.1-noble
+          - swift:6.2-noble
     runs-on: ubuntu-latest
     container:
       image: ${{ matrix.swiftver }}
@@ -79,16 +81,15 @@ jobs:
       matrix:
         dbimage:
           - mysql:5.7
-          - mysql:9.4
+          - mysql:9.5
           - mariadb:10.6
           - mariadb:12
           - percona:5.7
           - percona:8
         swiftver:
-          - swift:5.10-jammy
-          - swift:6.0-noble
+          - swift:6.0-jammy
           - swift:6.1-noble
-          - swiftlang/swift:nightly-6.2-noble
+          - swift:6.2-noble
           - swiftlang/swift:nightly-main-noble
     runs-on: ubuntu-latest
     container: ${{ matrix.swiftver }}
@@ -133,12 +134,12 @@ jobs:
       fail-fast: false
       matrix:
         dbimage: [mysql, mariadb, percona-server]
-        macos-version: ['macos-14', 'macos-15']
+        macos-version: ['macos-15', 'macos-26']
         include:
           - { username: root }
           - { dbimage: mariadb, username: runner }
-          - { macos-version: 'macos-14', xcode-version: 'latest-stable' }
           - { macos-version: 'macos-15', xcode-version: 'latest-stable' }
+          - { macos-version: 'macos-26', xcode-version: 'latest-stable' }
     runs-on: ${{ matrix.macos-version }}
     env: { MYSQL_HOSTNAME: '127.0.0.1' }
     steps:
