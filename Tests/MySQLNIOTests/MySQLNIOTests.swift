@@ -88,6 +88,49 @@ struct MySQLNIOTests {
         try await conn.close().get()
     }
 
+    @Test
+    func queryWithExecuteColumnMismatchingPrepareColumnType() async throws {
+        let conn = try await MySQLConnection.test()
+
+        do {
+            _ = try await conn.simpleQuery("DROP TABLE IF EXISTS `t1`").get()
+            _ = try await conn.simpleQuery("DROP TABLE IF EXISTS `t2`").get()
+            _ = try await conn.simpleQuery("""
+                CREATE TABLE `t1` (
+                  `id` int unsigned NOT NULL AUTO_INCREMENT,
+                  `group_id` int DEFAULT NULL,
+                  `text` varchar(150) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
+                  PRIMARY KEY (`id`)
+                ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 /*!80000 COLLATE=utf8mb4_0900_ai_ci */
+                """).get()
+            _ = try await conn.simpleQuery("""
+                CREATE TABLE `t2` (
+                  `id` int unsigned NOT NULL AUTO_INCREMENT,
+                  `t1_id` int DEFAULT NULL,
+                  `status` enum('1','0') DEFAULT NULL,
+                  `number` int DEFAULT NULL,
+                  PRIMARY KEY (`id`)
+                ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 /*!80000 COLLATE=utf8mb4_0900_ai_ci */
+                """).get()
+            _ = try await conn.simpleQuery("INSERT INTO `t1` (`id`, `group_id`, `text`) VALUES ('1', '1', 'something')").get()
+            _ = try await conn.simpleQuery("INSERT INTO `t2` (`id`, `t1_id`, `status`, `number`) VALUES ('1', '1', '1', '0')").get()
+            _ = try await conn.query("""
+                SELECT
+                    c.id = 1 -- comparing with one, or almost, any other comparison.
+                FROM
+                    t1 as a
+                    JOIN (SELECT * FROM t2 WHERE status = '1' AND number = 0) as b ON a.id = b.t1_id
+                    JOIN (SELECT * FROM t1) as c ON c.group_id = a.group_id
+                ORDER BY
+                    (a.text LIKE "") DESC
+                """, onMetadata: { metadata in conn.logger.info("\(metadata.affectedRows), \(metadata.lastInsertID ?? 0)") }).get()
+        } catch {
+            try? await conn.close().get()
+            throw error
+        }
+        try await conn.close().get()
+    }
+
 }
 
 final class MySQLNIOXCTests: XCTestCase {
