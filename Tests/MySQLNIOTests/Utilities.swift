@@ -26,6 +26,10 @@ extension MySQLConnection {
             on: eventLoop
         )
     }
+
+    static func test() async throws -> MySQLConnection {
+        try await self.test(on: .singletonMultiThreadedEventLoopGroup.any()).get()
+    }
 }
 
 let isLoggingConfigured: Bool = {

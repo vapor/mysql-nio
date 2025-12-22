@@ -1,95 +1,102 @@
-import XCTest
-@testable import MySQLNIO
 import Logging
+@testable import MySQLNIO
 import NIOCore
 import NIOPosix
+import Testing
+import XCTest
 
-final class MySQLNIOTests: XCTestCase {
-    private var eventLoopGroup: (any EventLoopGroup)!
-    private var eventLoop: any EventLoop { self.eventLoopGroup.any() }
+@Suite(.serialized)
+struct MySQLNIOTests {
+    init() {
+        #expect(isLoggingConfigured)
+    }
     
-    override func setUpWithError() throws {
+    @Test
+    func decodingSumOfIntsWithNoRows() async throws {
+        let conn = try await MySQLConnection.test()
+
+        do {
+            let dropResults = try await conn.simpleQuery("DROP TABLE IF EXISTS foos").get()
+            #expect(dropResults.count == 0)
+            let createResults = try await conn.simpleQuery("CREATE TABLE foos (`item_count` int(11))").get()
+            #expect(createResults.count == 0)
+            let rows = try await conn.simpleQuery("SELECT sum(`item_count`) as sum from foos").get()
+            try #require(rows.count == 1)
+
+            let sqlData = try #require(rows[0].column("sum"))
+
+            #expect(sqlData.string == nil)
+            #expect(sqlData.float == nil)
+            #expect(sqlData.double == nil)
+            #expect(sqlData.int == nil)
+            #expect(sqlData.decimal == nil)
+
+            _ = try await conn.simpleQuery("DROP TABLE IF EXISTS foos").get()
+        } catch {
+            _ = try? await conn.simpleQuery("DROP TABLE IF EXISTS foos").get()
+            try? await conn.close().get()
+            throw error
+        }
+        try await conn.close().get()
+    }
+
+    @Test
+    func decodingSumOfIntsWithRows() async throws {
+        let conn = try await MySQLConnection.test()
+
+        do {
+            #expect(try await conn.simpleQuery("DROP TABLE IF EXISTS foos").get().count == 0)
+            #expect(try await conn.simpleQuery("CREATE TABLE foos (`item_count` int(11))").get().count == 0)
+            _ = try await conn.simpleQuery("insert into foos (`item_count`) values (0)").get()
+            let rows1 = try await conn.simpleQuery("SELECT sum(`item_count`) as sum from foos").get()
+            try #require(rows1.count == 1)
+            let sqlData1 = try #require(rows1[0].column("sum"))
+            #expect(sqlData1.string == "0")
+            #expect(sqlData1.float == 0)
+            #expect(sqlData1.double == 0)
+            #expect(sqlData1.int == 0)
+            #expect(sqlData1.decimal == 0)
+            _ = try await conn.simpleQuery("insert into foos (`item_count`) values (199)").get()
+            let rows2 = try await conn.simpleQuery("SELECT sum(`item_count`) as sum from foos").get()
+            try #require(rows2.count == 1)
+            let sqlData2 = try #require(rows2[0].column("sum"))
+            #expect(sqlData2.string == "199")
+            #expect(sqlData2.float == 199)
+            #expect(sqlData2.double == 199)
+            #expect(sqlData2.int == 199)
+            #expect(sqlData2.decimal == Decimal(string: "199"))
+        } catch {
+            _ = try? await conn.simpleQuery("DROP TABLE IF EXISTS foos").get()
+            try? await conn.close().get()
+            throw error
+        }
+        try await conn.close().get()
+    }
+
+    @Test
+    func simpleQuery_selectVersion() async throws {
+        let conn = try await MySQLConnection.test()
+
+        do {
+            let rows = try await conn.simpleQuery("SELECT @@version").get()
+            try #require(rows.count == 1)
+            #expect(rows[0].column("@@version")?.string?.contains(".") ?? false)
+        } catch {
+            try? await conn.close().get()
+            throw error
+        }
+        try await conn.close().get()
+    }
+
+}
+
+final class MySQLNIOXCTests: XCTestCase {
+    override func setUp() async throws {
         XCTAssert(isLoggingConfigured)
-        self.eventLoopGroup = MultiThreadedEventLoopGroup(numberOfThreads: 1)
-    }
-    
-    override func tearDownWithError() throws {
-        try self.eventLoopGroup.syncShutdownGracefully()
     }
 
-    func testDecodingSumOfIntsWithNoRows() throws {
-        let conn = try MySQLConnection.test(on: self.eventLoop).wait()
-        defer { try! conn.close().wait() }
-        let dropResults = try conn.simpleQuery("DROP TABLE IF EXISTS foos").wait()
-        XCTAssertEqual(dropResults.count, 0)
-        let createResults = try conn.simpleQuery("CREATE TABLE foos (`item_count` int(11))").wait()
-        XCTAssertEqual(createResults.count, 0)
-        defer { _ = try! conn.simpleQuery("DROP TABLE IF EXISTS foos").wait() }
-        let rows = try conn.simpleQuery("SELECT sum(`item_count`) as sum from foos").wait()
-        guard rows.count == 1 else {
-            return XCTFail("invalid row count")
-        }
-        if let sqlData = rows[0].column("sum") {
-            XCTAssertEqual(sqlData.string, nil)
-            XCTAssertEqual(sqlData.float, nil)
-            XCTAssertEqual(sqlData.double, nil)
-            XCTAssertEqual(sqlData.int, nil)
-            XCTAssertEqual(sqlData.decimal, nil)
-        } else {
-            XCTAssert(false, "rows[0].column(\"sum\") was nil")
-        }
-    }
-
-    func testDecodingSumOfIntsWithRows() throws {
-        let conn = try MySQLConnection.test(on: self.eventLoop).wait()
-        defer { try! conn.close().wait() }
-        let dropResults = try conn.simpleQuery("DROP TABLE IF EXISTS foos").wait()
-        XCTAssertEqual(dropResults.count, 0)
-        let createResults = try conn.simpleQuery("CREATE TABLE foos (`item_count` int(11))").wait()
-        XCTAssertEqual(createResults.count, 0)
-        defer { _ = try! conn.simpleQuery("DROP TABLE IF EXISTS foos").wait() }
-        let _ = try conn.simpleQuery("insert into foos (`item_count`) values (0)").wait()
-        let rows = try conn.simpleQuery("SELECT sum(`item_count`) as sum from foos").wait()
-        guard rows.count == 1 else {
-            return XCTFail("invalid row count")
-        }
-        if let sqlData = rows[0].column("sum") {
-            XCTAssertEqual(sqlData.string, "0")
-            XCTAssertEqual(sqlData.float, 0)
-            XCTAssertEqual(sqlData.double, 0)
-            XCTAssertEqual(sqlData.int, 0)
-            XCTAssertEqual(sqlData.decimal, 0)
-        } else {
-            XCTAssert(false, "rows[0].column(\"sum\") was nil")
-        }
-        let _ = try conn.simpleQuery("insert into foos (`item_count`) values (199)").wait()
-        let rows2 = try conn.simpleQuery("SELECT sum(`item_count`) as sum from foos").wait()
-        guard rows2.count == 1 else {
-            return XCTFail("invalid row count")
-        }
-        if let sqlData = rows2[0].column("sum") {
-            XCTAssertEqual(sqlData.string, "199")
-            XCTAssertEqual(sqlData.float, 199)
-            XCTAssertEqual(sqlData.double, 199)
-            XCTAssertEqual(sqlData.int, 199)
-            XCTAssertEqual(sqlData.decimal, Decimal(string: "199"))
-        } else {
-            XCTAssert(false, "rows[0].column(\"sum\") was nil")
-        }
-    }
-
-    func testSimpleQuery_selectVersion() throws {
-        let conn = try MySQLConnection.test(on: self.eventLoop).wait()
-        defer { try! conn.close().wait() }
-        let rows = try conn.simpleQuery("SELECT @@version").wait()
-        guard rows.count == 1 else {
-            return XCTFail("invalid row count")
-        }
-        XCTAssert(rows[0].column("@@version")?.string?.contains(".") == true)
-    }
-    
     func testSimpleQuery_selectString() throws {
-        let conn = try MySQLConnection.test(on: self.eventLoop).wait()
+        let conn = try MySQLConnection.test(on: .singletonMultiThreadedEventLoopGroup.any()).wait()
         defer { try! conn.close().wait() }
         let rows = try conn.simpleQuery("SELECT 'foo' as bar").wait()
         guard rows.count == 1 else {
@@ -100,7 +107,7 @@ final class MySQLNIOTests: XCTestCase {
     }
     
     func testSimpleQuery_selectIntegers() throws {
-        let conn = try MySQLConnection.test(on: self.eventLoop).wait()
+        let conn = try MySQLConnection.test(on: .singletonMultiThreadedEventLoopGroup.any()).wait()
         defer { try! conn.close().wait() }
         let rows = try conn.simpleQuery("SELECT 1 as one, 2 as two").wait()
         guard rows.count == 1 else {
@@ -111,7 +118,7 @@ final class MySQLNIOTests: XCTestCase {
     }
     
     func testSimpleQuery_syntaxError() throws {
-        let conn = try MySQLConnection.test(on: self.eventLoop).wait()
+        let conn = try MySQLConnection.test(on: .singletonMultiThreadedEventLoopGroup.any()).wait()
         defer { try! conn.close().wait() }
         XCTAssertThrowsError(try conn.simpleQuery("SELECT &").wait()) { error in
             guard case .invalidSyntax = error as? MySQLError else {
@@ -121,7 +128,7 @@ final class MySQLNIOTests: XCTestCase {
     }
     
     func testQuery_syntaxError() throws {
-        let conn = try MySQLConnection.test(on: self.eventLoop).wait()
+        let conn = try MySQLConnection.test(on: .singletonMultiThreadedEventLoopGroup.any()).wait()
         defer { try! conn.close().wait() }
         XCTAssertThrowsError(try conn.query("SELECT &").wait()) { error in
             guard case .invalidSyntax = error as? MySQLError else {
@@ -131,7 +138,7 @@ final class MySQLNIOTests: XCTestCase {
     }
     
     func testSimpleQuery_duplicateEntry() throws {
-        let conn = try MySQLConnection.test(on: self.eventLoop).wait()
+        let conn = try MySQLConnection.test(on: .singletonMultiThreadedEventLoopGroup.any()).wait()
         defer { try! conn.close().wait() }
         let dropResults = try conn.simpleQuery("DROP TABLE IF EXISTS foos").wait()
         XCTAssertEqual(dropResults.count, 0)
@@ -148,7 +155,7 @@ final class MySQLNIOTests: XCTestCase {
     }
 
     func testQuery_duplicateEntry() throws {
-        let conn = try MySQLConnection.test(on: self.eventLoop).wait()
+        let conn = try MySQLConnection.test(on: .singletonMultiThreadedEventLoopGroup.any()).wait()
         defer { try! conn.close().wait() }
         let dropResults = try conn.simpleQuery("DROP TABLE IF EXISTS foos").wait()
         XCTAssertEqual(dropResults.count, 0)
@@ -165,7 +172,7 @@ final class MySQLNIOTests: XCTestCase {
     }
     
     func testQuery_selectMixed() throws {
-        let conn = try MySQLConnection.test(on: self.eventLoop).wait()
+        let conn = try MySQLConnection.test(on: .singletonMultiThreadedEventLoopGroup.any()).wait()
         defer { try! conn.close().wait() }
         let rows = try conn.query("SELECT '1' as one, 2 as two").wait()
         guard rows.count == 1 else {
@@ -176,7 +183,7 @@ final class MySQLNIOTests: XCTestCase {
     }
     
     func testQuery_selectBoundParams() throws {
-        let conn = try MySQLConnection.test(on: self.eventLoop).wait()
+        let conn = try MySQLConnection.test(on: .singletonMultiThreadedEventLoopGroup.any()).wait()
         defer { try! conn.close().wait() }
         let rows = try conn.query("SELECT ? as one, ? as two", ["1", "2"]).wait()
         guard rows.count == 1 else {
@@ -187,7 +194,7 @@ final class MySQLNIOTests: XCTestCase {
     }
     
     func testQuery_selectConcat() throws {
-        let conn = try MySQLConnection.test(on: self.eventLoop).wait()
+        let conn = try MySQLConnection.test(on: .singletonMultiThreadedEventLoopGroup.any()).wait()
         defer { try! conn.close().wait() }
         let rows = try conn.query("SELECT CONCAT(?, ?) as test;", ["hello", "world"]).wait()
         guard rows.count == 1 else {
@@ -197,7 +204,7 @@ final class MySQLNIOTests: XCTestCase {
     }
     
     func testQuery_insert() throws {
-        let conn = try MySQLConnection.test(on: self.eventLoop).wait()
+        let conn = try MySQLConnection.test(on: .singletonMultiThreadedEventLoopGroup.any()).wait()
         defer { try! conn.close().wait() }
         let dropResults = try conn.simpleQuery("DROP TABLE IF EXISTS foos").wait()
         XCTAssertEqual(dropResults.count, 0)
@@ -219,14 +226,14 @@ final class MySQLNIOTests: XCTestCase {
     }
     
     func testQuery_noResponse() throws {
-        let conn = try MySQLConnection.test(on: self.eventLoop).wait()
+        let conn = try MySQLConnection.test(on: .singletonMultiThreadedEventLoopGroup.any()).wait()
         defer { try! conn.close().wait() }
         let rows = try conn.query("SET @foo = 'bar'").wait()
         XCTAssertEqual(rows.count, 0)
     }
     
     func testQuery_metadata() throws {
-        let conn = try MySQLConnection.test(on: self.eventLoop).wait()
+        let conn = try MySQLConnection.test(on: .singletonMultiThreadedEventLoopGroup.any()).wait()
         defer { try! conn.close().wait() }
         let dropResults = try conn.simpleQuery("DROP TABLE IF EXISTS foos").wait()
         XCTAssertEqual(dropResults.count, 0)
@@ -241,7 +248,7 @@ final class MySQLNIOTests: XCTestCase {
     }
     
     func testQuery_datetime() throws {
-        let conn = try MySQLConnection.test(on: self.eventLoop).wait()
+        let conn = try MySQLConnection.test(on: .singletonMultiThreadedEventLoopGroup.any()).wait()
         defer { try! conn.close().wait() }
         do {
             let rows = try conn.query("SELECT CAST('2016-01-18' AS DATETIME) as datetime").wait()
@@ -282,7 +289,7 @@ final class MySQLNIOTests: XCTestCase {
     }
 
     func testString_lengthEncoded_uint8() throws {
-        let conn = try MySQLConnection.test(on: self.eventLoop).wait()
+        let conn = try MySQLConnection.test(on: .singletonMultiThreadedEventLoopGroup.any()).wait()
         defer { try! conn.close().wait() }
         let string = String(repeating: "a", count: 128)
         let rows = try conn.query("SELECT ? as s", [MySQLData(string: string)]).wait()
@@ -290,7 +297,7 @@ final class MySQLNIOTests: XCTestCase {
     }
 
     func testString_lengthEncoded_fc() throws {
-        let conn = try MySQLConnection.test(on: self.eventLoop).wait()
+        let conn = try MySQLConnection.test(on: .singletonMultiThreadedEventLoopGroup.any()).wait()
         defer { try! conn.close().wait() }
         let string = String(repeating: "a", count: 512)
         let rows = try conn.query("SELECT ? as s", [MySQLData(string: string)]).wait()
@@ -298,7 +305,7 @@ final class MySQLNIOTests: XCTestCase {
     }
 
     func testString_lengthEncoded_fd() throws {
-        let conn = try MySQLConnection.test(on: self.eventLoop).wait()
+        let conn = try MySQLConnection.test(on: .singletonMultiThreadedEventLoopGroup.any()).wait()
         defer { try! conn.close().wait() }
         let string = String(repeating: "a", count: 1<<17)
         let rows = try conn.query("SELECT ? as s", [MySQLData(string: string)]).wait()
@@ -347,7 +354,7 @@ final class MySQLNIOTests: XCTestCase {
             .init("xname", "VARCHAR(10) NOT NULL", "test"),
         ]
         
-        let conn = try MySQLConnection.test(on: self.eventLoop).wait()
+        let conn = try MySQLConnection.test(on: .singletonMultiThreadedEventLoopGroup.any()).wait()
         defer { try! conn.close().wait() }
         /// create table
         let columns = tests.map { test in
@@ -375,7 +382,7 @@ final class MySQLNIOTests: XCTestCase {
     
     /*func testPerformance_simpleSelects() throws {
         try XCTSkipIf(env("PERFORMANCE_TESTS") == nil)
-        let conn = try MySQLConnection.test(on: self.eventLoop).wait()
+        let conn = try MySQLConnection.test(on: .singletonMultiThreadedEventLoopGroup.any()).wait()
         defer { try! conn.close().wait() }
         for _ in 0..<1_000 {
             _ = try conn.simpleQuery("SELECT 1").wait()
@@ -384,7 +391,7 @@ final class MySQLNIOTests: XCTestCase {
     
     func testPerformance_parseDatetime() throws {
         try XCTSkipIf(env("PERFORMANCE_TESTS") == nil)
-        let conn = try MySQLConnection.test(on: self.eventLoop).wait()
+        let conn = try MySQLConnection.test(on: .singletonMultiThreadedEventLoopGroup.any()).wait()
         defer { try! conn.close().wait() }
         
         measure {
@@ -406,7 +413,7 @@ final class MySQLNIOTests: XCTestCase {
     }
 
     func testQuery_decimal() throws {
-        let conn = try MySQLConnection.test(on: self.eventLoop).wait()
+        let conn = try MySQLConnection.test(on: .singletonMultiThreadedEventLoopGroup.any()).wait()
         defer { try! conn.close().wait() }
         do {
             let rows = try conn.query("SELECT CAST('3.1415926' as DECIMAL(12,3)) as d").wait()
@@ -417,7 +424,7 @@ final class MySQLNIOTests: XCTestCase {
     // https://github.com/vapor/mysql-nio/issues/30
     /*func testPreparedStatement_maxOpen() throws {
         try XCTSkipIf(env("PERFORMANCE_TESTS") == nil)
-        let conn = try MySQLConnection.test(on: self.eventLoop).wait()
+        let conn = try MySQLConnection.test(on: .singletonMultiThreadedEventLoopGroup.any()).wait()
         defer { try! conn.close().wait() }
 
         let result = try conn.simpleQuery("SHOW VARIABLES LIKE 'max_prepared_stmt_count';").wait()
@@ -441,7 +448,7 @@ final class MySQLNIOTests: XCTestCase {
     }*/
 
     func testPreparedStatement_invalidParams() throws {
-        let conn = try MySQLConnection.test(on: self.eventLoop).wait()
+        let conn = try MySQLConnection.test(on: .singletonMultiThreadedEventLoopGroup.any()).wait()
         defer { try! conn.close().wait() }
 
         do {
@@ -453,7 +460,7 @@ final class MySQLNIOTests: XCTestCase {
 
     // https://github.com/vapor/mysql-nio/issues/47
     func testValidQueryTimeout() throws {
-        let conn = try MySQLConnection.test(on: self.eventLoop).wait()
+        let conn = try MySQLConnection.test(on: .singletonMultiThreadedEventLoopGroup.any()).wait()
         defer { try! conn.close().wait() }
 
         _ = try conn.query("CREATE TABLE `Phrase` (id INT(11), views INT(11))").wait()
@@ -463,7 +470,7 @@ final class MySQLNIOTests: XCTestCase {
     }
 
     func test4ByteMySQLTimeSerialize() throws {
-        let conn = try MySQLConnection.test(on: self.eventLoop).wait()
+        let conn = try MySQLConnection.test(on: .singletonMultiThreadedEventLoopGroup.any()).wait()
         defer { try! conn.close().wait() }
 
         let rows = try conn.query(#"SELECT DATE_FORMAT(?, "%M %D %Y %H:%i:%s.%f")as x"#, [.init(time: .init(year: 2020, month: 5, day: 23))]).wait()
@@ -471,7 +478,7 @@ final class MySQLNIOTests: XCTestCase {
     }
 
     func test4ByteMySQLTimeParse() throws {
-        let conn = try MySQLConnection.test(on: self.eventLoop).wait()
+        let conn = try MySQLConnection.test(on: .singletonMultiThreadedEventLoopGroup.any()).wait()
         defer { try! conn.close().wait() }
 
         _ = try conn.simpleQuery("DROP TABLE IF EXISTS foo").wait()
@@ -493,7 +500,7 @@ final class MySQLNIOTests: XCTestCase {
     }
 
     func test7ByteMySQLTimeSerialize() throws {
-        let conn = try MySQLConnection.test(on: self.eventLoop).wait()
+        let conn = try MySQLConnection.test(on: .singletonMultiThreadedEventLoopGroup.any()).wait()
         defer { try! conn.close().wait() }
 
         let rows = try conn.query(#"SELECT DATE_FORMAT(?, "%M %D %Y %H:%i:%s.%f")as x"#, [
@@ -503,7 +510,7 @@ final class MySQLNIOTests: XCTestCase {
     }
 
     func test7ByteMySQLTimeParse() throws {
-        let conn = try MySQLConnection.test(on: self.eventLoop).wait()
+        let conn = try MySQLConnection.test(on: .singletonMultiThreadedEventLoopGroup.any()).wait()
         defer { try! conn.close().wait() }
 
         _ = try conn.simpleQuery("DROP TABLE IF EXISTS foo").wait()
@@ -525,7 +532,7 @@ final class MySQLNIOTests: XCTestCase {
     }
 
     func test8ByteMySQLTimeSerialize() throws {
-        let conn = try MySQLConnection.test(on: self.eventLoop).wait()
+        let conn = try MySQLConnection.test(on: .singletonMultiThreadedEventLoopGroup.any()).wait()
         defer { try! conn.close().wait() }
 
         let rows = try conn.query(#"SELECT DATE_FORMAT(?, "%H:%i:%s.%f") as x"#, [
@@ -536,7 +543,7 @@ final class MySQLNIOTests: XCTestCase {
 
     // https://github.com/vapor/mysql-nio/issues/49
     func test8ByteMySQLTimeParse() throws {
-        let conn = try MySQLConnection.test(on: self.eventLoop).wait()
+        let conn = try MySQLConnection.test(on: .singletonMultiThreadedEventLoopGroup.any()).wait()
         defer { try! conn.close().wait() }
 
         _ = try conn.simpleQuery("DROP TABLE IF EXISTS foo").wait()
@@ -558,7 +565,7 @@ final class MySQLNIOTests: XCTestCase {
     }
 
     func test11ByteMySQLTimeSerialize() throws {
-        let conn = try MySQLConnection.test(on: self.eventLoop).wait()
+        let conn = try MySQLConnection.test(on: .singletonMultiThreadedEventLoopGroup.any()).wait()
         defer { try! conn.close().wait() }
 
         let rows = try conn.query(#"SELECT DATE_FORMAT(?, "%M %D %Y %H:%i:%s.%f") as x"#, [
@@ -568,7 +575,7 @@ final class MySQLNIOTests: XCTestCase {
     }
 
     func test11ByteMySQLTimeParse() throws {
-        let conn = try MySQLConnection.test(on: self.eventLoop).wait()
+        let conn = try MySQLConnection.test(on: .singletonMultiThreadedEventLoopGroup.any()).wait()
         defer { try! conn.close().wait() }
 
         _ = try conn.simpleQuery("DROP TABLE IF EXISTS foo").wait()
@@ -590,7 +597,7 @@ final class MySQLNIOTests: XCTestCase {
     }
 
     func test12ByteMySQLTimeSerialize() throws {
-        let conn = try MySQLConnection.test(on: self.eventLoop).wait()
+        let conn = try MySQLConnection.test(on: .singletonMultiThreadedEventLoopGroup.any()).wait()
         defer { try! conn.close().wait() }
 
         let rows = try conn.query(#"SELECT DATE_FORMAT(?, "%H:%i:%s.%f") as x"#, [
@@ -600,7 +607,7 @@ final class MySQLNIOTests: XCTestCase {
     }
 
     func test12ByteMySQLTimeParse() throws {
-        let conn = try MySQLConnection.test(on: self.eventLoop).wait()
+        let conn = try MySQLConnection.test(on: .singletonMultiThreadedEventLoopGroup.any()).wait()
         defer { try! conn.close().wait() }
 
         _ = try conn.simpleQuery("DROP TABLE IF EXISTS foo").wait()
@@ -620,9 +627,9 @@ final class MySQLNIOTests: XCTestCase {
         XCTAssertEqual(time.microsecond, 123456)
         XCTAssertEqual(time.date, nil)
     }
-    
+
     func testTextMySQLTimeParse() throws {
-        let conn = try MySQLConnection.test(on: self.eventLoop).wait()
+        let conn = try MySQLConnection.test(on: .singletonMultiThreadedEventLoopGroup.any()).wait()
         defer { try! conn.close().wait() }
         
         // The text protocol returns timestamp columns in text format.
@@ -632,7 +639,7 @@ final class MySQLNIOTests: XCTestCase {
     }
     
     func testNull() throws {
-        let conn = try MySQLConnection.test(on: self.eventLoop).wait()
+        let conn = try MySQLConnection.test(on: .singletonMultiThreadedEventLoopGroup.any()).wait()
         defer { try! conn.close().wait() }
         
         _ = try conn.simpleQuery("DROP TABLE IF EXISTS foo").wait()
@@ -667,7 +674,7 @@ final class MySQLNIOTests: XCTestCase {
             func handle(packet: inout MySQLPacket, capabilities: MySQLProtocol.CapabilityFlags) throws -> MySQLCommandState { preconditionFailure("") }
             func activate(capabilities: MySQLProtocol.CapabilityFlags) throws -> MySQLCommandState { .init(response: [.init(payload: .init(bytes: [0x0e]))], done: true) }
         }
-        let conn = try await MySQLConnection.test(on: self.eventLoop).get()
+        let conn = try await MySQLConnection.test(on: .singletonMultiThreadedEventLoopGroup.any()).get()
         do {
             try await conn.send(PingCommand(), logger: conn.logger).get()
             try await Task.sleep(nanoseconds: 100_000_000) // to let the reply come in without any other command queued
@@ -686,7 +693,7 @@ final class MySQLNIOTests: XCTestCase {
     // https://github.com/vapor/mysql-nio/issues/91
     func testBeforeHandshakeErrorHandling() async throws {
         // There's no way to force a real server to throw a pre-handshake error, fake it with a mock server and a handcrafted ERR_Packet.
-        let serverChannel = try await ServerBootstrap(group: self.eventLoopGroup)
+        let serverChannel = try await ServerBootstrap(group: .singletonMultiThreadedEventLoopGroup)
             .serverChannelOption(ChannelOptions.socket(SocketOptionLevel(SOL_SOCKET), SocketOptionName(SO_REUSEADDR)), value: SocketOptionValue(1))
             .childChannelOption(ChannelOptions.socket(SocketOptionLevel(SOL_SOCKET), SocketOptionName(SO_REUSEADDR)), value: SocketOptionValue(1))
             .childChannelInitializer { channel in
@@ -705,7 +712,7 @@ final class MySQLNIOTests: XCTestCase {
             }
             .bind(host: "127.0.0.1", port: 3307).get()
         do {
-            let connection = try await MySQLConnection.connect(to: .init(ipAddress: "127.0.0.1", port: 3307), username: "", database: "", tlsConfiguration: nil, on: self.eventLoop).get()
+            let connection = try await MySQLConnection.connect(to: .init(ipAddress: "127.0.0.1", port: 3307), username: "", database: "", tlsConfiguration: nil, on: .singletonMultiThreadedEventLoopGroup.any()).get()
             XCTFail("Should have thrown a server error.")
             try? await connection.close().get() // connection is *only* open if we get to this point
         } catch MySQLError.server(let err) {
