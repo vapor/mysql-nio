@@ -194,7 +194,8 @@ struct MySQLNIOTests {
         let conn = try await MySQLConnection.test()
 
         do {
-            try await #require(throws: MySQLError.invalidSyntax("You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '&' at line 1")) { _ = try await conn.simpleQuery("SELECT &").get() }
+            let isMariaDB = try await conn.simpleQuery("SELECT version() v").get().first?.column("v")?.string?.contains("MariaDB") ?? false
+            try await #require(throws: MySQLError.invalidSyntax("You have an error in your SQL syntax; check the manual that corresponds to your \(isMariaDB ? "MariaDB" : "MySQL") server version for the right syntax to use near '&' at line 1")) { _ = try await conn.simpleQuery("SELECT &").get() }
         } catch {
             try? await conn.close().get()
             throw error
@@ -207,7 +208,8 @@ struct MySQLNIOTests {
         let conn = try await MySQLConnection.test()
 
         do {
-            try await #require(throws: MySQLError.invalidSyntax("You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '&' at line 1")) { _ = try await conn.query("SELECT &").get() }
+            let isMariaDB = try await conn.simpleQuery("SELECT version() v").get().first?.column("v")?.string?.contains("MariaDB") ?? false
+            try await #require(throws: MySQLError.invalidSyntax("You have an error in your SQL syntax; check the manual that corresponds to your \(isMariaDB ? "MariaDB" : "MySQL") server version for the right syntax to use near '&' at line 1")) { _ = try await conn.query("SELECT &").get() }
         } catch {
             try? await conn.close().get()
             throw error
@@ -220,7 +222,8 @@ struct MySQLNIOTests {
         let conn = try await MySQLConnection.test()
 
         do {
-            let isNewMySQL = try await conn.simpleQuery("SELECT version() v").get().first?.column("v")?.string?.split(separator: ".").first.flatMap { Int(String($0)) } ?? 0 > 5
+            let v = try await conn.simpleQuery("SELECT version() v").get().first?.column("v")?.string
+            let isNewMySQL = v?.split(separator: ".").first.flatMap { Int(String($0)) } ?? 0 > 5 && !(v?.contains("MariaDB") ?? false)
             _ = try await conn.simpleQuery("DROP TABLE IF EXISTS foos").get()
             #expect(try await conn.simpleQuery("DROP TABLE IF EXISTS foos").get().isEmpty)
             #expect(try await conn.simpleQuery("CREATE TABLE foos (id BIGINT SIGNED unique, name VARCHAR(64))").get().isEmpty)
@@ -240,7 +243,8 @@ struct MySQLNIOTests {
         let conn = try await MySQLConnection.test()
 
         do {
-            let isNewMySQL = try await conn.simpleQuery("SELECT version() v").get().first?.column("v")?.string?.split(separator: ".").first.flatMap { Int(String($0)) } ?? 0 > 5
+            let v = try await conn.simpleQuery("SELECT version() v").get().first?.column("v")?.string
+            let isNewMySQL = v?.split(separator: ".").first.flatMap { Int(String($0)) } ?? 0 > 5 && !(v?.contains("MariaDB") ?? false)
             _ = try await conn.simpleQuery("DROP TABLE IF EXISTS foos").get()
             #expect(try await conn.simpleQuery("DROP TABLE IF EXISTS foos").get().isEmpty)
             #expect(try await conn.simpleQuery("CREATE TABLE foos (id BIGINT SIGNED unique, name VARCHAR(64))").get().isEmpty)
