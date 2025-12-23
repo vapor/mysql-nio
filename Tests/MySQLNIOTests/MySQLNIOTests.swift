@@ -5,6 +5,26 @@ import NIOPosix
 import Testing
 import XCTest
 
+extension MySQLError: Equatable {
+    public static func == (lhs: Self, rhs: Self) -> Bool {
+        switch (lhs, rhs) {
+        case (.secureConnectionRequired, .secureConnectionRequired): true
+        case (.unsupportedAuthPlugin(let l), .unsupportedAuthPlugin(let r)) where l == r: true
+        case (.authPluginDataError(let l), .authPluginDataError(let r)) where l == r: true
+        case (.missingOrInvalidAuthMoreDataStatusTag, .missingOrInvalidAuthMoreDataStatusTag): true
+        case (.missingOrInvalidAuthPluginInlineCommand(let l), .missingOrInvalidAuthPluginInlineCommand(let r)) where l == r: true
+        case (.missingAuthPluginInlineData, .missingAuthPluginInlineData): true
+        case (.unsupportedServer(let l), .unsupportedServer(let r)) where l == r: true
+        case (.protocolError, .protocolError): true
+        case (.server(let l), .server(let r)) where l.errorCode == r.errorCode && l.sqlStateMarker == r.sqlStateMarker && l.sqlState == r.sqlState && l.errorMessage == r.errorMessage: true
+        case (.closed, .closed): true
+        case (.duplicateEntry(let l), .duplicateEntry(let r)) where l == r: true
+        case (.invalidSyntax(let l), .invalidSyntax(let r)) where l == r: true
+        default: false
+        }
+    }
+}
+
 @Suite(.serialized)
 struct MySQLNIOTests {
     init() {
@@ -174,8 +194,7 @@ struct MySQLNIOTests {
         let conn = try await MySQLConnection.test()
 
         do {
-            let error = try await #require(throws: MySQLError.self) { _ = try await conn.simpleQuery("SELECT &").get() }
-            #expect({ if case .invalidSyntax = error { true } else { false } }())
+            try await #require(throws: MySQLError.invalidSyntax("You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '&' at line 1")) { _ = try await conn.simpleQuery("SELECT &").get() }
         } catch {
             try? await conn.close().get()
             throw error
@@ -188,8 +207,7 @@ struct MySQLNIOTests {
         let conn = try await MySQLConnection.test()
 
         do {
-            let error = try await #require(throws: MySQLError.self) { _ = try await conn.query("SELECT &").get() }
-            #expect({ if case .invalidSyntax = error { true } else { false } }())
+            try await #require(throws: MySQLError.invalidSyntax("You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '&' at line 1")) { _ = try await conn.query("SELECT &").get() }
         } catch {
             try? await conn.close().get()
             throw error
@@ -202,12 +220,12 @@ struct MySQLNIOTests {
         let conn = try await MySQLConnection.test()
 
         do {
+            let isNewMySQL = try await conn.simpleQuery("SELECT version() v").get().first?.column("v")?.string?.split(separator: ".").first.flatMap { Int(String($0)) } ?? 0 > 5
             _ = try await conn.simpleQuery("DROP TABLE IF EXISTS foos").get()
             #expect(try await conn.simpleQuery("DROP TABLE IF EXISTS foos").get().isEmpty)
             #expect(try await conn.simpleQuery("CREATE TABLE foos (id BIGINT SIGNED unique, name VARCHAR(64))").get().isEmpty)
             #expect(try await conn.simpleQuery("INSERT INTO foos VALUES (1, 'one')").get().isEmpty)
-            let error = try await #require(throws: MySQLError.self) { _ = try await conn.simpleQuery("INSERT INTO foos VALUES (1, 'two')").get() }
-            #expect({ if case .duplicateEntry = error { true } else { false } }())
+            try await #require(throws: MySQLError.duplicateEntry("Duplicate entry '1' for key '\(isNewMySQL ? "foos." : "")id'")) { _ = try await conn.simpleQuery("INSERT INTO foos VALUES (1, 'two')").get() }
             _ = try await conn.simpleQuery("DROP TABLE IF EXISTS foos").get()
         } catch {
             _ = try? await conn.simpleQuery("DROP TABLE IF EXISTS foos").get()
@@ -222,12 +240,12 @@ struct MySQLNIOTests {
         let conn = try await MySQLConnection.test()
 
         do {
+            let isNewMySQL = try await conn.simpleQuery("SELECT version() v").get().first?.column("v")?.string?.split(separator: ".").first.flatMap { Int(String($0)) } ?? 0 > 5
             _ = try await conn.simpleQuery("DROP TABLE IF EXISTS foos").get()
             #expect(try await conn.simpleQuery("DROP TABLE IF EXISTS foos").get().isEmpty)
             #expect(try await conn.simpleQuery("CREATE TABLE foos (id BIGINT SIGNED unique, name VARCHAR(64))").get().isEmpty)
             #expect(try await conn.simpleQuery("INSERT INTO foos VALUES (1, 'one')").get().isEmpty)
-            let error = try await #require(throws: MySQLError.self) { _ = try await conn.query("INSERT INTO foos VALUES (1, 'two')").get() }
-            #expect({ if case .duplicateEntry = error { true } else { false } }())
+            try await #require(throws: MySQLError.duplicateEntry("Duplicate entry '1' for key '\(isNewMySQL ? "foos." : "")id'")) { _ = try await conn.query("INSERT INTO foos VALUES (1, 'two')").get() }
             _ = try await conn.simpleQuery("DROP TABLE IF EXISTS foos").get()
         } catch {
             _ = try? await conn.simpleQuery("DROP TABLE IF EXISTS foos").get()
@@ -347,8 +365,7 @@ struct MySQLNIOTests {
         let conn = try await MySQLConnection.test(on: .singletonMultiThreadedEventLoopGroup.any()).get()
         try await conn.send(PingCommand(), logger: conn.logger).get()
         try await Task.sleep(nanoseconds: 100_000_000) // to let the reply come in without any other command queued
-        let error = try await #require(throws: MySQLError.self) { try await conn.simpleQuery("SELECT 1").get() }
-        #expect({ if case .closed = error { true } else { false } }())
+        try await #require(throws: MySQLError.closed) { _ = try await conn.simpleQuery("SELECT 1").get() }
         try? await conn.close().get()
     }
     
@@ -374,15 +391,10 @@ struct MySQLNIOTests {
                 return channel.pipeline.addHandler(Handler())
             }
             .bind(host: "127.0.0.1", port: 3307).get()
-        let error = try await #require(throws: MySQLError.self) {
+        try await #require(throws: MySQLError.server(.init(errorCode: .SERVER_GONE_ERROR, sqlStateMarker: "#", sqlState: "HY000", errorMessage: "Server gone"))) {
             let connection = try await MySQLConnection.connect(to: .init(ipAddress: "127.0.0.1", port: 3307), username: "", database: "", tlsConfiguration: nil, on: .singletonMultiThreadedEventLoopGroup.any()).get()
             try? await connection.close().get() // connection is *only* open if we get to this point
         }
-        let err = try #require({ if case .server(let err) = error { err } else { nil } }())
-        #expect(err.errorCode == .SERVER_GONE_ERROR)
-        #expect(err.sqlStateMarker == "#")
-        #expect(err.sqlState == "HY000")
-        #expect(err.errorMessage == "Server gone")
         try? await serverChannel.close(mode: .all)
     }
 }
