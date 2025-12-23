@@ -42,7 +42,7 @@ jobs:
       fail-fast: false
       matrix:
         dbimage:
-          - mysql:9.4
+          - mysql:9.5
         swiftver:
           - swift:6.2-noble
     runs-on: ubuntu-latest
