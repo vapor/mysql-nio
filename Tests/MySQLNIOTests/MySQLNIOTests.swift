@@ -65,6 +65,7 @@ struct MySQLNIOTests {
             #expect(sqlData2.double == 199)
             #expect(sqlData2.int == 199)
             #expect(sqlData2.decimal == Decimal(string: "199"))
+            _ = try await conn.simpleQuery("DROP TABLE IF EXISTS foos").get()
         } catch {
             _ = try? await conn.simpleQuery("DROP TABLE IF EXISTS foos").get()
             try? await conn.close().get()
@@ -124,6 +125,27 @@ struct MySQLNIOTests {
                 ORDER BY
                     (a.text LIKE "") DESC
                 """, onMetadata: { metadata in conn.logger.info("\(metadata.affectedRows), \(metadata.lastInsertID ?? 0)") }).get()
+
+            _ = try await conn.simpleQuery("DROP TABLE IF EXISTS `t1`").get()
+            _ = try await conn.simpleQuery("DROP TABLE IF EXISTS `t2`").get()
+        } catch {
+            _ = try? await conn.simpleQuery("DROP TABLE IF EXISTS `t1`").get()
+            _ = try? await conn.simpleQuery("DROP TABLE IF EXISTS `t2`").get()
+            try? await conn.close().get()
+            throw error
+        }
+        try await conn.close().get()
+    }
+
+    @Test
+    func simpleQuery_selectString() async throws {
+        let conn = try await MySQLConnection.test()
+
+        do {
+            let rows = try await conn.simpleQuery("SELECT 'foo' as bar").get()
+            try #require(rows.count == 1)
+            #expect(rows.description == #"[["bar": "foo"]]"#)
+            #expect(rows[0].column("bar")?.string == "foo")
         } catch {
             try? await conn.close().get()
             throw error
@@ -131,6 +153,238 @@ struct MySQLNIOTests {
         try await conn.close().get()
     }
 
+    @Test
+    func simpleQuery_selectIntegers() async throws {
+        let conn = try await MySQLConnection.test()
+
+        do {
+            let rows = try await conn.simpleQuery("SELECT 1 as one, 2 as two").get()
+            try #require(rows.count == 1)
+            #expect(rows[0].column("one")?.string == "1")
+            #expect(rows[0].column("two")?.string == "2")
+        } catch {
+            try? await conn.close().get()
+            throw error
+        }
+        try await conn.close().get()
+    }
+
+    @Test
+    func simpleQuery_syntaxError() async throws {
+        let conn = try await MySQLConnection.test()
+
+        do {
+            let error = try await #require(throws: MySQLError.self) { _ = try await conn.simpleQuery("SELECT &").get() }
+            #expect({ if case .invalidSyntax = error { true } else { false } }())
+        } catch {
+            try? await conn.close().get()
+            throw error
+        }
+        try await conn.close().get()
+    }
+    
+    @Test
+    func query_syntaxError() async throws {
+        let conn = try await MySQLConnection.test()
+
+        do {
+            let error = try await #require(throws: MySQLError.self) { _ = try await conn.query("SELECT &").get() }
+            #expect({ if case .invalidSyntax = error { true } else { false } }())
+        } catch {
+            try? await conn.close().get()
+            throw error
+        }
+        try await conn.close().get()
+    }
+
+    @Test
+    func simpleQuery_duplicateEntry() async throws {
+        let conn = try await MySQLConnection.test()
+
+        do {
+            _ = try await conn.simpleQuery("DROP TABLE IF EXISTS foos").get()
+            #expect(try await conn.simpleQuery("DROP TABLE IF EXISTS foos").get().isEmpty)
+            #expect(try await conn.simpleQuery("CREATE TABLE foos (id BIGINT SIGNED unique, name VARCHAR(64))").get().isEmpty)
+            #expect(try await conn.simpleQuery("INSERT INTO foos VALUES (1, 'one')").get().isEmpty)
+            let error = try await #require(throws: MySQLError.self) { _ = try await conn.simpleQuery("INSERT INTO foos VALUES (1, 'two')").get() }
+            #expect({ if case .duplicateEntry = error { true } else { false } }())
+            _ = try await conn.simpleQuery("DROP TABLE IF EXISTS foos").get()
+        } catch {
+            _ = try? await conn.simpleQuery("DROP TABLE IF EXISTS foos").get()
+            try? await conn.close().get()
+            throw error
+        }
+        try await conn.close().get()
+    }
+
+    @Test
+    func query_duplicateEntry() async throws {
+        let conn = try await MySQLConnection.test()
+
+        do {
+            _ = try await conn.simpleQuery("DROP TABLE IF EXISTS foos").get()
+            #expect(try await conn.simpleQuery("DROP TABLE IF EXISTS foos").get().isEmpty)
+            #expect(try await conn.simpleQuery("CREATE TABLE foos (id BIGINT SIGNED unique, name VARCHAR(64))").get().isEmpty)
+            #expect(try await conn.simpleQuery("INSERT INTO foos VALUES (1, 'one')").get().isEmpty)
+            let error = try await #require(throws: MySQLError.self) { _ = try await conn.query("INSERT INTO foos VALUES (1, 'two')").get() }
+            #expect({ if case .duplicateEntry = error { true } else { false } }())
+            _ = try await conn.simpleQuery("DROP TABLE IF EXISTS foos").get()
+        } catch {
+            _ = try? await conn.simpleQuery("DROP TABLE IF EXISTS foos").get()
+            try? await conn.close().get()
+            throw error
+        }
+        try await conn.close().get()
+    }
+
+    @Test
+    func query_selectMixed() async throws {
+        let conn = try await MySQLConnection.test()
+
+        do {
+            let rows = try await conn.query("SELECT '1' as one, 2 as two").get()
+            try #require(rows.count == 1)
+            #expect(rows[0].column("one")?.string == "1")
+            #expect(rows[0].column("two")?.string == "2")
+        } catch {
+            try? await conn.close().get()
+            throw error
+        }
+        try await conn.close().get()
+    }
+
+    @Test
+    func query_selectBoundParams() async throws {
+        let conn = try await MySQLConnection.test()
+
+        do {
+            let rows = try await conn.query("SELECT ? as one, ? as two", ["1", "2"]).get()
+            try #require(rows.count == 1)
+            #expect(rows[0].column("one")?.string == "1")
+            #expect(rows[0].column("two")?.string == "2")
+        } catch {
+            try? await conn.close().get()
+            throw error
+        }
+        try await conn.close().get()
+    }
+
+    @Test
+    func query_selectConcat() async throws {
+        let conn = try await MySQLConnection.test()
+
+        do {
+            let rows = try await conn.query("SELECT CONCAT(?, ?) as test;", ["hello", "world"]).get()
+            try #require(rows.count == 1)
+            #expect(rows[0].column("test")?.string == "helloworld")
+        } catch {
+            try? await conn.close().get()
+            throw error
+        }
+        try await conn.close().get()
+    }
+
+    @Test
+    func textWithMicrosecondsMySQLTimeParse() throws {
+        let dateString = "2024-04-15 22:38:12.392812"
+        
+        let time = MySQLTime(dateString)
+        
+        #expect(time != nil)
+        #expect(time?.year == 2024)
+        #expect(time?.month == 4)
+        #expect(time?.day == 15)
+        #expect(time?.hour == 22)
+        #expect(time?.minute == 38)
+        #expect(time?.second == 12)
+        #expect(time?.microsecond == 392812)
+    }
+
+    @Test
+    func date_conversion() throws {
+        let date = Date(timeIntervalSinceReferenceDate: 0.001)
+        let mysqlDate = MySQLTime(date: date)
+        let time = mysqlDate.date!
+        #expect(mysqlDate.microsecond != 0)
+
+        #expect(Int(exactly: Double(date.timeIntervalSinceReferenceDate) * 100000) == Int(exactly: Double(time.timeIntervalSinceReferenceDate) * 100000))
+    }
+
+    @Test
+    func date_before1970() throws {
+        let time = MySQLTime(date: MySQLTime(date: Date(timeIntervalSince1970: 1.1)).date!)
+        let time2 = MySQLTime(date: MySQLTime(date: Date(timeIntervalSince1970: -1.1)).date!)
+        #expect(time.microsecond == UInt32(100000))
+        #expect(time2.microsecond == UInt32(100000))
+    }
+
+    @Test
+    func date_zeroIsInvalidButMySQLReturnsIt() throws {
+        let zeroTime = MySQLTime()
+        let data = MySQLData(time: zeroTime)
+
+        #expect(data.description == "1970-01-01 00:00:00 +0000")
+    }
+
+    @Test
+    func sha2() throws {
+        var message = ByteBufferAllocator().buffer(capacity: 0)
+        message.writeString("test")
+        var digest = sha256(message)
+        #expect(digest.readBytes(length: 32) == [
+            0x9f, 0x86, 0xd0, 0x81, 0x88, 0x4c, 0x7d, 0x65, 0x9a, 0x2f, 0xea, 0xa0, 0xc5, 0x5a, 0xd0, 0x15,
+            0xa3, 0xbf, 0x4f, 0x1b, 0x2b, 0x0b, 0x82, 0x2c, 0xd1, 0x5d, 0x6c, 0x15, 0xb0, 0xf0, 0x0a, 0x08,
+        ])
+    }
+
+    // https://github.com/vapor/mysql-nio/issues/87
+    @Test
+    func unexpectedPacketHandling() async throws {
+        struct PingCommand: MySQLCommand {
+            func handle(packet: inout MySQLPacket, capabilities: MySQLProtocol.CapabilityFlags) throws -> MySQLCommandState { preconditionFailure("") }
+            func activate(capabilities: MySQLProtocol.CapabilityFlags) throws -> MySQLCommandState { .init(response: [.init(payload: .init(bytes: [0x0e]))], done: true) }
+        }
+        let conn = try await MySQLConnection.test(on: .singletonMultiThreadedEventLoopGroup.any()).get()
+        try await conn.send(PingCommand(), logger: conn.logger).get()
+        try await Task.sleep(nanoseconds: 100_000_000) // to let the reply come in without any other command queued
+        let error = try await #require(throws: MySQLError.self) { try await conn.simpleQuery("SELECT 1").get() }
+        #expect({ if case .closed = error { true } else { false } }())
+        try? await conn.close().get()
+    }
+    
+    // https://github.com/vapor/mysql-nio/issues/91
+    @Test
+    func beforeHandshakeErrorHandling() async throws {
+        // There's no way to force a real server to throw a pre-handshake error, fake it with a mock server and a handcrafted ERR_Packet.
+        let serverChannel = try await ServerBootstrap(group: .singletonMultiThreadedEventLoopGroup)
+            .serverChannelOption(ChannelOptions.socket(SocketOptionLevel(SOL_SOCKET), SocketOptionName(SO_REUSEADDR)), value: SocketOptionValue(1))
+            .childChannelOption(ChannelOptions.socket(SocketOptionLevel(SOL_SOCKET), SocketOptionName(SO_REUSEADDR)), value: SocketOptionValue(1))
+            .childChannelInitializer { channel in
+                final class Handler: ChannelInboundHandler, Sendable {
+                    typealias InboundIn = ByteBuffer; typealias OutboundOut = ByteBuffer
+                    func channelActive(context: ChannelHandlerContext) {
+                        var packet = MySQLPacket(), buf = ByteBuffer()
+                        let context = NIOLoopBound(context, eventLoop: context.eventLoop)
+                        packet.payload.writeMultipleIntegers(0xff/*flag*/, 2006/*CR_SERVER_GONE_ERROR*/, endianness: .little, as: (UInt8, UInt16).self)
+                        packet.payload.writeString("#HY000Server gone")
+                        try! MySQLPacketEncoder(sequence: .init(), logger: .init(label: "") { _ in SwiftLogNoOpLogHandler() }).encode(data: packet, out: &buf) // Never actually throws
+                        context.value.writeAndFlush(wrapOutboundOut(buf)).whenComplete { _ in context.value.close(mode: .all, promise: nil) }
+                    }
+                }
+                return channel.pipeline.addHandler(Handler())
+            }
+            .bind(host: "127.0.0.1", port: 3307).get()
+        let error = try await #require(throws: MySQLError.self) {
+            let connection = try await MySQLConnection.connect(to: .init(ipAddress: "127.0.0.1", port: 3307), username: "", database: "", tlsConfiguration: nil, on: .singletonMultiThreadedEventLoopGroup.any()).get()
+            try? await connection.close().get() // connection is *only* open if we get to this point
+        }
+        let err = try #require({ if case .server(let err) = error { err } else { nil } }())
+        #expect(err.errorCode == .SERVER_GONE_ERROR)
+        #expect(err.sqlStateMarker == "#")
+        #expect(err.sqlState == "HY000")
+        #expect(err.errorMessage == "Server gone")
+        try? await serverChannel.close(mode: .all)
+    }
 }
 
 final class MySQLNIOXCTests: XCTestCase {
@@ -138,114 +392,6 @@ final class MySQLNIOXCTests: XCTestCase {
         XCTAssert(isLoggingConfigured)
     }
 
-    func testSimpleQuery_selectString() throws {
-        let conn = try MySQLConnection.test(on: .singletonMultiThreadedEventLoopGroup.any()).wait()
-        defer { try! conn.close().wait() }
-        let rows = try conn.simpleQuery("SELECT 'foo' as bar").wait()
-        guard rows.count == 1 else {
-            return XCTFail("invalid row count")
-        }
-        XCTAssertEqual(rows.description, #"[["bar": "foo"]]"#)
-        XCTAssertEqual(rows[0].column("bar")?.string, "foo")
-    }
-    
-    func testSimpleQuery_selectIntegers() throws {
-        let conn = try MySQLConnection.test(on: .singletonMultiThreadedEventLoopGroup.any()).wait()
-        defer { try! conn.close().wait() }
-        let rows = try conn.simpleQuery("SELECT 1 as one, 2 as two").wait()
-        guard rows.count == 1 else {
-            return XCTFail("invalid row count")
-        }
-        XCTAssertEqual(rows[0].column("one")?.string, "1")
-        XCTAssertEqual(rows[0].column("two")?.string, "2")
-    }
-    
-    func testSimpleQuery_syntaxError() throws {
-        let conn = try MySQLConnection.test(on: .singletonMultiThreadedEventLoopGroup.any()).wait()
-        defer { try! conn.close().wait() }
-        XCTAssertThrowsError(try conn.simpleQuery("SELECT &").wait()) { error in
-            guard case .invalidSyntax = error as? MySQLError else {
-                return XCTFail("Exected MySQLError.invalidSyntax, but found \(error)")
-            }
-        }
-    }
-    
-    func testQuery_syntaxError() throws {
-        let conn = try MySQLConnection.test(on: .singletonMultiThreadedEventLoopGroup.any()).wait()
-        defer { try! conn.close().wait() }
-        XCTAssertThrowsError(try conn.query("SELECT &").wait()) { error in
-            guard case .invalidSyntax = error as? MySQLError else {
-                return XCTFail("Exected MySQLError.invalidSyntax, but found \(error)")
-            }
-        }
-    }
-    
-    func testSimpleQuery_duplicateEntry() throws {
-        let conn = try MySQLConnection.test(on: .singletonMultiThreadedEventLoopGroup.any()).wait()
-        defer { try! conn.close().wait() }
-        let dropResults = try conn.simpleQuery("DROP TABLE IF EXISTS foos").wait()
-        XCTAssertEqual(dropResults.count, 0)
-        let createResults = try conn.simpleQuery("CREATE TABLE foos (id BIGINT SIGNED unique, name VARCHAR(64))").wait()
-        XCTAssertEqual(createResults.count, 0)
-        defer { _ = try! conn.simpleQuery("DROP TABLE IF EXISTS foos").wait() }
-        let insertResults = try conn.simpleQuery("INSERT INTO foos VALUES (1, 'one')").wait()
-        XCTAssertEqual(insertResults.count, 0)
-        XCTAssertThrowsError(try conn.query("INSERT INTO foos VALUES (1, 'two')").wait()) { error in
-            guard case .duplicateEntry = error as? MySQLError else {
-                return XCTFail("Expected MySQLError.duplicateEntry, but found \(error)")
-            }
-        }
-    }
-
-    func testQuery_duplicateEntry() throws {
-        let conn = try MySQLConnection.test(on: .singletonMultiThreadedEventLoopGroup.any()).wait()
-        defer { try! conn.close().wait() }
-        let dropResults = try conn.simpleQuery("DROP TABLE IF EXISTS foos").wait()
-        XCTAssertEqual(dropResults.count, 0)
-        let createResults = try conn.simpleQuery("CREATE TABLE foos (id BIGINT SIGNED unique, name VARCHAR(64))").wait()
-        XCTAssertEqual(createResults.count, 0)
-        defer { _ = try! conn.simpleQuery("DROP TABLE IF EXISTS foos").wait() }
-        let insertResults = try conn.query("INSERT INTO foos VALUES (?, ?)", [1, "one"]).wait()
-        XCTAssertEqual(insertResults.count, 0)
-        XCTAssertThrowsError(try conn.query("INSERT INTO foos VALUES (?, ?)", [1, "two"]).wait()) { (inError) in
-            guard case .duplicateEntry = inError as? MySQLError else {
-                return XCTFail("Expected MySQLError.duplicateEntry, but found \(inError)")
-            }
-        }
-    }
-    
-    func testQuery_selectMixed() throws {
-        let conn = try MySQLConnection.test(on: .singletonMultiThreadedEventLoopGroup.any()).wait()
-        defer { try! conn.close().wait() }
-        let rows = try conn.query("SELECT '1' as one, 2 as two").wait()
-        guard rows.count == 1 else {
-            return XCTFail("invalid row count")
-        }
-        XCTAssertEqual(rows[0].column("one")?.string, "1")
-        XCTAssertEqual(rows[0].column("two")?.string, "2")
-    }
-    
-    func testQuery_selectBoundParams() throws {
-        let conn = try MySQLConnection.test(on: .singletonMultiThreadedEventLoopGroup.any()).wait()
-        defer { try! conn.close().wait() }
-        let rows = try conn.query("SELECT ? as one, ? as two", ["1", "2"]).wait()
-        guard rows.count == 1 else {
-            return XCTFail("invalid row count")
-        }
-        XCTAssertEqual(rows[0].column("one")?.string, "1")
-        XCTAssertEqual(rows[0].column("two")?.string, "2")
-    }
-    
-    func testQuery_selectConcat() throws {
-        let conn = try MySQLConnection.test(on: .singletonMultiThreadedEventLoopGroup.any()).wait()
-        defer { try! conn.close().wait() }
-        let rows = try conn.query("SELECT CONCAT(?, ?) as test;", ["hello", "world"]).wait()
-        guard rows.count == 1 else {
-            return XCTFail("invalid row count")
-        }
-        XCTAssertEqual(rows[0].column("test")?.string, "helloworld")
-    }
-    
     func testQuery_insert() throws {
         let conn = try MySQLConnection.test(on: .singletonMultiThreadedEventLoopGroup.any()).wait()
         defer { try! conn.close().wait() }
@@ -302,33 +448,6 @@ final class MySQLNIOXCTests: XCTestCase {
             let rows = try conn.query("SELECT CAST(? AS DATETIME) as datetime", [.init(date: date)]).wait()
             XCTAssertEqual(rows[0].column("datetime")?.date?.description, "2016-01-18 00:00:00 +0000")
         }
-    }
-    
-    func testDate_conversion() throws {
-        let date = Date(timeIntervalSinceReferenceDate: 0.001)
-        let mysqlDate = MySQLTime(date: date)
-        let time = mysqlDate.date!
-        XCTAssertNotEqual(mysqlDate.microsecond, 0)
-        
-        XCTAssertEqual(
-            Double(date.timeIntervalSinceReferenceDate),
-            Double(time.timeIntervalSinceReferenceDate),
-            accuracy: 5
-        )
-    }
- 
-    func testDate_before1970() throws {
-        let time = MySQLTime(date: MySQLTime(date: Date(timeIntervalSince1970: 1.1)).date!)
-        let time2 = MySQLTime(date: MySQLTime(date: Date(timeIntervalSince1970: -1.1)).date!)
-        XCTAssert(time.microsecond == UInt32(100000))
-        XCTAssert(time2.microsecond == UInt32(100000))
-    }
-    
-    func testDate_zeroIsInvalidButMySQLReturnsIt() throws {
-        let zeroTime = MySQLTime()
-        let data = MySQLData(time: zeroTime)
-
-        XCTAssertEqual(data.description, "1970-01-01 00:00:00 +0000")
     }
 
     func testString_lengthEncoded_uint8() throws {
@@ -422,38 +541,6 @@ final class MySQLNIOXCTests: XCTestCase {
             try test.match(selectResults[0].column(test.name), #file, #line)
         }
     }
-    
-    /*func testPerformance_simpleSelects() throws {
-        try XCTSkipIf(env("PERFORMANCE_TESTS") == nil)
-        let conn = try MySQLConnection.test(on: .singletonMultiThreadedEventLoopGroup.any()).wait()
-        defer { try! conn.close().wait() }
-        for _ in 0..<1_000 {
-            _ = try conn.simpleQuery("SELECT 1").wait()
-        }
-    }
-    
-    func testPerformance_parseDatetime() throws {
-        try XCTSkipIf(env("PERFORMANCE_TESTS") == nil)
-        let conn = try MySQLConnection.test(on: .singletonMultiThreadedEventLoopGroup.any()).wait()
-        defer { try! conn.close().wait() }
-        
-        measure {
-            for _ in 0..<100 {
-                let rows = try? conn.query("SELECT CAST('2016-01-18' AS DATETIME) as datetime").wait()
-                XCTAssertEqual(rows?[0].column("datetime")?.date?.description, "2016-01-18 00:00:00 +0000")
-            }
-        }
-    }*/
-
-    func testSHA2() throws {
-        var message = ByteBufferAllocator().buffer(capacity: 0)
-        message.writeString("test")
-        var digest = sha256(message)
-        XCTAssertEqual(digest.readBytes(length: 32), [
-            0x9f, 0x86, 0xd0, 0x81, 0x88, 0x4c, 0x7d, 0x65, 0x9a, 0x2f, 0xea, 0xa0, 0xc5, 0x5a, 0xd0, 0x15,
-            0xa3, 0xbf, 0x4f, 0x1b, 0x2b, 0x0b, 0x82, 0x2c, 0xd1, 0x5d, 0x6c, 0x15, 0xb0, 0xf0, 0x0a, 0x08,
-        ])
-    }
 
     func testQuery_decimal() throws {
         let conn = try MySQLConnection.test(on: .singletonMultiThreadedEventLoopGroup.any()).wait()
@@ -463,32 +550,6 @@ final class MySQLNIOXCTests: XCTestCase {
             XCTAssertEqual(rows[0].column("d").flatMap { Decimal(mysqlData: $0) }?.description, "3.142")
         }
     }
-
-    // https://github.com/vapor/mysql-nio/issues/30
-    /*func testPreparedStatement_maxOpen() throws {
-        try XCTSkipIf(env("PERFORMANCE_TESTS") == nil)
-        let conn = try MySQLConnection.test(on: .singletonMultiThreadedEventLoopGroup.any()).wait()
-        defer { try! conn.close().wait() }
-
-        let result = try conn.simpleQuery("SHOW VARIABLES LIKE 'max_prepared_stmt_count';").wait()
-        let max = result[0].column("Value")!.int!
-        conn.logger.info("max_prepared_stmt_count=\(max)")
-
-        struct TestError: Error { }
-        for i in 0..<(max + 1) {
-            if i % (max / 10) == 0 {
-                conn.logger.info("max_prepared_stmt_count iteration \(i)/\(max + 1)")
-            }
-            do {
-                _ = try conn.query("SELECT @@version", onRow: { row in
-                    throw TestError()
-                }).wait()
-                XCTFail("Query should have errored")
-            } catch is TestError {
-                // expected
-            }
-        }
-    }*/
 
     func testPreparedStatement_invalidParams() throws {
         let conn = try MySQLConnection.test(on: .singletonMultiThreadedEventLoopGroup.any()).wait()
@@ -694,78 +755,5 @@ final class MySQLNIOXCTests: XCTestCase {
         XCTAssertEqual(rows[0].column("bar")?.int, 1)
         XCTAssertNil(rows[0].column("baz")?.int)
         XCTAssertEqual(rows[0].column("qux")?.int, 3)
-    }
-    
-    func testTextWithMicrosecondsMySQLTimeParse() throws {
-        let dateString = "2024-04-15 22:38:12.392812"
-        
-        let time = MySQLTime(dateString)
-        
-        XCTAssertNotNil(time)
-        XCTAssertEqual(time?.year, 2024)
-        XCTAssertEqual(time?.month, 4)
-        XCTAssertEqual(time?.day, 15)
-        XCTAssertEqual(time?.hour, 22)
-        XCTAssertEqual(time?.minute, 38)
-        XCTAssertEqual(time?.second, 12)
-        XCTAssertEqual(time?.microsecond, 392812)
-    }
-    
-    // https://github.com/vapor/mysql-nio/issues/87
-    func testUnexpectedPacketHandling() async throws {
-        struct PingCommand: MySQLCommand {
-            func handle(packet: inout MySQLPacket, capabilities: MySQLProtocol.CapabilityFlags) throws -> MySQLCommandState { preconditionFailure("") }
-            func activate(capabilities: MySQLProtocol.CapabilityFlags) throws -> MySQLCommandState { .init(response: [.init(payload: .init(bytes: [0x0e]))], done: true) }
-        }
-        let conn = try await MySQLConnection.test(on: .singletonMultiThreadedEventLoopGroup.any()).get()
-        do {
-            try await conn.send(PingCommand(), logger: conn.logger).get()
-            try await Task.sleep(nanoseconds: 100_000_000) // to let the reply come in without any other command queued
-            do {
-                _ = try await conn.simpleQuery("SELECT 1").get()
-                XCTFail("did not throw an error")
-            } catch MySQLError.closed {
-                // pass
-            }
-        } catch {
-            XCTFail("threw an error: \(String(reflecting: error))")
-        }
-        try? await conn.close().get()
-    }
-    
-    // https://github.com/vapor/mysql-nio/issues/91
-    func testBeforeHandshakeErrorHandling() async throws {
-        // There's no way to force a real server to throw a pre-handshake error, fake it with a mock server and a handcrafted ERR_Packet.
-        let serverChannel = try await ServerBootstrap(group: .singletonMultiThreadedEventLoopGroup)
-            .serverChannelOption(ChannelOptions.socket(SocketOptionLevel(SOL_SOCKET), SocketOptionName(SO_REUSEADDR)), value: SocketOptionValue(1))
-            .childChannelOption(ChannelOptions.socket(SocketOptionLevel(SOL_SOCKET), SocketOptionName(SO_REUSEADDR)), value: SocketOptionValue(1))
-            .childChannelInitializer { channel in
-                final class Handler: ChannelInboundHandler, Sendable {
-                    typealias InboundIn = ByteBuffer; typealias OutboundOut = ByteBuffer
-                    func channelActive(context: ChannelHandlerContext) {
-                        var packet = MySQLPacket(), buf = ByteBuffer()
-                        let context = NIOLoopBound(context, eventLoop: context.eventLoop)
-                        packet.payload.writeMultipleIntegers(0xff/*flag*/, 2006/*CR_SERVER_GONE_ERROR*/, endianness: .little, as: (UInt8, UInt16).self)
-                        packet.payload.writeString("#HY000Server gone")
-                        try! MySQLPacketEncoder(sequence: .init(), logger: .init(label: "") { _ in SwiftLogNoOpLogHandler() }).encode(data: packet, out: &buf) // Never actually throws
-                        context.value.writeAndFlush(wrapOutboundOut(buf)).whenComplete { _ in context.value.close(mode: .all, promise: nil) }
-                    }
-                }
-                return channel.pipeline.addHandler(Handler())
-            }
-            .bind(host: "127.0.0.1", port: 3307).get()
-        do {
-            let connection = try await MySQLConnection.connect(to: .init(ipAddress: "127.0.0.1", port: 3307), username: "", database: "", tlsConfiguration: nil, on: .singletonMultiThreadedEventLoopGroup.any()).get()
-            XCTFail("Should have thrown a server error.")
-            try? await connection.close().get() // connection is *only* open if we get to this point
-        } catch MySQLError.server(let err) {
-            XCTAssertEqual(err.errorCode, .SERVER_GONE_ERROR)
-            XCTAssertEqual(err.sqlStateMarker, "#")
-            XCTAssertEqual(err.sqlState, "HY000")
-            XCTAssertEqual(err.errorMessage, "Server gone")
-        } catch {
-            XCTFail("Threw something other than the expected error: \(String(reflecting: error))")
-        }
-        try? await serverChannel.close(mode: .all)
     }
 }
