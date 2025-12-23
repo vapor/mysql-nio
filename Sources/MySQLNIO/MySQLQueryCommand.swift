@@ -57,7 +57,8 @@ private final class MySQLQueryCommand: MySQLCommand, @unchecked Sendable { // th
     let onMetadata: (MySQLQueryMetadata) throws -> ()
     let logger: Logger
 
-    private var columns: [MySQLProtocol.ColumnDefinition41]
+    private var prepareColumns: [MySQLProtocol.ColumnDefinition41]
+    private var executeColumns: [MySQLProtocol.ColumnDefinition41]
     private var params: [MySQLProtocol.ColumnDefinition41]
     private var ok: MySQLProtocol.COM_STMT_PREPARE_OK?
 
@@ -74,7 +75,8 @@ private final class MySQLQueryCommand: MySQLCommand, @unchecked Sendable { // th
         self.state = .ready
         self.sql = sql
         self.binds = binds
-        self.columns = []
+        self.prepareColumns = []
+        self.executeColumns = []
         self.params = []
         self.onRow = onRow
         self.onMetadata = onMetadata
@@ -148,8 +150,8 @@ private final class MySQLQueryCommand: MySQLCommand, @unchecked Sendable { // th
             return .noResponse
         case .columns:
             let column = try packet.decode(MySQLProtocol.ColumnDefinition41.self, capabilities: capabilities)
-            self.columns.append(column)
-            if self.columns.count == numericCast(self.ok!.numColumns) {
+            self.prepareColumns.append(column)
+            if self.prepareColumns.count == numericCast(self.ok!.numColumns) {
                 self.state = .executeColumnCount
             }
             return .noResponse
@@ -163,6 +165,8 @@ private final class MySQLQueryCommand: MySQLCommand, @unchecked Sendable { // th
             self.state = .executeColumns(remaining: numericCast(count))
             return .noResponse
         case .executeColumns(var remaining):
+            let column = try packet.decode(MySQLProtocol.ColumnDefinition41.self, capabilities: capabilities)
+            self.executeColumns.append(column)
             remaining -= 1
             switch remaining {
             case 0:
@@ -172,14 +176,14 @@ private final class MySQLQueryCommand: MySQLCommand, @unchecked Sendable { // th
             }
             return .noResponse
         case .rows:
-            if packet.isEOF || packet.isOK && columns.count == 0 {
+            if packet.isEOF || packet.isOK && executeColumns.count == 0 {
                 return try self.done(packet: &packet, capabilities: capabilities)
             }
 
-            let data = try MySQLProtocol.BinaryResultSetRow.decode(from: &packet, columns: columns)
+            let data = try MySQLProtocol.BinaryResultSetRow.decode(from: &packet, columns: executeColumns)
             let row = MySQLRow(
                 format: .binary,
-                columnDefinitions: self.columns,
+                columnDefinitions: self.executeColumns,
                 values: data.values
             )
             do {

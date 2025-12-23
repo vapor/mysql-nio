@@ -6,8 +6,8 @@
 <a href="https://discord.gg/vapor"><img src="https://design.vapor.codes/images/discordchat.svg" alt="Team Chat"></a>
 <a href="LICENSE"><img src="https://design.vapor.codes/images/mitlicense.svg" alt="MIT License"></a>
 <a href="https://github.com/vapor/mysql-nio/actions/workflows/test.yml"><img src="https://img.shields.io/github/actions/workflow/status/vapor/mysql-nio/test.yml?event=push&style=plastic&logo=github&label=test&logoColor=%23ccc" alt="Continuous Integration"></a>
-<a href="https://codecov.io/github/vapor/mysql-nio"><img src="https://img.shields.io/codecov/c/github/vapor/mysql-nio?style=plastic&logo=codecov&label=Codecov"></a>
-<a href="https://swift.org"><img src="https://design.vapor.codes/images/swift510up.svg" alt="Swift 5.10+"></a>
+<a href="https://codecov.io/github/vapor/mysql-nio"><img src="https://img.shields.io/codecov/c/github/vapor/mysql-nio?style=plastic&logo=codecov&label=Codecov" alt="Codde Coverage"></a>
+<a href="https://swift.org"><img src="https://design.vapor.codes/images/swift60up.svg" alt="Swift 6.0+"></a>
 </p>
 
 <br>
