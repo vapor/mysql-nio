@@ -24,8 +24,17 @@ private final class MySQLExecuteCommand: MySQLCommand, @unchecked Sendable {
         -> MySQLCommandState
     {
         if packet.isError {
-            let err = try packet.decode(MySQLProtocol.ERR_Packet.self, capabilities: capabilities)
-            throw MySQLError.server(err)
+            let errPacket = try packet.decode(MySQLProtocol.ERR_Packet.self, capabilities: capabilities)
+            let error: any Error
+            switch errPacket.errorCode {
+            case .DUP_ENTRY:
+                error = MySQLError.duplicateEntry(errPacket.errorMessage)
+            case .PARSE_ERROR:
+                error = MySQLError.invalidSyntax(errPacket.errorMessage)
+            default:
+                error = MySQLError.server(errPacket)
+            }
+            throw error
         }
 
         let ok = try MySQLProtocol.OK_Packet.decode(from: &packet, capabilities: capabilities)

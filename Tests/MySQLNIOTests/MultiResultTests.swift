@@ -68,10 +68,10 @@ struct MultiResultTests {
       try await conn.execute("INVALID SQL SYNTAX").get()
       #expect(Bool(false), "Expected error for invalid SQL")
     } catch let error as MySQLError {
-      if case .server(let errPacket) = error {
-        #expect(errPacket.errorCode == .PARSE_ERROR)
+      if case .invalidSyntax(let message) = error {
+        #expect(message.contains("syntax"))
       } else {
-        #expect(Bool(false), "Expected server error, got \(error)")
+        #expect(Bool(false), "Expected invalidSyntax error, got \(error)")
       }
     }
 
@@ -132,10 +132,8 @@ struct MultiResultTests {
         #expect(Bool(false), "Expected duplicate key error")
       } catch let error as MySQLError {
         switch error {
-        // case .duplicateEntry(let message):
-        //   #expect(message.contains("Duplicate"))
-        case .server(let errPacket):
-          #expect(errPacket.errorCode == .DUP_ENTRY)
+        case .duplicateEntry(let message):
+          #expect(message.contains("Duplicate"))
         default:
           #expect(Bool(false), "Unexpected error type: \(error)")
         }
