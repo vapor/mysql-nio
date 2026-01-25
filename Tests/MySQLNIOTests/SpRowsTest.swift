@@ -37,6 +37,55 @@ extension MySQLDatabase {
   }
 }
 
+// Test helpers
+private func setupKvTable(_ conn: MySQLConnection) async throws {
+  try await conn.execute(
+    """
+    CREATE OR REPLACE TABLE kv (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        value VARCHAR(255) NOT NULL UNIQUE
+    )
+    """
+  ).get()
+
+  try await conn.execute(
+    """
+    CREATE OR REPLACE PROCEDURE sp_add_kv_val(IN p_value varchar(255))
+    BEGIN
+        INSERT INTO kv (value) VALUES (p_value);
+    END
+    """
+  ).get()
+
+  try await conn.execute(
+    """
+    CREATE OR REPLACE PROCEDURE sp_find_kv_by_val(IN p_prefix varchar(255))
+    BEGIN
+        SELECT id, value FROM kv WHERE value LIKE CONCAT(p_prefix, '%');
+    END
+    """
+  ).get()
+}
+
+private func cleanupKvTable(_ conn: MySQLConnection) async {
+  try? await conn.execute("DROP TABLE IF EXISTS kv").get()
+}
+
+// Use this to have the initial test environment
+private func withKvTestConnection(_ body: (MySQLConnection) async throws -> Void) async throws {
+  let conn = try await MySQLConnection.test()
+  do {
+    try await setupKvTable(conn)
+    try await body(conn)
+    await cleanupKvTable(conn)
+  } catch {
+    await cleanupKvTable(conn)
+    try? await conn.close().get()
+    throw error
+  }
+  try await conn.close().get()
+}
+
 @Suite(.serialized)
 struct SpRowsTests {
   init() {
@@ -66,37 +115,8 @@ struct SpRowsTests {
   }
 
   @Test
-  func setupAndVerifyData() async throws {
-    let conn = try await MySQLConnection.test()
-
-    do {
-      try await conn.execute(
-        """
-        CREATE OR REPLACE TABLE kv (
-            id INT AUTO_INCREMENT PRIMARY KEY,
-            value VARCHAR(255) NOT NULL UNIQUE
-        )
-        """
-      ).get()
-
-      try await conn.execute(
-        """
-        CREATE OR REPLACE PROCEDURE sp_add_kv_val(IN p_value varchar(255))
-        BEGIN
-            INSERT INTO kv (value) VALUES (p_value);
-        END
-        """
-      ).get()
-
-      try await conn.execute(
-        """
-        CREATE OR REPLACE PROCEDURE sp_find_kv_by_val(IN p_prefix varchar(255))
-        BEGIN
-            SELECT id, value FROM kv WHERE value LIKE CONCAT(p_prefix, '%');
-        END
-        """
-      ).get()
-
+  func storedProcedureReturnsRows() async throws {
+    try await withKvTestConnection { conn in
       try await conn.execute(
         """
         START TRANSACTION;
@@ -120,14 +140,49 @@ struct SpRowsTests {
       // Test stored procedure returning zero rows
       let noRows = try await conn.simpleQuery("CALL sp_find_kv_by_val('notavailable')").get()
       #expect(noRows.count == 0)
-
-      // Cleanup
-      try await conn.execute("DROP TABLE IF EXISTS kv").get()
-    } catch {
-      try? await conn.execute("DROP TABLE IF EXISTS kv").get()
-      try? await conn.close().get()
-      throw error
     }
-    try await conn.close().get()
+  }
+
+  @Test
+  func transactionRollbackOnConstraintViolation() async throws {
+    try await withKvTestConnection { conn in
+      // Insert initial data
+      try await conn.execute("CALL sp_add_kv_val('initial')").get()
+
+      // Verify initial state
+      let before = try await conn.simpleQuery("SELECT COUNT(*) as cnt FROM kv").get()
+      #expect(before[0].column("cnt")?.int == 1)
+
+      // Try transaction with duplicate - should fail
+      do {
+        try await conn.execute(
+          """
+          START TRANSACTION;
+          CALL sp_add_kv_val('example11');
+          CALL sp_add_kv_val('example22');
+          CALL sp_add_kv_val('example33');
+          CALL sp_add_kv_val('example33');
+          COMMIT
+          """
+        ).get()
+        #expect(Bool(false), "Expected duplicate key error")
+      } catch let error as MySQLError {
+        switch error {
+        // case .duplicateEntry(let message):
+        //   #expect(message.contains("Duplicate"))
+        case .server(let errPacket):
+          #expect(errPacket.errorCode == .DUP_ENTRY)
+        default:
+          #expect(Bool(false), "Unexpected error type: \(error)")
+        }
+      }
+
+      // Rollback explicitly in case transaction is still open
+      try? await conn.execute("ROLLBACK").get()
+
+      // Verify table unchanged - should still have only 'initial'
+      let after = try await conn.simpleQuery("SELECT COUNT(*) as cnt FROM kv").get()
+      #expect(after[0].column("cnt")?.int == 1)
+    }
   }
 }
