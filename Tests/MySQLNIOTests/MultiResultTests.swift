@@ -51,7 +51,7 @@ private func withKvTestConnection(_ body: (MySQLConnection) async throws -> Void
 }
 
 @Suite(.serialized)
-struct SpRowsTests {
+struct MultiResultTests {
   init() {
     #expect(isLoggingConfigured)
   }
