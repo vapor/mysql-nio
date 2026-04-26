@@ -14,41 +14,41 @@ public final class MySQLConnection: MySQLDatabase, Sendable {
         logger: Logger = .init(label: "codes.vapor.mysql"),
         on eventLoop: any EventLoop
     ) -> EventLoopFuture<MySQLConnection> {
+        let sequence = MySQLPacketSequence()
+        let done = eventLoop.makePromise(of: Void.self)
+
         let bootstrap = ClientBootstrap(group: eventLoop)
             .channelOption(ChannelOptions.socket(SocketOptionLevel(SOL_SOCKET), SO_REUSEADDR), value: 1)
-        
-        logger.debug("Opening new connection to \(socketAddress)")
-        
-        return bootstrap.connect(to: socketAddress).flatMap { channel in
-            let sequence = MySQLPacketSequence()
-            let done = channel.eventLoop.makePromise(of: Void.self)
-            done.futureResult.whenFailure { _ in
-                channel.close(mode: .all, promise: nil)
-            }
-            do {
-                try channel.pipeline.syncOperations.addHandlers([
-                    ByteToMessageHandler(MySQLPacketDecoder(
-                        sequence: sequence,
-                        logger: logger
-                    )),
-                    MessageToByteHandler(MySQLPacketEncoder(
-                        sequence: sequence,
-                        logger: logger
-                    )),
-                    MySQLConnectionHandler(logger: logger, state: .handshake(.init(
-                        username: username,
-                        database: database,
-                        password: password,
-                        tlsConfiguration: tlsConfiguration,
-                        serverHostname: serverHostname,
-                        done: done
-                    )), sequence: sequence),
-                    ErrorHandler()
-                ], position: .last)
-            } catch {
-                return channel.eventLoop.makeFailedFuture(error)
+            .channelInitializer { channel in
+                done.futureResult.whenFailure { _ in
+                    channel.close(mode: .all, promise: nil)
+                }
+                return channel.eventLoop.makeCompletedFuture {
+                    try channel.pipeline.syncOperations.addHandlers([
+                        ByteToMessageHandler(MySQLPacketDecoder(
+                            sequence: sequence,
+                            logger: logger
+                        )),
+                        MessageToByteHandler(MySQLPacketEncoder(
+                            sequence: sequence,
+                            logger: logger
+                        )),
+                        MySQLConnectionHandler(logger: logger, state: .handshake(.init(
+                            username: username,
+                            database: database,
+                            password: password,
+                            tlsConfiguration: tlsConfiguration,
+                            serverHostname: serverHostname,
+                            done: done
+                        )), sequence: sequence),
+                        ErrorHandler()
+                    ], position: .last)
+                }
             }
 
+        logger.debug("Opening new connection to \(socketAddress)")
+
+        return bootstrap.connect(to: socketAddress).flatMap { channel in
             return done.futureResult.map { MySQLConnection(channel: channel, logger: logger) }
         }
     }
