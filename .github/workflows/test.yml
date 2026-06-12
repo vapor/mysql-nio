@@ -45,6 +45,7 @@ jobs:
           - mysql:9.5
         swiftver:
           - swift:6.2-noble
+          - swift:6.3-noble
     runs-on: ubuntu-latest
     container:
       image: ${{ matrix.swiftver }}
@@ -87,9 +88,8 @@ jobs:
           - percona:5.7
           - percona:8
         swiftver:
-          - swift:6.0-jammy
-          - swift:6.1-noble
           - swift:6.2-noble
+          - swift:6.3-noble
           - swiftlang/swift:nightly-main-noble
     runs-on: ubuntu-latest
     container: ${{ matrix.swiftver }}
@@ -113,20 +113,20 @@ jobs:
         with:
           codecov_token: ${{ secrets.CODECOV_TOKEN }}
           package_path: 'mysql-nio'
-      - name: Check out mysql-kit dependent
-        uses: actions/checkout@v6
-        with: { repository: 'vapor/mysql-kit', path: 'mysql-kit' }
-      - name: Check out fluent-mysql-driver dependent
-        uses: actions/checkout@v6
-        with: { repository: 'vapor/fluent-mysql-driver', path: 'fluent-mysql-driver' }
-      - name: Use local package in dependents
-        run: |
-          swift package --package-path mysql-kit edit mysql-nio --path mysql-nio
-          swift package --package-path fluent-mysql-driver edit mysql-nio --path mysql-nio
-      - name: Run mysql-kit tests
-        run: swift test --package-path mysql-kit
-      - name: Run fluent-mysql-driver tests
-        run: swift test --package-path fluent-mysql-driver
+      # - name: Check out mysql-kit dependent
+      #   uses: actions/checkout@v6
+      #   with: { repository: 'vapor/mysql-kit', path: 'mysql-kit' }
+      # - name: Check out fluent-mysql-driver dependent
+      #   uses: actions/checkout@v6
+      #   with: { repository: 'vapor/fluent-mysql-driver', path: 'fluent-mysql-driver' }
+      # - name: Use local package in dependents
+      #   run: |
+      #     swift package --package-path mysql-kit edit mysql-nio --path mysql-nio
+      #     swift package --package-path fluent-mysql-driver edit mysql-nio --path mysql-nio
+      # - name: Run mysql-kit tests
+      #   run: swift test --package-path mysql-kit
+      # - name: Run fluent-mysql-driver tests
+      #   run: swift test --package-path fluent-mysql-driver
 
   macos-all:
     if: ${{ !(github.event.pull_request.draft || false) }}

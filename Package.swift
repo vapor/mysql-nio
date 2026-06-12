@@ -1,34 +1,40 @@
-// swift-tools-version:6.0
+// swift-tools-version: 6.2
 import PackageDescription
 
 let package = Package(
     name: "mysql-nio",
     platforms: [
-        .macOS(.v10_15),
-        .iOS(.v13),
-        .watchOS(.v6),
-        .tvOS(.v13),
+        .macOS(.v15),
+        .iOS(.v18),
+        .watchOS(.v11),
+        .tvOS(.v18),
     ],
     products: [
-        .library(name: "MySQLNIO", targets: ["MySQLNIO"]),
+        .library(name: "MySQLNIO", targets: ["MySQLNIO"])
     ],
     dependencies: [
         .package(url: "https://github.com/apple/swift-algorithms.git", from: "1.0.0"),
-        .package(url: "https://github.com/apple/swift-crypto.git", "1.0.0" ..< "5.0.0"),
-        .package(url: "https://github.com/apple/swift-log.git", from: "1.0.0"),
-        .package(url: "https://github.com/apple/swift-nio.git", from: "2.0.0"),
-        .package(url: "https://github.com/apple/swift-nio-ssl.git", from: "2.14.0"),
+        .package(url: "https://github.com/apple/swift-collections.git", from: "1.1.4"),
+        .package(url: "https://github.com/apple/swift-crypto.git", "3.0.0"..<"5.0.0"),
+        .package(url: "https://github.com/apple/swift-log.git", from: "1.10.1"),
+        .package(url: "https://github.com/apple/swift-nio.git", from: "2.100.0"),
+        .package(url: "https://github.com/apple/swift-nio-ssl.git", from: "2.36.0"),
+        .package(url: "https://github.com/apple/swift-nio-transport-services.git", from: "1.26.0"),
     ],
     targets: [
         .target(
             name: "MySQLNIO",
             dependencies: [
                 .product(name: "Algorithms", package: "swift-algorithms"),
+                .product(name: "DequeModule", package: "swift-collections"),
+                .product(name: "OrderedCollections", package: "swift-collections"),
                 .product(name: "_CryptoExtras", package: "swift-crypto"),
                 .product(name: "Crypto", package: "swift-crypto"),
                 .product(name: "Logging", package: "swift-log"),
-                .product(name: "NIO", package: "swift-nio"),
+                .product(name: "NIOCore", package: "swift-nio"),
+                .product(name: "NIOPosix", package: "swift-nio"),
                 .product(name: "NIOSSL", package: "swift-nio-ssl"),
+                .product(name: "NIOTransportServices", package: "swift-nio-transport-services"),
             ],
             swiftSettings: swiftSettings
         ),
@@ -36,17 +42,27 @@ let package = Package(
             name: "MySQLNIOTests",
             dependencies: [
                 .target(name: "MySQLNIO"),
+                .product(name: "NIOEmbedded", package: "swift-nio"),
+            ],
+            swiftSettings: swiftSettings
+        ),
+        .testTarget(
+            name: "IntegrationTests",
+            dependencies: [
+                .target(name: "MySQLNIO")
             ],
             swiftSettings: swiftSettings
         ),
     ]
 )
 
-var swiftSettings: [SwiftSetting] { [
-    .enableUpcomingFeature("ExistentialAny"),
-    // .enableUpcomingFeature("InternalImportsByDefault"),
-    .enableUpcomingFeature("MemberImportVisibility"),
-    .enableUpcomingFeature("InferIsolatedConformances"),
-    // .enableUpcomingFeature("NonisolatedNonsendingByDefault"),
-    .enableUpcomingFeature("ImmutableWeakCaptures"),
-] }
+var swiftSettings: [SwiftSetting] {
+    [
+        .enableUpcomingFeature("ExistentialAny"),
+        .enableUpcomingFeature("InternalImportsByDefault"),
+        .enableUpcomingFeature("MemberImportVisibility"),
+        .enableUpcomingFeature("InferIsolatedConformances"),
+        .enableUpcomingFeature("NonisolatedNonsendingByDefault"),
+        .enableUpcomingFeature("ImmutableWeakCaptures"),
+    ]
+}
