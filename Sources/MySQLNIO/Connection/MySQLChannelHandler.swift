@@ -296,7 +296,7 @@ final class MySQLChannelHandler: ChannelDuplexHandler {
         }
     }
 
-    /// Used to send COM_QUIT
+    /// Used to send `COM_QUIT`
     ///
     /// > Important: The buffer must have 4 bytes of space reserved starting at the buffer's `readerIndex`. See ``MySQLRawPacketCodec``.
     @usableFromInline
