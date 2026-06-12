@@ -713,7 +713,7 @@ extension MySQLChannelHandler {
             case closeConnection(Context)
             case doNothing
         }
-        
+
         /// Want to gracefully shutdown the handler
         @usableFromInline
         mutating func triggerGracefulShutdown() -> TriggerGracefulShutdownAction {
