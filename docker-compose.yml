@@ -1,0 +1,34 @@
+x-shared-config: &shared_config
+  environment:
+    MYSQL_ALLOW_EMPTY_PASSWORD: true
+    MYSQL_USER: test_username
+    MYSQL_DATABASE: test_database
+    MYSQL_PASSWORD: test_password
+  ports:
+    - 3306:3306
+  volumes:
+    - ./Certs:/etc/mysql/certs
+  command:
+    - --ssl-ca=/etc/mysql/certs/ca.pem
+    - --ssl-cert=/etc/mysql/certs/server.pem
+    - --ssl-key=/etc/mysql/certs/server.key
+
+services:
+  mysql-8:
+    image: mysql:8
+    <<: *shared_config
+  mysql-9:
+    image: mysql:9
+    <<: *shared_config
+  mariadb-10:
+    image: mariadb:10
+    <<: *shared_config
+  mariadb-11:
+    image: mariadb:11
+    <<: *shared_config
+  mariadb-12:
+    image: mariadb:12
+    <<: *shared_config
+  percona-8:
+    image: percona:8
+    <<: *shared_config

@@ -87,8 +87,6 @@ jobs:
           - percona:5.7
           - percona:8
         swiftver:
-          - swift:6.0-jammy
-          - swift:6.1-noble
           - swift:6.2-noble
           - swiftlang/swift:nightly-main-noble
     runs-on: ubuntu-latest
