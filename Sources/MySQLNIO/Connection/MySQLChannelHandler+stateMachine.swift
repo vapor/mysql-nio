@@ -51,8 +51,8 @@ extension MySQLChannelHandler {
             /// Returns all pending commands, including the active command if it exists.
             ///
             /// > Warning: This mutates the state by moving the active command (if it exists) into the pending commands,
-            /// so it should only be used when we want to fail all pending commands and close the connection,
-            /// such as when a deadline is hit or a cancel is requested.
+            /// > so it should only be used when we want to fail all pending commands and close the connection,
+            /// > such as when a deadline is hit or a cancel is requested.
             mutating func allPendingCommands() -> Deque<PendingCommand> {
                 if let activeCommand { pendingCommands.append(activeCommand) }
                 return pendingCommands
