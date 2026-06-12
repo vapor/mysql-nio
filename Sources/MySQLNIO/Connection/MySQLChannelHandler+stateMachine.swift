@@ -80,7 +80,7 @@ extension MySQLChannelHandler {
         }
 
         init() {
-            self.state = .startup
+            self.init(.startup)
         }
 
         private init(_ state: consuming State) {
