@@ -164,7 +164,6 @@ extension MySQLConnectionConfiguration {
             "_platform": ProcessInfo.processInfo.hostArchitectureName,
             "_client_license": "MIT",
             "_runtime_vendor": "Apple",
-            "_runtime_version": ProcessInfo.processInfo.swiftRuntimeVersion,
             "_connector_version": "2.0.0",
             "_connector_name": "mysql-nio",
         ]

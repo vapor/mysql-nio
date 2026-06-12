@@ -45,6 +45,7 @@ jobs:
           - mysql:9.5
         swiftver:
           - swift:6.2-noble
+          - swift:6.3-noble
     runs-on: ubuntu-latest
     container:
       image: ${{ matrix.swiftver }}
@@ -88,6 +89,7 @@ jobs:
           - percona:8
         swiftver:
           - swift:6.2-noble
+          - swift:6.3-noble
           - swiftlang/swift:nightly-main-noble
     runs-on: ubuntu-latest
     container: ${{ matrix.swiftver }}

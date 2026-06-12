@@ -5,36 +5,6 @@ import Foundation
 #endif
 
 extension ProcessInfo {
-    /// Generated with `bash`:
-    ///
-    /// ```bash
-    /// for i in {3..2}; do
-    ///     for j in {10..0}; do
-    ///         echo "        #elseif swift(>=6.$i.$j)"
-    ///         echo "        return \"6.$i.$j\""
-    ///     done
-    /// done
-    /// ```
-    var swiftRuntimeVersion: String {
-        #if swift(>=6.3.2)
-        "6.3.2"
-        #elseif swift(>=6.3.1)
-        "6.3.1"
-        #elseif swift(>=6.3.0)
-        "6.3.0"
-        #elseif swift(>=6.2.4)
-        "6.2.4"
-        #elseif swift(>=6.2.3)
-        "6.2.3"
-        #elseif swift(>=6.2.2)
-        "6.2.2"
-        #elseif swift(>=6.2.1)
-        "6.2.1"
-        #elseif swift(>=6.2.0)
-        "6.2.0"
-        #endif
-    }
-
     /// Based on https://github.com/apple/swift/blob/main/lib/Basic/LangOptions.cpp#L52-L82
     var operatingSystemPlainName: String {
         #if os(macOS)
