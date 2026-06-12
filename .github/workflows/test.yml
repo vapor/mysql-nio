@@ -44,7 +44,7 @@ jobs:
         dbimage:
           - mysql:9.5
         swiftver:
-          - swift:6.2-noble
+          - swift:6.3-noble
     runs-on: ubuntu-latest
     container:
       image: ${{ matrix.swiftver }}
@@ -70,7 +70,7 @@ jobs:
       - name: Run unit tests
         run: swift test --enable-code-coverage
       - name: Upload code coverage
-        uses: vapor/swift-codecov-action@v0.3
+        uses: vapor/swift-codecov-action@2f478f2fd22e06ca363967d0fb6c6593a8548cee # v0.3.5
         with:
           codecov_token: ${{ secrets.CODECOV_TOKEN }}
   
@@ -87,9 +87,9 @@ jobs:
           - percona:5.7
           - percona:8
         swiftver:
-          - swift:6.0-jammy
           - swift:6.1-noble
           - swift:6.2-noble
+          - swift:6.3-noble
           - swiftlang/swift:nightly-main-noble
     runs-on: ubuntu-latest
     container: ${{ matrix.swiftver }}
@@ -109,7 +109,7 @@ jobs:
       - name: Run unit tests
         run: swift test --package-path mysql-nio --enable-code-coverage
       - name: Upload code coverage
-        uses: vapor/swift-codecov-action@v0.3
+        uses: vapor/swift-codecov-action@2f478f2fd22e06ca363967d0fb6c6593a8548cee # v0.3.5
         with:
           codecov_token: ${{ secrets.CODECOV_TOKEN }}
           package_path: 'mysql-nio'
@@ -144,7 +144,7 @@ jobs:
     env: { MYSQL_HOSTNAME: '127.0.0.1' }
     steps:
       - name: Select latest available Xcode
-        uses: maxim-lobanov/setup-xcode@v1
+        uses: maxim-lobanov/setup-xcode@ed7a3b1fda3918c0306d1b724322adc0b8cc0a90 # v1.7.0
         with: 
           xcode-version: ${{ matrix.xcode-version }}
       - name: Install MySQL, setup DB and auth, and wait for server start
@@ -167,6 +167,6 @@ jobs:
       - name: Run all tests
         run: swift test --enable-code-coverage
       - name: Upload code coverage
-        uses: vapor/swift-codecov-action@v0.3
+        uses: vapor/swift-codecov-action@2f478f2fd22e06ca363967d0fb6c6593a8548cee # v0.3.5
         with:
           codecov_token: ${{ secrets.CODECOV_TOKEN }}
