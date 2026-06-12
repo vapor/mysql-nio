@@ -323,7 +323,7 @@ final class MySQLChannelHandler: ChannelDuplexHandler {
         }
     }
 
-    /// Used to send utility commands, such as COM_PING and COM_RESET_CONNECTION
+    /// Used to send utility commands, such as `COM_PING` and `COM_RESET_CONNECTION`
     ///
     /// > Important: The buffer must have 4 bytes of space reserved starting at the buffer's `readerIndex`. See ``MySQLRawPacketCodec``.
     @usableFromInline
