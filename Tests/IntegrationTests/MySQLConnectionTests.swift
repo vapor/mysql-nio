@@ -73,7 +73,7 @@ struct MySQLConnectionTests {
         }
     }
 
-    @Test("Connect with TLS")
+    @Test("Connect with TLS", .disabled(if: ProcessInfo.processInfo.environment["CI"] != nil, "TODO: setup TLS testing in CI"))
     func tlsConnect() async throws {
         try await MySQLConnection.withConnection(
             address: .hostname(mySQLHostname),
