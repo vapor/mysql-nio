@@ -221,7 +221,7 @@ extension MySQLChannelHandler {
         }
 
         @usableFromInline
-        mutating func receivedResponse(packet: inout ByteBuffer) -> ReceivedResponseAction {
+        mutating func receivedResponse(packet: inout ByteBuffer) throws -> ReceivedResponseAction {
             switch consume self.state {
             case .startup:
                 preconditionFailure("Cannot receive packet when in startup state")
@@ -262,14 +262,24 @@ extension MySQLChannelHandler {
                         initialHandshake.authenticationPluginName,
                         capabilities: clientCapabilities
                     )
-                    guard
-                        let authResponse = authMethod.processData(
-                            initialHandshake.authenticationPluginData,
-                            password: state.configuration.password,
-                            connectionIsSecure: connectionIsSecure
-                        )
-                    else {
-                        preconditionFailure("The auth response cannot be nil at this stage.")
+                    let authResponse: ByteBuffer
+                    do {
+                        guard
+                            let response = try authMethod.processData(
+                                initialHandshake.authenticationPluginData,
+                                password: state.configuration.password,
+                                connectionIsSecure: connectionIsSecure
+                            )
+                        else {
+                            preconditionFailure("The auth response cannot be nil at this stage.")
+                            // It cannot be nil because no authentication method currently returns nil at the first step of the authentication process,
+                            // not because the server could be returning invalid data.
+                            // If a method is added that returns nil, this precondition failure should be replaced with proper handling of that case.
+                        }
+                        authResponse = response
+                    } catch {
+                        self = .closed(error)
+                        return .failPromise(state.connectPromise, error)
                     }
 
                     self = .awaitingAuthReply(
@@ -359,21 +369,33 @@ extension MySQLChannelHandler {
                     }
                     // TODO: mysql_native_password in authentication switch in MariaDB doesn't work for root user with empty password
                     state.authMethod = AuthenticationMethods.fromName(authSwitchRequest.authenticationPluginName, capabilities: nil)
-                    let responsePacket = state.authMethod.processData(
-                        authSwitchRequest.authenticationPluginData,
-                        password: state.password,
-                        connectionIsSecure: state.capabilities.contains(.ssl)
-                    )
+                    let responsePacket: ByteBuffer?
+                    do {
+                        responsePacket = try state.authMethod.processData(
+                            authSwitchRequest.authenticationPluginData,
+                            password: state.password,
+                            connectionIsSecure: state.capabilities.contains(.ssl)
+                        )
+                    } catch {
+                        self = .closed(error)
+                        return .failPromise(state.connectPromise, error)
+                    }
                     self = .awaitingAuthReply(state)
                     return .authRespond(responsePacket)
                 } else if packet.mySQLHeaderFlag == 0x02 {
                     fatalError("TODO: Multi Factor Authentication is not yet supported")
                 } else {
-                    let responsePacket = state.authMethod.processData(
-                        packet,
-                        password: state.password,
-                        connectionIsSecure: state.capabilities.contains(.ssl)
-                    )
+                    let responsePacket: ByteBuffer?
+                    do {
+                        responsePacket = try state.authMethod.processData(
+                            packet,
+                            password: state.password,
+                            connectionIsSecure: state.capabilities.contains(.ssl)
+                        )
+                    } catch {
+                        self = .closed(error)
+                        return .failPromise(state.connectPromise, error)
+                    }
                     self = .awaitingAuthReply(state)
                     return .authRespond(responsePacket)
                 }

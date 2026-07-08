@@ -6,8 +6,8 @@ import _CryptoExtras
 struct CachingSHA2Password: AuthenticationMethod, ~Copyable {
     static let name = "caching_sha2_password"
     var stateMachine = StateMachine()
-    mutating func processData(_ data: ByteBuffer, password: String?, connectionIsSecure: Bool) -> ByteBuffer? {
-        self.stateMachine.processData(data, password: password, connectionIsSecure: connectionIsSecure)
+    mutating func processData(_ data: ByteBuffer, password: String?, connectionIsSecure: Bool) throws -> ByteBuffer? {
+        try self.stateMachine.processData(data, password: password, connectionIsSecure: connectionIsSecure)
     }
 }
 
@@ -37,19 +37,23 @@ extension CachingSHA2Password {
             self.state = state
         }
 
-        mutating func processData(_ data: ByteBuffer, password: String?, connectionIsSecure: Bool) -> ByteBuffer? {
+        enum Error: Swift.Error {
+            case invalidSeed
+            case invalidResponse
+            case invalidPublicKey
+        }
+
+        mutating func processData(_ data: ByteBuffer, password: String?, connectionIsSecure: Bool) throws -> ByteBuffer? {
             switch consume self.state {
             case .uninitialized:
                 self = .fastAuthentication(nonce: connectionIsSecure ? .init() : data)
                 if let password {
-                    guard data.readableBytes == 20 else { preconditionFailure("Invalid seed") }
+                    guard data.readableBytes == 20 else { throw Error.invalidSeed }
                     let passwordHash = SHA256.hash(data: Array(password.utf8))
                     let seedHash = SHA256.hash(data: Array(chain(SHA256.hash(data: Array(passwordHash)), data.readableBytesView)))
                     return ByteBuffer(bytes: zip(passwordHash, seedHash).map(^))
                 } else {
-                    var emptyPassword = ByteBuffer()
-                    emptyPassword.writeNullTerminatedString("")
-                    return emptyPassword
+                    return ByteBuffer(bytes: [0x00])
                 }
             case .fastAuthentication(let nonce):
                 guard data.readableBytes == 2,
@@ -57,7 +61,8 @@ extension CachingSHA2Password {
                     let resultByte = data.getInteger(at: data.readerIndex + 1, as: UInt8.self),
                     let result = FastAuthenticationResult(rawValue: resultByte)
                 else {
-                    preconditionFailure("Invalid caching_sha2_password response to fast authentication")
+                    self = .end
+                    throw Error.invalidResponse
                 }
                 switch result {
                 case .success:
@@ -79,10 +84,10 @@ extension CachingSHA2Password {
                     let pemString = data.getString(at: data.readerIndex + 1, length: data.readableBytes - 1),
                     let key = try? _RSA.Encryption.PublicKey(pemRepresentation: pemString)
                 else {
-                    preconditionFailure("Invalid RSA public key from server")
+                    throw Error.invalidPublicKey
                 }
                 let saltedPassword = Array(zip(chain((password ?? "").utf8, [0]), nonce.readableBytesView.cycled()).map(^))
-                return ByteBuffer(bytes: try! key.encrypt(saltedPassword, padding: .PKCS1_OAEP))  // TODO: handle errors
+                return ByteBuffer(bytes: try key.encrypt(saltedPassword, padding: .PKCS1_OAEP))
             case .end:
                 preconditionFailure("Received data after authentication completed")
             }

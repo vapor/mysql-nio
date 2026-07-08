@@ -214,7 +214,7 @@ final class MySQLChannelHandler: ChannelDuplexHandler {
         self.logger.trace("Received MySQL packet")
 
         var packet = packet
-        switch self.stateMachine.receivedResponse(packet: &packet) {
+        switch try self.stateMachine.receivedResponse(packet: &packet) {
         case .closeWithError(let error):
             throw error
         case .handshakeRespond(let handshakeResponse, let sslRequest, let statusFlags):

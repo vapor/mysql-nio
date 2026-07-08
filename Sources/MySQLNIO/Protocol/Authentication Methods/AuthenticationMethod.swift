@@ -3,7 +3,7 @@ public import NIOCore
 @usableFromInline
 protocol AuthenticationMethod: ~Copyable {
     static var name: String { get }
-    mutating func processData(_ data: ByteBuffer, password: String?, connectionIsSecure: Bool) -> ByteBuffer?
+    mutating func processData(_ data: ByteBuffer, password: String?, connectionIsSecure: Bool) throws -> ByteBuffer?
 }
 
 enum AuthenticationMethods {
@@ -21,7 +21,7 @@ enum AuthenticationMethods {
                 {
                     MySQLNativePassword()
                 } else {
-                    preconditionFailure("Old Password Authentication is not supported.")
+                    fatalError("Old Password Authentication is not supported.")
                 }
             } else {
                 preconditionFailure("capabilities can be nil only if the authentication plugin name is provided, but it was not")
