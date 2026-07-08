@@ -5,8 +5,8 @@ import NIOCore
 struct MySQLNativePassword: AuthenticationMethod, ~Copyable {
     static let name = "mysql_native_password"
     var stateMachine = StateMachine()
-    mutating func processData(_ data: ByteBuffer, password: String?, connectionIsSecure _: Bool) -> ByteBuffer? {
-        self.stateMachine.processData(data, password: password)
+    mutating func processData(_ data: ByteBuffer, password: String?, connectionIsSecure _: Bool) throws -> ByteBuffer? {
+        try self.stateMachine.processData(data, password: password)
     }
 }
 
@@ -29,11 +29,15 @@ extension MySQLNativePassword {
             self.state = state
         }
 
-        mutating func processData(_ data: ByteBuffer, password: String?) -> ByteBuffer {
+        enum Error: Swift.Error {
+            case invalidSeed
+        }
+
+        mutating func processData(_ data: ByteBuffer, password: String?) throws -> ByteBuffer {
             switch consume self.state {
             case .uninitialized:
                 self = .end
-                guard data.readableBytes == 20 else { preconditionFailure("Invalid seed") }
+                guard data.readableBytes == 20 else { throw Error.invalidSeed }
                 let passwordHash = Insecure.SHA1.hash(data: Array((password ?? "").utf8))
                 let seedHash = Insecure.SHA1.hash(data: Array(chain(data.readableBytesView, Insecure.SHA1.hash(data: Array(passwordHash)))))
                 return ByteBuffer(bytes: zip(passwordHash, seedHash).map(^))
