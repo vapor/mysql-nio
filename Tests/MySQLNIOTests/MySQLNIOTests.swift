@@ -30,6 +30,42 @@ struct MySQLNIOTests {
     init() {
         #expect(isLoggingConfigured)
     }
+
+    @Test(arguments: [nil, ""] as [String?])
+    func cachingSHA2PasswordWithoutPasswordSendsEmptyAuthResponse(password: String?) throws {
+        #expect(try cachingSHA2AuthResponse(password: password).readableBytes == 0)
+    }
+
+    @Test
+    func cachingSHA2PasswordWithPasswordStillSendsScrambledAuthResponse() throws {
+        #expect(try cachingSHA2AuthResponse(password: "secret").readableBytes == 32)
+    }
+
+    private func cachingSHA2AuthResponse(password: String?) throws -> ByteBuffer {
+        let eventLoop = MultiThreadedEventLoopGroup.singleton.next()
+        let done = eventLoop.makePromise(of: Void.self)
+        defer { done.succeed(()) }
+        let handler = MySQLConnectionHandler(
+            logger: .init(label: "codes.vapor.mysql.tests"),
+            state: .handshake(.init(
+                username: "root",
+                database: "",
+                password: password,
+                tlsConfiguration: nil,
+                serverHostname: nil,
+                done: done
+            )),
+            sequence: .init()
+        )
+        let response = try handler.doInitialAuthPluginHandling(
+            authPluginName: "caching_sha2_password",
+            isTLS: false,
+            passwordInput: password,
+            authPluginData: .init(bytes: Array(0..<20)),
+            done: done
+        )
+        return response
+    }
     
     @Test
     func decodingSumOfIntsWithNoRows() async throws {
