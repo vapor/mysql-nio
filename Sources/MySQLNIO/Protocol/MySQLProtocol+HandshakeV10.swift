@@ -128,6 +128,18 @@ extension MySQLProtocol {
                     guard var authPluginDataPart2 = packet.payload.readSlice(length: authPluginDataPart2Length) else {
                         throw Error.missingAuthPluginData
                     }
+                    if capabilities.contains(.CLIENT_PLUGIN_AUTH),
+                       authPluginDataPart2.readableBytes > 0,
+                       authPluginDataPart2.getInteger(
+                           at: authPluginDataPart2.writerIndex - 1,
+                           as: UInt8.self
+                       ) == 0 {
+                        // The wire field is at least 13 bytes: 12 bytes of
+                        // plugin data followed by a NUL terminator. The
+                        // terminator separates the data from the plugin name;
+                        // it is not part of the authentication nonce.
+                        authPluginDataPart2.moveWriterIndex(to: authPluginDataPart2.writerIndex - 1)
+                    }
                     authPluginData = authPluginDataPart1
                     authPluginData.writeBuffer(&authPluginDataPart2)
                     if !capabilities.contains(.CLIENT_PLUGIN_AUTH) {
