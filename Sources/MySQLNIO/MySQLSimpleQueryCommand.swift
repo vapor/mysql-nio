@@ -21,6 +21,7 @@ private final class MySQLSimpleQueryCommand: MySQLCommand, @unchecked Sendable {
         case ready
         case columns(count: UInt64)
         case rows
+        case moreResults
         case done
     }
     var state: State
@@ -69,11 +70,16 @@ private final class MySQLSimpleQueryCommand: MySQLCommand, @unchecked Sendable {
             }
             return .noResponse
         case .rows:
-            guard !packet.isEOF else {
+            if packet.isOK || packet.isEOF {
+                let ok = try MySQLProtocol.OK_Packet.decode(from: &packet, capabilities: capabilities)
+                if ok.statusFlags.contains(.SERVER_MORE_RESULTS_EXISTS) {
+                    self.state = .moreResults
+                    return .noResponse
+                }
                 self.state = .done
                 return .done
             }
-            
+
             let data = try MySQLProtocol.TextResultSetRow.decode(from: &packet, columnCount: columns.count)
             let row = MySQLRow(
                 format: .text,
@@ -82,6 +88,14 @@ private final class MySQLSimpleQueryCommand: MySQLCommand, @unchecked Sendable {
             )
             self.onRow(row)
             return .noResponse
+        case .moreResults:
+            // Consume remaining OK packets until no more results
+            let ok = try MySQLProtocol.OK_Packet.decode(from: &packet, capabilities: capabilities)
+            if ok.statusFlags.contains(.SERVER_MORE_RESULTS_EXISTS) {
+                return .noResponse
+            }
+            self.state = .done
+            return .done
         case .done: throw MySQLError.protocolError
         }
     }
