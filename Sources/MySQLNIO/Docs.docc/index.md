@@ -1,20 +1,6 @@
-<div align="center">
-<img src="https://design.vapor.codes/images/vapor-mysqlnio.svg" height="96" alt="MySQLNIO">
-<br>
-<br>
-    
-[![Documentation](https://design.vapor.codes/images/readthedocs.svg)](https://docs.vapor.codes/4.0/)
-[![Team Chat](https://design.vapor.codes/images/discordchat.svg)](https://discord.gg/vapor)
-[![MIT License](https://design.vapor.codes/images/mitlicense.svg)](./LICENSE)
-[![Continuous Integration](https://img.shields.io/github/actions/workflow/status/vapor/mysql-nio/test.yml?event=push&style=plastic&logo=github&label=test&logoColor=ccc)](https://github.com/vapor/mysql-nio/actions/workflows/test.yml)
-[![Code Coverage](https://img.shields.io/codecov/c/github/vapor/mysql-nio?style=plastic&logo=codecov&label=Codecov)](https://codecov.io/github/vapor/mysql-nio)
-[![Swift 6.0+](https://design.vapor.codes/images/swift60up.svg)](https://swift.org)
+# ``MySQLNIO``
 
-</div>
-
-<br>
-
-🐬 Non-blocking, event-driven Swift client for MySQL built on [SwiftNIO](https://github.com/apple/swift-nio).
+MySQLNIO is a driver for the MySQL database written in Swift. It uses SwiftNIO under the hood to provide a non-blocking API.
 
 ## Using MySQLNIO
 
@@ -37,7 +23,7 @@ MySQLNIO supports the following platforms:
 
 MySQLNIO is a client package for connecting to, authorizing, and querying a MySQL server. At the heart of this module are NIO channel handlers for parsing and serializing messages in MySQL's proprietary wire protocol. These channel handlers are combined in a request / response style connection type that provides a convenient, client-like interface for performing queries. 
 
-Support for both simple (text) and parameterized (prepared statement) querying is provided out of the box alongside a `MySQLData` type that handles conversion between MySQL's wire format and native Swift types.
+Support for both simple (text) and parameterized (prepared statement) querying is provided out of the box alongside a ``MySQLData`` type that handles conversion between MySQL's wire format and native Swift types.
 
 ### Motivation
 
@@ -78,7 +64,7 @@ This section will provide a quick look at using MySQLNIO.
 
 ### Creating a Connection
 
-The first step to making a query is creating a new `MySQLConnection`. The minimum requirements to create one are a `SocketAddress`, `EventLoop`, and credentials. 
+The first step to making a query is creating a new ``MySQLConnection``. The minimum requirements to create one are a `SocketAddress`, `EventLoop`, and credentials. 
 
 ```swift
 import MySQLNIO
@@ -99,18 +85,18 @@ There are a few ways to create a `SocketAddress`:
 - `init(unixDomainSocketPath: String)`
 - `makeAddressResolvingHost(_ host: String, port: Int)`
 
-There are also some additional arguments you can supply to `connect`. 
+There are also some additional arguments you can supply to ``MySQLConnection/connect(to:username:database:password:tlsConfiguration:serverHostname:logger:on:)``. 
 
 - `tlsConfiguration` An optional `TLSConfiguration` struct. This will be used if the MySQL server supports TLS. Pass `nil` to opt-out of TLS.
 - `serverHostname` An optional `String` to use in conjunction with `tlsConfiguration` to specify the server's hostname. 
 
-`connect` will return a `MySQLConnection`, or an error if it could not connect.
+``MySQLConnection/connect(to:username:database:password:tlsConfiguration:serverHostname:logger:on:)`` will return a ``MySQLConnection``, or an error if it could not connect.
 
 ### Database Protocol
 
-Interaction with a server revolves around the `MySQLDatabase` protocol. This protocol includes methods like `query(_:)` for executing SQL queries and reading the resulting rows. 
+Interaction with a server revolves around the ``MySQLDatabase`` protocol. This protocol includes methods like ``MySQLDatabase/query(_:_:onRow:onMetadata:)`` for executing SQL queries and reading the resulting rows. 
 
-`MySQLConnection` is the default implementation of `MySQLDatabase` provided by this package. Assume the client here is the connection from the previous example.
+``MySQLConnection`` is the default implementation of ``MySQLDatabase`` provided by this package. Assume the client here is the connection from the previous example.
 
 ```swift
 import MySQLNIO
@@ -125,7 +111,7 @@ Simple (text) queries allow you to execute a SQL string on the connected MySQL s
 
 These queries are most useful for schema or transactional queries, or simple selects. Note that values returned by simple queries will be transferred in the less efficient text format. 
 
-`simpleQuery` has two overloads, one that returns an array of rows, and one that accepts a closure for handling each row as it is returned.
+``MySQLDatabase/simpleQuery(_:onRow:)`` has two overloads, one that returns an array of rows, and one that accepts a closure for handling each row as it is returned.
 
 ```swift
 let rows = try await db.simpleQuery("SELECT @@version").get()
@@ -142,7 +128,7 @@ Parameterized (prepared statement) queries allow you to execute a SQL string on 
 
 These queries are most useful for selecting, inserting, and updating data. Data for these queries is transferred using the highly efficient binary format. 
 
-Just like `simpleQuery`, `query` also offers two overloads. One that returns an array of rows, and one that accepts a closure for handling each row as it is returned.
+Just like ``MySQLDatabase/simpleQuery(_:onRow:)``, ``MySQLDatabase/query(_:_:onRow:onMetadata:)`` also offers two overloads. One that returns an array of rows, and one that accepts a closure for handling each row as it is returned.
 
 ```swift
 let rows = try await db.query("SELECT * FROM planets WHERE name = ?", ["Earth"]).get()
@@ -155,7 +141,7 @@ try await db.query("SELECT * FROM planets WHERE name = ?", ["Earth"]) { row in
 
 ### Rows and Data
 
-Both `simpleQuery` and `query` return the same `MySQLRow` type. Columns can be fetched from the row using the `column(_:table:)` method.
+Both ``MySQLDatabase/simpleQuery(_:)`` and ``MySQLDatabase/query(_:_:onMetadata:)`` return the same ``MySQLRow`` type. Columns can be fetched from the row using the ``MySQLRow/column(_:table:)`` method.
 
 ```swift
 let row: any MySQLRow = ...
@@ -163,13 +149,13 @@ let version = row.column("name")
 print(version) // MySQLData?
 ```
 
-`MySQLRow` columns are stored as `MySQLData`. This struct contains the raw bytes returned by MySQL as well as some information for parsing them, such as:
+``MySQLRow`` columns are stored as ``MySQLData``. This struct contains the raw bytes returned by MySQL as well as some information for parsing them, such as:
 
 - MySQL data type
 - Wire format: binary or text
 - Value as array of bytes
 
-`MySQLData` has a variety of convenience methods for converting column data to usable Swift types.
+``MySQLData`` has a variety of convenience methods for converting column data to usable Swift types.
 
 ```swift
 let data: MySQLData = ...
@@ -202,4 +188,4 @@ print(data.decimal) // Decimal?
 print(data.time) // MySQLTime?
 ```
 
-`MySQLData` is also used for sending data _to_ the server via parameterized values. To create `MySQLData` from a Swift type, use the available intializer methods. 
+``MySQLData`` is also used for sending data _to_ the server via parameterized values. To create ``MySQLData`` from a Swift type, use the available intializer methods. 

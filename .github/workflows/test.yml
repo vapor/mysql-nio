@@ -46,7 +46,6 @@ jobs:
         dbimage:
           - mysql:9.7
         swiftver:
-          - swift:6.2-noble
           - swift:6.3-noble
     runs-on: ubuntu-latest
     container:
