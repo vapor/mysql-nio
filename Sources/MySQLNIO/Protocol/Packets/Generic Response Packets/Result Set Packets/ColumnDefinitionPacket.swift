@@ -10,7 +10,7 @@ struct ColumnDefinitionPacket {
     let extendedMetadata: String?
     let characterSet: MySQLCollation
     let maxColumnSize: UInt32
-    let type: UInt8
+    let type: MySQLDataType
     let flags: UInt16
     let decimals: UInt8
 
@@ -49,7 +49,7 @@ struct ColumnDefinitionPacket {
         self.columnName = columnName
         self.characterSet = .lookup(byId: characterSetRaw)
         self.maxColumnSize = maxColumnSize
-        self.type = type
+        self.type = MySQLDataType(rawValue: type)
         self.flags = flags
         self.decimals = decimals
     }
