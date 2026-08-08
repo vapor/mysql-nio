@@ -875,7 +875,7 @@ extension MySQLChannelHandler.StateMachine {
         @usableFromInline
         enum ReceivedResponseAction {
             case metadataFollows
-            case columnDefinition(ColumnDefinitionPacket)
+            case columnDefinition(ColumnDefinition)
             case metadataEnd
             case row(String)
             case resultsetEnd
@@ -929,7 +929,7 @@ extension MySQLChannelHandler.StateMachine {
                 } else {
                     self = .awaitingColumnMetadata(columnsRemaining: columnsRemaining - 1, capabilities: self.capabilities)
                 }
-                guard let columnDefinition = ColumnDefinitionPacket(from: &packet, capabilities: self.capabilities) else {
+                guard let columnDefinition = ColumnDefinition(from: &packet, capabilities: self.capabilities) else {
                     let error = MySQLClientError.invalidPacket("Received an invalid Column Definition Packet")
                     self = .done(result: error, capabilities: self.capabilities)
                     return .error(error)
