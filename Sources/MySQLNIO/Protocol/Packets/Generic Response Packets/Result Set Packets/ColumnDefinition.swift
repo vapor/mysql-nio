@@ -1,7 +1,7 @@
 import NIOCore
 
 @usableFromInline
-struct ColumnDefinition {
+struct ColumnDefinition: Hashable, Sendable {
     /// Schema name
     @usableFromInline
     let schema: String

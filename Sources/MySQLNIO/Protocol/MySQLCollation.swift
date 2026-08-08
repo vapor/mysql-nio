@@ -36,7 +36,7 @@
 ///
 ///    - Use `utf8mb4_unicode_520_ci`
 @usableFromInline
-struct MySQLCollation {
+struct MySQLCollation: Hashable, Sendable {
     /// The full name of the collation (e.g. `utf8mb4_0900_ai_ci`).
     let name: String
 
