@@ -99,10 +99,14 @@ struct MySQLCollation: Hashable, Sendable {
     /// Apply the heuristic algorithm to determining the appropriate collation for a connection.
     static func bestCollation(forVersion version: String, capabilities: MySQLCapabilities) -> Self {
         if !capabilities.contains(.clientMySQL),  // MariaDB 10.10 or newer
-            version.starts(with: "10.10") || version.starts(with: "10.11") || version.starts(with: "11.") || version.starts(with: "12.")
+            // second character is not a dot, therefore there's more than one digit, i.e. > 9
+            version.dropFirst().first != "."
+                // 2+ digits not starting with 10. so >= 11, or is 10.10 or 10.11
+                // the trailing . on the check for 10 makes versions 100+ pass :D
+                && (!version.starts(with: "10.") || version.starts(with: "10.10") || version.starts(with: "10.11"))
         {
             .utf8Unicode14AICI
-        } else if capabilities.contains(.clientMySQL), version.starts(with: "8") || version.starts(with: "9") {
+        } else if capabilities.contains(.clientMySQL), Int(version.split(separator: ".").first ?? "") ?? 0 >= 8 {
             // non-MariaDB MySQL 8.0 or newer (or compatible)
             .utf8Unicode9AICI
         } else {  // anything else
