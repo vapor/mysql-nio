@@ -99,11 +99,6 @@ extension DataRow {
             preconditionFailure("index out of bounds")
         }
 
-        var byteIndex = self.startIndex
-        for _ in 0..<index {
-            byteIndex = self.index(after: byteIndex)
-        }
-
-        return self[byteIndex]
+        return self[self.index(self.startIndex, offsetBy: index)]
     }
 }
