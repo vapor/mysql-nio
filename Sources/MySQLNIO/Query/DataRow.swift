@@ -16,7 +16,7 @@ extension DataRow: Sequence {
 
 extension DataRow: Collection {
     @usableFromInline
-    struct ColumnIndex: Comparable {
+    struct ColumnIndex: Comparable, Hashable {
         @usableFromInline
         var offset: Int
 
