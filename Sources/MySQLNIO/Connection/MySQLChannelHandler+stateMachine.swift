@@ -907,6 +907,24 @@ extension MySQLChannelHandler.StateMachine {
             }
             switch consume self.state {
             case .awaitingResultsetStart:
+                if packet.isOKPacket(capabilities: self.capabilities) {
+                    guard let okPacket = try? OKPacket(from: &packet, capabilities: self.capabilities) else {
+                        let error = MySQLClientError.invalidPacket("Received an invalid OK Packet")
+                        self = .done(result: error, capabilities: self.capabilities)
+                        return .error(error)
+                    }
+                    if okPacket.serverStatus.contains(.serverMoreResultsExists) {
+                        self = .awaitingResultsetStart(capabilities: self.capabilities)
+                        return .moreResultsExists
+                    }
+                    self = .done(result: nil, capabilities: self.capabilities)
+                    return .resultsetEnd
+                }
+                guard let columnCount = packet.readEncodedInteger(as: UInt64.self, strategy: .mySQL) else {
+                    let error = MySQLClientError.invalidPacket("Received an invalid Result Set Header Packet")
+                    self = .done(result: error, capabilities: self.capabilities)
+                    return .error(error)
+                }
                 var metadataFollows = false
                 if self.capabilities.metadataFlagAvailable {
                     guard let metadataFollowsFlag = packet.readInteger(as: UInt8.self) else {
@@ -915,11 +933,6 @@ extension MySQLChannelHandler.StateMachine {
                         return .error(error)
                     }
                     metadataFollows = metadataFollowsFlag == 1
-                }
-                guard let columnCount = packet.readEncodedInteger(as: UInt64.self, strategy: .mySQL) else {
-                    let error = MySQLClientError.invalidPacket("Received an invalid Result Set Header Packet")
-                    self = .done(result: error, capabilities: self.capabilities)
-                    return .error(error)
                 }
                 if !self.capabilities.metadataFlagAvailable || metadataFollows {
                     if columnCount == 0 {
