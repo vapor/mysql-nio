@@ -864,13 +864,8 @@ extension MySQLChannelHandler.StateMachine {
 
         @usableFromInline
         struct ColumnMetadata {
-            var columns: [ColumnDefinition]
-            var lookupTable: [String: Int]
-
-            init() {
-                self.columns = []
-                self.lookupTable = [:]
-            }
+            var columns: [ColumnDefinition] = []
+            var lookupTable: [String: Int] = [:]
         }
 
         init(capabilities: MySQLCapabilities) {
