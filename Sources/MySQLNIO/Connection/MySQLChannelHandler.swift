@@ -10,7 +10,7 @@ final class MySQLChannelHandler: ChannelDuplexHandler {
         @usableFromInline
         enum CommandKind {
             case utility
-            case query(AsyncThrowingStream<String, any Error>.Continuation)
+            case query(MySQLRowSequence.Continuation)
         }
 
         @usableFromInline
@@ -362,7 +362,7 @@ final class MySQLChannelHandler: ChannelDuplexHandler {
         _ packet: ByteBuffer,
         promise: MySQLPromise<ByteBuffer>,
         requestID: Int,
-        continuation: AsyncThrowingStream<String, any Error>.Continuation
+        continuation: MySQLRowSequence.Continuation
     ) {
         self.eventLoop.assertInEventLoop()
         var command = PendingCommand(

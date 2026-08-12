@@ -440,10 +440,10 @@ extension MySQLChannelHandler {
                 }
             case .query(var state):
                 switch state.stateMachine.receivedResponse(packet: &packet) {
-                case .metadataEnd, .metadataFollows:
+                case .doNothing:
                     self = .query(state)
                     return .doNothing
-                case .columnDefinition(_):
+                case .columnMetadata(_):
                     // TODO: handle column definitions
                     self = .query(state)
                     return .doNothing
@@ -850,9 +850,9 @@ extension MySQLChannelHandler.StateMachine {
             /// resultset has been signaled as incoming but not yet received.
             case awaitingResultsetStart
             /// Waiting for one or more column metadata packets
-            case awaitingColumnMetadata(columnsRemaining: UInt64)
+            case awaitingColumnMetadata(columnsRemaining: UInt64, columnMetadata: ColumnMetadata)
             /// Reading resultset rows
-            case readingRows
+            case readingRows(columnMetadata: ColumnMetadata)
             /// All result sets received, or error stopped the query.
             case done(result: (any Error)?)
         }
@@ -861,6 +861,17 @@ extension MySQLChannelHandler.StateMachine {
 
         @usableFromInline
         let capabilities: MySQLCapabilities
+
+        @usableFromInline
+        struct ColumnMetadata {
+            var columns: [ColumnDefinition]
+            var lookupTable: [String: Int]
+
+            init() {
+                self.columns = []
+                self.lookupTable = [:]
+            }
+        }
 
         init(capabilities: MySQLCapabilities) {
             self.state = .awaitingResultsetStart
@@ -874,10 +885,9 @@ extension MySQLChannelHandler.StateMachine {
 
         @usableFromInline
         enum ReceivedResponseAction {
-            case metadataFollows
-            case columnDefinition(ColumnDefinition)
-            case metadataEnd
-            case row(String)
+            case doNothing
+            case columnMetadata(ColumnMetadata)
+            case row(MySQLRow)
             case resultsetEnd
             case moreResultsExists
             case error(any Error)
@@ -913,29 +923,41 @@ extension MySQLChannelHandler.StateMachine {
                 }
                 if !self.capabilities.metadataFlagAvailable || metadataFollows {
                     if columnCount == 0 {
-                        self = .readingRows(capabilities: self.capabilities)
-                        return .metadataEnd
+                        self = .readingRows(columnMetadata: .init(), capabilities: self.capabilities)
+                        return .doNothing
                     } else {
-                        self = .awaitingColumnMetadata(columnsRemaining: columnCount, capabilities: self.capabilities)
-                        return .metadataFollows
+                        self = .awaitingColumnMetadata(
+                            columnsRemaining: columnCount,
+                            columnMetadata: .init(),
+                            capabilities: self.capabilities
+                        )
+                        return .doNothing
                     }
                 } else {
-                    self = .readingRows(capabilities: self.capabilities)
-                    return .metadataEnd
+                    self = .readingRows(columnMetadata: .init(), capabilities: self.capabilities)
+                    return .doNothing
                 }
-            case .awaitingColumnMetadata(let columnsRemaining):
-                if columnsRemaining == 1 {
-                    self = .readingRows(capabilities: self.capabilities)
-                } else {
-                    self = .awaitingColumnMetadata(columnsRemaining: columnsRemaining - 1, capabilities: self.capabilities)
-                }
-                guard let columnDefinition = ColumnDefinition(from: &packet, capabilities: self.capabilities) else {
+            case .awaitingColumnMetadata(let columnsRemaining, var columnMetadata):
+                guard let columnDefinition = ColumnDefinition(from: &packet, capabilities: self.capabilities, format: .text) else {
                     let error = MySQLClientError.invalidPacket("Received an invalid Column Definition Packet")
                     self = .done(result: error, capabilities: self.capabilities)
                     return .error(error)
                 }
-                return .columnDefinition(columnDefinition)
-            case .readingRows:
+                let nextColumnIndex = columnMetadata.columns.count
+                columnMetadata.columns.append(columnDefinition)
+                columnMetadata.lookupTable[columnDefinition.name] = nextColumnIndex
+                if columnsRemaining == 1 {
+                    self = .readingRows(columnMetadata: columnMetadata, capabilities: self.capabilities)
+                    return .columnMetadata(columnMetadata)
+                } else {
+                    self = .awaitingColumnMetadata(
+                        columnsRemaining: columnsRemaining - 1,
+                        columnMetadata: columnMetadata,
+                        capabilities: self.capabilities
+                    )
+                    return .doNothing
+                }
+            case .readingRows(let columnMetadata):
                 if packet.isEOFPacket {
                     guard let eofPacket = EOFPacket(from: &packet) else {
                         let error = MySQLClientError.invalidPacket("Received an invalid EOF Packet")
@@ -961,13 +983,14 @@ extension MySQLChannelHandler.StateMachine {
                     self = .done(result: nil, capabilities: self.capabilities)
                     return .resultsetEnd
                 } else {
-                    guard let row = packet.readLengthPrefixedString(strategy: .mySQL) else {
-                        let error = MySQLClientError.invalidPacket("Received an invalid Text Resultset Row packet")
-                        self = .done(result: error, capabilities: self.capabilities)
-                        return .error(error)
-                    }
-                    self = .readingRows(capabilities: self.capabilities)
-                    return .row(row)
+                    self = .readingRows(columnMetadata: columnMetadata, capabilities: self.capabilities)
+                    return .row(
+                        MySQLRow(
+                            data: .init(columnCount: UInt64(columnMetadata.columns.count), bytes: packet),
+                            lookupTable: columnMetadata.lookupTable,
+                            columns: columnMetadata.columns
+                        )
+                    )
                 }
             case .done:
                 preconditionFailure("Should not receive packets when query state machine is done")
@@ -978,12 +1001,16 @@ extension MySQLChannelHandler.StateMachine {
             Self(.awaitingResultsetStart, capabilities: capabilities)
         }
 
-        private static func awaitingColumnMetadata(columnsRemaining: UInt64, capabilities: MySQLCapabilities) -> Self {
-            Self(.awaitingColumnMetadata(columnsRemaining: columnsRemaining), capabilities: capabilities)
+        private static func awaitingColumnMetadata(
+            columnsRemaining: UInt64,
+            columnMetadata: ColumnMetadata,
+            capabilities: MySQLCapabilities
+        ) -> Self {
+            Self(.awaitingColumnMetadata(columnsRemaining: columnsRemaining, columnMetadata: columnMetadata), capabilities: capabilities)
         }
 
-        private static func readingRows(capabilities: MySQLCapabilities) -> Self {
-            Self(.readingRows, capabilities: capabilities)
+        private static func readingRows(columnMetadata: ColumnMetadata, capabilities: MySQLCapabilities) -> Self {
+            Self(.readingRows(columnMetadata: columnMetadata), capabilities: capabilities)
         }
 
         private static func done(result: (any Error)?, capabilities: MySQLCapabilities) -> Self {
