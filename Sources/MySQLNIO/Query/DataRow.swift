@@ -41,8 +41,8 @@ extension DataRow: Collection {
     }
 
     @inlinable
-    var endIndex: ColumnIndex {
-        ColumnIndex(self.bytes.readerIndex + self.bytes.readableBytes)
+    var endIndex: Self {
+        .init(self.bytes.readerIndex + self.bytes.readableBytes)
     }
 
     @inlinable
