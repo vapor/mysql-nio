@@ -36,12 +36,12 @@ extension DataRow: Collection {
     typealias Index = DataRow.ColumnIndex
 
     @inlinable
-    var startIndex: Self {
+    var startIndex: Index {
         .init(self.bytes.readerIndex)
     }
 
     @inlinable
-    var endIndex: Self {
+    var endIndex: Index {
         .init(self.bytes.readerIndex + self.bytes.readableBytes)
     }
 
