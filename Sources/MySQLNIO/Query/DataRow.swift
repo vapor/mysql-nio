@@ -36,8 +36,8 @@ extension DataRow: Collection {
     typealias Index = DataRow.ColumnIndex
 
     @inlinable
-    var startIndex: ColumnIndex {
-        ColumnIndex(self.bytes.readerIndex)
+    var startIndex: Self {
+        .init(self.bytes.readerIndex)
     }
 
     @inlinable
