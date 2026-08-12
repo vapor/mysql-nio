@@ -8,15 +8,6 @@ public enum MySQLFormat: Sendable {
     case text
 }
 
-extension MySQLFormat: CustomStringConvertible {
-    public var description: String {
-        switch self {
-        case .binary: "binary"
-        case .text: "text"
-        }
-    }
-}
-
 /// The raw wire-level type of a MySQL value.
 ///
 /// These are all of the possible types a given value might have, from MySQL's perspective.
