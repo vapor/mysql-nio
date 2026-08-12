@@ -184,12 +184,6 @@ struct MySQLPacketsTests {
     }
 }
 
-extension MySQLCollation: Equatable {
-    static func == (lhs: MySQLCollation, rhs: MySQLCollation) -> Bool {
-        lhs.id == rhs.id
-    }
-}
-
 extension InitialHandshakePacket: Equatable {
     static func == (lhs: InitialHandshakePacket, rhs: InitialHandshakePacket) -> Bool {
         lhs.protocolVersion == rhs.protocolVersion && lhs.serverVersion == rhs.serverVersion && lhs.connectionID == rhs.connectionID
