@@ -167,9 +167,9 @@ extension MySQLRandomAccessRow: Sendable, RandomAccessCollection {
         )
     }
 
-    public subscript(name: String) -> MySQLCell {
+    public subscript(name: String) -> MySQLCell? {
         guard let index = self.lookupTable[name] else {
-            fatalError(#"A column "\#(name)" does not exist."#)
+            return nil
         }
         return self[index]
     }
