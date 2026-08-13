@@ -71,7 +71,7 @@ struct MySQLPacketsTests {
             let handshakeResponse = HandshakeResponsePacket(
                 clientCapabilities: capabilities,
                 maxPacketSize: 0x4000_0000,
-                clientDefaultCharacterSetAndCollation: .init(name: "latin1_swedish_ci", characterSetName: "latin1", id: 8),
+                clientDefaultCharacterSetAndCollation: .init(name: "", characterSetName: "", id: 8),
                 username: "root",
                 authResponse: .init(
                     bytes: [0x22, 0x50, 0x79, 0xa2, 0x12, 0xd4, 0xe8, 0x82, 0xe5, 0xb3, 0xf4, 0x1a, 0x97, 0x75, 0x6b, 0xc8, 0xbe, 0xdb, 0x9f, 0x80]
@@ -181,12 +181,6 @@ struct MySQLPacketsTests {
             okPacket.write(to: &encodingPacket, capabilities: [.clientProtocol41])
             #expect(encodingPacket == buffer)
         }
-    }
-}
-
-extension MySQLCollation: Equatable {
-    static func == (lhs: MySQLCollation, rhs: MySQLCollation) -> Bool {
-        lhs.id == rhs.id
     }
 }
 

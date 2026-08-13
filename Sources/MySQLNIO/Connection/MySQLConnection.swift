@@ -84,13 +84,13 @@ public final actor MySQLConnection: Sendable {
 
     public func query<Value>(
         _ query: String,
-        handler: (AsyncThrowingStream<String, any Error>) async throws -> Value
+        handler: (MySQLRowSequence) async throws -> Value
     ) async throws -> Value {
         var payload = self.channel.allocator.buffer(capacity: 4 + 1 + query.utf8.count)
         payload.writeBytes([0x00, 0x00, 0x00, 0x00])
         payload.writeInteger(UInt8(0x03))
         payload.writeString(query)
-        let (stream, continuation) = AsyncThrowingStream<String, any Error>.makeStream()
+        let (stream, continuation) = MySQLRowSequence.makeStream()
         try await self.sendQueryCommand(payload, streamContinuation: continuation)
         return try await handler(stream)
     }
@@ -326,7 +326,7 @@ extension MySQLConnection {
     }
 
     @usableFromInline
-    func sendQueryCommand(_ packet: ByteBuffer, streamContinuation: AsyncThrowingStream<String, any Error>.Continuation) async throws {
+    func sendQueryCommand(_ packet: ByteBuffer, streamContinuation: MySQLRowSequence.Continuation) async throws {
         let requestID = Self.requestIDGenerator.next()
         try await withTaskCancellationHandler {
             if Task.isCancelled {

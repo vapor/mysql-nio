@@ -1,5 +1,6 @@
 import Logging
 import MySQLNIO
+import NIOCore
 import NIOSSL
 import Testing
 
@@ -13,8 +14,8 @@ import Foundation
 struct MySQLConnectionTests {
     let mySQLHostname = ProcessInfo.processInfo.environment["MYSQL_HOSTNAME"] ?? "localhost"
 
-    @Test("Query")
-    func query() async throws {
+    @Test("Select Version")
+    func selectVersion() async throws {
         try await MySQLConnection.withConnection(
             address: .hostname(mySQLHostname),
             configuration: .init(username: "test_username", password: "test_password"),
@@ -22,8 +23,67 @@ struct MySQLConnectionTests {
         ) { connection in
             try await connection.query("SELECT @@version") { rows in
                 for try await row in rows {
-                    #expect(row.contains("."))
+                    for cell in row {
+                        let version = String(buffer: try #require(cell.bytes))
+                        #expect(version.contains("."))
+                    }
                 }
+            }
+        }
+    }
+
+    @Test("Select String")
+    func selectString() async throws {
+        try await MySQLConnection.withConnection(
+            address: .hostname(mySQLHostname),
+            configuration: .init(username: "test_username", password: "test_password"),
+            logger: logger
+        ) { connection in
+            try await connection.query("SELECT 'foo' as bar") { rows in
+                for try await row in rows {
+                    for cell in row {
+                        #expect(cell.columnName == "bar")
+                        let value = String(buffer: try #require(cell.bytes))
+                        #expect(value == "foo")
+                    }
+                }
+            }
+        }
+    }
+
+    @Test("Select Integers")
+    func selectIntegers() async throws {
+        try await MySQLConnection.withConnection(
+            address: .hostname(mySQLHostname),
+            configuration: .init(username: "test_username", password: "test_password"),
+            logger: logger
+        ) { connection in
+            try await connection.query("SELECT '1' as one, 2 as two") { rows in
+                for try await row in rows {
+                    for cell in row {
+                        let value = String(buffer: try #require(cell.bytes))
+                        switch cell.columnName {
+                        case "one": #expect(value == "1")
+                        case "two": #expect(value == "2")
+                        default: Issue.record()
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    @Test("No Response")
+    func noResponse() async throws {
+        try await MySQLConnection.withConnection(
+            address: .hostname(mySQLHostname),
+            configuration: .init(username: "test_username", password: "test_password"),
+            logger: logger
+        ) { connection in
+            try await connection.query("SET @foo = 'bar'") { rows in
+                var iterator = rows.makeAsyncIterator()
+                let firstRow = try await iterator.next()
+                #expect(firstRow == nil)
             }
         }
     }
