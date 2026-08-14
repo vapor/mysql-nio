@@ -2,6 +2,7 @@ import Logging
 import NIOCore
 import NIOEmbedded
 import NIOPosix
+import OrderedCollections
 import Testing
 
 @testable import MySQLNIO
@@ -75,8 +76,10 @@ struct MySQLConnectionTests {
                 lastInsertID: 0,
                 serverStatus: [],
                 warningCount: 0,
-                info: nil,
-                sessionStateInfo: nil
+                info: "",
+                newSchema: nil,
+                updatedSettings: [:],
+                generalStateChange: false
             )
             let okPacketBuffer = NIOAsyncTestingChannel.makeMySQLPacket(sequenceID: 6) { buffer in
                 okPacket.write(to: &buffer, capabilities: .baselineClientCapabilities)

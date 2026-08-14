@@ -1,5 +1,6 @@
 import NIOCore
 import NIOEmbedded
+import OrderedCollections
 import Testing
 
 @testable import MySQLNIO
@@ -103,8 +104,10 @@ extension NIOAsyncTestingChannel {
             lastInsertID: 0,
             serverStatus: [],
             warningCount: 0,
-            info: nil,
-            sessionStateInfo: nil
+            info: "",
+            newSchema: nil,
+            updatedSettings: [:],
+            generalStateChange: false
         )
         let okPacketBuffer = Self.makeMySQLPacket(sequenceID: 2) {
             okPacket.write(to: &$0, capabilities: .baselineClientCapabilities)
@@ -122,8 +125,10 @@ extension NIOAsyncTestingChannel {
             lastInsertID: 0,
             serverStatus: [],
             warningCount: 0,
-            info: nil,
-            sessionStateInfo: nil
+            info: "",
+            newSchema: nil,
+            updatedSettings: [:],
+            generalStateChange: false
         )
         let okPacketBuffer = Self.makeMySQLPacket(sequenceID: 1) {
             okPacket.write(to: &$0, capabilities: .baselineClientCapabilities)

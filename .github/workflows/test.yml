@@ -6,7 +6,6 @@ on:
   pull_request: { types: [opened, reopened, synchronize, ready_for_review] }
   push: { branches: [ main ] }
 env:
-  LOG_LEVEL: info
   MYSQL_DATABASE: 'test_database'
   MYSQL_DATABASE_A: 'test_database'
   MYSQL_DATABASE_B: 'test_database'
@@ -176,9 +175,58 @@ jobs:
         with:
           codecov_token: ${{ secrets.CODECOV_TOKEN }}
 
+  ios-build:
+    runs-on: macos-latest
+    timeout-minutes: 15
+    steps:
+    - name: Select appropriate Xcode version
+      uses: maxim-lobanov/setup-xcode@ed7a3b1fda3918c0306d1b724322adc0b8cc0a90 # v1.7.0
+      with:
+        xcode-version: latest-stable
+    - name: Check out code
+      uses: actions/checkout@v7
+    - name: Xcodebuild
+      run: |
+        xcodebuild build -scheme mysql-nio -destination 'platform=iOS Simulator,name=iPhone 17'
+
+  android-build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v7
+      - name: Build for Android
+        uses: skiptools/swift-android-action@2044b79660f201ccef8cbce62877e4ec5409f9c8 # v2.9.5
+        with:
+          build-tests: true
+          run-tests: false
+
   submit-dependencies:
     permissions:
       contents: write
     if: ${{ github.event_name == 'push' }}
     uses: vapor/ci/.github/workflows/submit-deps.yml@main
     secrets: inherit
+
+  foundation-linking:
+    uses: vapor/ci/.github/workflows/check-foundation-linking.yml@main
+    permissions:
+      contents: read
+    with:
+      swift_image: swift:6.3-noble
+
+  lint:
+    runs-on: ubuntu-latest
+    container: swift:noble
+    timeout-minutes: 5
+    steps:
+      - name: Configure git
+        run: git config --global --add safe.directory "${GITHUB_WORKSPACE}"
+      - name: Check out code
+        uses: actions/checkout@v7
+      - name: Lint
+        run: |
+          apt -q update && apt -yq install curl
+          curl -s https://raw.githubusercontent.com/swiftlang/github-workflows/refs/heads/main/.github/workflows/scripts/check-swift-format.sh | bash
