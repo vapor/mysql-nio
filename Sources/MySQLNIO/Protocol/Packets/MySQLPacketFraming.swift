@@ -1,4 +1,3 @@
-import Logging
 import NIOCore
 
 /// This type is both an `NIOSingleStepByteToMessageDecoder` and a `MessageToByteEncoder`, and handles adding and

@@ -47,7 +47,7 @@ public final actor MySQLConnection: Sendable {
     ///   - address: Internet address of the MySQL server
     ///   - configuration: Configuration of the MySQL connection
     ///   - eventLoop: EventLoop to run connection on
-    ///   - logger: Logger to use for the connection
+    ///   - logger: Logger to use for the connection. Defaults to the current task-local logger.
     ///   - operation: Closure where MySQL operations using the connection are performed
     ///
     /// - Returns: The value returned by the `operation` closure
@@ -55,7 +55,7 @@ public final actor MySQLConnection: Sendable {
         address: MySQLServerAddress,
         configuration: MySQLConnectionConfiguration,
         eventLoop: any EventLoop = MultiThreadedEventLoopGroup.singleton.any(),
-        logger: Logger,
+        logger: Logger = Logger.current,
         operation: (MySQLConnection) async throws -> Value
     ) async throws -> Value {
         let connection = try await self.connect(
@@ -228,7 +228,7 @@ extension MySQLConnection {
     package static func setupChannelAndConnect(
         _ channel: any Channel,
         configuration: MySQLConnectionConfiguration,
-        logger: Logger
+        logger: Logger = Logger.current
     ) async throws -> MySQLConnection {
         if !channel.eventLoop.inEventLoop {
             return try await channel.eventLoop.flatSubmit {

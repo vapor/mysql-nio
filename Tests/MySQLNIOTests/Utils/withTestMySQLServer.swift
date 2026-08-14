@@ -1,4 +1,3 @@
-import Logging
 import NIOCore
 import NIOEmbedded
 import OrderedCollections
@@ -13,19 +12,17 @@ import Testing
 ///
 /// - Parameters:
 ///   - configuration: The configuration to use for the MySQL connection.
-///   - logger: The logger to use for logging MySQL events.
 ///   - clientOperation: An async operation to perform for the client side of the test.
 ///         The ``MySQLConnection`` will be passed as a parameter to this operation.
 ///   - serverOperation: An async operation to perform for the server side of the test.
 ///         The test MySQL server channel will be passed as a parameter to this operation.
 func withTestMySQLServer(
     configuration: MySQLConnectionConfiguration = .init(username: "test_username"),
-    logger: Logger = .init(label: "MySQLConnectionTests").withLogLevel(.trace),
     client clientOperation: @Sendable @escaping (MySQLConnection) async throws -> Void,
     server serverOperation: @Sendable @escaping (NIOAsyncTestingChannel) async throws -> Void
 ) async throws {
     let channel = NIOAsyncTestingChannel()
-    let connection = try await MySQLConnection.setupChannelAndConnect(channel, configuration: configuration, logger: logger)
+    let connection = try await MySQLConnection.setupChannelAndConnect(channel, configuration: configuration)
     try await channel.processHandshake(configuration: configuration)
     try await withThrowingTaskGroup { group in
         group.addTask {
