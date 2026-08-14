@@ -6,7 +6,7 @@ import Testing
 
 @testable import MySQLNIO
 
-@Suite("MySQLConnection Tests")
+@Suite("MySQLConnection Tests", .defaultLogger(logLevel: .trace))
 struct MySQLConnectionTests {
     @Test("Ping")
     func ping() async throws {
