@@ -179,7 +179,7 @@ jobs:
       uses: actions/checkout@v7
     - name: Xcodebuild
       run: |
-        xcodebuild build -scheme stomp-nio -destination 'platform=iOS Simulator,name=iPhone 17'
+        xcodebuild build -scheme mysql-nio -destination 'platform=iOS Simulator,name=iPhone 17'
 
   android-build:
     runs-on: ubuntu-latest
