@@ -146,11 +146,7 @@ public struct MySQLConnectionConfiguration: Sendable {
         self.connectTimeout = connectTimeout
         self.commandTimeout = commandTimeout
         self.tls = tls
-        self.connectionAttributes = Self.builtinConnectionAttributes.merging(
-            Self.sensitiveBuiltinConnectionAttributes.merging(
-                connectionAttributes
-            ) { $1 }
-        ) { $1 }
+        self.connectionAttributes = Self.builtinConnectionAttributes.merging(connectionAttributes) { $1 }
         self.isInteractive = isInteractive
     }
 }
@@ -167,23 +163,5 @@ extension MySQLConnectionConfiguration {
             "_connector_version": "2.0.0",
             "_connector_name": "mysql-nio",
         ]
-    }
-
-    fileprivate static var sensitiveBuiltinConnectionAttributes: OrderedDictionary<String, String> {
-        #if DEBUG
-        [
-            "_pid": "\(ProcessInfo.processInfo.processIdentifier)",
-            "_source_host": ProcessInfo.processInfo.hostName,
-            "os_user": ProcessInfo.processInfo.userName,
-            "program_name": ProcessInfo.processInfo.processName,
-        ]
-        #else
-        [
-            "_pid": "-1",
-            "_source_host": "localhost",
-            "os_user": "user",
-            "program_name": "sh",
-        ]
-        #endif
     }
 }
