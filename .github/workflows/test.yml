@@ -7,9 +7,17 @@ on:
   push: { branches: [ main ] }
 env:
   MYSQL_DATABASE: 'test_database'
+  MYSQL_DATABASE_A: 'test_database'
+  MYSQL_DATABASE_B: 'test_database'
   MYSQL_USERNAME: 'test_username'
+  MYSQL_USERNAME_A: 'test_username'
+  MYSQL_USERNAME_B: 'test_username'
   MYSQL_PASSWORD: 'test_password'
+  MYSQL_PASSWORD_A: 'test_password'
+  MYSQL_PASSWORD_B: 'test_password'
   MYSQL_HOSTNAME: 'mysql-a'
+  MYSQL_HOSTNAME_A: 'mysql-a'
+  MYSQL_HOSTNAME_B: 'mysql-b'
 
 jobs:
   api-breakage:

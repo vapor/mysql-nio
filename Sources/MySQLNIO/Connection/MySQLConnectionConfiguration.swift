@@ -171,12 +171,17 @@ extension MySQLConnectionConfiguration {
 
     fileprivate static var sensitiveBuiltinConnectionAttributes: OrderedDictionary<String, String> {
         #if DEBUG
-        [
+        var attributes: OrderedDictionary<String, String> = [
             "_pid": "\(ProcessInfo.processInfo.processIdentifier)",
             "_source_host": ProcessInfo.processInfo.hostName,
-            "os_user": ProcessInfo.processInfo.userName,
             "program_name": ProcessInfo.processInfo.processName,
         ]
+        #if !os(iOS) && !os(tvOS) && !os(watchOS) && !os(visionOS)
+        attributes["os_user"] = ProcessInfo.processInfo.userName
+        #else
+        attributes["os_user"] = "user"
+        #endif
+        return attributes
         #else
         [
             "_pid": "-1",
