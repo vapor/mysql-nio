@@ -8,6 +8,7 @@ let package = Package(
         .iOS(.v18),
         .watchOS(.v11),
         .tvOS(.v18),
+        .visionOS(.v2),
     ],
     products: [
         .library(name: "MySQLNIO", targets: ["MySQLNIO"])
@@ -58,6 +59,13 @@ let package = Package(
 
 var swiftSettings: [SwiftSetting] {
     [
+        .treatAllWarnings(as: .error),
+        // `UnownedSerialExecutor` is `@unsafe`
+        // .strictMemorySafety(),
+        .enableExperimentalFeature("SuppressedAssociatedTypesWithDefaults"),
+        .enableExperimentalFeature("LifetimeDependence"),
+        .enableExperimentalFeature("Lifetimes"),
+        .enableUpcomingFeature("LifetimeDependence"),
         .enableUpcomingFeature("ExistentialAny"),
         .enableUpcomingFeature("InternalImportsByDefault"),
         .enableUpcomingFeature("MemberImportVisibility"),

@@ -6,19 +6,10 @@ on:
   pull_request: { types: [opened, reopened, synchronize, ready_for_review] }
   push: { branches: [ main ] }
 env:
-  LOG_LEVEL: info
   MYSQL_DATABASE: 'test_database'
-  MYSQL_DATABASE_A: 'test_database'
-  MYSQL_DATABASE_B: 'test_database'
   MYSQL_USERNAME: 'test_username'
-  MYSQL_USERNAME_A: 'test_username'
-  MYSQL_USERNAME_B: 'test_username'
   MYSQL_PASSWORD: 'test_password'
-  MYSQL_PASSWORD_A: 'test_password'
-  MYSQL_PASSWORD_B: 'test_password'
   MYSQL_HOSTNAME: 'mysql-a'
-  MYSQL_HOSTNAME_A: 'mysql-a'
-  MYSQL_HOSTNAME_B: 'mysql-b'
 
 jobs:
   api-breakage:
@@ -176,9 +167,58 @@ jobs:
         with:
           codecov_token: ${{ secrets.CODECOV_TOKEN }}
 
+  ios-build:
+    runs-on: macos-latest
+    timeout-minutes: 15
+    steps:
+    - name: Select appropriate Xcode version
+      uses: maxim-lobanov/setup-xcode@v1
+      with:
+        xcode-version: latest-stable
+    - name: Check out code
+      uses: actions/checkout@v7
+    - name: Xcodebuild
+      run: |
+        xcodebuild build -scheme stomp-nio -destination 'platform=iOS Simulator,name=iPhone 17'
+
+  android-build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v7
+      - name: Build for Android
+        uses: skiptools/swift-android-action@v2
+        with:
+          build-tests: true
+          run-tests: false
+
   submit-dependencies:
     permissions:
       contents: write
     if: ${{ github.event_name == 'push' }}
     uses: vapor/ci/.github/workflows/submit-deps.yml@main
     secrets: inherit
+
+  foundation-linking:
+    uses: vapor/ci/.github/workflows/check-foundation-linking.yml@main
+    permissions:
+      contents: read
+    with:
+      swift_image: swift:6.3-noble
+
+  lint:
+    runs-on: ubuntu-latest
+    container: swift:noble
+    timeout-minutes: 5
+    steps:
+      - name: Configure git
+        run: git config --global --add safe.directory "${GITHUB_WORKSPACE}"
+      - name: Check out code
+        uses: actions/checkout@v7
+      - name: Lint
+        run: |
+          apt -q update && apt -yq install curl
+          curl -s https://raw.githubusercontent.com/swiftlang/github-workflows/refs/heads/main/.github/workflows/scripts/check-swift-format.sh | bash
