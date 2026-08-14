@@ -10,7 +10,7 @@ extension ByteBuffer {
     }
 
     func isOKPacket(capabilities: MySQLCapabilities) -> Bool {
-        guard (7...((1 << 24) - 1)).contains(self.readableBytes) else { return false }
+        guard (7...Int(UInt24.max)).contains(self.readableBytes) else { return false }
         if capabilities.contains(.clientDeprecateEOF) {
             return self.mySQLHeaderFlag == 0x00
         } else {
