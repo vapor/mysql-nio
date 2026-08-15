@@ -178,7 +178,7 @@ extension MySQLChannelHandler {
                 } else {
                     command.activateDeadline()
                     state.activeCommand = command
-                    self = .query(.init(connectedState: state, stateMachine: .init(capabilities: state.capabilities)))
+                    self = .query(.init(connectedState: state, stateMachine: .init(capabilities: state.capabilities), gracefulShutdown: false))
                     return .sendCommand(state.context, command)
                 }
             case .query(var state):
@@ -428,7 +428,7 @@ extension MySQLChannelHandler {
                     case .utility:
                         self = .connected(state)
                     case .query:
-                        self = .query(.init(connectedState: state, stateMachine: .init(capabilities: state.capabilities)))
+                        self = .query(.init(connectedState: state, stateMachine: .init(capabilities: state.capabilities), gracefulShutdown: false))
                     }
                     guard let deadline = nextCommand.deadline else {
                         preconditionFailure("The command deadline cannot be nil when the command is sent.")
@@ -469,7 +469,11 @@ extension MySQLChannelHandler {
                         state.connectedState.activeCommand = nextCommand
                         switch nextCommand.kind {
                         case .utility:
-                            self = .connected(state.connectedState)
+                            if state.gracefulShutdown {
+                                self = .closing(state.connectedState)
+                            } else {
+                                self = .connected(state.connectedState)
+                            }
                         case .query:
                             self = .query(state)
                         }
@@ -478,8 +482,13 @@ extension MySQLChannelHandler {
                         }
                         return .succeedPromise(command, .reschedule(deadline), nextCommand: nextCommand, statusFlags: nil)
                     } else {
-                        self = .connected(state.connectedState)
-                        return .succeedPromise(command, .cancel, nextCommand: nil, statusFlags: nil)
+                        if state.gracefulShutdown {
+                            self = .closed(nil)
+                            return .succeedPromiseAndClose(command, statusFlags: nil)
+                        } else {
+                            self = .connected(state.connectedState)
+                            return .succeedPromise(command, .cancel, nextCommand: nil, statusFlags: nil)
+                        }
                     }
                 case .moreResultsExists:
                     // TODO: handle multiple result sets
@@ -528,7 +537,18 @@ extension MySQLChannelHandler {
                     var nextCommand = nextCommand
                     nextCommand.activateDeadline()
                     state.activeCommand = nextCommand
-                    self = .closing(state)
+                    switch nextCommand.kind {
+                    case .utility:
+                        self = .closing(state)
+                    case .query:
+                        self = .query(
+                            .init(
+                                connectedState: state,
+                                stateMachine: .init(capabilities: state.capabilities),
+                                gracefulShutdown: true
+                            )
+                        )
+                    }
                     guard let deadline = nextCommand.deadline else {
                         preconditionFailure("The command deadline cannot be nil when the command is sent.")
                     }
@@ -757,9 +777,10 @@ extension MySQLChannelHandler {
                     self = .closed(nil)
                     return .closeConnection(state.context)
                 }
-            case .query(let state):
+            case .query(var state):
                 if state.connectedState.activeCommand != nil || !state.connectedState.pendingCommands.isEmpty {
-                    self = .closing(state.connectedState)
+                    state.gracefulShutdown = true
+                    self = .query(state)
                     return .doNothing
                 } else {
                     self = .closed(nil)
@@ -840,6 +861,8 @@ extension MySQLChannelHandler.StateMachine {
     struct QueryState: ~Copyable {
         var connectedState: ConnectedState
         var stateMachine: QueryStateMachine
+        /// Whether a graceful shutdown has been requested.
+        var gracefulShutdown: Bool
     }
 
     @usableFromInline
