@@ -56,7 +56,7 @@ extension MySQLChannelHandler {
             /// > so it should only be used when we want to fail all pending commands and close the connection,
             /// > such as when a deadline is hit or a cancel is requested.
             mutating func allPendingCommands() -> Deque<PendingCommand> {
-                if let activeCommand { pendingCommands.append(activeCommand) }
+                if let activeCommand { pendingCommands.prepend(activeCommand) }
                 return pendingCommands
             }
 
