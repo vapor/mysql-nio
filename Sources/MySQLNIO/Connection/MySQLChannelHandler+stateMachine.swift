@@ -27,6 +27,7 @@ extension MySQLChannelHandler {
             let context: Context
             let connectPromise: PendingCommand
             let configuration: MySQLConnectionConfiguration
+            var gracefulShutdown: Bool
         }
 
         /// See ``MySQLChannelHandler/StateMachine/State/awaitingAuthReply-enum.case``.
@@ -37,6 +38,7 @@ extension MySQLChannelHandler {
             let capabilities: MySQLCapabilities
             var authMethod: any AuthenticationMethod & ~Copyable
             let password: String?
+            var gracefulShutdown: Bool
         }
 
         @usableFromInline
@@ -92,7 +94,9 @@ extension MySQLChannelHandler {
         mutating func setAwaitingGreeting(context: Context, connectPromise: PendingCommand, configuration: MySQLConnectionConfiguration) {
             switch consume self.state {
             case .startup:
-                self = .awaitingGreeting(.init(context: context, connectPromise: connectPromise, configuration: configuration))
+                self = .awaitingGreeting(
+                    .init(context: context, connectPromise: connectPromise, configuration: configuration, gracefulShutdown: false)
+                )
             case .awaitingGreeting:
                 preconditionFailure("Cannot set awaitingGreeting state when state is already awaitingGreeting")
             case .awaitingAuthReply:
@@ -288,7 +292,8 @@ extension MySQLChannelHandler {
                             connectPromise: state.connectPromise,
                             capabilities: clientCapabilities,
                             authMethod: authMethod,
-                            password: state.configuration.password
+                            password: state.configuration.password,
+                            gracefulShutdown: state.gracefulShutdown
                         )
                     )
 
@@ -347,6 +352,10 @@ extension MySQLChannelHandler {
                     } catch {
                         self = .closed(error)
                         return .failPromise(state.connectPromise, error)
+                    }
+                    if state.gracefulShutdown {
+                        self = .closed(nil)
+                        return .succeedPromiseAndClose(state.connectPromise, statusFlags: okPacket.serverStatus)
                     }
                     self = .connected(.init(context: state.context, activeCommand: nil, pendingCommands: .init(), capabilities: state.capabilities))
                     return .succeedPromise(state.connectPromise, .cancel, nextCommand: nil, statusFlags: okPacket.serverStatus)
@@ -763,11 +772,13 @@ extension MySQLChannelHandler {
             case .startup:
                 self = .closed(nil)
                 return .doNothing
-            case .awaitingGreeting(let state):
-                self = .closing(.init(context: state.context, pendingCommands: .init([state.connectPromise]), capabilities: .requiredCapabilities))
+            case .awaitingGreeting(var state):
+                state.gracefulShutdown = true
+                self = .awaitingGreeting(state)
                 return .doNothing
-            case .awaitingAuthReply(let state):
-                self = .closing(.init(context: state.context, pendingCommands: .init([state.connectPromise]), capabilities: state.capabilities))
+            case .awaitingAuthReply(var state):
+                state.gracefulShutdown = true
+                self = .awaitingAuthReply(state)
                 return .doNothing
             case .connected(let state):
                 if state.activeCommand != nil || !state.pendingCommands.isEmpty {

@@ -245,7 +245,7 @@ final class MySQLChannelHandler: ChannelDuplexHandler {
         case .succeedPromiseAndClose(let command, let statusFlags):
             if let statusFlags { self.statusFlags = statusFlags }
             command.promise.succeed(packet)
-            throw MySQLClientError.connectionClosing
+            context.close(promise: nil)
         case .failPromise(let command, let error):
             command.promise.fail(error)
             throw error
