@@ -19,7 +19,7 @@ final class MySQLChannelHandler: ChannelDuplexHandler {
         @usableFromInline
         let packet: ByteBuffer?
         @usableFromInline
-        let promise: MySQLPromise<ByteBuffer>
+        var promise: MySQLPromise<ByteBuffer>
         @usableFromInline
         let requestID: Int
         /// Optional because in the connect promise we set the deadline directly.
@@ -198,13 +198,8 @@ final class MySQLChannelHandler: ChannelDuplexHandler {
     func cancel(requestID: Int) {
         self.eventLoop.assertInEventLoop()
         switch self.stateMachine.cancel(requestID: requestID) {
-        case .failPendingCommandsAndClose(let cancelled, let closeConnectionDueToCancel):
-            for command in cancelled {
-                command.promise.fail(MySQLClientError.cancelled)
-            }
-            for command in closeConnectionDueToCancel {
-                command.promise.fail(MySQLClientError.connectionClosedDueToCancellation)
-            }
+        case .cancelCommand(let command):
+            command.promise.fail(MySQLClientError.cancelled)
         case .doNothing:
             break
         }

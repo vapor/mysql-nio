@@ -60,24 +60,22 @@ extension MySQLChannelHandler {
                 return pendingCommands
             }
 
-            func cancel(requestID: Int) -> (cancel: [PendingCommand], connectionClosedDueToCancellation: [PendingCommand]) {
-                var withRequestID = [PendingCommand]()
-                var withoutRequestID = [PendingCommand]()
-                if let activeCommand {
-                    if activeCommand.requestID == requestID {
-                        withRequestID.append(activeCommand)
-                    } else {
-                        withoutRequestID.append(activeCommand)
-                    }
+            /// Cancels the command with the given `requestID`, if any, without affecting other commands.
+            ///
+            /// - If the command is still pending (not yet sent), it is removed from the queue and returned so its promise can be failed.
+            /// - If the command is the active one (already sent, response in flight), its promise is replaced with `.forget` so the
+            ///   eventual response is discarded instead of double-resolving it; the original command is returned so its promise can be failed.
+            mutating func cancel(requestID: Int) -> CancelAction {
+                if var activeCommand, activeCommand.requestID == requestID {
+                    let cancelledCommand = activeCommand
+                    activeCommand.promise = .forget
+                    self.activeCommand = activeCommand
+                    return .cancelCommand(cancelledCommand)
                 }
-                for command in pendingCommands {
-                    if command.requestID == requestID {
-                        withRequestID.append(command)
-                    } else {
-                        withoutRequestID.append(command)
-                    }
+                if let index = pendingCommands.firstIndex(where: { $0.requestID == requestID }) {
+                    return .cancelCommand(pendingCommands.remove(at: index))
                 }
-                return (withRequestID, withoutRequestID)
+                return .doNothing
             }
         }
 
@@ -703,7 +701,7 @@ extension MySQLChannelHandler {
 
         @usableFromInline
         enum CancelAction {
-            case failPendingCommandsAndClose(cancel: [PendingCommand], closeConnectionDueToCancel: [PendingCommand])
+            case cancelCommand(PendingCommand)
             case doNothing
         }
 
@@ -717,42 +715,18 @@ extension MySQLChannelHandler {
                 preconditionFailure("Cannot cancel while in awaitingGreeting state")
             case .awaitingAuthReply:
                 preconditionFailure("Cannot cancel while in awaitingAuthReply state")
-            case .connected(let state):
-                let (cancel, closeConnectionDueToCancel) = state.cancel(requestID: requestID)
-                if cancel.count > 0 {
-                    self = .closed(MySQLClientError.cancelled)
-                    return .failPendingCommandsAndClose(
-                        cancel: cancel,
-                        closeConnectionDueToCancel: closeConnectionDueToCancel
-                    )
-                } else {
-                    self = .connected(state)
-                    return .doNothing
-                }
-            case .query(let state):
-                let (cancel, closeConnectionDueToCancel) = state.connectedState.cancel(requestID: requestID)
-                if cancel.count > 0 {
-                    self = .closed(MySQLClientError.cancelled)
-                    return .failPendingCommandsAndClose(
-                        cancel: cancel,
-                        closeConnectionDueToCancel: closeConnectionDueToCancel
-                    )
-                } else {
-                    self = .query(state)
-                    return .doNothing
-                }
-            case .closing(let state):
-                let (cancel, closeConnectionDueToCancel) = state.cancel(requestID: requestID)
-                if cancel.count > 0 {
-                    self = .closed(MySQLClientError.cancelled)
-                    return .failPendingCommandsAndClose(
-                        cancel: cancel,
-                        closeConnectionDueToCancel: closeConnectionDueToCancel
-                    )
-                } else {
-                    self = .closing(state)
-                    return .doNothing
-                }
+            case .connected(var state):
+                let action = state.cancel(requestID: requestID)
+                self = .connected(state)
+                return action
+            case .query(var state):
+                let action = state.connectedState.cancel(requestID: requestID)
+                self = .query(state)
+                return action
+            case .closing(var state):
+                let action = state.cancel(requestID: requestID)
+                self = .closing(state)
+                return action
             case .closed(let error):
                 self = .closed(error)
                 return .doNothing
