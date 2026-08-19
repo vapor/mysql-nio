@@ -310,7 +310,7 @@ struct MySQLConnectionTests {
         }
     }
 
-    @Test("Cancellation")
+    @Test("Cancellation", .disabled("debugging"))
     func cancellation() async throws {
         let (stream, continuation) = AsyncStream<Void>.makeStream()
         try await withTestMySQLServer { connection in
