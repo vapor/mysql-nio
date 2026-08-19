@@ -310,50 +310,35 @@ struct MySQLConnectionTests {
         }
     }
 
-    @Test("Cancellation", .disabled("debugging"))
+    @Test("Cancellation")
     func cancellation() async throws {
-        let (stream, continuation) = AsyncStream<Void>.makeStream()
-        try await withTestMySQLServer { connection in
-            try await withThrowingTaskGroup { group in
-                group.addTask {
-                    await #expect(throws: MySQLClientError.cancelled) {
-                        // This will be sent and become the active command
-                        async let firstCommand: Void = connection.ping()
+        let channel = NIOAsyncTestingChannel()
+        let logger = Logger(label: #function).withLogLevel(.trace)
+        let configuration = MySQLConnectionConfiguration(username: "test_username")
+        let connection = try await MySQLConnection.setupChannelAndConnect(channel, configuration: configuration, logger: logger)
+        try await channel.processHandshake(configuration: configuration)
 
-                        try await Task.sleep(for: .milliseconds(100))
+        try await withThrowingTaskGroup { group in
+            group.addTask {
+                // This will be sent and become the active command
+                async let firstCommand: Void = connection.ping()
 
-                        // No need to process this second command from the server, as it will be cancelled before it is sent
-                        async let secondCommand: Void = connection.ping()
-                        _ = try await (firstCommand, secondCommand)
-                    }
-                }
+                try await Task.sleep(for: .milliseconds(100))
 
-                try await Task.sleep(for: .milliseconds(500))
-                // This is put in the command queue before the cancellation,
-                // but will not be cancelled and sent to the server after the first command is completed
-                async let thirdCommand: Void = connection.ping()
-
-                // Wait until the server is in the middle of processing the command
-                await stream.first { _ in true }
-                group.cancelAll()
-
-                // Even after cancellation, the server can still process the third command
-                try await thirdCommand
-
-                // The connection is still active so we can send more commands after the cancellation
-                await #expect(throws: Never.self) {
-                    try await connection.ping()
-                }
+                // No need to process this second command from the server, as it will be cancelled before it is sent
+                async let secondCommand: Void = connection.ping()
+                _ = try await (firstCommand, secondCommand)
             }
-        } server: { channel in
-            // Wait for all three commands to be sent
-            try await Task.sleep(for: .milliseconds(1000))
+            try await Task.sleep(for: .milliseconds(500))
+            // This is put in the command queue before the cancellation,
+            // but will not be cancelled and sent to the server after the first command is completed
+            async let thirdCommand: Void = connection.ping()
 
             let pingCommandPacket = try await channel.waitForOutboundWrite(as: ByteBuffer.self)
             #expect(pingCommandPacket == ByteBuffer(bytes: [0x01, 0x00, 0x00, 0x00, 0x0E]))
 
             // In the middle of processing the command, we cancel the task
-            continuation.yield()
+            group.cancelAll()
 
             // The server continues to process the command as it has no knowledge of the cancellation
             let okPacket = OKPacket(
@@ -376,9 +361,20 @@ struct MySQLConnectionTests {
 
             // This is the `thirdCommand` sent before the cancellation
             try await channel.processPing()
+            try await thirdCommand
+        }
 
-            // This is the command sent after everything
-            try await channel.processPing()
+        // The connection is still active so we can send more commands after the cancellation
+        await withThrowingTaskGroup { group in
+            group.addTask { try await connection.ping() }
+            group.addTask { try await channel.processPing() }
+            await #expect(throws: Never.self) { try await group.waitForAll() }
+        }
+
+        connection.close()
+        if channel.isActive {
+            let quitPacket = try await channel.waitForOutboundWrite(as: ByteBuffer.self)
+            #expect(quitPacket == ByteBuffer(bytes: [0x01, 0x00, 0x00, 0x00, 0x01]))
         }
     }
 
