@@ -34,8 +34,11 @@ func withTestMySQLServer(
         }
         group.addTask {
             try await serverOperation(channel)
-            let quitPacket = try await channel.waitForOutboundWrite(as: ByteBuffer.self)
-            #expect(quitPacket == ByteBuffer(bytes: [0x01, 0x00, 0x00, 0x00, 0x01]))
+            // If the connection wasn't already closed (e.g. by a completed graceful shutdown), it will send COM_QUIT.
+            if channel.isActive {
+                let quitPacket = try await channel.waitForOutboundWrite(as: ByteBuffer.self)
+                #expect(quitPacket == ByteBuffer(bytes: [0x01, 0x00, 0x00, 0x00, 0x01]))
+            }
         }
         try await group.waitForAll()
     }

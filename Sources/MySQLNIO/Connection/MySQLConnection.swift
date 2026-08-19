@@ -168,7 +168,9 @@ extension MySQLConnection {
 
     /// Send a `COM_QUIT` command to the server to close the connection.
     func quit() throws {
-        _ = try self.channelHandler.sendUtilityCommandNoWait(.init(bytes: [0x00, 0x00, 0x00, 0x00, 0x01]))
+        if channel.isActive {
+            try self.channelHandler.sendUtilityCommandNoWait(.init(bytes: [0x00, 0x00, 0x00, 0x00, 0x01]))
+        }
     }
 
     private static func _makeConnection(
