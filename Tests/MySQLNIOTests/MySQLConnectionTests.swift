@@ -317,12 +317,12 @@ struct MySQLConnectionTests {
                 group.addTask {
                     await #expect(throws: MySQLClientError.cancelled) {
                         // This will be sent and become the active command
-                        async let firstCommand = connection.ping()
+                        async let firstCommand: Void = connection.ping()
 
                         try await Task.sleep(for: .milliseconds(50))
 
                         // No need to process this second command from the server, as it will be cancelled before it is sent
-                        async let secondCommand = connection.ping()
+                        async let secondCommand: Void = connection.ping()
                         _ = try await (firstCommand, secondCommand)
                     }
                 }
@@ -330,7 +330,7 @@ struct MySQLConnectionTests {
                 try await Task.sleep(for: .milliseconds(100))
                 // This is put in the command queue before the cancellation,
                 // but will not be cancelled and sent to the server after the first command is completed
-                async let thirdCommand = connection.ping()
+                async let thirdCommand: Void = connection.ping()
 
                 // Wait until the server is in the middle of processing the command
                 await stream.first { _ in true }
