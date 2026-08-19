@@ -8,8 +8,6 @@ public struct MySQLClientError: Error, Sendable, Equatable {
             case errorPacket
             /// The Task was cancelled
             case cancelled
-            /// Connection closed because another command was cancelled.
-            case connectionClosedDueToCancellation
             /// Connection closed because it timed out while waiting for response packet
             case timeout
             /// The server's protocol version is too old or too new, or the server doesn't support the minimum required capabilities.
@@ -32,8 +30,6 @@ public struct MySQLClientError: Error, Sendable, Equatable {
         public static let errorPacket = Self(.errorPacket)
         /// The Task was cancelled
         public static let cancelled = Self(.cancelled)
-        /// Connection closed because another command was cancelled.
-        public static let connectionClosedDueToCancellation = Self(.connectionClosedDueToCancellation)
         /// Connection closed because it timed out while waiting for response packet
         public static let timeout = Self(.timeout)
         /// The server's protocol version is too old or too new, or the server doesn't support the minimum required capabilities.
@@ -104,9 +100,6 @@ public struct MySQLClientError: Error, Sendable, Equatable {
 
     /// The Task was cancelled
     public static let cancelled = Self(errorType: .cancelled)
-
-    /// Connection closed because another command was cancelled.
-    public static let connectionClosedDueToCancellation = Self(errorType: .connectionClosedDueToCancellation)
 
     /// Connection closed because it timed out while waiting for response packet
     public static let timeout = Self(errorType: .timeout)

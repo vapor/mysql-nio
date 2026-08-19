@@ -27,6 +27,8 @@ extension MySQLChannelHandler {
             let context: Context
             let connectPromise: PendingCommand
             let configuration: MySQLConnectionConfiguration
+            /// Whether a graceful shutdown has been requested.
+            var gracefulShutdown: Bool
         }
 
         /// See ``MySQLChannelHandler/StateMachine/State/awaitingAuthReply-enum.case``.
@@ -37,6 +39,8 @@ extension MySQLChannelHandler {
             let capabilities: MySQLCapabilities
             var authMethod: any AuthenticationMethod & ~Copyable
             let password: String?
+            /// Whether a graceful shutdown has been requested.
+            var gracefulShutdown: Bool
         }
 
         @usableFromInline
@@ -54,28 +58,26 @@ extension MySQLChannelHandler {
             /// > so it should only be used when we want to fail all pending commands and close the connection,
             /// > such as when a deadline is hit or a cancel is requested.
             mutating func allPendingCommands() -> Deque<PendingCommand> {
-                if let activeCommand { pendingCommands.append(activeCommand) }
+                if let activeCommand { pendingCommands.prepend(activeCommand) }
                 return pendingCommands
             }
 
-            func cancel(requestID: Int) -> (cancel: [PendingCommand], connectionClosedDueToCancellation: [PendingCommand]) {
-                var withRequestID = [PendingCommand]()
-                var withoutRequestID = [PendingCommand]()
-                if let activeCommand {
-                    if activeCommand.requestID == requestID {
-                        withRequestID.append(activeCommand)
-                    } else {
-                        withoutRequestID.append(activeCommand)
-                    }
+            /// Cancels the command with the given `requestID`, if any, without affecting other commands.
+            ///
+            /// - If the command is still pending (not yet sent), it is removed from the queue and returned so its promise can be failed.
+            /// - If the command is the active one (already sent, response in flight), its promise is replaced with `.forget` so the
+            ///   eventual response is discarded instead of double-resolving it; the original command is returned so its promise can be failed.
+            mutating func cancel(requestID: Int) -> CancelAction {
+                if var activeCommand, activeCommand.requestID == requestID {
+                    let cancelledCommand = activeCommand
+                    activeCommand.promise = .forget
+                    self.activeCommand = activeCommand
+                    return .cancelCommand(cancelledCommand)
                 }
-                for command in pendingCommands {
-                    if command.requestID == requestID {
-                        withRequestID.append(command)
-                    } else {
-                        withoutRequestID.append(command)
-                    }
+                if let index = pendingCommands.firstIndex(where: { $0.requestID == requestID }) {
+                    return .cancelCommand(pendingCommands.remove(at: index))
                 }
-                return (withRequestID, withoutRequestID)
+                return .doNothing
             }
         }
 
@@ -92,7 +94,9 @@ extension MySQLChannelHandler {
         mutating func setAwaitingGreeting(context: Context, connectPromise: PendingCommand, configuration: MySQLConnectionConfiguration) {
             switch consume self.state {
             case .startup:
-                self = .awaitingGreeting(.init(context: context, connectPromise: connectPromise, configuration: configuration))
+                self = .awaitingGreeting(
+                    .init(context: context, connectPromise: connectPromise, configuration: configuration, gracefulShutdown: false)
+                )
             case .awaitingGreeting:
                 preconditionFailure("Cannot set awaitingGreeting state when state is already awaitingGreeting")
             case .awaitingAuthReply:
@@ -178,7 +182,7 @@ extension MySQLChannelHandler {
                 } else {
                     command.activateDeadline()
                     state.activeCommand = command
-                    self = .query(.init(connectedState: state, stateMachine: .init(capabilities: state.capabilities)))
+                    self = .query(.init(connectedState: state, stateMachine: .init(capabilities: state.capabilities), gracefulShutdown: false))
                     return .sendCommand(state.context, command)
                 }
             case .query(var state):
@@ -213,11 +217,15 @@ extension MySQLChannelHandler {
         enum ReceivedResponseAction {
             case handshakeRespond(ByteBuffer, sslRequest: ByteBuffer?, statusFlags: ServerStatusFlags)
             case authRespond(ByteBuffer?)
+            // TODO: why can statusFlags be nil here? Shouldn't it always be present in the OK packet?
             case succeedPromise(PendingCommand, DeadlineCallbackAction, nextCommand: PendingCommand?, statusFlags: ServerStatusFlags?)
             case succeedPromiseAndClose(PendingCommand, statusFlags: ServerStatusFlags?)
             case failPromise(PendingCommand, any Error)
             case closeWithError(any Error)
             case doNothing
+            case succeedQueryPromise(PendingCommand, statusFlags: ServerStatusFlags?)
+            case finishRowSequence(DeadlineCallbackAction, nextCommand: PendingCommand?, statusFlags: ServerStatusFlags?)
+            case finishRowSequenceAndClose(statusFlags: ServerStatusFlags?)
         }
 
         @usableFromInline
@@ -288,7 +296,8 @@ extension MySQLChannelHandler {
                             connectPromise: state.connectPromise,
                             capabilities: clientCapabilities,
                             authMethod: authMethod,
-                            password: state.configuration.password
+                            password: state.configuration.password,
+                            gracefulShutdown: state.gracefulShutdown
                         )
                     )
 
@@ -347,6 +356,10 @@ extension MySQLChannelHandler {
                     } catch {
                         self = .closed(error)
                         return .failPromise(state.connectPromise, error)
+                    }
+                    if state.gracefulShutdown {
+                        self = .closed(nil)
+                        return .succeedPromiseAndClose(state.connectPromise, statusFlags: okPacket.serverStatus)
                     }
                     self = .connected(.init(context: state.context, activeCommand: nil, pendingCommands: .init(), capabilities: state.capabilities))
                     return .succeedPromise(state.connectPromise, .cancel, nextCommand: nil, statusFlags: okPacket.serverStatus)
@@ -428,7 +441,7 @@ extension MySQLChannelHandler {
                     case .utility:
                         self = .connected(state)
                     case .query:
-                        self = .query(.init(connectedState: state, stateMachine: .init(capabilities: state.capabilities)))
+                        self = .query(.init(connectedState: state, stateMachine: .init(capabilities: state.capabilities), gracefulShutdown: false))
                     }
                     guard let deadline = nextCommand.deadline else {
                         preconditionFailure("The command deadline cannot be nil when the command is sent.")
@@ -443,18 +456,39 @@ extension MySQLChannelHandler {
                 case .doNothing:
                     self = .query(state)
                     return .doNothing
-                case .columnMetadata(_):
-                    // TODO: handle column definitions
-                    self = .query(state)
-                    return .doNothing
-                case .row(let row):
+                case .moreResultsExists:
+                    // TODO: handle multiple result sets
                     guard case .query(let continuation) = state.connectedState.activeCommand?.kind else {
-                        preconditionFailure("The active command must be a query command when receiving rows.")
+                        preconditionFailure("The active command must be a query command when receiving the more results flag.")
                     }
-                    continuation.yield(row)
+                    continuation.finish()
                     self = .query(state)
                     return .doNothing
-                case .resultsetEnd:
+                // MARK: - `COM_QUERY` related actions
+                case .succeedPromise(_):
+                    // TODO: handle column definitions
+                    guard let command = state.connectedState.activeCommand else {
+                        preconditionFailure("Cannot complete query without an active command")
+                    }
+                    // The command's promise is resolved here,
+                    // so a later cancel while rows are still being read must not try to resolve it again;
+                    // only the row continuation matters now.
+                    state.connectedState.activeCommand?.promise = .forget
+                    self = .query(state)
+                    return .succeedQueryPromise(command, statusFlags: nil)
+                // TODO: check how we handle errors here and in the channel handler
+                case .failPromise(let error):
+                    guard let command = state.connectedState.activeCommand else {
+                        preconditionFailure("Cannot fail query without an active command")
+                    }
+                    guard case .query(let continuation) = command.kind else {
+                        preconditionFailure("The active command must be a query command when receiving an error.")
+                    }
+                    continuation.finish(throwing: error)
+                    state.connectedState.activeCommand = nil
+                    self = .connected(state.connectedState)
+                    return .failPromise(command, error)
+                case .noResultset:
                     guard let command = state.connectedState.activeCommand else {
                         preconditionFailure("Cannot complete query without an active command")
                     }
@@ -469,7 +503,7 @@ extension MySQLChannelHandler {
                         state.connectedState.activeCommand = nextCommand
                         switch nextCommand.kind {
                         case .utility:
-                            self = .connected(state.connectedState)
+                            self = state.gracefulShutdown ? .closing(state.connectedState) : .connected(state.connectedState)
                         case .query:
                             self = .query(state)
                         }
@@ -478,28 +512,59 @@ extension MySQLChannelHandler {
                         }
                         return .succeedPromise(command, .reschedule(deadline), nextCommand: nextCommand, statusFlags: nil)
                     } else {
-                        self = .connected(state.connectedState)
-                        return .succeedPromise(command, .cancel, nextCommand: nil, statusFlags: nil)
+                        if state.gracefulShutdown {
+                            self = .closed(nil)
+                            return .succeedPromiseAndClose(command, statusFlags: nil)
+                        } else {
+                            self = .connected(state.connectedState)
+                            return .succeedPromise(command, .cancel, nextCommand: nil, statusFlags: nil)
+                        }
                     }
-                case .moreResultsExists:
-                    // TODO: handle multiple result sets
+                // MARK: - `MySQLRowSequence` related actions
+                case .row(let row):
                     guard case .query(let continuation) = state.connectedState.activeCommand?.kind else {
-                        preconditionFailure("The active command must be a query command when receiving the more results flag.")
+                        preconditionFailure("The active command must be a query command when receiving rows.")
                     }
-                    continuation.finish()
+                    continuation.yield(row)
                     self = .query(state)
                     return .doNothing
-                case .error(let error):
-                    guard let command = state.connectedState.activeCommand else {
-                        preconditionFailure("Cannot fail query without an active command")
-                    }
-                    guard case .query(let continuation) = command.kind else {
+                case .rowError(let error):
+                    guard case .query(let continuation) = state.connectedState.activeCommand?.kind else {
                         preconditionFailure("The active command must be a query command when receiving an error.")
                     }
                     continuation.finish(throwing: error)
                     state.connectedState.activeCommand = nil
                     self = .connected(state.connectedState)
-                    return .failPromise(command, error)
+                    return .doNothing
+                case .resultsetEnd:
+                    guard case .query(let continuation) = state.connectedState.activeCommand?.kind else {
+                        preconditionFailure("The active command must be a query command when receiving the end of the result set.")
+                    }
+                    continuation.finish()
+                    state.connectedState.activeCommand = nil
+                    if let nextCommand = state.connectedState.pendingCommands.popFirst() {
+                        var nextCommand = nextCommand
+                        nextCommand.activateDeadline()
+                        state.connectedState.activeCommand = nextCommand
+                        switch nextCommand.kind {
+                        case .utility:
+                            self = state.gracefulShutdown ? .closing(state.connectedState) : .connected(state.connectedState)
+                        case .query:
+                            self = .query(state)
+                        }
+                        guard let deadline = nextCommand.deadline else {
+                            preconditionFailure("The command deadline cannot be nil when the command is sent.")
+                        }
+                        return .finishRowSequence(.reschedule(deadline), nextCommand: nextCommand, statusFlags: nil)
+                    } else {
+                        if state.gracefulShutdown {
+                            self = .closed(nil)
+                            return .finishRowSequenceAndClose(statusFlags: nil)
+                        } else {
+                            self = .connected(state.connectedState)
+                            return .finishRowSequence(.cancel, nextCommand: nil, statusFlags: nil)
+                        }
+                    }
                 }
             case .closing(var state):
                 guard let command = state.activeCommand else {
@@ -528,7 +593,18 @@ extension MySQLChannelHandler {
                     var nextCommand = nextCommand
                     nextCommand.activateDeadline()
                     state.activeCommand = nextCommand
-                    self = .closing(state)
+                    switch nextCommand.kind {
+                    case .utility:
+                        self = .closing(state)
+                    case .query:
+                        self = .query(
+                            .init(
+                                connectedState: state,
+                                stateMachine: .init(capabilities: state.capabilities),
+                                gracefulShutdown: true
+                            )
+                        )
+                    }
                     guard let deadline = nextCommand.deadline else {
                         preconditionFailure("The command deadline cannot be nil when the command is sent.")
                     }
@@ -674,7 +750,7 @@ extension MySQLChannelHandler {
 
         @usableFromInline
         enum CancelAction {
-            case failPendingCommandsAndClose(cancel: [PendingCommand], closeConnectionDueToCancel: [PendingCommand])
+            case cancelCommand(PendingCommand)
             case doNothing
         }
 
@@ -688,42 +764,18 @@ extension MySQLChannelHandler {
                 preconditionFailure("Cannot cancel while in awaitingGreeting state")
             case .awaitingAuthReply:
                 preconditionFailure("Cannot cancel while in awaitingAuthReply state")
-            case .connected(let state):
-                let (cancel, closeConnectionDueToCancel) = state.cancel(requestID: requestID)
-                if cancel.count > 0 {
-                    self = .closed(MySQLClientError.cancelled)
-                    return .failPendingCommandsAndClose(
-                        cancel: cancel,
-                        closeConnectionDueToCancel: closeConnectionDueToCancel
-                    )
-                } else {
-                    self = .connected(state)
-                    return .doNothing
-                }
-            case .query(let state):
-                let (cancel, closeConnectionDueToCancel) = state.connectedState.cancel(requestID: requestID)
-                if cancel.count > 0 {
-                    self = .closed(MySQLClientError.cancelled)
-                    return .failPendingCommandsAndClose(
-                        cancel: cancel,
-                        closeConnectionDueToCancel: closeConnectionDueToCancel
-                    )
-                } else {
-                    self = .query(state)
-                    return .doNothing
-                }
-            case .closing(let state):
-                let (cancel, closeConnectionDueToCancel) = state.cancel(requestID: requestID)
-                if cancel.count > 0 {
-                    self = .closed(MySQLClientError.cancelled)
-                    return .failPendingCommandsAndClose(
-                        cancel: cancel,
-                        closeConnectionDueToCancel: closeConnectionDueToCancel
-                    )
-                } else {
-                    self = .closing(state)
-                    return .doNothing
-                }
+            case .connected(var state):
+                let action = state.cancel(requestID: requestID)
+                self = .connected(state)
+                return action
+            case .query(var state):
+                let action = state.connectedState.cancel(requestID: requestID)
+                self = .query(state)
+                return action
+            case .closing(var state):
+                let action = state.cancel(requestID: requestID)
+                self = .closing(state)
+                return action
             case .closed(let error):
                 self = .closed(error)
                 return .doNothing
@@ -743,11 +795,13 @@ extension MySQLChannelHandler {
             case .startup:
                 self = .closed(nil)
                 return .doNothing
-            case .awaitingGreeting(let state):
-                self = .closing(.init(context: state.context, pendingCommands: .init([state.connectPromise]), capabilities: .requiredCapabilities))
+            case .awaitingGreeting(var state):
+                state.gracefulShutdown = true
+                self = .awaitingGreeting(state)
                 return .doNothing
-            case .awaitingAuthReply(let state):
-                self = .closing(.init(context: state.context, pendingCommands: .init([state.connectPromise]), capabilities: state.capabilities))
+            case .awaitingAuthReply(var state):
+                state.gracefulShutdown = true
+                self = .awaitingAuthReply(state)
                 return .doNothing
             case .connected(let state):
                 if state.activeCommand != nil || !state.pendingCommands.isEmpty {
@@ -757,9 +811,10 @@ extension MySQLChannelHandler {
                     self = .closed(nil)
                     return .closeConnection(state.context)
                 }
-            case .query(let state):
+            case .query(var state):
                 if state.connectedState.activeCommand != nil || !state.connectedState.pendingCommands.isEmpty {
-                    self = .closing(state.connectedState)
+                    state.gracefulShutdown = true
+                    self = .query(state)
                     return .doNothing
                 } else {
                     self = .closed(nil)
@@ -840,17 +895,24 @@ extension MySQLChannelHandler.StateMachine {
     struct QueryState: ~Copyable {
         var connectedState: ConnectedState
         var stateMachine: QueryStateMachine
+        /// Whether a graceful shutdown has been requested.
+        var gracefulShutdown: Bool
     }
 
     @usableFromInline
     struct QueryStateMachine: ~Copyable {
         @usableFromInline
         enum State: ~Copyable {
+            // MARK: - `COM_QUERY` related states, see below for related actions
+
             /// A `COM_QUERY` command was sent and no response has yet been received, or a new
             /// resultset has been signaled as incoming but not yet received.
             case awaitingResultsetStart
             /// Waiting for one or more column metadata packets
             case awaitingColumnMetadata(columnsRemaining: UInt64, columnMetadata: ColumnMetadata)
+
+            // MARK: - `MySQLRowSequence` related states, see below for related actions
+
             /// Reading resultset rows
             case readingRows(columnMetadata: ColumnMetadata)
             /// All result sets received, or error stopped the query.
@@ -881,58 +943,74 @@ extension MySQLChannelHandler.StateMachine {
         @usableFromInline
         enum ReceivedResponseAction {
             case doNothing
-            case columnMetadata(ColumnMetadata)
-            case row(MySQLRow)
-            case resultsetEnd
+            /// TODO: handle multiple result sets
             case moreResultsExists
-            case error(any Error)
+
+            // MARK: - `COM_QUERY` related actions
+
+            /// The query command was received by the server and all column metadata has been received
+            case succeedPromise(ColumnMetadata?)
+            /// Something went wrong while sending the query command or receiving column metadata
+            case failPromise(any Error)
+            /// The query was successful but no rows were returned (e.g. an `UPDATE` command)
+            case noResultset
+
+            // MARK: - `MySQLRowSequence` related actions
+
+            /// Yield a row to the query continuation
+            case row(MySQLRow)
+            /// Send an error to the query continuation and finish it
+            case rowError(any Error)
+            /// Finish the query continuation
+            case resultsetEnd
         }
 
         @usableFromInline
         mutating func receivedResponse(packet: inout ByteBuffer) -> ReceivedResponseAction {
-            if packet.isErrorPacket {
-                guard let errorPacket = ErrorPacket(from: &packet), case .error(let errorKind) = errorPacket.kind else {
-                    let error = MySQLClientError.errorPacket()
-                    self = .done(result: error, capabilities: self.capabilities)
-                    return .error(error)
-                }
-                let error = MySQLClientError.errorPacket(errorCode: errorPacket.errorCode, errorMessage: errorKind.errorMessage)
-                self = .done(result: error, capabilities: self.capabilities)
-                return .error(error)
-            }
             switch consume self.state {
+            // MARK: - `COM_QUERY` related states
             case .awaitingResultsetStart:
+                guard !packet.isErrorPacket else {
+                    guard let errorPacket = ErrorPacket(from: &packet), case .error(let errorKind) = errorPacket.kind else {
+                        let error = MySQLClientError.errorPacket()
+                        self = .done(result: error, capabilities: self.capabilities)
+                        return .failPromise(error)
+                    }
+                    let error = MySQLClientError.errorPacket(errorCode: errorPacket.errorCode, errorMessage: errorKind.errorMessage)
+                    self = .done(result: error, capabilities: self.capabilities)
+                    return .failPromise(error)
+                }
                 if packet.isOKPacket(capabilities: self.capabilities) {
                     guard let okPacket = try? OKPacket(from: &packet, capabilities: self.capabilities) else {
                         let error = MySQLClientError.invalidPacket("Received an invalid OK Packet")
                         self = .done(result: error, capabilities: self.capabilities)
-                        return .error(error)
+                        return .failPromise(error)
                     }
                     if okPacket.serverStatus.contains(.serverMoreResultsExists) {
                         self = .awaitingResultsetStart(capabilities: self.capabilities)
                         return .moreResultsExists
                     }
                     self = .done(result: nil, capabilities: self.capabilities)
-                    return .resultsetEnd
+                    return .noResultset
                 }
                 guard let columnCount = packet.readEncodedInteger(as: UInt64.self, strategy: .mySQL) else {
                     let error = MySQLClientError.invalidPacket("Received an invalid Result Set Header Packet")
                     self = .done(result: error, capabilities: self.capabilities)
-                    return .error(error)
+                    return .failPromise(error)
                 }
                 var metadataFollows = false
                 if self.capabilities.metadataFlagAvailable {
                     guard let metadataFollowsFlag = packet.readInteger(as: UInt8.self) else {
                         let error = MySQLClientError.invalidPacket("Received an invalid Result Set Header Packet")
                         self = .done(result: error, capabilities: self.capabilities)
-                        return .error(error)
+                        return .failPromise(error)
                     }
                     metadataFollows = metadataFollowsFlag == 1
                 }
                 if !self.capabilities.metadataFlagAvailable || metadataFollows {
                     if columnCount == 0 {
                         self = .readingRows(columnMetadata: .init(), capabilities: self.capabilities)
-                        return .doNothing
+                        return .succeedPromise(nil)
                     } else {
                         self = .awaitingColumnMetadata(
                             columnsRemaining: columnCount,
@@ -943,20 +1021,30 @@ extension MySQLChannelHandler.StateMachine {
                     }
                 } else {
                     self = .readingRows(columnMetadata: .init(), capabilities: self.capabilities)
-                    return .doNothing
+                    return .succeedPromise(nil)
                 }
             case .awaitingColumnMetadata(let columnsRemaining, var columnMetadata):
+                guard !packet.isErrorPacket else {
+                    guard let errorPacket = ErrorPacket(from: &packet), case .error(let errorKind) = errorPacket.kind else {
+                        let error = MySQLClientError.errorPacket()
+                        self = .done(result: error, capabilities: self.capabilities)
+                        return .failPromise(error)
+                    }
+                    let error = MySQLClientError.errorPacket(errorCode: errorPacket.errorCode, errorMessage: errorKind.errorMessage)
+                    self = .done(result: error, capabilities: self.capabilities)
+                    return .failPromise(error)
+                }
                 guard let columnDefinition = ColumnDefinition(from: &packet, capabilities: self.capabilities, format: .text) else {
                     let error = MySQLClientError.invalidPacket("Received an invalid Column Definition Packet")
                     self = .done(result: error, capabilities: self.capabilities)
-                    return .error(error)
+                    return .failPromise(error)
                 }
                 let nextColumnIndex = columnMetadata.columns.count
                 columnMetadata.columns.append(columnDefinition)
                 columnMetadata.lookupTable[columnDefinition.name] = nextColumnIndex
                 if columnsRemaining == 1 {
                     self = .readingRows(columnMetadata: columnMetadata, capabilities: self.capabilities)
-                    return .columnMetadata(columnMetadata)
+                    return .succeedPromise(columnMetadata)
                 } else {
                     self = .awaitingColumnMetadata(
                         columnsRemaining: columnsRemaining - 1,
@@ -965,12 +1053,23 @@ extension MySQLChannelHandler.StateMachine {
                     )
                     return .doNothing
                 }
+            // MARK: - `MySQLRowSequence` related states
             case .readingRows(let columnMetadata):
+                guard !packet.isErrorPacket else {
+                    guard let errorPacket = ErrorPacket(from: &packet), case .error(let errorKind) = errorPacket.kind else {
+                        let error = MySQLClientError.errorPacket()
+                        self = .done(result: error, capabilities: self.capabilities)
+                        return .rowError(error)
+                    }
+                    let error = MySQLClientError.errorPacket(errorCode: errorPacket.errorCode, errorMessage: errorKind.errorMessage)
+                    self = .done(result: error, capabilities: self.capabilities)
+                    return .rowError(error)
+                }
                 if packet.isEOFPacket {
                     guard let eofPacket = EOFPacket(from: &packet) else {
                         let error = MySQLClientError.invalidPacket("Received an invalid EOF Packet")
                         self = .done(result: error, capabilities: self.capabilities)
-                        return .error(error)
+                        return .rowError(error)
                     }
                     if eofPacket.serverStatus.contains(.serverMoreResultsExists) {
                         self = .awaitingResultsetStart(capabilities: self.capabilities)
@@ -982,7 +1081,7 @@ extension MySQLChannelHandler.StateMachine {
                     guard let okPacket = try? OKPacket(from: &packet, capabilities: self.capabilities) else {
                         let error = MySQLClientError.invalidPacket("Received an invalid OK Packet")
                         self = .done(result: error, capabilities: self.capabilities)
-                        return .error(error)
+                        return .rowError(error)
                     }
                     if okPacket.serverStatus.contains(.serverMoreResultsExists) {
                         self = .awaitingResultsetStart(capabilities: self.capabilities)

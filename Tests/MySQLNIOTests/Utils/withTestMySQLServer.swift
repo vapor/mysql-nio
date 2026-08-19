@@ -34,8 +34,11 @@ func withTestMySQLServer(
         }
         group.addTask {
             try await serverOperation(channel)
-            let quitPacket = try await channel.waitForOutboundWrite(as: ByteBuffer.self)
-            #expect(quitPacket == ByteBuffer(bytes: [0x01, 0x00, 0x00, 0x00, 0x01]))
+            // If the connection wasn't already closed (e.g. by a completed graceful shutdown), it will send COM_QUIT.
+            if channel.isActive {
+                let quitPacket = try await channel.waitForOutboundWrite(as: ByteBuffer.self)
+                #expect(quitPacket == ByteBuffer(bytes: [0x01, 0x00, 0x00, 0x00, 0x01]))
+            }
         }
         try await group.waitForAll()
     }
@@ -135,6 +138,55 @@ extension NIOAsyncTestingChannel {
         )
         let okPacketBuffer = Self.makeMySQLPacket(sequenceID: 1) {
             okPacket.write(to: &$0, capabilities: .baselineClientCapabilities)
+        }
+        try await self.writeInbound(okPacketBuffer)
+    }
+
+    /// Helper function to process a MySQL query command from the client and respond with the specified columns and rows.
+    ///
+    /// - Parameters:
+    ///   - query: The SQL query string sent by the client.
+    ///   - columns: An array of ``ColumnDefinition`` representing the columns in the result
+    ///   - rows: An array of strings representing the rows in the result set.
+    func processQuery(
+        _ query: String,
+        columns: [ColumnDefinition],
+        rows: [String]
+    ) async throws {
+        let queryPacket = try await self.waitForOutboundWrite(as: ByteBuffer.self)
+        #expect(queryPacket.getBytes(at: queryPacket.readerIndex + 4, length: 1) == [0x03])  // COM_QUERY command
+        let queryString = queryPacket.getString(at: queryPacket.readerIndex + 5, length: queryPacket.readableBytes - 5)
+        #expect(queryString == query)
+        let resultsetMetadataPacket = Self.makeMySQLPacket(sequenceID: 1) { buffer in
+            buffer.writeEncodedInteger(columns.count, strategy: .mySQL)  // column count
+            // TODO: Fix crash when there is no column definitions (i.e. when `metadata_follows = 0`)
+            buffer.writeInteger(1, as: UInt8.self)  // metadata follows
+        }
+        try await self.writeInbound(resultsetMetadataPacket)
+        for (i, column) in columns.enumerated() {
+            let columnDefinitionPacket = Self.makeMySQLPacket(sequenceID: UInt8(i + 2)) { buffer in
+                column.write(to: &buffer, capabilities: .baselineClientCapabilities)
+            }
+            try await self.writeInbound(columnDefinitionPacket)
+        }
+        for (i, row) in rows.enumerated() {
+            let rowPacket = Self.makeMySQLPacket(sequenceID: UInt8(i + 2 + columns.count)) { buffer in
+                buffer.writeLengthPrefixedString(row, strategy: .mySQL)
+            }
+            try await self.writeInbound(rowPacket)
+        }
+        let okPacket = OKPacket(
+            affectedRows: 0,
+            lastInsertID: 0,
+            serverStatus: [],
+            warningCount: 0,
+            info: "",
+            newSchema: nil,
+            updatedSettings: [:],
+            generalStateChange: false
+        )
+        let okPacketBuffer = NIOAsyncTestingChannel.makeMySQLPacket(sequenceID: 6) { buffer in
+            okPacket.write(to: &buffer, capabilities: .baselineClientCapabilities)
         }
         try await self.writeInbound(okPacketBuffer)
     }
