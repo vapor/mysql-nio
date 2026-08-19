@@ -303,6 +303,7 @@ struct MySQLConnectionTests {
             }
             try await channel.writeInbound(okPacketBuffer)
 
+            try await Task.sleep(for: .milliseconds(200))  // Wait for the graceful shutdown to complete
             #expect(!channel.isActive)
 
             try await channel.closeFuture.get()
