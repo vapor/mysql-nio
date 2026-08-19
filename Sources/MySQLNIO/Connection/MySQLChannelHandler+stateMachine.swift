@@ -215,11 +215,15 @@ extension MySQLChannelHandler {
         enum ReceivedResponseAction {
             case handshakeRespond(ByteBuffer, sslRequest: ByteBuffer?, statusFlags: ServerStatusFlags)
             case authRespond(ByteBuffer?)
+            // TODO: why can statusFlags be nil here? Shouldn't it always be present in the OK packet?
             case succeedPromise(PendingCommand, DeadlineCallbackAction, nextCommand: PendingCommand?, statusFlags: ServerStatusFlags?)
             case succeedPromiseAndClose(PendingCommand, statusFlags: ServerStatusFlags?)
             case failPromise(PendingCommand, any Error)
             case closeWithError(any Error)
             case doNothing
+            case succeedQueryPromise(PendingCommand, statusFlags: ServerStatusFlags?)
+            case finishRowSequence(DeadlineCallbackAction, nextCommand: PendingCommand?, statusFlags: ServerStatusFlags?)
+            case finishRowSequenceAndClose(statusFlags: ServerStatusFlags?)
         }
 
         @usableFromInline
@@ -450,18 +454,39 @@ extension MySQLChannelHandler {
                 case .doNothing:
                     self = .query(state)
                     return .doNothing
-                case .columnMetadata(_):
-                    // TODO: handle column definitions
-                    self = .query(state)
-                    return .doNothing
-                case .row(let row):
+                case .moreResultsExists:
+                    // TODO: handle multiple result sets
                     guard case .query(let continuation) = state.connectedState.activeCommand?.kind else {
-                        preconditionFailure("The active command must be a query command when receiving rows.")
+                        preconditionFailure("The active command must be a query command when receiving the more results flag.")
                     }
-                    continuation.yield(row)
+                    continuation.finish()
                     self = .query(state)
                     return .doNothing
-                case .resultsetEnd:
+                // MARK: - `COM_QUERY` related actions
+                case .succeedPromise(_):
+                    // TODO: handle column definitions
+                    guard let command = state.connectedState.activeCommand else {
+                        preconditionFailure("Cannot complete query without an active command")
+                    }
+                    // The command's promise is resolved here,
+                    // so a later cancel while rows are still being read must not try to resolve it again;
+                    // only the row continuation matters now.
+                    state.connectedState.activeCommand?.promise = .forget
+                    self = .query(state)
+                    return .succeedQueryPromise(command, statusFlags: nil)
+                // TODO: check how we handle errors here and in the channel handler
+                case .failPromise(let error):
+                    guard let command = state.connectedState.activeCommand else {
+                        preconditionFailure("Cannot fail query without an active command")
+                    }
+                    guard case .query(let continuation) = command.kind else {
+                        preconditionFailure("The active command must be a query command when receiving an error.")
+                    }
+                    continuation.finish(throwing: error)
+                    state.connectedState.activeCommand = nil
+                    self = .connected(state.connectedState)
+                    return .failPromise(command, error)
+                case .noResultset:
                     guard let command = state.connectedState.activeCommand else {
                         preconditionFailure("Cannot complete query without an active command")
                     }
@@ -497,25 +522,55 @@ extension MySQLChannelHandler {
                             return .succeedPromise(command, .cancel, nextCommand: nil, statusFlags: nil)
                         }
                     }
-                case .moreResultsExists:
-                    // TODO: handle multiple result sets
+                // MARK: - `MySQLRowSequence` related actions
+                case .row(let row):
                     guard case .query(let continuation) = state.connectedState.activeCommand?.kind else {
-                        preconditionFailure("The active command must be a query command when receiving the more results flag.")
+                        preconditionFailure("The active command must be a query command when receiving rows.")
                     }
-                    continuation.finish()
+                    continuation.yield(row)
                     self = .query(state)
                     return .doNothing
-                case .error(let error):
-                    guard let command = state.connectedState.activeCommand else {
-                        preconditionFailure("Cannot fail query without an active command")
-                    }
-                    guard case .query(let continuation) = command.kind else {
+                case .rowError(let error):
+                    guard case .query(let continuation) = state.connectedState.activeCommand?.kind else {
                         preconditionFailure("The active command must be a query command when receiving an error.")
                     }
                     continuation.finish(throwing: error)
                     state.connectedState.activeCommand = nil
                     self = .connected(state.connectedState)
-                    return .failPromise(command, error)
+                    return .doNothing
+                case .resultsetEnd:
+                    guard case .query(let continuation) = state.connectedState.activeCommand?.kind else {
+                        preconditionFailure("The active command must be a query command when receiving the end of the result set.")
+                    }
+                    continuation.finish()
+                    state.connectedState.activeCommand = nil
+                    if let nextCommand = state.connectedState.pendingCommands.popFirst() {
+                        var nextCommand = nextCommand
+                        nextCommand.activateDeadline()
+                        state.connectedState.activeCommand = nextCommand
+                        switch nextCommand.kind {
+                        case .utility:
+                            if state.gracefulShutdown {
+                                self = .closing(state.connectedState)
+                            } else {
+                                self = .connected(state.connectedState)
+                            }
+                        case .query:
+                            self = .query(state)
+                        }
+                        guard let deadline = nextCommand.deadline else {
+                            preconditionFailure("The command deadline cannot be nil when the command is sent.")
+                        }
+                        return .finishRowSequence(.reschedule(deadline), nextCommand: nextCommand, statusFlags: nil)
+                    } else {
+                        if state.gracefulShutdown {
+                            self = .closed(nil)
+                            return .finishRowSequenceAndClose(statusFlags: nil)
+                        } else {
+                            self = .connected(state.connectedState)
+                            return .finishRowSequence(.cancel, nextCommand: nil, statusFlags: nil)
+                        }
+                    }
                 }
             case .closing(var state):
                 guard let command = state.activeCommand else {
@@ -854,11 +909,16 @@ extension MySQLChannelHandler.StateMachine {
     struct QueryStateMachine: ~Copyable {
         @usableFromInline
         enum State: ~Copyable {
+            // MARK: - `COM_QUERY` related states, see below for related actions
+
             /// A `COM_QUERY` command was sent and no response has yet been received, or a new
             /// resultset has been signaled as incoming but not yet received.
             case awaitingResultsetStart
             /// Waiting for one or more column metadata packets
             case awaitingColumnMetadata(columnsRemaining: UInt64, columnMetadata: ColumnMetadata)
+
+            // MARK: - `MySQLRowSequence` related states, see below for related actions
+
             /// Reading resultset rows
             case readingRows(columnMetadata: ColumnMetadata)
             /// All result sets received, or error stopped the query.
@@ -889,58 +949,74 @@ extension MySQLChannelHandler.StateMachine {
         @usableFromInline
         enum ReceivedResponseAction {
             case doNothing
-            case columnMetadata(ColumnMetadata)
-            case row(MySQLRow)
-            case resultsetEnd
+            /// TODO: handle multiple result sets
             case moreResultsExists
-            case error(any Error)
+
+            // MARK: - `COM_QUERY` related actions
+
+            /// The query command was received by the server and all column metadata has been received
+            case succeedPromise(ColumnMetadata?)
+            /// Something went wrong while sending the query command or receiving column metadata
+            case failPromise(any Error)
+            /// The query was successful but no rows were returned (e.g. an `UPDATE` command)
+            case noResultset
+
+            // MARK: - `MySQLRowSequence` related actions
+
+            /// Yield a row to the query continuation
+            case row(MySQLRow)
+            /// Send an error to the query continuation and finish it
+            case rowError(any Error)
+            /// Finish the query continuation
+            case resultsetEnd
         }
 
         @usableFromInline
         mutating func receivedResponse(packet: inout ByteBuffer) -> ReceivedResponseAction {
-            if packet.isErrorPacket {
-                guard let errorPacket = ErrorPacket(from: &packet), case .error(let errorKind) = errorPacket.kind else {
-                    let error = MySQLClientError.errorPacket()
-                    self = .done(result: error, capabilities: self.capabilities)
-                    return .error(error)
-                }
-                let error = MySQLClientError.errorPacket(errorCode: errorPacket.errorCode, errorMessage: errorKind.errorMessage)
-                self = .done(result: error, capabilities: self.capabilities)
-                return .error(error)
-            }
             switch consume self.state {
+            // MARK: - `COM_QUERY` related states
             case .awaitingResultsetStart:
+                guard !packet.isErrorPacket else {
+                    guard let errorPacket = ErrorPacket(from: &packet), case .error(let errorKind) = errorPacket.kind else {
+                        let error = MySQLClientError.errorPacket()
+                        self = .done(result: error, capabilities: self.capabilities)
+                        return .failPromise(error)
+                    }
+                    let error = MySQLClientError.errorPacket(errorCode: errorPacket.errorCode, errorMessage: errorKind.errorMessage)
+                    self = .done(result: error, capabilities: self.capabilities)
+                    return .failPromise(error)
+                }
                 if packet.isOKPacket(capabilities: self.capabilities) {
                     guard let okPacket = try? OKPacket(from: &packet, capabilities: self.capabilities) else {
                         let error = MySQLClientError.invalidPacket("Received an invalid OK Packet")
                         self = .done(result: error, capabilities: self.capabilities)
-                        return .error(error)
+                        return .failPromise(error)
                     }
                     if okPacket.serverStatus.contains(.serverMoreResultsExists) {
                         self = .awaitingResultsetStart(capabilities: self.capabilities)
                         return .moreResultsExists
                     }
                     self = .done(result: nil, capabilities: self.capabilities)
-                    return .resultsetEnd
+                    return .noResultset
                 }
                 guard let columnCount = packet.readEncodedInteger(as: UInt64.self, strategy: .mySQL) else {
                     let error = MySQLClientError.invalidPacket("Received an invalid Result Set Header Packet")
                     self = .done(result: error, capabilities: self.capabilities)
-                    return .error(error)
+                    return .failPromise(error)
                 }
                 var metadataFollows = false
                 if self.capabilities.metadataFlagAvailable {
                     guard let metadataFollowsFlag = packet.readInteger(as: UInt8.self) else {
                         let error = MySQLClientError.invalidPacket("Received an invalid Result Set Header Packet")
                         self = .done(result: error, capabilities: self.capabilities)
-                        return .error(error)
+                        return .failPromise(error)
                     }
                     metadataFollows = metadataFollowsFlag == 1
                 }
                 if !self.capabilities.metadataFlagAvailable || metadataFollows {
                     if columnCount == 0 {
                         self = .readingRows(columnMetadata: .init(), capabilities: self.capabilities)
-                        return .doNothing
+                        return .succeedPromise(nil)
                     } else {
                         self = .awaitingColumnMetadata(
                             columnsRemaining: columnCount,
@@ -951,20 +1027,30 @@ extension MySQLChannelHandler.StateMachine {
                     }
                 } else {
                     self = .readingRows(columnMetadata: .init(), capabilities: self.capabilities)
-                    return .doNothing
+                    return .succeedPromise(nil)
                 }
             case .awaitingColumnMetadata(let columnsRemaining, var columnMetadata):
+                guard !packet.isErrorPacket else {
+                    guard let errorPacket = ErrorPacket(from: &packet), case .error(let errorKind) = errorPacket.kind else {
+                        let error = MySQLClientError.errorPacket()
+                        self = .done(result: error, capabilities: self.capabilities)
+                        return .failPromise(error)
+                    }
+                    let error = MySQLClientError.errorPacket(errorCode: errorPacket.errorCode, errorMessage: errorKind.errorMessage)
+                    self = .done(result: error, capabilities: self.capabilities)
+                    return .failPromise(error)
+                }
                 guard let columnDefinition = ColumnDefinition(from: &packet, capabilities: self.capabilities, format: .text) else {
                     let error = MySQLClientError.invalidPacket("Received an invalid Column Definition Packet")
                     self = .done(result: error, capabilities: self.capabilities)
-                    return .error(error)
+                    return .failPromise(error)
                 }
                 let nextColumnIndex = columnMetadata.columns.count
                 columnMetadata.columns.append(columnDefinition)
                 columnMetadata.lookupTable[columnDefinition.name] = nextColumnIndex
                 if columnsRemaining == 1 {
                     self = .readingRows(columnMetadata: columnMetadata, capabilities: self.capabilities)
-                    return .columnMetadata(columnMetadata)
+                    return .succeedPromise(columnMetadata)
                 } else {
                     self = .awaitingColumnMetadata(
                         columnsRemaining: columnsRemaining - 1,
@@ -973,12 +1059,23 @@ extension MySQLChannelHandler.StateMachine {
                     )
                     return .doNothing
                 }
+            // MARK: - `MySQLRowSequence` related states
             case .readingRows(let columnMetadata):
+                guard !packet.isErrorPacket else {
+                    guard let errorPacket = ErrorPacket(from: &packet), case .error(let errorKind) = errorPacket.kind else {
+                        let error = MySQLClientError.errorPacket()
+                        self = .done(result: error, capabilities: self.capabilities)
+                        return .rowError(error)
+                    }
+                    let error = MySQLClientError.errorPacket(errorCode: errorPacket.errorCode, errorMessage: errorKind.errorMessage)
+                    self = .done(result: error, capabilities: self.capabilities)
+                    return .rowError(error)
+                }
                 if packet.isEOFPacket {
                     guard let eofPacket = EOFPacket(from: &packet) else {
                         let error = MySQLClientError.invalidPacket("Received an invalid EOF Packet")
                         self = .done(result: error, capabilities: self.capabilities)
-                        return .error(error)
+                        return .rowError(error)
                     }
                     if eofPacket.serverStatus.contains(.serverMoreResultsExists) {
                         self = .awaitingResultsetStart(capabilities: self.capabilities)
@@ -990,7 +1087,7 @@ extension MySQLChannelHandler.StateMachine {
                     guard let okPacket = try? OKPacket(from: &packet, capabilities: self.capabilities) else {
                         let error = MySQLClientError.invalidPacket("Received an invalid OK Packet")
                         self = .done(result: error, capabilities: self.capabilities)
-                        return .error(error)
+                        return .rowError(error)
                     }
                     if okPacket.serverStatus.contains(.serverMoreResultsExists) {
                         self = .awaitingResultsetStart(capabilities: self.capabilities)

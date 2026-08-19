@@ -244,6 +244,16 @@ final class MySQLChannelHandler: ChannelDuplexHandler {
         case .failPromise(let command, let error):
             command.promise.fail(error)
             throw error
+        case .succeedQueryPromise(let command, let statusFlags):
+            if let statusFlags { self.statusFlags = statusFlags }
+            command.promise.succeed(packet)
+        case .finishRowSequence(let action, let nextCommand, let statusFlags):
+            self.processDeadlineCallbackAction(action: action)
+            if let nextCommand { _ = context.channel.writeAndFlush(nextCommand.packet) }
+            if let statusFlags { self.statusFlags = statusFlags }
+        case .finishRowSequenceAndClose(let statusFlags):
+            if let statusFlags { self.statusFlags = statusFlags }
+            context.close(promise: nil)
         case .doNothing:
             break
         }
