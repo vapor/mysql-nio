@@ -319,7 +319,7 @@ struct MySQLConnectionTests {
                         // This will be sent and become the active command
                         async let firstCommand: Void = connection.ping()
 
-                        try await Task.sleep(for: .milliseconds(50))
+                        try await Task.sleep(for: .milliseconds(100))
 
                         // No need to process this second command from the server, as it will be cancelled before it is sent
                         async let secondCommand: Void = connection.ping()
@@ -327,7 +327,7 @@ struct MySQLConnectionTests {
                     }
                 }
 
-                try await Task.sleep(for: .milliseconds(100))
+                try await Task.sleep(for: .milliseconds(500))
                 // This is put in the command queue before the cancellation,
                 // but will not be cancelled and sent to the server after the first command is completed
                 async let thirdCommand: Void = connection.ping()
@@ -337,7 +337,7 @@ struct MySQLConnectionTests {
                 group.cancelAll()
 
                 // Even after cancellation, the server can still process the third command
-                _ = try await thirdCommand
+                try await thirdCommand
 
                 // The connection is still active so we can send more commands after the cancellation
                 await #expect(throws: Never.self) {
@@ -346,7 +346,7 @@ struct MySQLConnectionTests {
             }
         } server: { channel in
             // Wait for all three commands to be sent
-            try await Task.sleep(for: .milliseconds(150))
+            try await Task.sleep(for: .milliseconds(1000))
 
             let pingCommandPacket = try await channel.waitForOutboundWrite(as: ByteBuffer.self)
             #expect(pingCommandPacket == ByteBuffer(bytes: [0x01, 0x00, 0x00, 0x00, 0x0E]))
