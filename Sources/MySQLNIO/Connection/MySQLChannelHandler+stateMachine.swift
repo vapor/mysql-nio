@@ -27,6 +27,7 @@ extension MySQLChannelHandler {
             let context: Context
             let connectPromise: PendingCommand
             let configuration: MySQLConnectionConfiguration
+            /// Whether a graceful shutdown has been requested.
             var gracefulShutdown: Bool
         }
 
@@ -38,6 +39,7 @@ extension MySQLChannelHandler {
             let capabilities: MySQLCapabilities
             var authMethod: any AuthenticationMethod & ~Copyable
             let password: String?
+            /// Whether a graceful shutdown has been requested.
             var gracefulShutdown: Bool
         }
 
@@ -501,11 +503,7 @@ extension MySQLChannelHandler {
                         state.connectedState.activeCommand = nextCommand
                         switch nextCommand.kind {
                         case .utility:
-                            if state.gracefulShutdown {
-                                self = .closing(state.connectedState)
-                            } else {
-                                self = .connected(state.connectedState)
-                            }
+                            self = state.gracefulShutdown ? .closing(state.connectedState) : .connected(state.connectedState)
                         case .query:
                             self = .query(state)
                         }
@@ -550,11 +548,7 @@ extension MySQLChannelHandler {
                         state.connectedState.activeCommand = nextCommand
                         switch nextCommand.kind {
                         case .utility:
-                            if state.gracefulShutdown {
-                                self = .closing(state.connectedState)
-                            } else {
-                                self = .connected(state.connectedState)
-                            }
+                            self = state.gracefulShutdown ? .closing(state.connectedState) : .connected(state.connectedState)
                         case .query:
                             self = .query(state)
                         }
