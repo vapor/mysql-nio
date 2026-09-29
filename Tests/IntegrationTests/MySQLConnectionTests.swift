@@ -146,6 +146,10 @@ struct MySQLConnectionTests {
         ) { connection in
             try await connection.ping()
         }
+        // The channel handler always caches the following error,
+        // after the connection is closed and just before the channel becomes inactive:
+        // `debug MySQLNIOTests: error=uncleanShutdown [MySQLNIO] MySQLChannelHandler: ERROR`
+        // TODO: Is it our fault or MySQL's?
     }
 
     static var sslContext: NIOSSLContext {

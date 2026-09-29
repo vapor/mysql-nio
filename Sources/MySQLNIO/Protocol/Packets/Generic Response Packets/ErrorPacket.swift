@@ -49,4 +49,31 @@ struct ErrorPacket {
             self.kind = .error(.init(sqlState: sqlState, errorMessage: errorMessage))
         }
     }
+
+    package init(errorCode: UInt16, kind: Kind) {
+        self.errorCode = errorCode
+        self.kind = kind
+    }
+
+    package func write(to packet: inout ByteBuffer) {
+        packet.writeInteger(UInt8(0xFF))
+        packet.writeInteger(errorCode, endianness: .little)
+        switch kind {
+        case .progressReporting(let progress):
+            packet.writeInteger(progress.stage)
+            packet.writeInteger(progress.maxStage)
+            packet.writeBytes([
+                UInt8((progress.progress >> 16) & 0xFF),
+                UInt8((progress.progress >> 8) & 0xFF),
+                UInt8(progress.progress & 0xFF),
+            ])
+            packet.writeLengthPrefixedString(progress.progressInfo, strategy: .mySQL)
+        case .error(let error):
+            if let sqlState = error.sqlState {
+                packet.writeInteger(UInt8(0x23))  // "#"
+                packet.writeString(sqlState)
+            }
+            packet.writeString(error.errorMessage)
+        }
+    }
 }
