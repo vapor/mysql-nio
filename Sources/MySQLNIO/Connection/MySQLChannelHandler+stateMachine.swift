@@ -28,7 +28,7 @@ extension MySQLChannelHandler {
             let connectPromise: PendingCommand
             let configuration: MySQLConnectionConfiguration
             /// Whether a graceful shutdown has been requested.
-            var gracefulShutdown: Bool
+            var gracefulShutdownTriggered: Bool
         }
 
         /// See ``MySQLChannelHandler/StateMachine/State/awaitingAuthReply-enum.case``.
@@ -40,7 +40,7 @@ extension MySQLChannelHandler {
             var authMethod: any AuthenticationMethod & ~Copyable
             let password: String?
             /// Whether a graceful shutdown has been requested.
-            var gracefulShutdown: Bool
+            var gracefulShutdownTriggered: Bool
         }
 
         @usableFromInline
@@ -95,7 +95,7 @@ extension MySQLChannelHandler {
             switch consume self.state {
             case .startup:
                 self = .awaitingGreeting(
-                    .init(context: context, connectPromise: connectPromise, configuration: configuration, gracefulShutdown: false)
+                    .init(context: context, connectPromise: connectPromise, configuration: configuration, gracefulShutdownTriggered: false)
                 )
             case .awaitingGreeting:
                 preconditionFailure("Cannot set awaitingGreeting state when state is already awaitingGreeting")
@@ -182,7 +182,9 @@ extension MySQLChannelHandler {
                 } else {
                     command.activateDeadline()
                     state.activeCommand = command
-                    self = .query(.init(connectedState: state, stateMachine: .init(capabilities: state.capabilities), gracefulShutdown: false))
+                    self = .query(
+                        .init(connectedState: state, stateMachine: .init(capabilities: state.capabilities), gracefulShutdownTriggered: false)
+                    )
                     return .sendCommand(state.context, command)
                 }
             case .query(var state):
@@ -297,7 +299,7 @@ extension MySQLChannelHandler {
                             capabilities: clientCapabilities,
                             authMethod: authMethod,
                             password: state.configuration.password,
-                            gracefulShutdown: state.gracefulShutdown
+                            gracefulShutdownTriggered: state.gracefulShutdownTriggered
                         )
                     )
 
@@ -357,7 +359,7 @@ extension MySQLChannelHandler {
                         self = .closed(error)
                         return .failPromise(state.connectPromise, error)
                     }
-                    if state.gracefulShutdown {
+                    if state.gracefulShutdownTriggered {
                         self = .closed(nil)
                         return .succeedPromiseAndClose(state.connectPromise, statusFlags: okPacket.serverStatus)
                     }
@@ -441,7 +443,9 @@ extension MySQLChannelHandler {
                     case .utility:
                         self = .connected(state)
                     case .query:
-                        self = .query(.init(connectedState: state, stateMachine: .init(capabilities: state.capabilities), gracefulShutdown: false))
+                        self = .query(
+                            .init(connectedState: state, stateMachine: .init(capabilities: state.capabilities), gracefulShutdownTriggered: false)
+                        )
                     }
                     guard let deadline = nextCommand.deadline else {
                         preconditionFailure("The command deadline cannot be nil when the command is sent.")
@@ -503,7 +507,7 @@ extension MySQLChannelHandler {
                         state.connectedState.activeCommand = nextCommand
                         switch nextCommand.kind {
                         case .utility:
-                            self = state.gracefulShutdown ? .closing(state.connectedState) : .connected(state.connectedState)
+                            self = state.gracefulShutdownTriggered ? .closing(state.connectedState) : .connected(state.connectedState)
                         case .query:
                             self = .query(state)
                         }
@@ -512,7 +516,7 @@ extension MySQLChannelHandler {
                         }
                         return .succeedPromise(command, .reschedule(deadline), nextCommand: nextCommand, statusFlags: nil)
                     } else {
-                        if state.gracefulShutdown {
+                        if state.gracefulShutdownTriggered {
                             self = .closed(nil)
                             return .succeedPromiseAndClose(command, statusFlags: nil)
                         } else {
@@ -548,7 +552,7 @@ extension MySQLChannelHandler {
                         state.connectedState.activeCommand = nextCommand
                         switch nextCommand.kind {
                         case .utility:
-                            self = state.gracefulShutdown ? .closing(state.connectedState) : .connected(state.connectedState)
+                            self = state.gracefulShutdownTriggered ? .closing(state.connectedState) : .connected(state.connectedState)
                         case .query:
                             self = .query(state)
                         }
@@ -557,7 +561,7 @@ extension MySQLChannelHandler {
                         }
                         return .finishRowSequence(.reschedule(deadline), nextCommand: nextCommand, statusFlags: nil)
                     } else {
-                        if state.gracefulShutdown {
+                        if state.gracefulShutdownTriggered {
                             self = .closed(nil)
                             return .finishRowSequenceAndClose(statusFlags: nil)
                         } else {
@@ -601,7 +605,7 @@ extension MySQLChannelHandler {
                             .init(
                                 connectedState: state,
                                 stateMachine: .init(capabilities: state.capabilities),
-                                gracefulShutdown: true
+                                gracefulShutdownTriggered: true
                             )
                         )
                     }
@@ -796,11 +800,11 @@ extension MySQLChannelHandler {
                 self = .closed(nil)
                 return .doNothing
             case .awaitingGreeting(var state):
-                state.gracefulShutdown = true
+                state.gracefulShutdownTriggered = true
                 self = .awaitingGreeting(state)
                 return .doNothing
             case .awaitingAuthReply(var state):
-                state.gracefulShutdown = true
+                state.gracefulShutdownTriggered = true
                 self = .awaitingAuthReply(state)
                 return .doNothing
             case .connected(let state):
@@ -813,7 +817,7 @@ extension MySQLChannelHandler {
                 }
             case .query(var state):
                 if state.connectedState.activeCommand != nil || !state.connectedState.pendingCommands.isEmpty {
-                    state.gracefulShutdown = true
+                    state.gracefulShutdownTriggered = true
                     self = .query(state)
                     return .doNothing
                 } else {
@@ -896,7 +900,7 @@ extension MySQLChannelHandler.StateMachine {
         var connectedState: ConnectedState
         var stateMachine: QueryStateMachine
         /// Whether a graceful shutdown has been requested.
-        var gracefulShutdown: Bool
+        var gracefulShutdownTriggered: Bool
     }
 
     @usableFromInline
