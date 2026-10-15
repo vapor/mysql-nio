@@ -19,7 +19,7 @@ final class MySQLChannelHandler: ChannelDuplexHandler {
         @usableFromInline
         let packet: ByteBuffer?
         @usableFromInline
-        let promise: MySQLPromise<ByteBuffer>
+        var promise: MySQLPromise<ByteBuffer>
         @usableFromInline
         let requestID: Int
         /// Optional because in the connect promise we set the deadline directly.
@@ -198,13 +198,8 @@ final class MySQLChannelHandler: ChannelDuplexHandler {
     func cancel(requestID: Int) {
         self.eventLoop.assertInEventLoop()
         switch self.stateMachine.cancel(requestID: requestID) {
-        case .failPendingCommandsAndClose(let cancelled, let closeConnectionDueToCancel):
-            for command in cancelled {
-                command.promise.fail(MySQLClientError.cancelled)
-            }
-            for command in closeConnectionDueToCancel {
-                command.promise.fail(MySQLClientError.connectionClosedDueToCancellation)
-            }
+        case .cancelCommand(let command):
+            command.promise.fail(MySQLClientError.cancelled)
         case .doNothing:
             break
         }
@@ -245,10 +240,20 @@ final class MySQLChannelHandler: ChannelDuplexHandler {
         case .succeedPromiseAndClose(let command, let statusFlags):
             if let statusFlags { self.statusFlags = statusFlags }
             command.promise.succeed(packet)
-            throw MySQLClientError.connectionClosing
+            context.close(promise: nil)
         case .failPromise(let command, let error):
             command.promise.fail(error)
             throw error
+        case .succeedQueryPromise(let command, let statusFlags):
+            if let statusFlags { self.statusFlags = statusFlags }
+            command.promise.succeed(packet)
+        case .finishRowSequence(let action, let nextCommand, let statusFlags):
+            self.processDeadlineCallbackAction(action: action)
+            if let nextCommand { _ = context.channel.writeAndFlush(nextCommand.packet) }
+            if let statusFlags { self.statusFlags = statusFlags }
+        case .finishRowSequenceAndClose(let statusFlags):
+            if let statusFlags { self.statusFlags = statusFlags }
+            context.close(promise: nil)
         case .doNothing:
             break
         }
