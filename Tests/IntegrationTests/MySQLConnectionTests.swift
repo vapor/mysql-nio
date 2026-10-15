@@ -10,7 +10,7 @@ import FoundationEssentials
 import Foundation
 #endif
 
-@Suite("MySQLConnection Tests")
+@Suite("MySQLConnection Tests", .defaultLogger(logLevel: .trace))
 struct MySQLConnectionTests {
     let mySQLHostname = ProcessInfo.processInfo.environment["MYSQL_HOSTNAME"] ?? "localhost"
 
@@ -18,8 +18,7 @@ struct MySQLConnectionTests {
     func selectVersion() async throws {
         try await MySQLConnection.withConnection(
             address: .hostname(mySQLHostname),
-            configuration: .init(username: "test_username", password: "test_password"),
-            logger: logger
+            configuration: .init(username: "test_username", password: "test_password")
         ) { connection in
             try await connection.query("SELECT @@version") { rows in
                 for try await row in rows {
@@ -36,8 +35,7 @@ struct MySQLConnectionTests {
     func selectString() async throws {
         try await MySQLConnection.withConnection(
             address: .hostname(mySQLHostname),
-            configuration: .init(username: "test_username", password: "test_password"),
-            logger: logger
+            configuration: .init(username: "test_username", password: "test_password")
         ) { connection in
             try await connection.query("SELECT 'foo' as bar") { rows in
                 for try await row in rows {
@@ -55,8 +53,7 @@ struct MySQLConnectionTests {
     func selectIntegers() async throws {
         try await MySQLConnection.withConnection(
             address: .hostname(mySQLHostname),
-            configuration: .init(username: "test_username", password: "test_password"),
-            logger: logger
+            configuration: .init(username: "test_username", password: "test_password")
         ) { connection in
             try await connection.query("SELECT '1' as one, 2 as two") { rows in
                 for try await row in rows {
@@ -77,8 +74,7 @@ struct MySQLConnectionTests {
     func noResponse() async throws {
         try await MySQLConnection.withConnection(
             address: .hostname(mySQLHostname),
-            configuration: .init(username: "test_username", password: "test_password"),
-            logger: logger
+            configuration: .init(username: "test_username", password: "test_password")
         ) { connection in
             try await connection.query("SET @foo = 'bar'") { rows in
                 var iterator = rows.makeAsyncIterator()
@@ -92,8 +88,7 @@ struct MySQLConnectionTests {
     func ping() async throws {
         try await MySQLConnection.withConnection(
             address: .hostname(mySQLHostname),
-            configuration: .init(username: "test_username", password: "test_password"),
-            logger: logger
+            configuration: .init(username: "test_username", password: "test_password")
         ) { connection in
             try await connection.ping()
         }
@@ -103,8 +98,7 @@ struct MySQLConnectionTests {
     func resetConnection() async throws {
         try await MySQLConnection.withConnection(
             address: .hostname(mySQLHostname),
-            configuration: .init(username: "test_username", password: "test_password"),
-            logger: logger
+            configuration: .init(username: "test_username", password: "test_password")
         ) { connection in
             try await connection.resetConnection()
         }
@@ -114,8 +108,7 @@ struct MySQLConnectionTests {
     func initDB() async throws {
         try await MySQLConnection.withConnection(
             address: .hostname(mySQLHostname),
-            configuration: .init(username: "test_username", password: "test_password"),
-            logger: logger
+            configuration: .init(username: "test_username", password: "test_password")
         ) { connection in
             try await connection.initDB(schema: "test_database")
         }
@@ -125,8 +118,7 @@ struct MySQLConnectionTests {
     func statistics() async throws {
         try await MySQLConnection.withConnection(
             address: .hostname(mySQLHostname),
-            configuration: .init(username: "test_username", password: "test_password"),
-            logger: logger
+            configuration: .init(username: "test_username", password: "test_password")
         ) { connection in
             let stats = try await connection.statistics()
             #expect(stats.contains("Uptime: "))
@@ -141,8 +133,7 @@ struct MySQLConnectionTests {
                 username: "test_username",
                 password: "test_password",
                 tls: .prefer(try Self.sslContext, tlsServerName: "vapor.codes")
-            ),
-            logger: logger
+            )
         ) { connection in
             try await connection.ping()
         }
@@ -165,10 +156,4 @@ struct MySQLConnectionTests {
         .split(separator: "/", omittingEmptySubsequences: false)
         .dropLast(3)
         .joined(separator: "/")
-
-    let logger: Logger = {
-        var logger = Logger(label: "MySQLNIOTests")
-        logger.logLevel = .trace
-        return logger
-    }()
 }
