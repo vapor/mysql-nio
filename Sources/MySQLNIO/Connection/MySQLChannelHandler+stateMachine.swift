@@ -119,13 +119,15 @@ extension MySQLChannelHandler {
             case throwError(MySQLClientError)
         }
 
-        /// Handler wants to send a command
+        /// Handler wants to send a utility command, such as `COM_PING` and `COM_RESET_CONNECTION`
         ///
-        /// - Parameter command: The command the handler wants to send.
+        /// - Parameters:
+        ///   - command: The utility command the handler wants to send.
         ///     It is passed inout so that the state machine can activate the command's deadline if needed.
+        ///   - now: The current time used to calculate the command's deadline.
         /// - Returns: An action describing what the handler should do to send the command, or an error if the command cannot be sent in the current state.
         @usableFromInline
-        mutating func sendUtilityCommand(_ command: inout PendingCommand) -> SendUtilityCommandAction {
+        mutating func sendUtilityCommand(_ command: inout PendingCommand, now: NIODeadline) -> SendUtilityCommandAction {
             switch consume self.state {
             case .startup:
                 preconditionFailure("Cannot send command when in startup state")
@@ -139,7 +141,7 @@ extension MySQLChannelHandler {
                     self = .connected(state)
                     return .doNothing
                 } else {
-                    command.activateDeadline()
+                    command.activateDeadline(now: now)
                     state.activeCommand = command
                     self = .connected(state)
                     return .sendCommand(state.context, command)
@@ -150,7 +152,7 @@ extension MySQLChannelHandler {
                     self = .query(state)
                     return .doNothing
                 } else {
-                    command.activateDeadline()
+                    command.activateDeadline(now: now)
                     state.connectedState.activeCommand = command
                     let context = state.connectedState.context
                     self = .query(state)
@@ -165,8 +167,14 @@ extension MySQLChannelHandler {
             }
         }
 
+        /// Handler wants to send a query command.
+        ///
+        /// - Parameters:
+        ///   - command: The query command the handler wants to send.
+        ///     It is passed inout so that the state machine can activate the command's deadline if needed.
+        ///   - now: The current time used to calculate the command's deadline.
         @usableFromInline
-        mutating func sendQueryCommand(_ command: inout PendingCommand) -> SendUtilityCommandAction {
+        mutating func sendQueryCommand(_ command: inout PendingCommand, now: NIODeadline) -> SendUtilityCommandAction {
             switch consume self.state {
             case .startup:
                 preconditionFailure("Cannot send command when in startup state")
@@ -180,7 +188,7 @@ extension MySQLChannelHandler {
                     self = .connected(state)
                     return .doNothing
                 } else {
-                    command.activateDeadline()
+                    command.activateDeadline(now: now)
                     state.activeCommand = command
                     self = .query(
                         .init(connectedState: state, stateMachine: .init(capabilities: state.capabilities), gracefulShutdownTriggered: false)
@@ -193,7 +201,7 @@ extension MySQLChannelHandler {
                     self = .query(state)
                     return .doNothing
                 } else {
-                    command.activateDeadline()
+                    command.activateDeadline(now: now)
                     state.connectedState.activeCommand = command
                     let context = state.connectedState.context
                     self = .query(state)
@@ -231,7 +239,7 @@ extension MySQLChannelHandler {
         }
 
         @usableFromInline
-        mutating func receivedResponse(packet: inout ByteBuffer) throws -> ReceivedResponseAction {
+        mutating func receivedResponse(packet: inout ByteBuffer, now: NIODeadline) throws -> ReceivedResponseAction {
             switch consume self.state {
             case .startup:
                 preconditionFailure("Cannot receive packet when in startup state")
@@ -437,7 +445,7 @@ extension MySQLChannelHandler {
                     }
                 if let nextCommand = state.pendingCommands.popFirst() {
                     var nextCommand = nextCommand
-                    nextCommand.activateDeadline()
+                    nextCommand.activateDeadline(now: now)
                     state.activeCommand = nextCommand
                     switch nextCommand.kind {
                     case .utility:
@@ -503,7 +511,7 @@ extension MySQLChannelHandler {
                     state.connectedState.activeCommand = nil
                     if let nextCommand = state.connectedState.pendingCommands.popFirst() {
                         var nextCommand = nextCommand
-                        nextCommand.activateDeadline()
+                        nextCommand.activateDeadline(now: now)
                         state.connectedState.activeCommand = nextCommand
                         switch nextCommand.kind {
                         case .utility:
@@ -548,7 +556,7 @@ extension MySQLChannelHandler {
                     state.connectedState.activeCommand = nil
                     if let nextCommand = state.connectedState.pendingCommands.popFirst() {
                         var nextCommand = nextCommand
-                        nextCommand.activateDeadline()
+                        nextCommand.activateDeadline(now: now)
                         state.connectedState.activeCommand = nextCommand
                         switch nextCommand.kind {
                         case .utility:
@@ -595,7 +603,7 @@ extension MySQLChannelHandler {
                     }
                 if let nextCommand = state.pendingCommands.popFirst() {
                     var nextCommand = nextCommand
-                    nextCommand.activateDeadline()
+                    nextCommand.activateDeadline(now: now)
                     state.activeCommand = nextCommand
                     switch nextCommand.kind {
                     case .utility:
