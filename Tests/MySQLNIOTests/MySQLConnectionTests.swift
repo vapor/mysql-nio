@@ -463,4 +463,34 @@ struct MySQLConnectionTests {
             try await channel.processPing()  // This is the command sent after everything
         }
     }
+
+    @Test("A timed-out query is removed before the connection closes")
+    func queryTimeoutThenConnectionClose() async {
+        await #expect(throws: MySQLClientError.timeout) {
+            try await withTestMySQLServer(
+                configuration: .init(username: "test_username", commandTimeout: .milliseconds(10))
+            ) { connection in
+                try await connection.query("test") { rows in
+                    for try await _ in rows {}
+                }
+            } server: { channel in
+                _ = try await channel.waitForOutboundWrite(as: ByteBuffer.self)
+                await channel.testingEventLoop.advanceTime(by: .milliseconds(20))
+            }
+        }
+    }
+
+    @Test("A timed-out command is removed before the connection closes")
+    func commandTimeoutThenConnectionClose() async {
+        await #expect(throws: MySQLClientError.timeout) {
+            try await withTestMySQLServer(
+                configuration: .init(username: "test_username", commandTimeout: .milliseconds(10))
+            ) { connection in
+                try await connection.ping()
+            } server: { channel in
+                _ = try await channel.waitForOutboundWrite(as: ByteBuffer.self)
+                await channel.testingEventLoop.advanceTime(by: .milliseconds(20))
+            }
+        }
+    }
 }
