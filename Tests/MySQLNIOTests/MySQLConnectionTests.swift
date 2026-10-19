@@ -465,32 +465,88 @@ struct MySQLConnectionTests {
     }
 
     @Test("A timed-out query is removed before the connection closes")
-    func queryTimeoutThenConnectionClose() async {
-        await #expect(throws: MySQLClientError.timeout) {
-            try await withTestMySQLServer(
-                configuration: .init(username: "test_username", commandTimeout: .milliseconds(10))
-            ) { connection in
+    func queryTimeoutThenConnectionClose() async throws {
+        try await withTestMySQLServer(
+            configuration: .init(username: "test_username", commandTimeout: .milliseconds(10))
+        ) { connection in
+            await #expect(throws: MySQLClientError.timeout) {
                 try await connection.query("test") { rows in
                     for try await _ in rows {}
                 }
-            } server: { channel in
-                _ = try await channel.waitForOutboundWrite(as: ByteBuffer.self)
-                await channel.testingEventLoop.advanceTime(by: .milliseconds(20))
             }
+        } server: { channel in
+            _ = try await channel.waitForOutboundWrite(as: ByteBuffer.self)
+            await channel.testingEventLoop.advanceTime(by: .milliseconds(20))
         }
     }
 
     @Test("A timed-out command is removed before the connection closes")
-    func commandTimeoutThenConnectionClose() async {
-        await #expect(throws: MySQLClientError.timeout) {
-            try await withTestMySQLServer(
-                configuration: .init(username: "test_username", commandTimeout: .milliseconds(10))
-            ) { connection in
-                try await connection.ping()
-            } server: { channel in
-                _ = try await channel.waitForOutboundWrite(as: ByteBuffer.self)
-                await channel.testingEventLoop.advanceTime(by: .milliseconds(20))
-            }
+    func commandTimeoutThenConnectionClose() async throws {
+        try await withTestMySQLServer(
+            configuration: .init(username: "test_username", commandTimeout: .milliseconds(10))
+        ) { connection in
+            await #expect(throws: MySQLClientError.timeout) { try await connection.ping() }
+        } server: { channel in
+            _ = try await channel.waitForOutboundWrite(as: ByteBuffer.self)
+            await channel.testingEventLoop.advanceTime(by: .milliseconds(20))
         }
+    }
+
+    @Test("A cancelled query doesn't trigger a timeout")
+    func cancelledQueryDoesntTimeout() async throws {
+        let channel = NIOAsyncTestingChannel()
+        let configuration = MySQLConnectionConfiguration(username: "test_username", commandTimeout: .milliseconds(10))
+        let connection = try await MySQLConnection.setupChannelAndConnect(channel, configuration: configuration)
+        try await channel.processHandshake(configuration: configuration)
+
+        let task = Task { try await connection.query("test") { _ in } }
+
+        _ = try await channel.waitForOutboundWrite(as: ByteBuffer.self)
+        task.cancel()
+        await channel.testingEventLoop.advanceTime(by: .milliseconds(20))
+
+        await #expect(throws: MySQLClientError.cancelled) { try await task.value }
+    }
+
+    @Test("Timeout deadline is recalculated after cancellation")
+    func timeoutRecalculatedAfterCancellation() async throws {
+        let channel = NIOAsyncTestingChannel()
+        let configuration = MySQLConnectionConfiguration(username: "test_username", commandTimeout: .milliseconds(10))
+        let connection = try await MySQLConnection.setupChannelAndConnect(channel, configuration: configuration)
+        try await channel.processHandshake(configuration: configuration)
+
+        let cancelledTask = Task { try await connection.ping() }
+        let cancelledPingCommandPacket = try await channel.waitForOutboundWrite(as: ByteBuffer.self)
+        await channel.testingEventLoop.advanceTime(by: .milliseconds(9))
+
+        // This command will be queued
+        let task = Task { try await connection.ping() }
+
+        cancelledTask.cancel()
+        await channel.testingEventLoop.advanceTime(by: .milliseconds(9))
+
+        #expect(cancelledPingCommandPacket == ByteBuffer(bytes: [0x01, 0x00, 0x00, 0x00, 0x0e]))
+        let okPacket = OKPacket(
+            affectedRows: 0,
+            lastInsertID: 0,
+            serverStatus: [],
+            warningCount: 0,
+            info: "",
+            newSchema: nil,
+            updatedSettings: [:],
+            generalStateChange: false
+        )
+        let okPacketBuffer = NIOAsyncTestingChannel.makeMySQLPacket(sequenceID: 1) {
+            okPacket.write(to: &$0, capabilities: .baselineClientCapabilities)
+        }
+        try await channel.writeInbound(okPacketBuffer)
+        // Timeout for `task` starts now
+
+        await channel.testingEventLoop.advanceTime(by: .milliseconds(9))
+        // Process `task`
+        try await channel.processPing()
+
+        await #expect(throws: MySQLClientError.cancelled) { try await cancelledTask.value }
+        await #expect(throws: Never.self) { try await task.value }
     }
 }

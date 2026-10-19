@@ -202,6 +202,8 @@ final class MySQLChannelHandler: ChannelDuplexHandler {
         switch self.stateMachine.cancel(requestID: requestID) {
         case .cancelCommand(let command):
             command.promise.fail(MySQLClientError.cancelled)
+            self.deadlineCallback?.cancel()
+            self.deadlineCallback = nil
         case .doNothing:
             break
         }
