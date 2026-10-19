@@ -19,7 +19,7 @@ final class MySQLChannelHandler: ChannelDuplexHandler {
         @usableFromInline
         let packet: ByteBuffer?
         @usableFromInline
-        let promise: MySQLPromise<ByteBuffer>
+        var promise: MySQLPromise<ByteBuffer>
         @usableFromInline
         let requestID: Int
         /// Optional because in the connect promise we set the deadline directly.
@@ -50,13 +50,15 @@ final class MySQLChannelHandler: ChannelDuplexHandler {
             self.deadline = deadline
         }
 
-        /// Sets the deadline as `.now() + timeout`. This should only be called once, when the command is sent.
+        /// Sets the deadline as `now + timeout`. This should only be called once, when the command is sent.
+        ///
+        /// - Parameter now: The current time used to calculate the deadline.
         @usableFromInline
-        mutating func activateDeadline() {
+        mutating func activateDeadline(now: NIODeadline) {
             guard let timeout else {
                 preconditionFailure("The command timeout can be nil only for the connect promise.")
             }
-            self.deadline = .now() + timeout
+            self.deadline = now + timeout
         }
     }
 
@@ -65,7 +67,7 @@ final class MySQLChannelHandler: ChannelDuplexHandler {
 
         func handleScheduledCallback(eventLoop: some EventLoop) {
             let channelHandler = self.channelHandler.value
-            switch channelHandler.stateMachine.hitDeadline(now: .now()) {
+            switch channelHandler.stateMachine.hitDeadline(now: self.channelHandler.eventLoop.now) {
             case .failPendingCommandsAndClose(let context, let commands):
                 let error = MySQLClientError.timeout
                 for command in commands {
@@ -120,7 +122,7 @@ final class MySQLChannelHandler: ChannelDuplexHandler {
     func setAwaitingGreeting(context: ChannelHandlerContext) {
         let promise = self.eventLoop.makePromise(of: ByteBuffer.self)
 
-        let deadline = .now() + .init(self.configuration.connectTimeout)
+        let deadline = self.eventLoop.now + .init(self.configuration.connectTimeout)
         self.scheduleDeadlineCallback(deadline: deadline)
 
         self.stateMachine.setAwaitingGreeting(
@@ -198,13 +200,10 @@ final class MySQLChannelHandler: ChannelDuplexHandler {
     func cancel(requestID: Int) {
         self.eventLoop.assertInEventLoop()
         switch self.stateMachine.cancel(requestID: requestID) {
-        case .failPendingCommandsAndClose(let cancelled, let closeConnectionDueToCancel):
-            for command in cancelled {
-                command.promise.fail(MySQLClientError.cancelled)
-            }
-            for command in closeConnectionDueToCancel {
-                command.promise.fail(MySQLClientError.connectionClosedDueToCancellation)
-            }
+        case .cancelCommand(let command):
+            command.promise.fail(MySQLClientError.cancelled)
+            self.deadlineCallback?.cancel()
+            self.deadlineCallback = nil
         case .doNothing:
             break
         }
@@ -214,7 +213,7 @@ final class MySQLChannelHandler: ChannelDuplexHandler {
         self.logger.trace("Received MySQL packet")
 
         var packet = packet
-        switch try self.stateMachine.receivedResponse(packet: &packet) {
+        switch try self.stateMachine.receivedResponse(packet: &packet, now: self.eventLoop.now) {
         case .closeWithError(let error):
             throw error
         case .handshakeRespond(let handshakeResponse, let sslRequest, let statusFlags):
@@ -245,10 +244,20 @@ final class MySQLChannelHandler: ChannelDuplexHandler {
         case .succeedPromiseAndClose(let command, let statusFlags):
             if let statusFlags { self.statusFlags = statusFlags }
             command.promise.succeed(packet)
-            throw MySQLClientError.connectionClosing
+            context.close(promise: nil)
         case .failPromise(let command, let error):
             command.promise.fail(error)
             throw error
+        case .succeedQueryPromise(let command, let statusFlags):
+            if let statusFlags { self.statusFlags = statusFlags }
+            command.promise.succeed(packet)
+        case .finishRowSequence(let action, let nextCommand, let statusFlags):
+            self.processDeadlineCallbackAction(action: action)
+            if let nextCommand { _ = context.channel.writeAndFlush(nextCommand.packet) }
+            if let statusFlags { self.statusFlags = statusFlags }
+        case .finishRowSequenceAndClose(let statusFlags):
+            if let statusFlags { self.statusFlags = statusFlags }
+            context.close(promise: nil)
         case .doNothing:
             break
         }
@@ -309,7 +318,7 @@ final class MySQLChannelHandler: ChannelDuplexHandler {
             requestID: 0,
             timeout: .init(self.configuration.commandTimeout)
         )
-        switch self.stateMachine.sendUtilityCommand(&command) {
+        switch self.stateMachine.sendUtilityCommand(&command, now: self.eventLoop.now) {
         case .sendCommand(let context, let pendingCommand):
             // Packet can be nil only for the connect promise, and we just provided a packet above, so it's safe to force unwrap here.
             _ = context.channel.writeAndFlush(pendingCommand.packet!)
@@ -340,7 +349,7 @@ final class MySQLChannelHandler: ChannelDuplexHandler {
             requestID: requestID,
             timeout: .init(self.configuration.commandTimeout)
         )
-        switch self.stateMachine.sendUtilityCommand(&command) {
+        switch self.stateMachine.sendUtilityCommand(&command, now: self.eventLoop.now) {
         case .sendCommand(let context, let pendingCommand):
             // Packet can be nil only for the connect promise, and we just provided a packet above, so it's safe to force unwrap here.
             _ = context.channel.writeAndFlush(pendingCommand.packet!)
@@ -372,7 +381,7 @@ final class MySQLChannelHandler: ChannelDuplexHandler {
             requestID: requestID,
             timeout: .init(self.configuration.commandTimeout)
         )
-        switch self.stateMachine.sendQueryCommand(&command) {
+        switch self.stateMachine.sendQueryCommand(&command, now: self.eventLoop.now) {
         case .sendCommand(let context, let pendingCommand):
             // Packet can be nil only for the connect promise, and we just provided a packet above, so it's safe to force unwrap here.
             _ = context.channel.writeAndFlush(pendingCommand.packet!)

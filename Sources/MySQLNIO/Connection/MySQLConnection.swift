@@ -76,7 +76,7 @@ public final actor MySQLConnection: Sendable {
         }
         self.channel.eventLoop.execute {
             self.assumeIsolated {
-                try? $0.triggerGracefulShutdown()
+                try? $0.quit()
                 $0.channel.close(mode: .all, promise: nil)
             }
         }
@@ -162,9 +162,15 @@ extension MySQLConnection {
     /// Trigger graceful shutdown of connection
     ///
     /// The connection will wait until all pending commands have been processed before closing the connection.
-    func triggerGracefulShutdown() throws {
-        _ = try self.channelHandler.sendUtilityCommandNoWait(.init(bytes: [0x00, 0x00, 0x00, 0x00, 0x01]))
+    func triggerGracefulShutdown() {
         self.channelHandler.triggerGracefulShutdown()
+    }
+
+    /// Send a `COM_QUIT` command to the server to close the connection.
+    func quit() throws {
+        if channel.isActive {
+            try self.channelHandler.sendUtilityCommandNoWait(.init(bytes: [0x00, 0x00, 0x00, 0x00, 0x01]))
+        }
     }
 
     private static func _makeConnection(
