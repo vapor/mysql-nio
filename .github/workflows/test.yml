@@ -45,7 +45,7 @@ jobs:
         dbimage:
           - mysql:9.7
         swiftver:
-          - swift:6.3-noble
+          - swift:6.4-resolute
     runs-on: ubuntu-latest
     container:
       image: ${{ matrix.swiftver }}
@@ -92,7 +92,7 @@ jobs:
         swiftver:
           - swift:6.2-noble
           - swift:6.3-noble
-          - swiftlang/swift:nightly-main-noble
+          - swift:6.4-resolute
     runs-on: ubuntu-latest
     container: ${{ matrix.swiftver }}
     services:
@@ -215,11 +215,11 @@ jobs:
     permissions:
       contents: read
     with:
-      swift_image: swift:6.3-noble
+      swift_image: swift:6.4-resolute
 
   lint:
     runs-on: ubuntu-latest
-    container: swift:noble
+    container: swift:resolute
     timeout-minutes: 5
     steps:
       - name: Configure git
