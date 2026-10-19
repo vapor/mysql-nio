@@ -59,7 +59,7 @@ jobs:
       - name: Force MySQL server to disallow TLS
         shell: bash
         run: |
-          apt-get update && apt-get install -y 'mysql-client-core-*' curl
+          apt-get update && apt-get install -y mysql-client-core curl
           i=0; while ((i<10)); do
             { mysql -BS/var/run/mysqld/mysqld.sock <<<"SET PERSIST ssl_ca='',ssl_cert='',ssl_key='';ALTER INSTANCE RELOAD TLS NO ROLLBACK ON ERROR;" ; } && break
             sleep 2
