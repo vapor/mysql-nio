@@ -25,8 +25,8 @@ permissions:
 jobs:
   api-breakage:
     if: ${{ !(github.event.pull_request.draft || false) }}
-    runs-on: ubuntu-latest
-    container: swift:noble
+    runs-on: ubuntu-24.04
+    container: swift:resolute
     steps:
       - name: Check out code
         uses: actions/checkout@v7
@@ -42,10 +42,10 @@ jobs:
       fail-fast: false
       matrix:
         dbimage:
-          - mysql:9.5
+          - mysql:9.7
         swiftver:
-          - swift:6.3-noble
-    runs-on: ubuntu-latest
+          - swift:6.4-resolute
+    runs-on: ubuntu-24.04
     container:
       image: ${{ matrix.swiftver }}
       volumes: [ 'mysqlshare:/var/run/mysqld' ]
@@ -81,17 +81,18 @@ jobs:
       matrix:
         dbimage:
           - mysql:5.7
-          - mysql:9.5
+          - mysql:9.7
           - mariadb:10.6
           - mariadb:12
+          - mariadb:13
           - percona:5.7
           - percona:8
         swiftver:
-          - swift:6.1-noble
           - swift:6.2-noble
           - swift:6.3-noble
+          - swift:6.4-resolute
           - swiftlang/swift:nightly-main-noble
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     container: ${{ matrix.swiftver }}
     services:
       mysql-a:
@@ -134,12 +135,12 @@ jobs:
       fail-fast: false
       matrix:
         dbimage: [mysql, mariadb, percona-server]
-        macos-version: ['macos-15', 'macos-26']
+        macos-version: ['macos-26', 'xcode-27']
         include:
           - { username: root }
           - { dbimage: mariadb, username: runner }
-          - { macos-version: 'macos-15', xcode-version: 'latest-stable' }
           - { macos-version: 'macos-26', xcode-version: 'latest-stable' }
+          - { macos-version: 'xcode-27', xcode-version: 'latest-stable' }
     runs-on: ${{ matrix.macos-version }}
     env: { MYSQL_HOSTNAME: '127.0.0.1' }
     steps:
