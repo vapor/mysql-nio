@@ -38,6 +38,8 @@ jobs:
 
   linux-insecure-test:
     if: ${{ !(github.event.pull_request.draft || false) }}
+    env:
+      MYSQL_PASSWORD: 'test_password_longer_than_twenty_bytes'
     strategy:
       fail-fast: false
       matrix:
@@ -53,7 +55,7 @@ jobs:
       mysql-a:
         image: ${{ matrix.dbimage }}
         volumes: [ 'mysqlshare:/var/run/mysqld' ]
-        env: { MYSQL_ALLOW_EMPTY_PASSWORD: true, MYSQL_USER: test_username, MYSQL_PASSWORD: test_password, MYSQL_DATABASE: test_database }
+        env: { MYSQL_ALLOW_EMPTY_PASSWORD: true, MYSQL_USER: test_username, MYSQL_PASSWORD: test_password_longer_than_twenty_bytes, MYSQL_DATABASE: test_database }
     steps:
       - name: Force MySQL server to disallow TLS
         shell: bash

@@ -30,6 +30,50 @@ struct MySQLNIOTests {
     init() {
         #expect(isLoggingConfigured)
     }
+
+    @Test
+    func handshakeExcludesAuthPluginDataTerminatorFromNonce() throws {
+        // Captured from MySQL 8.4.10. The packet advertises 21 bytes of auth
+        // plugin data on the wire: a 20-byte nonce plus its NUL terminator.
+        let packetHex = """
+            5b 00 00 00 0a 38 2e 34 2e 31 30 2d 30 75 62 75
+            6e 74 75 30 2e 32 35 2e 31 30 2e 31 00 ab 5e 09
+            00 46 73 0c 10 45 74 33 18 00 ff ff ff 02 00 ff
+            df 15 00 00 00 00 00 00 00 00 00 00 20 29 23 43
+            71 7b 6c 49 62 7d 7e 15 00 63 61 63 68 69 6e 67
+            5f 73 68 61 32 5f 70 61 73 73 77 6f 72 64 00
+            """
+        let bytes = packetHex.split(whereSeparator: \.isWhitespace).compactMap {
+            UInt8($0, radix: 16)
+        }
+        var packet = MySQLPacket(payload: .init(bytes: bytes.dropFirst(4)))
+
+        let handshake = try packet.decode(MySQLProtocol.HandshakeV10.self, capabilities: [])
+
+        #expect(handshake.authPluginName == "caching_sha2_password")
+        #expect(handshake.authPluginData.readableBytes == 20)
+        #expect(
+            Array(handshake.authPluginData.readableBytesView) == [
+                0x46, 0x73, 0x0c, 0x10, 0x45, 0x74, 0x33, 0x18,
+                0x20, 0x29, 0x23, 0x43, 0x71, 0x7b, 0x6c, 0x49,
+                0x62, 0x7d, 0x7e, 0x15,
+            ]
+        )
+        #expect(packet.payload.readableBytes == 0)
+    }
+
+    @Test
+    func longPasswordAuthenticatesAcrossFreshConnections() async throws {
+        // The insecure MySQL CI job sets a password longer than the 20-byte
+        // caching_sha2_password nonce. Two fresh connections exercise both
+        // the full-authentication and cached fast-authentication paths.
+        for _ in 0..<2 {
+            let connection = try await MySQLConnection.test()
+            let rows = try await connection.simpleQuery("SELECT 1 AS value").get()
+            #expect(rows.first?.column("value")?.int == 1)
+            try await connection.close().get()
+        }
+    }
     
     @Test
     func decodingSumOfIntsWithNoRows() async throws {
